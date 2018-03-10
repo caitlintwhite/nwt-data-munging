@@ -1,34 +1,13 @@
 Water quality and chemistry data munging for Green Lake 4
 ================
 CTW
-2018-03-05
+2018-03-10
 
 ``` r
 # Load needed libraries
 library(tidyverse)
-```
-
-    ## ── Attaching packages ────────────────────────────────────────────────────── tidyverse 1.2.1 ──
-
-    ## ✔ ggplot2 2.2.1     ✔ purrr   0.2.4
-    ## ✔ tibble  1.3.4     ✔ dplyr   0.7.4
-    ## ✔ tidyr   0.7.2     ✔ stringr 1.2.0
-    ## ✔ readr   1.1.1     ✔ forcats 0.2.0
-
-    ## ── Conflicts ───────────────────────────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::filter() masks stats::filter()
-    ## ✖ dplyr::lag()    masks stats::lag()
-
-``` r
 library(lubridate)
 ```
-
-    ## 
-    ## Attaching package: 'lubridate'
-
-    ## The following object is masked from 'package:base':
-    ## 
-    ##     date
 
 ``` r
 # Read in water quality and water chemistry datasets on GL4
@@ -45,7 +24,7 @@ library(lubridate)
 # NA=Not available
 
 # Nel Caine water chemistry dataset,  through 2014
-Caine_waterchem <- read_csv("http://niwot.colorado.edu/data_csvs/gre4solu.nc.data.csv",
+Caine_GL4_waterchem <- read_csv("http://niwot.colorado.edu/data_csvs/gre4solu.nc.data.csv",
                           na = c("NaN", "DNS",  "EQCL", "N/A", "NP", "NSS", "NV", "u", "QNS", NA, " ", ""))
 ```
 
@@ -66,7 +45,7 @@ Caine_waterchem <- read_csv("http://niwot.colorado.edu/data_csvs/gre4solu.nc.dat
 ``` r
 # Diane McKnight water chemistry dataset, through 2016
 # issues: year is wrong (has 1905 for 2014 and 2015 dates), TDP, IP and PO4 has "<" attached to some values
-McKnight_waterchem <- read_csv("http://niwot.colorado.edu/data_csvs/glvwatsolu.dm.data.csv",
+McKnight_GLV_waterchem <- read_csv("http://niwot.colorado.edu/data_csvs/glvwatsolu.dm.data.csv",
                                na = c("NaN", "DNS",  "EQCL", "N/A", "NP", "NSS", "NV", "u", "QNS", NA, " ", ""))
 ```
 
@@ -90,10 +69,43 @@ McKnight_waterchem <- read_csv("http://niwot.colorado.edu/data_csvs/glvwatsolu.d
     ## See spec(...) for full column specifications.
 
 ``` r
+# Diane McKnight water quality dataset
+McKnight_GLV_WQdat <- read_csv("http://niwot.colorado.edu/data_csvs/water_quality_GLV.dm.data.csv", 
+                      trim_ws = TRUE,
+                      na = c("NaN", NA, "NA ", " ", ""))
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   LTER_site = col_character(),
+    ##   local_site = col_character(),
+    ##   `depth/loc` = col_character(),
+    ##   date = col_date(format = ""),
+    ##   time = col_time(format = ""),
+    ##   chl_a = col_double(),
+    ##   pH = col_double(),
+    ##   temp = col_double(),
+    ##   std_conduct = col_double(),
+    ##   conduct = col_double(),
+    ##   DO = col_double(),
+    ##   sat = col_double(),
+    ##   secchi = col_double(),
+    ##   light_att = col_double(),
+    ##   surf_light = col_double(),
+    ##   depth_light = col_double(),
+    ##   DOC = col_double(),
+    ##   comments = col_character()
+    ## )
+
+``` r
+McKnight_GL4_WQdat <- McKnight_GLV_WQdat[McKnight_GLV_WQdat$local_site=="GL4",]
+```
+
+``` r
 # Clean up and prep data
 
 # Caine dataset --
-Caine_GL4 <- dplyr::select(Caine_waterchem, -contains("sdev")) %>%
+Caine_GL4 <- dplyr::select(Caine_GL4_waterchem, -contains("sdev")) %>%
   subset(samp_loc == "GREEN LAKE 4") %>%
   gather(metric, value, pH:POC) %>%
   mutate(value = as.numeric(value)) %>%
@@ -104,7 +116,7 @@ Caine_GL4 <- dplyr::select(Caine_waterchem, -contains("sdev")) %>%
     ## coercion
 
 ``` r
-Caine_sdev <- dplyr::select(Caine_waterchem, samp_loc:time, contains("sdev")) %>%
+Caine_sdev <- dplyr::select(Caine_GL4_waterchem, samp_loc:time, contains("sdev")) %>%
   subset(samp_loc == "GREEN LAKE 4") %>%
   gather(sdev, sd_value, d18O_sdev:T_sdev) %>%
   mutate(metric = gsub("_sdev", "", sdev)) %>%
@@ -124,39 +136,56 @@ Caine_long <- left_join(Caine_GL4, Caine_sdev) %>%
     ## Joining, by = c("samp_loc", "year", "date", "time", "metric")
 
 ``` r
+# plot data availability
+Caine_long %>%
+  #filter(location != "Lake") %>%
+  group_by(year, location, metric) %>%
+  summarise(nobs = length(metric)) %>%
+  ggplot() +
+  geom_col(aes(year, nobs, fill=location), width=0.7) +
+  scale_fill_brewer(palette = "Paired") +
+  scale_x_continuous(breaks=seq(1980, 2015, 5)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_wrap(~metric)
+```
+
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-3-1.png)
+
+``` r
 # McKnight dataset --
 # fix year
-McKnight_waterchem$year <- year(McKnight_waterchem$date)
+McKnight_GLV_waterchem$year <- year(McKnight_GLV_waterchem$date)
 # remove any values with "<" since not sure of value in context of other values
 ## TDP
-summary(with(McKnight_waterchem, grepl("<", TDP))) # 13 observations true
+summary(with(McKnight_GLV_waterchem, grepl("<", TDP))) # 13 observations true
 ```
 
     ##    Mode   FALSE    TRUE    NA's 
     ## logical     908      13       0
 
 ``` r
-McKnight_waterchem$TDP <- as.numeric(with(McKnight_waterchem, ifelse(grepl("<", TDP), NA, TDP))) 
+McKnight_GLV_waterchem$TDP <- as.numeric(with(McKnight_GLV_waterchem, ifelse(grepl("<", TDP), NA, TDP))) 
 ## IP
-summary(with(McKnight_waterchem, grepl("<", IP))) # 19 observations true
+summary(with(McKnight_GLV_waterchem, grepl("<", IP))) # 19 observations true
 ```
 
     ##    Mode   FALSE    TRUE    NA's 
     ## logical     902      19       0
 
 ``` r
-McKnight_waterchem$IP <- as.numeric(with(McKnight_waterchem, ifelse(grepl("<", IP), NA, IP)))
+McKnight_GLV_waterchem$IP <- as.numeric(with(McKnight_GLV_waterchem, ifelse(grepl("<", IP), NA, IP)))
 ## PO4
-summary(grepl("<", McKnight_waterchem$'PO4---')) # 19 observations true
+summary(grepl("<", McKnight_GLV_waterchem$'PO4---')) # 19 observations true
 ```
 
     ##    Mode   FALSE    TRUE    NA's 
     ## logical     902      19       0
 
 ``` r
-McKnight_waterchem$'PO4---' <- as.numeric(ifelse(grepl("<", McKnight_waterchem$`PO4---`), NA, McKnight_waterchem$'PO4---')) 
+McKnight_GLV_waterchem$'PO4---' <- as.numeric(ifelse(grepl("<", McKnight_GLV_waterchem$`PO4---`), NA, McKnight_GLV_waterchem$'PO4---')) 
 
-McKnight_GL4 <- dplyr::select(McKnight_waterchem, -contains("sdev")) %>%
+McKnight_GL4 <- dplyr::select(McKnight_GLV_waterchem, -contains("sdev")) %>%
   subset(local_site == "GL4") %>%
   gather(metric, value, pH:POC) %>%
   mutate(value = as.numeric(value)) %>%
@@ -167,7 +196,7 @@ McKnight_GL4 <- dplyr::select(McKnight_waterchem, -contains("sdev")) %>%
     ## coercion
 
 ``` r
-McKnight_sdev <- dplyr::select(McKnight_waterchem, LTER_site:`depth/loc`, contains("sdev")) %>%
+McKnight_sdev <- dplyr::select(McKnight_GLV_waterchem, LTER_site:`depth/loc`, contains("sdev")) %>%
   subset(local_site == "GL4") %>%
   gather(sdev, sd_value, d18O_sdev:T_sdev) %>%
   mutate(metric = gsub("_sdev", "", sdev)) %>%
@@ -197,9 +226,96 @@ McKnight_long <- left_join(McKnight_GL4, McKnight_sdev) %>%
     ## See problems(...) for more details.
 
 ``` r
+McKnight_long_alldepths <- left_join(McKnight_GL4, McKnight_sdev) %>%
+  mutate(doy = yday(date)) %>%
+  dplyr::select(-LTER_site, -local_site, -comments) %>%
+  # keep only these sample depths/locations for now
+  filter(grepl("m|Surface|Inlet|Outlet|waterfall", `depth/loc`)) %>%
+  # split depth from location, and make depth numeric
+  mutate(`depth/loc` = gsub("Surface", "0m", `depth/loc`),
+         location = ifelse(grepl("m",`depth/loc`), "Lake",
+                           ifelse(`depth/loc` == "Inlet", "Inlet", 
+                                  ifelse(`depth/loc` == "Outlet", "Outlet", "Waterfall"))),
+         depth = ifelse(location == "Lake", parse_number(`depth/loc`), NA),
+         source = "McKnight") %>%
+  dplyr::select(-`depth/loc`)
+```
+
+    ## Joining, by = c("LTER_site", "local_site", "year", "date", "time", "depth/loc", "metric")
+
+    ## Warning: 6569 parsing failures.
+    ## row # A tibble: 5 x 4 col     row   col expected actual expected   <int> <int>    <chr>  <chr> actual 1    21    NA a number Outlet row 2    22    NA a number Outlet col 3    23    NA a number Outlet expected 4    39    NA a number  Inlet actual 5    40    NA a number Outlet
+    ## ... ................. ... ............................. ........ ............................. ...... ............................. ... ............................. ... ............................. ........ ............................. ...... .............................
+    ## See problems(...) for more details.
+
+``` r
 # join both water chemistry datasets
 GL4_waterchem <- rbind(Caine_long, McKnight_long)
+
+# plot data availability Jun - Sep
+# what is sampling frequency by depth over time?
+# lake only
+GL4_waterchem %>%
+  filter(month(date) %in% 6:9, 
+         location == "Lake") %>%
+  group_by(year, location, depth, metric) %>%
+  summarise(nobs = length(metric)) %>%
+  ggplot() +
+  geom_vline(aes(xintercept=0), col="dodgerblue4", lwd=1) +
+  geom_point(aes(depth, year, group=depth,  col=nobs, size=nobs), alpha=0.4) +
+  scale_color_distiller(palette = "Set2") +
+  scale_size_continuous() +
+  scale_x_reverse(breaks=seq(0, 9, 3)) +
+  #scale_y_continuous(breaks=seq(1980, 2015, 5)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  coord_flip() +
+  facet_wrap(~metric)
 ```
+
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-4-1.png)
+
+``` r
+# what is sampling frequency by depth over time?
+# lake only
+McKnight_long_alldepths %>%
+  filter(month(date) %in% 6:9, 
+         location == "Lake") %>%
+  group_by(year, location, depth, metric) %>%
+  summarise(nobs = length(metric)) %>%
+  ggplot() +
+  geom_vline(aes(xintercept=0), col="dodgerblue4", lwd=1) +
+  geom_point(aes(depth, year, group=depth,  col=nobs, size=nobs), alpha=0.4) +
+  scale_color_distiller(palette = "Set2",breaks=seq(0,12,3)) +
+  scale_size_continuous(breaks=seq(0,12,3)) +
+  scale_x_reverse(expand = c(0.1,0), breaks=seq(0, 10, 2)) +
+  #scale_y_continuous(breaks=seq(1980, 2015, 5)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  coord_flip() +
+  facet_wrap(~metric)
+```
+
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-4-2.png)
+
+``` r
+# inlet and outlet only
+GL4_waterchem %>%
+  filter(month(date) %in% 6:9, 
+         location != "Lake") %>%
+  group_by(source, year, location, depth, metric) %>%
+  summarise(nobs = length(metric)) %>%
+  mutate(grouping = paste(source, location, sep="_")) %>%
+  ggplot() +
+  geom_col(aes(year, nobs, fill=grouping), width=0.7) +
+  scale_fill_brewer(palette = "Paired") +
+  scale_x_continuous(breaks=seq(1980, 2015, 5)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_wrap(~metric)
+```
+
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-4-3.png)
 
 ``` r
 # Compare outlet values by source
@@ -257,3 +373,60 @@ ggplot(subset(test2, metric %in% c("d18O", "dDeut", "Trit")), aes(doy, value)) +
   theme_light() +
   facet_grid(local_site~metric, scales = "free_y")
 ```
+
+``` r
+GL4_WQ_long <- McKnight_GL4_WQdat %>%
+  dplyr::select(-comments) %>%
+  gather(metric, value, chl_a:DOC) %>%
+  filter(!is.na(value)) %>%
+  mutate(doy = yday(date),
+    yr = year(date),
+         depth = ifelse(`depth/loc`== "Surface", 0, parse_number(`depth/loc`)),
+         location = ifelse(`depth/loc`== "Inlet", "Inlet",
+                           ifelse(`depth/loc`== "Outlet", "Outlet", "Lake")))
+```
+
+    ## Warning: 1122 parsing failures.
+    ## row # A tibble: 5 x 4 col     row   col expected actual expected   <int> <int>    <chr>  <chr> actual 1    61    NA a number  Inlet row 2    62    NA a number Outlet col 3    66    NA a number  Inlet expected 4    67    NA a number Outlet actual 5    71    NA a number  Inlet
+    ## ... ................. ... ............................. ........ ............................. ...... ............................. ... ............................. ... ............................. ........ ............................. ...... .............................
+    ## See problems(...) for more details.
+
+``` r
+GL4_WQ_long$location[is.na(GL4_WQ_long$location)] <- "Lake" # fix NA value
+GL4_WQ_long$depth[is.na(GL4_WQ_long$depth)] <- -1 # assign depth of -1 for anything measured in air or not in lake
+
+# what is sampling frequency by depth over time?
+# lake only
+GL4_WQ_long %>%
+  filter(location == "Lake") %>%
+  group_by(yr, location, depth, metric) %>%
+  summarise(nobs = length(metric)) %>%
+  ggplot() +
+  geom_vline(aes(xintercept=0), col="dodgerblue4", lwd=1) +
+  geom_point(aes(depth, yr, group=depth,  col=nobs, size=nobs), alpha=0.4) +
+  scale_color_distiller(palette = "Set2", breaks=seq(2,12,2)) +
+  scale_size_continuous(breaks=seq(1,12,3)) +
+  scale_x_reverse(breaks=seq(0,12,3)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  coord_flip() +
+  facet_grid(location~metric)
+```
+
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-6-1.png)
+
+``` r
+# inlet and outlet sampling frequency
+GL4_WQ_long %>%
+  filter(location != "Lake") %>%
+  group_by(yr, location, depth, metric) %>%
+  summarise(nobs = length(metric)) %>%
+  ggplot() +
+  geom_col(aes(yr, nobs, fill=location), width=0.7) +
+  scale_fill_brewer(palette = "Paired") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_grid(location~metric, scales = "free_y")
+```
+
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-6-2.png)

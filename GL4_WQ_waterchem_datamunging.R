@@ -6,6 +6,7 @@
 #' ---
 
 # -----------------
+#+ setup, message=FALSE, warning = FALSE
 # Load needed libraries
 library(tidyverse)
 library(lubridate)
