@@ -4,6 +4,32 @@
 #' date: "`r format(Sys.Date())`"
 #' output: github_document
 #' ---
+#'
+#' ## Script purpose
+#' NWT LTER has a decades-long record of data collected annually or nearly so for lakes and streams in the Green Lakes Valley.
+#' A challenge in working with such a wealth of data is how to make sense of so much data: how to summarize? at what scale or frequency? what to summarize? what descriptive summary statistics to calculate (e.g. mean, max, min, metrics of variance)? and what should be related to what?
+#' This script is a first attempt in wrangling one NWT LTER's long term "core" datasets (actually two related datasets): water quality and water chemistry from Green Lakes Valley.
+#' A long-term data goal for NWT LTER is to make its data more accessible and intelligible to researchers and the public, to promote visibility of NWT LTER itself, the long-history of research conducted there and the core datasets in particular, as well as spur novel uses of the core datasets.
+#' A strategy for achieving this goal is to automate simple dataset clean up, any preparation (transformation) needed for summarizing, and data visualization.
+#' 
+#' As such, the purposes of this script are to:
+#' 
+#' * Read in relevant datasets directly from the NWT LTER website (these are more up to date than what's on the EDI data portal):
+#'     * Green Lake 4 water chemistry (PI: Nel Caine)
+#'     * Green Lake Valley water chemistry (PI: Diane McKnight)
+#'     * Green Lake Valley water quality (PI: Diane McKnight)
+#' * Visually assess each dataset for metrics included, temporal and spatial range, and sampling frequency within those ranges
+#' * Asses which metrics and sites overlap between disparate datasets
+#' * Focus on Green Lake 4 and combine water chemistry and water quality datasets to create master long-term aquatic ecology dataset for GL4
+#' * Test data summarizing and visualization (this will be a work in progress as CTW received feedback)  
+#'
+#' I focus on Green Lake 4 because that is a site with greatest consistentcy of sampling through time (per Kelly Loria, and it shows in the data).
+#' I have some exposure to NWT LTER from past field work and data tasks, and I have academic training and work experience in freshwater ecology, however I do not conduct research at NWT nor work in aquatic ecosystems currently.
+#' My experience going through these data and challenges incurred should be fairly representative of an outside researcher or someone with ecological knowledge interested in aquatic data (e.g. environmental science for the City of Boulder) curious about NWT data.
+#'
+#' For comments or collaborations, email caitlin.t.white@colorado.edu, login to GitHub to add issues or items to the project board for this repository, or fork the repository to edit code, and submit pull requests.    
+#'
+#' ## Setup
 
 # -----------------
 #+ setup, message=FALSE, warning = FALSE
@@ -25,6 +51,7 @@ library(lubridate)
 # QNS=Quantity Not Sufficient
 # NA=Not available
 
+#+ read in data, message=FALSE, warning = FALSE
 # Nel Caine water chemistry dataset,  through 2014
 Caine_GL4_waterchem <- read_csv("http://niwot.colorado.edu/data_csvs/gre4solu.nc.data.csv",
                           na = c("NaN", "DNS",  "EQCL", "N/A", "NP", "NSS", "NV", "u", "QNS", NA, " ", ""))
@@ -41,10 +68,42 @@ McKnight_GLV_WQdat <- read_csv("http://niwot.colorado.edu/data_csvs/water_qualit
 
 McKnight_GL4_WQdat <- McKnight_GLV_WQdat[McKnight_GLV_WQdat$local_site=="GL4",]
 
+# read in Nel Caine ice on and ice off dates
+# raw data are days counted from September 30 (Sept 30 = 1)
+GLV_iceon <- read_csv("~/Dropbox/NWT_data/GLV_iceon_NelCaine.csv",
+                      skip = 3,
+                      col_names = c("year", "silver", "albion", "GL1", "GL2", "GL3", "GL4", "GL5", "arikaree"))
+
+# raw data are days counted from May 1 (May 1 = 1)
+GLV_iceoff <- read_csv("~/Dropbox/NWT_data/GLV_iceoff_NelCaine.csv",
+                      skip = 3,
+                      col_names = c("year", "silver", "albion", "GL1", "GL2", "GL3", "GL4", "GL5"))
+
 # -------------------
 # Clean up and prep data
 
-# Caine dataset --
+# ice phenology datasets
+iceon <- GLV_iceon %>%
+  gather(site, d_from_ref, silver:arikaree) %>%
+  mutate(refdate = as.Date(paste(year, "09/30",sep="/")),
+         event_date = refdate + d_from_ref,
+         event_doy = yday(event_date),
+         event = "iceon")
+
+# ice phenology datasets
+iceoff <- GLV_iceoff %>%
+  gather(site, d_from_ref, silver:GL5) %>%
+  mutate(refdate = as.Date(paste(year, "04/30",sep="/")),
+         event_date = refdate + d_from_ref,
+         event_doy = yday(event_date),
+         event = "iceoff")
+
+# put it together!
+ice_phenology <- rbind(iceoff, iceon)
+
+ggplot(ice_phenology, aes(event_doy, year)) + geom_point() + geom_path(aes(group=year)) + facet_wrap(~site)
+
+# Caine waterchem dataset --
 Caine_GL4 <- dplyr::select(Caine_GL4_waterchem, -contains("sdev")) %>%
   subset(samp_loc == "GREEN LAKE 4") %>%
   gather(metric, value, pH:POC) %>%
@@ -280,3 +339,88 @@ GL4_WQ_long %>%
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90)) +
   facet_grid(location~metric, scales = "free_y")
+
+# -------------------
+## Date frequency
+GL4_waterchem %>%
+  dplyr::select(year, date, doy, location, source) %>%
+  distinct() %>%
+  mutate(term = ifelse(month(date) %in% 6:10, "Summer", "Winter")) %>%
+  group_by(year, term, location, source) %>%
+  mutate(nobs = length(doy)) %>%
+  filter(source == "McKnight") %>%
+  ggplot(aes(doy, year)) +
+  geom_path(aes(col=nobs, group=year)) +
+  geom_point(aes(col=nobs), alpha=0.8) +
+  labs(y="Year", x="Day of year", title = "Dates sampled, by year and location for GL4") +
+  scale_x_continuous(labels = function(x) format(as.Date(as.character(x), "%j"), "%d-%b"),
+                     breaks = yday(c("2018-01-01", "2018-02-01", "2018-03-01", "2018-04-01", 
+                                     "2018-05-01", "2018-06-01", "2018-07-01", "2018-08-01", 
+                                     "2018-09-01", "2018-10-01", "2018-11-01", "2018-12-01"))) +
+  scale_y_continuous(breaks = seq(1980,2016,4)) +
+  scale_color_distiller(name = "# obs/yr", palette= "Set2", breaks=seq(0,15, 3)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=45)) +
+  facet_grid(location~source)
+
+# water quality sampling dates
+# read in Nel Caine's ice-off dates
+ice_off <- read_csv("/Users/serahsierra/Documents/Suding\ Lab/NWT\ LTER/Eric_Sokol_Lakes/ice_climate_and_flow_D1_Dan_copy.csv")
+ice_off$gl4_date <- as.Date(ice_off$gl4_date, format = "%m/%d/%y")
+ice_off$gl4_doy <- yday(ice_off$gl4_date)
+
+GL4_WQ_long %>%
+  dplyr::select(yr, date, doy, location) %>%
+  distinct() %>%
+  #mutate(term = ifelse(month(date) %in% 6:10, "Summer", "Winter")) %>%
+  group_by(yr, location) %>%
+  mutate(nobs = length(doy)) %>%
+  #left_join(ice_off[c("year", "gl4_doy")], by = c("yr" = "year")) %>%
+  #filter(source == "McKnight") %>%
+  ggplot(aes(doy, yr)) +
+  geom_point(data= subset(ice_off, year > 1999), aes(gl4_doy, year), col="dodgerblue", size = 2) +
+  geom_path(aes(col=nobs, group=yr)) +
+  geom_point(aes(col=nobs), alpha=0.8) +
+  labs(y="Year", x="Day of year", title = "Dates sampled, by year and location for GL4") +
+  scale_x_continuous(labels = function(x) format(as.Date(as.character(x), "%j"), "%d-%b"),
+                     breaks = yday(c("2018-01-01", "2018-02-01", "2018-03-01", "2018-04-01",
+                                     "2018-05-01", "2018-06-01", "2018-07-01", "2018-08-01",
+                                     "2018-09-01", "2018-10-01", "2018-11-01", "2018-12-01"))) +
+  scale_y_continuous(breaks = seq(1980,2016,4)) +
+  scale_color_distiller(name = "# obs/yr", palette= "Set2", breaks=seq(0,15, 3)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=45)) +
+  facet_grid(location~.)
+
+# plot first date sampled in lakes each year, just to see if trend overtime in timing
+GL4_WQ_long %>%
+  dplyr::select(yr, date, doy, location) %>%
+  distinct() %>%
+  #mutate(term = ifelse(month(date) %in% 6:10, "Summer", "Winter")) %>%
+  group_by(yr, location) %>%
+  filter(date == min(date)) %>%
+  ggplot(aes(yr,doy)) +
+  #geom_path(aes(col=nobs, group=yr)) +
+  geom_point(data= subset(ice_phenology, year > 1999 & event == "iceoff" & site == "GL4"), aes(year, event_doy), col="dodgerblue", size = 2) +
+  geom_point() +
+  geom_smooth(method = "lm", col="grey50") +
+  geom_smooth(data= subset(ice_phenology, year > 1999 & event == "iceoff" & site == "GL4"), aes(year, event_doy), col="dodgerblue", method="lm") +
+  labs(x="Year", y="Day of year", title = "Dates sampled, by year and location for GL4") +
+  scale_y_continuous(labels = function(x) format(as.Date(as.character(x), "%j"), "%d-%b"),
+                     breaks = yday(c("2018-06-01", "2018-06-15", "2018-07-01", "2018-07-15",
+                                     "2018-08-01", "2018-08-15", "2018-09-01"))) +
+  scale_x_continuous(breaks = seq(1980,2016,4)) +
+  #scale_color_distiller(name = "# obs/yr", palette= "Set2", breaks=seq(0,15, 3)) +
+  theme_bw() +
+  #theme(axis.text.x = element_text(angle=45)) +
+  facet_grid(location~.)
+
+test <- GL4_WQ_long %>%
+  dplyr::select(yr, date, doy, location) %>%
+  distinct() %>%
+  #mutate(term = ifelse(month(date) %in% 6:10, "Summer", "Winter")) %>%
+  group_by(yr, location) %>%
+  filter(date == min(date) & location == "Lake")
+summary(lm(formula = doy ~ yr, data=test))
+summary(lm(formula = gl4_doy ~ year, data=ice_off[ice_off$year>1999,]))
+summary(lm(formula = gl4_doy ~ year, data=ice_off))
