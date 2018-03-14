@@ -157,6 +157,7 @@ Caine_long <- left_join(Caine_GL4, Caine_sdev) %>%
 # remove intermediate datasets, not needed anymore
 rm(Caine_GL4, Caine_sdev)
 
+#' **QA Notes**
 #' Working through the McKnight water chemistry dataset, there are a few other issues to mention in the raw data. I show code to illustrate:
 #' 
 #' * 1905 erroneously entered for the year 2015 in the "year" column 
@@ -171,7 +172,9 @@ unique(McKnight_GLV_waterchem$year[year(McKnight_GLV_waterchem$date)==2015])
 # fix year
 McKnight_GLV_waterchem$year <- year(McKnight_GLV_waterchem$date)
 
-#' * Three numeric fields (TDP, IP, and PO4) have "<" entered, coercing the entire field in R as a character instead of numeric when it's read in. "<" is also an ambiguous value (I know it doesn't exceed a certain level, but I can't say whether "<5" is 4 or 1 which could make a difference for averaging or determining minimum values). Since I'm not sure of the true value, I exclude anything with "<" for summarizing.
+#' + Three numeric fields (TDP, IP, and PO4) have "<" entered, coercing the entire field in R as a character instead of numeric when it's read in. 
+#' + "<" is also an ambiguous value. I know it doesn't exceed a certain level, but I can't say whether "<5" is 4 or 1 which could make a difference for averaging or determining minimum values. 
+#'      + Since I'm not sure of the true value, I exclude anything with "<" for summarizing.
 #' 
 
 # remove any values with "<" since not sure of value in context of other values
@@ -366,9 +369,11 @@ GL4_waterchem %>% # core data: lake depths only at 0, 3 and 9m
 
 # -------------------
 #' **Green Lake 4 water quality data availability**
+#' QA note: There's a problem with counts for 2007 in my code (there should be 6 obs), which I will fix. There really are that many samples for outlet in 2007 though.
 
 #+ water quality data availability, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 4 
 GL4_WQ_long <- McKnight_GL4_WQdat %>%
+  as.data.frame() %>%
   dplyr::select(-comments) %>%
   gather(metric, value, chl_a:DOC) %>%
   filter(!is.na(value)) %>%
@@ -392,9 +397,12 @@ GL4_WQ_long %>%
   labs(x = "Year", y = "Number of observations", 
        title = paste("Annual sampling frequency: Green Lake 4 water quality data (PI: McKnight),", min(GL4_WQ_long$yr), "-", max(GL4_WQ_long$yr))) +
   scale_fill_manual(guide = "none", values = c("#B2DF8A","#1F78B4")) +
+  scale_x_continuous(breaks = seq(2004, 2016, 4)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90)) +
   facet_grid(location~metric, scales = "free_y")
+
+#' QA note: In the raw data, secchi depths values are filled down for all depths (including "air"). In practice, there is only one secchi value per day/time for the entire water column.
 
 #+ lake water quality data availability, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 6 
 # what is sampling frequency by depth over time?
@@ -419,8 +427,10 @@ GL4_WQ_long %>%
 
 
 # -------------------
+#' **Alternative sampling frequency figures**
 #' An alternative to showing sampling frequency as bar charts is to show it as point data by date by year.
-#' These figures capture the sampling range and specific dates sampled, but don't reflect frequency by depth
+#' Instead of emphasizing the total number of observations per year, the focus is on when samples were taken and an interranual comparison of those dates. 
+#' These figures capture the sampling range and specific dates sampled, but don't reflect frequency by depth.
 
 #+ waterchem date frequency, echo = FALSE, fig.height = 8, fig.width = 8
 ## Date frequency
@@ -473,6 +483,10 @@ GL4_WQ_long %>%
   theme(axis.text.x = element_text(angle=45, vjust=0.75, hjust=0.85)) +
   facet_grid(location~.)
 
+#' QA note: Plotting ice off with summer lake sampling date (above), I noticed a slight trend in delay of lake sampling over time. A delayed ice off trend wasn't what I remembered from the NWT renewal/the Preston et al. 2016 paper, and so I plotted first sample, ice break and ice off by year. 
+#' Since lake sampling started in 1998, there is a significant trend in lake first sampling date with time (ice break and ice off no). 
+#' The metadata note lake sampling each year begins roughly 1 week after ice off. Any consequence of missing this window is worth considering when summarizing data and comparing vaues interannually.    
+
 #+ first date QA check, echo = FALSE
 # plot first date sampled in lakes each year, just to see if trend overtime in timing
 GL4_WQ_long %>%
@@ -504,6 +518,16 @@ GL4_WQ_long %>%
 
 
 # --------------
+#' ## Data comparison for combining water chemistry datasets
+#' Because of overlap in analytes, sites and location within sites, it would be great to merge the Caine and McKnight water chemistry datasets for continuity in time. This prompts are few questions:
+#' 
+#'  + How do values compare?
+#'  + Are these datasets appropriate to join?
+#'  + Is it appropriate to average values across datasets in years where there is sampling overlap? 
+#'
+#' The outlet samples were collected by both groups in the summer months (Jun - Oct). The Caine lake samples are ones collected from just below the ice in winter months (Nov - May), whereas the McKnight lake samples were only collected in summer and at various depths (see above).
+#' 
+
 #+ plot actual data values, echo = FALSE, fig.width = 8, fig.height = 8 
 # Compare outlet values by source
 ggplot(subset(GL4_waterchem, location == "Outlet")) +
