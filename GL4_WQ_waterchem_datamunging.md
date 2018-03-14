@@ -231,53 +231,7 @@ The following figures show data availability, temporal and depth ranges, and sam
 
 ![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20data%20availability-1.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20data%20availability-2.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20data%20availability-3.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20data%20availability-4.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20data%20availability-5.png)
 
-``` r
-# Compare outlet values by source
-ggplot(subset(GL4_waterchem, location == "Outlet")) +
-  geom_point(aes(date, value, col=source), alpha=0.5) +
-  labs(x="Date", y ="Value", title = "GL4 water chemistry samples from outlet") +
-  theme_light() +
-  facet_wrap(~metric, scales = "free_y")
-```
-
-![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-8-1.png)
-
-``` r
-ggplot(subset(GL4_waterchem, location == "Lake" & depth == 0)) +
-  geom_point(aes(date, value, col=source), alpha=0.5) +
-  labs(x="Date", y ="Value", title = "GL4 water chemistry samples from lake surface") +
-  theme_light() +
-  facet_wrap(~metric, scales = "free_y")
-```
-
-![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-8-2.png)
-
-``` r
-# What is temporal frequency of data by measurement and site?
-ggplot(GL4_waterchem, aes(date, value, col=source)) + 
-         geom_point(alpha=0.3) +
-  #geom_errorbar(aes(ymin = value - sd_value, ymax = value + sd_value), alpha=0.3) +
-  labs(title = "Data availability at GL4, by dataset source and lake depth ('NA' refers to Outlet samples)") +
-  theme_light() +
-  facet_grid(metric~depth, scales = "free_y") +
-  theme(strip.text.y = element_text(angle=360))
-```
-
-![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-8-3.png)
-
-``` r
-# What are characteristics of each site/depth and measurement through time?
-ggplot(subset(McKnight_long, doy %in% 100:300), aes(doy, value)) + 
-  geom_point(aes(col=year), alpha=0.3) +
-  #geom_errorbar(aes(ymin = value - sd_value, ymax = value + sd_value), alpha=0.3) +
-  labs(title = "McKnight water chemistry measurements, by day of year and metric") +
-  scale_color_distiller(palette="PuBu") +
-  theme_light() +
-  facet_grid(metric~location*depth, scales = "free_y") +
-  theme(strip.text.y = element_text(angle=360))
-```
-
-![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-8-4.png)
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-1.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-2.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-3.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-4.png)
 
 ``` r
 # Did errorbars add correctly? Yes!

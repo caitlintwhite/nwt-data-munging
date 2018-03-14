@@ -296,9 +296,9 @@ GL4_waterchem %>%
   summarise(nobs = length(metric)) %>%
   ggplot() +
   geom_vline(aes(xintercept=0), col="dodgerblue4", lwd=1) +
-  geom_point(aes(depth, year, group=depth,  col=nobs, size=nobs), alpha=0.4) +
+  geom_point(aes(depth, year, group=depth,  col=nobs, size=nobs/2), alpha=0.5) +
   scale_color_distiller(palette = "Set2") +
-  scale_size_continuous() +
+  #scale_size_continuous() +
   scale_x_reverse(breaks=seq(0, 9, 3)) +
   #scale_y_continuous(breaks=seq(1980, 2015, 5)) +
   theme_bw() +
@@ -315,9 +315,9 @@ McKnight_long_alldepths %>%
   summarise(nobs = length(metric)) %>%
   ggplot() +
   geom_vline(aes(xintercept=0), col="dodgerblue4", lwd=1) +
-  geom_point(aes(depth, year, group=depth,  col=nobs, size=nobs), alpha=0.4) +
-  scale_color_distiller(palette = "Set2",breaks=seq(0,12,3)) +
-  scale_size_continuous(breaks=seq(0,12,3)) +
+  geom_point(aes(depth, year, group=depth,  col=nobs, size= nobs/2), alpha=0.5) +
+  scale_color_distiller(palette = "Set2", breaks=seq(0,12,3)) +
+  #scale_size_continuous(breaks=seq(0,12,3)) +
   scale_x_reverse(expand = c(0.1,0), breaks=seq(0, 10, 2)) +
   #scale_y_continuous(breaks=seq(1980, 2015, 5)) +
   theme_minimal() +
@@ -342,6 +342,7 @@ GL4_waterchem %>%
  
 
 # --------------
+#+ plot actual data values, echo = FALSE, fig.width = 8, fig.height = 8 
 # Compare outlet values by source
 ggplot(subset(GL4_waterchem, location == "Outlet")) +
   geom_point(aes(date, value, col=source), alpha=0.5) +
