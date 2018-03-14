@@ -369,21 +369,22 @@ GL4_waterchem %>% # core data: lake depths only at 0, 3 and 9m
 
 # -------------------
 #' **Green Lake 4 water quality data availability**
-#' QA note: There's a problem with counts for 2007 in my code (there should be 6 obs), which I will fix. There really are that many samples for outlet in 2007 though.
+#' 
+#' **QA note**: There really are that many samples for outlet chlorophyll-a in 2007.
 
 #+ water quality data availability, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 4 
 GL4_WQ_long <- McKnight_GL4_WQdat %>%
-  as.data.frame() %>%
   dplyr::select(-comments) %>%
   gather(metric, value, chl_a:DOC) %>%
   filter(!is.na(value)) %>%
   mutate(doy = yday(date),
          yr = year(date),
-         depth = ifelse(`depth/loc`== "Surface", 0, parse_number(`depth/loc`)),
+         depth = ifelse(`depth/loc`== "Surface", 0, 
+                        ifelse(grepl("m",`depth/loc`)==FALSE, NA, parse_number(`depth/loc`))),
          location = ifelse(`depth/loc`== "Inlet", "Inlet",
                            ifelse(`depth/loc`== "Outlet", "Outlet", "Lake")))
 
-GL4_WQ_long$location[is.na(GL4_WQ_long$location)] <- "Lake" # fix NA value
+GL4_WQ_long$location[is.na(GL4_WQ_long$location)] <- "Lake" # fix NA value, corresponds to secchi depth
 GL4_WQ_long$depth[is.na(GL4_WQ_long$depth)] <- -1 # assign depth of -1 for anything measured in air or not in lake
 
 
@@ -402,7 +403,7 @@ GL4_WQ_long %>%
   theme(axis.text.x = element_text(angle = 90)) +
   facet_grid(location~metric, scales = "free_y")
 
-#' QA note: In the raw data, secchi depths values are filled down for all depths (including "air"). In practice, there is only one secchi value per day/time for the entire water column.
+#' **QA note**: In the raw data, secchi depths values are filled down for all depths (including "air"). In practice, there is only one secchi value per day/time for the entire water column.
 
 #+ lake water quality data availability, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 6 
 # what is sampling frequency by depth over time?
@@ -428,6 +429,7 @@ GL4_WQ_long %>%
 
 # -------------------
 #' **Alternative sampling frequency figures**
+#' 
 #' An alternative to showing sampling frequency as bar charts is to show it as point data by date by year.
 #' Instead of emphasizing the total number of observations per year, the focus is on when samples were taken and an interranual comparison of those dates. 
 #' These figures capture the sampling range and specific dates sampled, but don't reflect frequency by depth.
@@ -483,7 +485,7 @@ GL4_WQ_long %>%
   theme(axis.text.x = element_text(angle=45, vjust=0.75, hjust=0.85)) +
   facet_grid(location~.)
 
-#' QA note: Plotting ice off with summer lake sampling date (above), I noticed a slight trend in delay of lake sampling over time. A delayed ice off trend wasn't what I remembered from the NWT renewal/the Preston et al. 2016 paper, and so I plotted first sample, ice break and ice off by year. 
+#' **QA note**: Plotting ice off with summer lake sampling date (above), I noticed a slight trend in delay of lake sampling over time. A delayed ice off trend wasn't what I remembered from the NWT renewal/the Preston et al. 2016 paper, and so I plotted first sample, ice break and ice off by year. 
 #' Since lake sampling started in 1998, there is a significant trend in lake first sampling date with time (ice break and ice off no). 
 #' The metadata note lake sampling each year begins roughly 1 week after ice off. Any consequence of missing this window is worth considering when summarizing data and comparing vaues interannually.    
 

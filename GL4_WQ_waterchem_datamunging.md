@@ -246,19 +246,23 @@ Showing the ice phenology data availability via raw data values is easy because 
 
 ![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/data%20availablity%20for%20water%20chem-1.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/data%20availablity%20for%20water%20chem-2.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/data%20availablity%20for%20water%20chem-3.png)
 
-**Green Lake 4 water quality data availability** QA note: There's a problem with counts for 2007 in my code (there should be 6 obs), which I will fix. There really are that many samples for outlet in 2007 though.
+**Green Lake 4 water quality data availability**
+
+**QA note**: There really are that many samples for outlet chlorophyll-a in 2007.
 
 ![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/water%20quality%20data%20availability-1.png)
 
-QA note: In the raw data, secchi depths values are filled down for all depths (including "air"). In practice, there is only one secchi value per day/time for the entire water column.
+**QA note**: In the raw data, secchi depths values are filled down for all depths (including "air"). In practice, there is only one secchi value per day/time for the entire water column.
 
 ![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/lake%20water%20quality%20data%20availability-1.png)
 
-**Alternative sampling frequency figures** An alternative to showing sampling frequency as bar charts is to show it as point data by date by year. Instead of emphasizing the total number of observations per year, the focus is on when samples were taken and an interranual comparison of those dates. These figures capture the sampling range and specific dates sampled, but don't reflect frequency by depth.
+**Alternative sampling frequency figures**
+
+An alternative to showing sampling frequency as bar charts is to show it as point data by date by year. Instead of emphasizing the total number of observations per year, the focus is on when samples were taken and an interranual comparison of those dates. These figures capture the sampling range and specific dates sampled, but don't reflect frequency by depth.
 
 ![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/waterchem%20date%20frequency-1.png) ![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/water%20quality%20date%20frequency-1.png)
 
-QA note: Plotting ice off with summer lake sampling date (above), I noticed a slight trend in delay of lake sampling over time. A delayed ice off trend wasn't what I remembered from the NWT renewal/the Preston et al. 2016 paper, and so I plotted first sample, ice break and ice off by year. Since lake sampling started in 1998, there is a significant trend in lake first sampling date with time (ice break and ice off no). The metadata note lake sampling each year begins roughly 1 week after ice off. Any consequence of missing this window is worth considering when summarizing data and comparing vaues interannually.
+**QA note**: Plotting ice off with summer lake sampling date (above), I noticed a slight trend in delay of lake sampling over time. A delayed ice off trend wasn't what I remembered from the NWT renewal/the Preston et al. 2016 paper, and so I plotted first sample, ice break and ice off by year. Since lake sampling started in 1998, there is a significant trend in lake first sampling date with time (ice break and ice off no). The metadata note lake sampling each year begins roughly 1 week after ice off. Any consequence of missing this window is worth considering when summarizing data and comparing vaues interannually.
 
 ![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/first%20date%20QA%20check-1.png)
 
