@@ -227,156 +227,26 @@ Exluding these "&lt;" values also seems reasonable because they represent a smal
 Visualize data availability
 ---------------------------
 
-The following figures show data availability, temporal and depth ranges, and sampling frequency within for the tidied long-form datasets.
+The following figures show data availability, temporal and depth ranges, and sampling frequency within for the tidied long-form datasets. The reason I include lake ice phenology data is to give some context to when summer season lake data was collected. The metata data for lake water quality and water chemistry (McKnight) states samples were collected approximately 1 week after ice-off, so I wanted to check against Nel Caine's ice phenology data.
 
-![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20data%20availability-1.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20data%20availability-2.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20data%20availability-3.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20data%20availability-4.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20data%20availability-5.png)
+Things I'd like feedback on include: + For presenting data availability, which figures are most compelling? + Given data availability (e.g. inconsistencies in sampling frequency by site and depth), how to best summarize data for a usable long-term summary dataset of lake trends
 
-![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-1.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-2.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-3.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-4.png)
+Showing the ice phenology data availability via raw data values is easy because it's a relatively simple dataset (3 variables x site x time). Showing data availability via actual data values with either water quality or chemistry data is trickier because there are more data (more variables x different depths x location (lake, inlet, outlet) x site x time).
 
-``` r
-# Did errorbars add correctly? Yes!
-ggplot(subset(test2, metric %in% c("d18O", "dDeut", "Trit")), aes(doy, value)) + 
-  geom_point(aes(col=as.factor(year)), alpha=0.4) +
-  geom_errorbar(aes(ymin = value - sd_value, ymax = value + sd_value, col=as.factor(year)), alpha=0.3) +
-  theme_light() +
-  facet_grid(local_site~metric, scales = "free_y")
-```
+**All lakes ice phenology**
 
-``` r
-GL4_WQ_long <- McKnight_GL4_WQdat %>%
-  dplyr::select(-comments) %>%
-  gather(metric, value, chl_a:DOC) %>%
-  filter(!is.na(value)) %>%
-  mutate(doy = yday(date),
-    yr = year(date),
-         depth = ifelse(`depth/loc`== "Surface", 0, parse_number(`depth/loc`)),
-         location = ifelse(`depth/loc`== "Inlet", "Inlet",
-                           ifelse(`depth/loc`== "Outlet", "Outlet", "Lake")))
-```
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20data%20availability-1.png)
 
-    ## Warning: 1122 parsing failures.
-    ## row # A tibble: 5 x 4 col     row   col expected actual expected   <int> <int>    <chr>  <chr> actual 1    61    NA a number  Inlet row 2    62    NA a number Outlet col 3    66    NA a number  Inlet expected 4    67    NA a number Outlet actual 5    71    NA a number  Inlet
-    ## ... ................. ... ............................. ........ ............................. ...... ............................. ... ............................. ... ............................. ........ ............................. ...... .............................
-    ## See problems(...) for more details.
+**Green Lake 4 water chemistry data availability**
 
-``` r
-GL4_WQ_long$location[is.na(GL4_WQ_long$location)] <- "Lake" # fix NA value
-GL4_WQ_long$depth[is.na(GL4_WQ_long$depth)] <- -1 # assign depth of -1 for anything measured in air or not in lake
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/data%20availablity%20for%20water%20chem-1.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/data%20availablity%20for%20water%20chem-2.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/data%20availablity%20for%20water%20chem-3.png)
 
-# what is sampling frequency by depth over time?
-# lake only
-GL4_WQ_long %>%
-  filter(location == "Lake") %>%
-  group_by(yr, location, depth, metric) %>%
-  summarise(nobs = length(metric)) %>%
-  ggplot() +
-  geom_vline(aes(xintercept=0), col="dodgerblue4", lwd=1) +
-  geom_point(aes(depth, yr, group=depth,  col=nobs, size=nobs), alpha=0.4) +
-  scale_color_distiller(palette = "Set2", breaks=seq(2,12,2)) +
-  scale_size_continuous(breaks=seq(1,12,3)) +
-  scale_x_reverse(breaks=seq(0,12,3)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90)) +
-  coord_flip() +
-  facet_grid(location~metric)
-```
+**Green Lake 4 water quality data availability**
 
-![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-9-1.png)
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/water%20quality%20data%20availability-1.png) ![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/lake%20water%20quality%20data%20availability-1.png)
 
-``` r
-# inlet and outlet sampling frequency
-GL4_WQ_long %>%
-  filter(location != "Lake") %>%
-  group_by(yr, location, depth, metric) %>%
-  summarise(nobs = length(metric)) %>%
-  ggplot() +
-  geom_col(aes(yr, nobs, fill=location), width=0.7) +
-  scale_fill_brewer(palette = "Paired") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90)) +
-  facet_grid(location~metric, scales = "free_y")
-```
+An alternative to showing sampling frequency as bar charts is to show it as point data by date by year. These figures capture the sampling range and specific dates sampled, but don't reflect frequency by depth
 
-![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-9-2.png)
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/waterchem%20date%20frequency-1.png) ![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/water%20quality%20date%20frequency-1.png) ![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/first%20date%20QA%20check-1.png)
 
-``` r
-## Date frequency
-GL4_waterchem %>%
-  dplyr::select(year, date, doy, location, source) %>%
-  distinct() %>%
-  mutate(term = ifelse(month(date) %in% 6:10, "Summer", "Winter")) %>%
-  group_by(year, term, location, source) %>%
-  mutate(nobs = length(doy)) %>%
-  filter(source == "McKnight") %>%
-  ggplot(aes(doy, year)) +
-  geom_path(aes(col=nobs, group=year)) +
-  geom_point(aes(col=nobs), alpha=0.8) +
-  labs(y="Year", x="Day of year", title = "Dates sampled, by year and location for GL4") +
-  scale_x_continuous(labels = function(x) format(as.Date(as.character(x), "%j"), "%d-%b"),
-                     breaks = yday(c("2018-01-01", "2018-02-01", "2018-03-01", "2018-04-01", 
-                                     "2018-05-01", "2018-06-01", "2018-07-01", "2018-08-01", 
-                                     "2018-09-01", "2018-10-01", "2018-11-01", "2018-12-01"))) +
-  scale_y_continuous(breaks = seq(1980,2016,4)) +
-  scale_color_distiller(name = "# obs/yr", palette= "Set2", breaks=seq(0,15, 3)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle=45)) +
-  facet_grid(location~source)
-```
-
-![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-10-1.png)
-
-``` r
-GL4_WQ_long %>%
-  dplyr::select(yr, date, doy, location) %>%
-  distinct() %>%
-  #mutate(term = ifelse(month(date) %in% 6:10, "Summer", "Winter")) %>%
-  group_by(yr, location) %>%
-  mutate(nobs = length(doy)) %>%
-  #left_join(ice_off[c("year", "gl4_doy")], by = c("yr" = "year")) %>%
-  #filter(source == "McKnight") %>%
-  ggplot(aes(doy, yr)) +
-  geom_point(data= subset(GLV_ice_long, year > 1999 & lake == "Green4" & event == "clear"), aes(event_doy, year), col="dodgerblue", size = 2) +
-  geom_point(data= subset(GLV_ice_long, year > 1999 & lake == "Green4" & event == "break"), aes(event_doy, year), col="lightblue", size = 2) +
-  geom_path(aes(col=nobs, group=yr)) +
-  geom_point(aes(col=nobs), alpha=0.8) +
-  labs(y="Year", x="Day of year", title = "Dates sampled, by year and location for GL4") +
-  scale_x_continuous(labels = function(x) format(as.Date(as.character(x), "%j"), "%d-%b"),
-                     breaks = yday(c("2018-01-01", "2018-02-01", "2018-03-01", "2018-04-01",
-                                     "2018-05-01", "2018-06-01", "2018-07-01", "2018-08-01",
-                                     "2018-09-01", "2018-10-01", "2018-11-01", "2018-12-01"))) +
-  scale_y_continuous(breaks = seq(1980,2016,4)) +
-  scale_color_distiller(name = "# obs/yr", palette= "Set2", breaks=seq(0,15, 3)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle=45)) +
-  facet_grid(location~.)
-```
-
-![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-10-2.png)
-
-``` r
-# plot first date sampled in lakes each year, just to see if trend overtime in timing
-GL4_WQ_long %>%
-  dplyr::select(yr, date, doy, location) %>%
-  distinct() %>%
-  #mutate(term = ifelse(month(date) %in% 6:10, "Summer", "Winter")) %>%
-  group_by(yr, location) %>%
-  filter(date == min(date)) %>%
-  ggplot(aes(yr,doy)) +
-  #geom_path(aes(col=nobs, group=yr)) +
-  geom_point(data= subset(GLV_ice_long, year > 1999 & event == "clear" & lake == "Green4"), aes(year, event_doy), col="dodgerblue", size = 2) +
-  geom_point(data= subset(GLV_ice_long, year > 1999 & event == "break" & lake == "Green4"), aes(year, event_doy), col="lightblue", size = 2) +
-  geom_point() +
-  geom_smooth(method = "lm", col="grey50") +
-  #geom_smooth(data= subset(GLV_ice_long, year > 1999 & event == "clear" & lake == "Green4"), aes(year, event_doy), col="dodgerblue", method="lm") +
-  labs(x="Year", y="Day of year", title = "Dates sampled, by year and location for GL4") +
-  scale_y_continuous(labels = function(x) format(as.Date(as.character(x), "%j"), "%d-%b"),
-                     breaks = yday(c("2018-06-01", "2018-06-15", "2018-07-01", "2018-07-15",
-                                     "2018-08-01", "2018-08-15", "2018-09-01"))) +
-  scale_x_continuous(breaks = seq(1980,2016,4)) +
-  #scale_color_distiller(name = "# obs/yr", palette= "Set2", breaks=seq(0,15, 3)) +
-  theme_bw() +
-  #theme(axis.text.x = element_text(angle=45)) +
-  facet_grid(location~.)
-```
-
-![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/unnamed-chunk-10-3.png)
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-1.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-2.png)

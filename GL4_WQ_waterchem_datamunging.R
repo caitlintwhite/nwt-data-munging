@@ -252,9 +252,21 @@ GL4_waterchem <- rbind(Caine_long, McKnight_long)
 # ----- 
 #' ## Visualize data availability
 #' The following figures show data availability, temporal and depth ranges, and sampling frequency within for the tidied long-form datasets.
+#' The reason I include lake ice phenology data is to give some context to when summer season lake data was collected. 
+#' The metata data for lake water quality and water chemistry (McKnight) states samples were collected approximately 1 week after ice-off, so I wanted to check against Nel Caine's ice phenology data.
+#' 
+#' Things I'd like feedback on include:
+#' 
+#' + For presenting data availability, which figures are most compelling?
+#' + Given data availability (e.g. inconsistencies in sampling frequency by site and depth), how to best summarize data for a usable long-term summary dataset of lake trends
+#' 
+#'  Showing the ice phenology data availability via raw data values is easy because it's a relatively simple dataset (3 variables x site x time).
+#'  Showing data availability via actual data values with either water quality or chemistry data is trickier because there are more data (more variables x different depths x location (lake, inlet, outlet) x site x time).  
+#'
+#' **All lakes ice phenology**
 
-#+ plot data availability, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 8
-# ice phenology dataset
+#+ plot data availability, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 6
+# ice phenology dataset--
 GLV_ice_long %>%
   mutate(lake = factor(lake, levels = c("Silver", "Albion", "Green1",
                                            "Green2", "Green3", "Green4",
@@ -268,7 +280,10 @@ GLV_ice_long %>%
   theme_minimal() +
   facet_wrap(~lake)
 
-# Caine water chemistry data for GL4
+#' **Green Lake 4 water chemistry data availability**
+
+#+ data availablity for water chem, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 8
+# Caine GL4 water chemistry data--
 Caine_long %>%
   #filter(location != "Lake") %>%
   group_by(year, location, metric) %>%
@@ -281,24 +296,67 @@ Caine_long %>%
        subtitle = "Samples collected below ice from lakes approx Nov - May; from lake outlet Jun - Oct, during 'summer' conditions") +
   scale_fill_brewer(name = "Sampling\nlocation", palette = "Paired") +
   scale_x_continuous(breaks=seq(1980, 2015, 5)) +
-  theme_bw() +
+  theme_minimal() +
   theme(axis.text.x = element_text(angle = 90)) +
   facet_wrap(~metric)
 
+# show McKnight and Caine inlet and outlet water chem sample combined frequency
+# inlet and outlet only
+GL4_waterchem %>%
+  filter(location != "Lake") %>% # excludes summer McKnight lake samples and winter lake Caine samples
+  group_by(source, year, location, depth, metric) %>%
+  summarise(nobs = length(metric)) %>%
+  mutate(grouping = factor(paste(source, location, sep="_"), levels = c("Caine_Outlet", "McKnight_Outlet", "McKnight_Inlet"))) %>%
+  ggplot() +
+  geom_col(aes(year, nobs, fill=grouping), width=0.7) +
+  labs(x = "Year", y = "Number of observations",
+       title = paste("Annual sampling frequency: Green Lake 4 water chemistry", min(GL4_waterchem$year), "-", max(GL4_waterchem$year)),
+       subtitle = "Bars stacked to show total number of observations per year, segments colored by data source") +
+  scale_fill_brewer(name = "Data source", palette="Paired") +
+  scale_x_continuous(breaks=seq(1980, 2015, 5)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_wrap(~metric)
 
-# plot data availability Jun - Sep
+# McKnight GL4 water chemistry data--
 # what is sampling frequency by depth over time?
 # lake only
-GL4_waterchem %>%
-  filter(month(date) %in% 6:9, 
+McKnight_long_alldepths %>% # all lake depths (when it could be determined)
+  filter(month(date) %in% 6:9, # summer months only
+         location == "Lake") %>% # excludes inlet and outlet samples
+  group_by(year, location, depth, metric) %>%
+  summarise(nobs = length(metric)) %>%
+  ggplot() +
+  geom_vline(aes(xintercept=0), col="dodgerblue2", lwd=1) +
+  geom_point(aes(depth, year, group=depth,  col=nobs, size= nobs/2), alpha=0.4) +
+  labs(y = "Year", x = "Lake depth (m)", 
+       title = paste("Annual sampling frequency: Green Lake 4 water chemistry (PI: McKnight),", min(McKnight_long_alldepths$year), "-", max(McKnight_long_alldepths$year)),
+       subtitle = "Points colored and sized by number of observations") +
+  scale_color_distiller(name = "# obs", palette = "Set2", breaks=seq(0,12,3)) +
+  scale_size_continuous(guide="none") +
+  scale_x_reverse(expand = c(0.1,0), breaks=seq(0, 12, 3)) +
+  #scale_y_continuous(breaks=seq(1980, 2015, 5)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  coord_flip() +
+  facet_wrap(~metric)
+
+#+ McKnight lake chemistry "core", eval=FALSE, echo=FALSE
+# plot lake chemistry data availability Jun - Sep
+# what is sampling frequency by depth over time?
+GL4_waterchem %>% # core data: lake depths only at 0, 3 and 9m
+  filter(month(date) %in% 6:9, # effectively makes it McKnight data only
          location == "Lake") %>%
   group_by(year, location, depth, metric) %>%
   summarise(nobs = length(metric)) %>%
   ggplot() +
-  geom_vline(aes(xintercept=0), col="dodgerblue4", lwd=1) +
+  geom_vline(aes(xintercept=0), col="dodgerblue2", lwd=1) +
   geom_point(aes(depth, year, group=depth,  col=nobs, size=nobs/2), alpha=0.5) +
+  labs(y = "Year", x = "Lake depth (m)", 
+       title = paste("Annual sampling frequency: Green Lake 4 water chemistry (PI: McKnight),", min(McKnight_long_alldepths$year), "-", max(McKnight_long_alldepths$year)),
+       subtitle = "Core data only, points colored and sized by number of observations") +
   scale_color_distiller(palette = "Set2") +
-  #scale_size_continuous() +
+  scale_size_continuous(guide = "none") +
   scale_x_reverse(breaks=seq(0, 9, 3)) +
   #scale_y_continuous(breaks=seq(1980, 2015, 5)) +
   theme_bw() +
@@ -306,40 +364,144 @@ GL4_waterchem %>%
   coord_flip() +
   facet_wrap(~metric)
 
-# what is sampling frequency by depth over time?
-# lake only
-McKnight_long_alldepths %>%
-  filter(month(date) %in% 6:9, 
-         location == "Lake") %>%
-  group_by(year, location, depth, metric) %>%
+# -------------------
+#' **Green Lake 4 water quality data availability**
+
+#+ water quality data availability, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 4 
+GL4_WQ_long <- McKnight_GL4_WQdat %>%
+  dplyr::select(-comments) %>%
+  gather(metric, value, chl_a:DOC) %>%
+  filter(!is.na(value)) %>%
+  mutate(doy = yday(date),
+         yr = year(date),
+         depth = ifelse(`depth/loc`== "Surface", 0, parse_number(`depth/loc`)),
+         location = ifelse(`depth/loc`== "Inlet", "Inlet",
+                           ifelse(`depth/loc`== "Outlet", "Outlet", "Lake")))
+
+GL4_WQ_long$location[is.na(GL4_WQ_long$location)] <- "Lake" # fix NA value
+GL4_WQ_long$depth[is.na(GL4_WQ_long$depth)] <- -1 # assign depth of -1 for anything measured in air or not in lake
+
+
+# inlet and outlet sampling frequency
+GL4_WQ_long %>%
+  filter(location != "Lake") %>%
+  group_by(yr, location, depth, metric) %>%
   summarise(nobs = length(metric)) %>%
   ggplot() +
-  geom_vline(aes(xintercept=0), col="dodgerblue4", lwd=1) +
-  geom_point(aes(depth, year, group=depth,  col=nobs, size= nobs/2), alpha=0.5) +
-  scale_color_distiller(palette = "Set2", breaks=seq(0,12,3)) +
-  #scale_size_continuous(breaks=seq(0,12,3)) +
-  scale_x_reverse(expand = c(0.1,0), breaks=seq(0, 10, 2)) +
-  #scale_y_continuous(breaks=seq(1980, 2015, 5)) +
+  geom_col(aes(yr, nobs, fill=location), width=0.7) +
+  labs(x = "Year", y = "Number of observations", 
+       title = paste("Annual sampling frequency: Green Lake 4 water quality data (PI: McKnight),", min(GL4_WQ_long$yr), "-", max(GL4_WQ_long$yr))) +
+  scale_fill_manual(guide = "none", values = c("#B2DF8A","#1F78B4")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_grid(location~metric, scales = "free_y")
+
+#+ lake water quality data availability, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 6 
+# what is sampling frequency by depth over time?
+# lake only
+GL4_WQ_long %>%
+  filter(location == "Lake") %>%
+  group_by(yr, location, depth, metric) %>%
+  summarise(nobs = length(metric)) %>%
+  ggplot() +
+  geom_vline(aes(xintercept=0), col="dodgerblue2", lwd=1) +
+  geom_point(aes(depth, yr, group=depth,  col=nobs, size=nobs/2), alpha=0.4) +
+  labs(y = "Year", x = "Lake depth (m)", 
+       title = paste("Annual sampling frequency: Green Lake 4 water quality (PI: McKnight),", min(GL4_WQ_long$yr), "-", max(GL4_WQ_long$yr)),
+       subtitle = "Points colored and sized by number of observations; secchi and light attenuation values recorded at 'air' ") +
+  scale_color_distiller(name = "# obs", palette = "Set2", breaks=seq(2,12,2)) +
+  scale_size_continuous(guide = "none") +
+  scale_x_reverse(breaks=seq(0,12,3)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90)) +
   coord_flip() +
-  facet_wrap(~metric)
+  facet_grid(.~metric)
 
-# inlet and outlet only
+
+# -------------------
+#' An alternative to showing sampling frequency as bar charts is to show it as point data by date by year.
+#' These figures capture the sampling range and specific dates sampled, but don't reflect frequency by depth
+
+#+ waterchem date frequency, echo = FALSE, fig.height = 8, fig.width = 8
+## Date frequency
 GL4_waterchem %>%
-  filter(month(date) %in% 6:9, 
-         location != "Lake") %>%
-  group_by(source, year, location, depth, metric) %>%
-  summarise(nobs = length(metric)) %>%
-  mutate(grouping = paste(source, location, sep="_")) %>%
-  ggplot() +
-  geom_col(aes(year, nobs, fill=grouping), width=0.7) +
-  scale_fill_brewer(palette = "Paired") +
-  scale_x_continuous(breaks=seq(1980, 2015, 5)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90)) +
-  facet_wrap(~metric)
- 
+  dplyr::select(year, date, doy, location, source) %>%
+  distinct() %>%
+  #mutate(term = ifelse(month(date) %in% 6:10, "Summer", "Winter")) %>%
+  group_by(year, location, source) %>%
+  mutate(nobs = length(doy)) %>%
+  #filter(source == "McKnight") %>%
+  ggplot(aes(doy, year)) +
+  geom_path(aes(col=nobs, group=year)) +
+  geom_point(aes(col=nobs), alpha=0.8) +
+  labs(y="Year", x="Day of year", 
+       title = "Annual sampling frequency: Green Lake 4 water chemistry, by data source and location",
+       subtitle = "Points on date collected, line shows temporal range of data per year") +
+  scale_x_continuous(labels = function(x) format(as.Date(as.character(x), "%j"), "%d-%b"),
+                     breaks = yday(c("2018-01-01", "2018-02-01", "2018-03-01", "2018-04-01", 
+                                     "2018-05-01", "2018-06-01", "2018-07-01", "2018-08-01", 
+                                     "2018-09-01", "2018-10-01", "2018-11-01", "2018-12-01"))) +
+  scale_y_continuous(breaks = seq(1980,2016,4)) +
+  scale_color_distiller(name = "# obs/yr", palette= "Set2", breaks=seq(0,25,5)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=45, vjust=0.75, hjust=0.85)) +
+  facet_grid(location~source)
+
+#+ water quality date frequency, echo = FALSE, fig.height = 6, fig.width = 8
+GL4_WQ_long %>%
+  dplyr::select(yr, date, doy, location) %>%
+  distinct() %>%
+  #mutate(term = ifelse(month(date) %in% 6:10, "Summer", "Winter")) %>%
+  group_by(yr, location) %>%
+  mutate(nobs = length(doy)) %>%
+  #filter(source == "McKnight") %>%
+  ggplot(aes(doy, yr)) +
+  geom_point(data= subset(GLV_ice_long, year > 1999 & lake == "Green4" & event == "clear"), aes(event_doy, year), col="dodgerblue", size = 2, alpha= 0.5) +
+  geom_point(data= subset(GLV_ice_long, year > 1999 & lake == "Green4" & event == "break"), aes(event_doy, year), col="lightblue", size = 2, alpha = 0.5) +
+  geom_path(aes(col=nobs, group=yr)) +
+  geom_point(aes(col=nobs), alpha=0.8) +
+  labs(y="Year", x="Day of year", 
+       title = "Annual sampling frequency: Green Lake 4 water quality (PI: McKnight)",
+       subtitle = "GL4 ice phenology in blue: ice break (light blue) and ice clearance (dark blue)") +
+  scale_x_continuous(labels = function(x) format(as.Date(as.character(x), "%j"), "%d-%b"),
+                     breaks = yday(c("2018-01-01", "2018-02-01", "2018-03-01", "2018-04-01",
+                                     "2018-05-01", "2018-06-01", "2018-07-01", "2018-08-01",
+                                     "2018-09-01", "2018-10-01", "2018-11-01", "2018-12-01"))) +
+  scale_y_continuous(breaks = seq(1980,2016,4)) +
+  scale_color_distiller(name = "# obs", palette= "Set2", breaks=seq(0,15, 3)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=45, vjust=0.75, hjust=0.85)) +
+  facet_grid(location~.)
+
+#+ first date QA check, echo = FALSE
+# plot first date sampled in lakes each year, just to see if trend overtime in timing
+GL4_WQ_long %>%
+  dplyr::select(yr, date, doy, location) %>%
+  filter(location == "Lake") %>%
+  distinct() %>%
+  #mutate(term = ifelse(month(date) %in% 6:10, "Summer", "Winter")) %>%
+  group_by(yr, location) %>%
+  filter(date == min(date)) %>%
+  ggplot(aes(yr,doy)) +
+  #geom_path(aes(col=nobs, group=yr)) +
+  geom_point(data= subset(GLV_ice_long, year > 1999 & event == "clear" & lake == "Green4"), aes(year, event_doy), col="dodgerblue", alpha=0.8) +
+  geom_point(data= subset(GLV_ice_long, year > 1999 & event == "break" & lake == "Green4"), aes(year, event_doy), col="lightblue", alpha=0.8) +
+  geom_point() +
+  geom_smooth(method = "lm", col="grey50") +
+  #geom_smooth(data= subset(GLV_ice_long, year > 1999 & event == "clear" & lake == "Green4"), aes(year, event_doy), col="dodgerblue", method="lm") +
+  labs(x="Year", y="Day of year", 
+       title = "QA check: first date water quality sampled at GL4 by year",
+       subtitle ="Ice phenology shown in blue: ice break (light blue), ice clearance (dark blue)") +
+  scale_y_continuous(labels = function(x) format(as.Date(as.character(x), "%j"), "%d-%b"),
+                     breaks = yday(c("2018-05-01", "2018-05-15", "2018-06-01", "2018-06-15", 
+                                     "2018-07-01", "2018-07-15", "2018-08-01"))) +
+  scale_x_continuous(breaks = seq(1980,2016,4)) +
+  #scale_color_distiller(name = "# obs/yr", palette= "Set2", breaks=seq(0,15, 3)) +
+  theme_minimal()
+  #theme(axis.text.x = element_text(angle=45)) +
+  #facet_grid(location~.)
+
+
 
 # --------------
 #+ plot actual data values, echo = FALSE, fig.width = 8, fig.height = 8 
@@ -348,16 +510,18 @@ ggplot(subset(GL4_waterchem, location == "Outlet")) +
   geom_point(aes(date, value, col=source), alpha=0.5) +
   labs(x="Date", y ="Value", title = "GL4 water chemistry samples from outlet") +
   theme_light() +
+  theme(axis.text.x = element_text(angle=90)) +
   facet_wrap(~metric, scales = "free_y")
 
 ggplot(subset(GL4_waterchem, location == "Lake" & depth == 0)) +
   geom_point(aes(date, value, col=source), alpha=0.5) +
   labs(x="Date", y ="Value", title = "GL4 water chemistry samples from lake surface") +
   theme_light() +
+  theme(axis.text.x = element_text(angle=90)) +
   facet_wrap(~metric, scales = "free_y")
   
 
-
+#+ r, eval=FALSE, echo = FALSE
 # What is temporal frequency of data by measurement and site?
 ggplot(GL4_waterchem, aes(date, value, col=source)) + 
          geom_point(alpha=0.3) +
@@ -378,7 +542,6 @@ ggplot(subset(McKnight_long, doy %in% 100:300), aes(doy, value)) +
   facet_grid(metric~location*depth, scales = "free_y") +
   theme(strip.text.y = element_text(angle=360))
 
-#+ r, eval=FALSE
 # Did errorbars add correctly? Yes!
 ggplot(subset(test2, metric %in% c("d18O", "dDeut", "Trit")), aes(doy, value)) + 
   geom_point(aes(col=as.factor(year)), alpha=0.4) +
@@ -386,117 +549,4 @@ ggplot(subset(test2, metric %in% c("d18O", "dDeut", "Trit")), aes(doy, value)) +
   theme_light() +
   facet_grid(local_site~metric, scales = "free_y")
 
-# -------------------
-GL4_WQ_long <- McKnight_GL4_WQdat %>%
-  dplyr::select(-comments) %>%
-  gather(metric, value, chl_a:DOC) %>%
-  filter(!is.na(value)) %>%
-  mutate(doy = yday(date),
-    yr = year(date),
-         depth = ifelse(`depth/loc`== "Surface", 0, parse_number(`depth/loc`)),
-         location = ifelse(`depth/loc`== "Inlet", "Inlet",
-                           ifelse(`depth/loc`== "Outlet", "Outlet", "Lake")))
 
-GL4_WQ_long$location[is.na(GL4_WQ_long$location)] <- "Lake" # fix NA value
-GL4_WQ_long$depth[is.na(GL4_WQ_long$depth)] <- -1 # assign depth of -1 for anything measured in air or not in lake
-
-# what is sampling frequency by depth over time?
-# lake only
-GL4_WQ_long %>%
-  filter(location == "Lake") %>%
-  group_by(yr, location, depth, metric) %>%
-  summarise(nobs = length(metric)) %>%
-  ggplot() +
-  geom_vline(aes(xintercept=0), col="dodgerblue4", lwd=1) +
-  geom_point(aes(depth, yr, group=depth,  col=nobs, size=nobs), alpha=0.4) +
-  scale_color_distiller(palette = "Set2", breaks=seq(2,12,2)) +
-  scale_size_continuous(breaks=seq(1,12,3)) +
-  scale_x_reverse(breaks=seq(0,12,3)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90)) +
-  coord_flip() +
-  facet_grid(location~metric)
-
-# inlet and outlet sampling frequency
-GL4_WQ_long %>%
-  filter(location != "Lake") %>%
-  group_by(yr, location, depth, metric) %>%
-  summarise(nobs = length(metric)) %>%
-  ggplot() +
-  geom_col(aes(yr, nobs, fill=location), width=0.7) +
-  scale_fill_brewer(palette = "Paired") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90)) +
-  facet_grid(location~metric, scales = "free_y")
-
-# -------------------
-## Date frequency
-GL4_waterchem %>%
-  dplyr::select(year, date, doy, location, source) %>%
-  distinct() %>%
-  mutate(term = ifelse(month(date) %in% 6:10, "Summer", "Winter")) %>%
-  group_by(year, term, location, source) %>%
-  mutate(nobs = length(doy)) %>%
-  filter(source == "McKnight") %>%
-  ggplot(aes(doy, year)) +
-  geom_path(aes(col=nobs, group=year)) +
-  geom_point(aes(col=nobs), alpha=0.8) +
-  labs(y="Year", x="Day of year", title = "Dates sampled, by year and location for GL4") +
-  scale_x_continuous(labels = function(x) format(as.Date(as.character(x), "%j"), "%d-%b"),
-                     breaks = yday(c("2018-01-01", "2018-02-01", "2018-03-01", "2018-04-01", 
-                                     "2018-05-01", "2018-06-01", "2018-07-01", "2018-08-01", 
-                                     "2018-09-01", "2018-10-01", "2018-11-01", "2018-12-01"))) +
-  scale_y_continuous(breaks = seq(1980,2016,4)) +
-  scale_color_distiller(name = "# obs/yr", palette= "Set2", breaks=seq(0,15, 3)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle=45)) +
-  facet_grid(location~source)
-
-
-GL4_WQ_long %>%
-  dplyr::select(yr, date, doy, location) %>%
-  distinct() %>%
-  #mutate(term = ifelse(month(date) %in% 6:10, "Summer", "Winter")) %>%
-  group_by(yr, location) %>%
-  mutate(nobs = length(doy)) %>%
-  #left_join(ice_off[c("year", "gl4_doy")], by = c("yr" = "year")) %>%
-  #filter(source == "McKnight") %>%
-  ggplot(aes(doy, yr)) +
-  geom_point(data= subset(GLV_ice_long, year > 1999 & lake == "Green4" & event == "clear"), aes(event_doy, year), col="dodgerblue", size = 2) +
-  geom_point(data= subset(GLV_ice_long, year > 1999 & lake == "Green4" & event == "break"), aes(event_doy, year), col="lightblue", size = 2) +
-  geom_path(aes(col=nobs, group=yr)) +
-  geom_point(aes(col=nobs), alpha=0.8) +
-  labs(y="Year", x="Day of year", title = "Dates sampled, by year and location for GL4") +
-  scale_x_continuous(labels = function(x) format(as.Date(as.character(x), "%j"), "%d-%b"),
-                     breaks = yday(c("2018-01-01", "2018-02-01", "2018-03-01", "2018-04-01",
-                                     "2018-05-01", "2018-06-01", "2018-07-01", "2018-08-01",
-                                     "2018-09-01", "2018-10-01", "2018-11-01", "2018-12-01"))) +
-  scale_y_continuous(breaks = seq(1980,2016,4)) +
-  scale_color_distiller(name = "# obs/yr", palette= "Set2", breaks=seq(0,15, 3)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle=45)) +
-  facet_grid(location~.)
-
-# plot first date sampled in lakes each year, just to see if trend overtime in timing
-GL4_WQ_long %>%
-  dplyr::select(yr, date, doy, location) %>%
-  distinct() %>%
-  #mutate(term = ifelse(month(date) %in% 6:10, "Summer", "Winter")) %>%
-  group_by(yr, location) %>%
-  filter(date == min(date)) %>%
-  ggplot(aes(yr,doy)) +
-  #geom_path(aes(col=nobs, group=yr)) +
-  geom_point(data= subset(GLV_ice_long, year > 1999 & event == "clear" & lake == "Green4"), aes(year, event_doy), col="dodgerblue", size = 2) +
-  geom_point(data= subset(GLV_ice_long, year > 1999 & event == "break" & lake == "Green4"), aes(year, event_doy), col="lightblue", size = 2) +
-  geom_point() +
-  geom_smooth(method = "lm", col="grey50") +
-  #geom_smooth(data= subset(GLV_ice_long, year > 1999 & event == "clear" & lake == "Green4"), aes(year, event_doy), col="dodgerblue", method="lm") +
-  labs(x="Year", y="Day of year", title = "Dates sampled, by year and location for GL4") +
-  scale_y_continuous(labels = function(x) format(as.Date(as.character(x), "%j"), "%d-%b"),
-                     breaks = yday(c("2018-06-01", "2018-06-15", "2018-07-01", "2018-07-15",
-                                     "2018-08-01", "2018-08-15", "2018-09-01"))) +
-  scale_x_continuous(breaks = seq(1980,2016,4)) +
-  #scale_color_distiller(name = "# obs/yr", palette= "Set2", breaks=seq(0,15, 3)) +
-  theme_bw() +
-  #theme(axis.text.x = element_text(angle=45)) +
-  facet_grid(location~.)
