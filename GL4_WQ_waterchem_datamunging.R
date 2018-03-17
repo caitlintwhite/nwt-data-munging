@@ -332,7 +332,7 @@ McKnight_long_alldepths %>% # all lake depths (when it could be determined)
   summarise(nobs = length(metric)) %>%
   ggplot() +
   geom_vline(aes(xintercept=0), col="dodgerblue2", lwd=1) +
-  geom_point(aes(depth, year, group=depth,  col=nobs, size= nobs/2), alpha=0.4) +
+  geom_point(aes(depth, year, group=depth,  col=nobs, size= nobs/4), alpha=0.4) +
   labs(y = "Year", x = "Lake depth (m)", 
        title = paste("4. Annual sampling frequency: Green Lake 4 water chemistry (PI: McKnight),", min(McKnight_long_alldepths$year), "-", max(McKnight_long_alldepths$year)),
        subtitle = "Points colored and sized by number of observations") +
@@ -360,12 +360,12 @@ GL4_waterchem %>% # core data: lake depths only at 0, 3 and 9m
   ggplot() +
   #geom_vline(aes(xintercept=0), col="dodgerblue2", lwd=1) +
   # "size=nobs/2" include in aesthetics for geom_point if want to size by observations
-  geom_point(aes(depth, year, group=depth,  fill=nobs), pch = 21, col = "black", alpha=0.5) +
+  geom_point(aes(depth, year, group=depth, fill=nobs, size = nobs/4), pch = 21, col = "gray50", alpha=0.5) +
   labs(y = "Year", x = "Lake depth (m)", 
        title = paste("5. Annual sampling frequency: Green Lake 4 water chemistry (PI: McKnight),", min(McKnight_long_alldepths$year), "-", max(McKnight_long_alldepths$year)),
        subtitle = "Core data only, points colored by number of observations") +
   scale_fill_distiller(palette = "PuBu", direction = 1) +
-  #scale_size_continuous(guide = "none") +
+  scale_size_continuous(guide = "none") +
   scale_x_reverse(breaks=seq(0, 9, 3)) +
   #scale_y_continuous(breaks=seq(1980, 2015, 5)) +
   theme_bw() +
@@ -424,12 +424,12 @@ GL4_WQ_long %>%
   ggplot() +
   #geom_vline(aes(xintercept=0), col="dodgerblue2", lwd=1) +
   # "size=nobs/2" add to aesthetics if want to size by nobs 
-  geom_point(aes(depth, yr, group=depth,  fill=nobs), pch = 21, col="black", alpha=0.4) +
+  geom_point(aes(depth, yr, group=depth, fill=nobs, size = nobs/4), pch = 21, col="gray50", alpha=0.4) +
   labs(y = "Year", x = "Lake depth (m)", 
        title = paste("7. Annual sampling frequency: Green Lake 4 water quality (PI: McKnight),", min(GL4_WQ_long$yr), "-", max(GL4_WQ_long$yr)),
        subtitle = "Points colored and sized by number of observations; secchi and light attenuation values recorded at 'air' ") +
   scale_fill_distiller(name = "# obs", palette = "PuBu", breaks=seq(2,12,2), direction = 1) +
-  #scale_size_continuous(guide = "none") +
+  scale_size_continuous(guide = "none") +
   scale_x_reverse(breaks=seq(0,12,3)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90)) +
