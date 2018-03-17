@@ -293,12 +293,12 @@ Caine_long %>%
   group_by(year, location, metric) %>%
   summarise(nobs = length(metric)) %>%
   ggplot() +
-  geom_col(aes(year, nobs, fill=location), width=0.7) +
+  geom_col(aes(year, nobs, fill=location), col="gray50", position = "identity", alpha=0.5) +
   labs(x = "Year", y = "Number of observations",
        title = paste("2. Sampling frequency per year: Green Lake 4 water chemistry (PI: Nel Caine),",
                      min(Caine_long$year), "-", max(Caine_long$year)),
        subtitle = "Samples collected below ice from lakes approx Nov - May; from lake outlet Jun - Oct, during 'summer' conditions") +
-  scale_fill_brewer(name = "Sampling\nlocation", palette = "Paired") +
+  scale_fill_brewer(name = "Sampling\nlocation", palette = "Set2") +
   scale_x_continuous(breaks=seq(1980, 2015, 5)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90)) +
@@ -312,10 +312,10 @@ GL4_waterchem %>%
   summarise(nobs = length(metric)) %>%
   mutate(grouping = factor(paste(source, location, sep="_"), levels = c("Caine_Outlet", "McKnight_Outlet", "McKnight_Inlet"))) %>%
   ggplot() +
-  geom_col(aes(year, nobs, fill=grouping), width=0.7) +
+  geom_area(aes(year, nobs, fill=grouping), col = "gray50", position = "identity", alpha=0.4) +
   labs(x = "Year", y = "Number of observations",
-       title = paste("3. Annual sampling frequency: Green Lake 4 water chemistry", min(GL4_waterchem$year), "-", max(GL4_waterchem$year)),
-       subtitle = "Bars stacked to show total number of observations per year, segments colored by data source") +
+       title = paste("3. Annual sampling frequency: Green Lake 4 water chemistry", min(GL4_waterchem$year), "-", max(GL4_waterchem$year))) +
+       #subtitle = "Bars stacked to show total number of observations per year, segments colored by data source") +
   scale_fill_brewer(name = "Data source", palette="Paired") +
   scale_x_continuous(breaks=seq(1980, 2015, 5)) +
   theme_minimal() +
@@ -332,7 +332,7 @@ McKnight_long_alldepths %>% # all lake depths (when it could be determined)
   summarise(nobs = length(metric)) %>%
   ggplot() +
   geom_vline(aes(xintercept=0), col="dodgerblue2", lwd=1) +
-  geom_point(aes(depth, year, group=depth,  col=nobs, size= nobs/4), alpha=0.4) +
+  geom_point(aes(depth, year, group=depth,  col=nobs, size = nobs/4), alpha=0.4) +
   labs(y = "Year", x = "Lake depth (m)", 
        title = paste("4. Annual sampling frequency: Green Lake 4 water chemistry (PI: McKnight),", min(McKnight_long_alldepths$year), "-", max(McKnight_long_alldepths$year)),
        subtitle = "Points colored and sized by number of observations") +
@@ -360,15 +360,15 @@ GL4_waterchem %>% # core data: lake depths only at 0, 3 and 9m
   ggplot() +
   #geom_vline(aes(xintercept=0), col="dodgerblue2", lwd=1) +
   # "size=nobs/2" include in aesthetics for geom_point if want to size by observations
-  geom_point(aes(depth, year, group=depth, fill=nobs, size = nobs/4), pch = 21, col = "gray50", alpha=0.5) +
+  geom_point(aes(depth, year, group=depth, fill=nobs), size=2, pch = 21, col = "gray50", alpha=0.5) +
   labs(y = "Year", x = "Lake depth (m)", 
        title = paste("5. Annual sampling frequency: Green Lake 4 water chemistry (PI: McKnight),", min(McKnight_long_alldepths$year), "-", max(McKnight_long_alldepths$year)),
        subtitle = "Core data only, points colored by number of observations") +
   scale_fill_distiller(palette = "PuBu", direction = 1) +
-  scale_size_continuous(guide = "none") +
+  #scale_size_continuous(guide = "none") +
   scale_x_reverse(breaks=seq(0, 9, 3)) +
   #scale_y_continuous(breaks=seq(1980, 2015, 5)) +
-  theme_bw() +
+  theme_minimal() +
   theme(axis.text.x = element_text(angle = 90)) +
   coord_flip() +
   facet_wrap(~metric)
