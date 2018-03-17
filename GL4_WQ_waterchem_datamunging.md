@@ -1,7 +1,7 @@
 Water quality and chemistry data munging for Green Lake 4
 ================
 CTW
-2018-03-14
+2018-03-17
 
 Script purpose
 --------------
@@ -246,9 +246,13 @@ Showing the ice phenology data availability via raw data values is easy because 
 
 ![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/data%20availablity%20for%20water%20chem-1.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/data%20availablity%20for%20water%20chem-2.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/data%20availablity%20for%20water%20chem-3.png)
 
+This figure shows just the "core" depths (0, 3 and 9). Symobology and coloring adjusted per CR's suggestion (compare with symbology in Fig. 4).
+
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/McKnight%20lake%20chemistry%20core-1.png)
+
 **Green Lake 4 water quality data availability**
 
-**QA note**: There really are that many samples for outlet chlorophyll-a in 2007.
+**QA note**: There really are that many samples for outlet chlorophyll-a in 2007. Chris Ray suggests remaking this as broken plot (see example here: <https://joergsteinkamp.wordpress.com/2016/01/22/broken-axis-with-ggplot2/>). If do this, will need to add code to automate detecting outliers and breaking y-axis as necessary.
 
 ![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/water%20quality%20data%20availability-1.png)
 
