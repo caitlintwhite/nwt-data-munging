@@ -550,61 +550,64 @@ ggplot(subset(GL4_waterchem, location == "Outlet")) +
   geom_point(aes(date, value, col=source), pch= 1, alpha=0.5) +
   labs(x="Date", y ="Value", title = "11. GL4 water chemistry samples from outlet") +
   theme_light() +
-  scale_color_manual(values = c("firebrick2", "dodgerblue2")) +
   theme(axis.text.x = element_text(angle=90)) +
   facet_wrap(~metric, scales = "free_y")
+
+# How many samples are there by month?
+GL4_waterchem %>%
+  mutate(mon = month(date, label = TRUE, abbr=TRUE)) %>%
+  filter(location == "Outlet") %>%
+  ggplot() +
+  geom_boxplot(aes(mon, value, group=mon), col="gray50") +
+  geom_point(aes(mon, value, col=source), alpha=0.2) +
+  labs(x="Month", y = "Value", 
+       title = "12. GL4 water chemistry values, by month, from outlet") +
+  #scale_color_discrete(name = "Source", palette = "Set2")
+  theme_minimal() +
+  theme(axis.text.x = element_text(size=8, angle=90)) +
+  facet_wrap(~metric, scales = "free_y")
+
 
 ggplot(subset(GL4_waterchem, location == "Lake" & depth == 0)) +
   geom_point(aes(date, value, col=source), alpha=0.3) +
-  labs(x="Date", y ="Value", title = "12. GL4 water chemistry samples from lake surface") +
-  scale_color_manual(values = c("firebrick2", "dodgerblue2")) +
+  labs(x="Date", y ="Value", 
+       title = "13. GL4 water chemistry samples from lake surface") +
   theme_light() +
   theme(axis.text.x = element_text(angle=90)) +
   facet_wrap(~metric, scales = "free_y")
-  
 
-#+ r, eval=FALSE, echo = FALSE
-# What is temporal frequency of data by measurement and site?
-ggplot(GL4_waterchem, aes(date, value, col=source)) + 
-         geom_point(alpha=0.3) +
-  #geom_errorbar(aes(ymin = value - sd_value, ymax = value + sd_value), alpha=0.3) +
-  labs(title = "Data availability at GL4, by dataset source and lake depth ('NA' refers to Outlet samples)") +
-  theme_light() +
-  facet_grid(metric~depth, scales = "free_y") +
-  theme(strip.text.y = element_text(angle=360))
+GL4_waterchem %>%
+  mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
+  filter(location == "Lake") %>%
+  ggplot() +
+  geom_point(aes(mon, value, fill=depth), col="gray90", pch=21, alpha = 0.4) +
+  scale_fill_distiller(name = "Depth (m)", palette= "PuBu", direction = -1, trans = "reverse") +
+  labs(x="Month", y="Value", 
+       title= "14. GL4 lake water chemistry by month, colored by lake depth where collected",
+       subtitle = "Lake samples collected Nov-May by N. Caine, Jun-Sep by D. McKnight") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 7, angle=90)) +
+  facet_wrap(~metric, scales = "free_y")  
 
+GL4_waterchem %>%
+  mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
+  filter(location == "Lake") %>%
+  ggplot() +
+  geom_boxplot(aes(mon, value, group=mon), col="gray50") +
+  geom_point(aes(mon, value, col=year), alpha = 0.3) +
+  scale_color_distiller(palette= "BrBG", direction = 1) +
+  labs(x="Month", y="Value", 
+       title= "15. Alternate version: GL4 lake water chemistry by month, colored by year") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 7, angle=90)) +
+  facet_wrap(~metric, scales = "free_y")
 
-# What are characteristics of each site/depth and measurement through time?
-ggplot(subset(McKnight_long, doy %in% 100:300), aes(doy, value)) + 
-  geom_point(aes(col=year), alpha=0.3) +
-  #geom_errorbar(aes(ymin = value - sd_value, ymax = value + sd_value), alpha=0.3) +
-  labs(title = "McKnight water chemistry measurements, by day of year and metric") +
-  scale_color_distiller(palette="PuBu") +
-  theme_light() +
-  facet_grid(metric~location*depth, scales = "free_y") +
-  theme(strip.text.y = element_text(angle=360))
-
-# Did errorbars add correctly? Yes!
-ggplot(subset(test2, metric %in% c("d18O", "dDeut", "Trit")), aes(doy, value)) + 
-  geom_point(aes(col=as.factor(year)), alpha=0.4) +
-  geom_errorbar(aes(ymin = value - sd_value, ymax = value + sd_value, col=as.factor(year)), alpha=0.3) +
-  theme_light() +
-  facet_grid(local_site~metric, scales = "free_y")
 
 #' ## Data summary
 #' 
+#' Below are some summary figures. See CTW for an interactive NO3 time series figure (HTML does not render well in GitHub).
 
 #+ Summarize GL4 outlet data, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.heigh = 6
-# How many samples are there by month?
-GL4_waterchem %>%
-  mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
-  filter(location == "Outlet") %>%
-  ggplot() +
-  geom_point(aes(mon, value, col=source), alpha=0.4) +
-  ggtitle("GL4 outlet water chemistry value by month") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle=90)) +
-  facet_wrap(~metric, scales = "free_y")
 
 GL4_waterchem %>%
   mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
@@ -616,21 +619,12 @@ GL4_waterchem %>%
   ggplot() +
   geom_errorbar(aes(mon, ymax = mean_value +se, ymin = mean_value-se, col=source), width = 0.25, alpha=0.7) +
   geom_point(aes(mon, mean_value, col=source), alpha=0.4) +
-  ggtitle("GL4 outlet water chemistry mean values (+/- 1se) by month") +
+  ggtitle("16. GL4 outlet water chemistry mean values (+/- 1se) by month") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle=90)) +
+  theme(axis.text.x = element_text(size = 7, angle=90)) +
   facet_wrap(~metric, scales = "free_y")
 
-GL4_waterchem %>%
-  mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
-  filter(location == "Lake") %>%
-  ggplot() +
-  geom_point(aes(mon, value, col=year), alpha = 0.4) +
-  scale_color_distiller(palette= "BrBG") +
-  ggtitle("GL4 lake water chemistry by month, colored by year") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle=90)) +
-  facet_wrap(~metric, scales = "free_y")
+
 
 GL4_waterchem %>%
   mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
@@ -645,9 +639,9 @@ GL4_waterchem %>%
   scale_fill_brewer(name="Depth", palette= "PuBu", direction = 1) +
   scale_color_brewer(name= "Depth", palette= "PuBu", direction = 1) +
   labs(y = "Mean value", x = "Month", 
-       title = paste("Green Lake 4 water chemistry mean values (+/- 1 se)", min(GL4_waterchem$year), "-", max(GL4_waterchem$year)))+
+       title = paste("17. Green Lake 4 water chemistry mean values (+/- 1 se)", min(GL4_waterchem$year), "-", max(GL4_waterchem$year)))+
   theme_minimal() +
-  theme(axis.text.x = element_text(angle=90)) +
+  theme(axis.text.x = element_text(size = 7, angle=90)) +
   facet_wrap(~metric, scales = "free_y")
 
 
@@ -658,9 +652,9 @@ GL4_WQ_long %>%
   geom_boxplot(aes(mon, value, group= mon), col= "gray50", alpha=0.4) +
   geom_point(aes(mon, value, fill= yr), col= "gray50", pch=21, alpha=0.4) +
   scale_fill_distiller(palette = "BrBG", direction = 1) +
-  ggtitle("GL4 water quality by month at inlet and outlet, colored by year") +
+  ggtitle("18. GL4 water quality by month at inlet and outlet, colored by year") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle= 90)) +
+  theme(axis.text.x = element_text(size = 7, angle= 90)) +
   facet_wrap(location~metric, scales = "free_y", ncol=8)
 
 GL4_WQ_long %>%
@@ -676,9 +670,9 @@ GL4_WQ_long %>%
   geom_errorbar(aes(mon, ymax = mean_value +se, ymin = mean_value-se, col=as.factor(depth)), width = 0.25, alpha=0.7, position = position_dodge(width=0.2)) +
   scale_color_brewer(name= "Depth (m)", palette = "PuBu", direction = 1) +
   scale_fill_brewer(name= "Depth (m)", palette = "PuBu", direction = 1) +
-  ggtitle("GL4 water quality mean values (+/- 1se), colored by lake depth") +
+  ggtitle("19. GL4 water quality mean values (+/- 1se), colored by lake depth") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle= 90)) +
+  theme(axis.text.x = element_text(size = 7, angle= 90)) +
   facet_wrap(~metric, scales = "free_y")
 
 #+ NO3 only, test interactive ts plot with dygraph, echo = FALSE, eval =FALSE

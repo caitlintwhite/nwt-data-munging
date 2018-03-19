@@ -281,9 +281,11 @@ Because of overlap in analytes, sites and location within sites, it would be gre
 
 The outlet samples were collected by both groups in the summer months (Jun - Oct). The Caine lake samples are ones collected from just below the ice in winter months (Nov - May), whereas the McKnight lake samples were only collected in summer and at various depths (see above).
 
-![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-1.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-2.png)
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-1.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-2.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-3.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-4.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-5.png)
 
 Data summary
 ------------
 
-![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-1.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-2.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-3.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-4.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-5.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-6.png)
+Below are some summary figures. See CTW for an interactive NO3 time series figure (HTML does not render well in GitHub).
+
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-1.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-2.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-3.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-4.png)
