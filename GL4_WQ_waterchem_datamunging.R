@@ -594,13 +594,14 @@ ggplot(subset(test2, metric %in% c("d18O", "dDeut", "Trit")), aes(doy, value)) +
 #' ## Data summary
 #' 
 
-#+ Summarize GL4 outlet data
+#+ Summarize GL4 outlet data, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.heigh = 6
 # How many samples are there by month?
 GL4_waterchem %>%
   mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
   filter(location == "Outlet") %>%
   ggplot() +
   geom_point(aes(mon, value, col=source), alpha=0.4) +
+  ggtitle("GL4 outlet water chemistry value by month") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle=90)) +
   facet_wrap(~metric, scales = "free_y")
@@ -615,6 +616,7 @@ GL4_waterchem %>%
   ggplot() +
   geom_errorbar(aes(mon, ymax = mean_value +se, ymin = mean_value-se, col=source), width = 0.25, alpha=0.7) +
   geom_point(aes(mon, mean_value, col=source), alpha=0.4) +
+  ggtitle("GL4 outlet water chemistry mean values (+/- 1se) by month") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle=90)) +
   facet_wrap(~metric, scales = "free_y")
@@ -625,6 +627,7 @@ GL4_waterchem %>%
   ggplot() +
   geom_point(aes(mon, value, col=year), alpha = 0.4) +
   scale_color_distiller(palette= "BrBG") +
+  ggtitle("GL4 lake water chemistry by month, colored by year") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle=90)) +
   facet_wrap(~metric, scales = "free_y")
@@ -642,7 +645,7 @@ GL4_waterchem %>%
   scale_fill_brewer(name="Depth", palette= "PuBu", direction = 1) +
   scale_color_brewer(name= "Depth", palette= "PuBu", direction = 1) +
   labs(y = "Mean value", x = "Month", 
-       title = paste("Green Lake 4 water chemistry", min(GL4_waterchem$year), "-", max(GL4_waterchem$year)))+
+       title = paste("Green Lake 4 water chemistry mean values (+/- 1 se)", min(GL4_waterchem$year), "-", max(GL4_waterchem$year)))+
   theme_minimal() +
   theme(axis.text.x = element_text(angle=90)) +
   facet_wrap(~metric, scales = "free_y")
@@ -655,6 +658,7 @@ GL4_WQ_long %>%
   geom_boxplot(aes(mon, value, group= mon), col= "gray50", alpha=0.4) +
   geom_point(aes(mon, value, fill= yr), col= "gray50", pch=21, alpha=0.4) +
   scale_fill_distiller(palette = "BrBG", direction = 1) +
+  ggtitle("GL4 water quality by month at inlet and outlet, colored by year") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle= 90)) +
   facet_wrap(location~metric, scales = "free_y", ncol=8)
@@ -670,8 +674,28 @@ GL4_WQ_long %>%
   ggplot() +
   geom_point(aes(mon, mean_value, fill=as.factor(depth)), col="gray50", pch=21, position = position_dodge(width=0.2), alpha=0.7) +
   geom_errorbar(aes(mon, ymax = mean_value +se, ymin = mean_value-se, col=as.factor(depth)), width = 0.25, alpha=0.7, position = position_dodge(width=0.2)) +
-  scale_color_brewer(name= "Depth", palette = "PuBu", direction = 1) +
-  scale_fill_brewer(name= "Depth", palette = "PuBu", direction = 1) +
+  scale_color_brewer(name= "Depth (m)", palette = "PuBu", direction = 1) +
+  scale_fill_brewer(name= "Depth (m)", palette = "PuBu", direction = 1) +
+  ggtitle("GL4 water quality mean values (+/- 1se), colored by lake depth") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle= 90)) +
   facet_wrap(~metric, scales = "free_y")
+
+#+ NO3 only, test interactive ts plot with dygraph, echo = FALSE, eval =FALSE
+library(dygraphs)
+library(xts)
+
+NO3 <- GL4_waterchem %>%
+  subset(metric == "NO3-" & location == "Outlet") %>%
+  dplyr::select(year, date, time, metric, value, source) %>%
+  group_by(year, date, source) %>%
+  summarise(value = mean(value)) %>%
+  spread(source, value) %>%
+  as.data.frame()
+
+Caine_NO3 <- xts(NO3$Caine, order.by=NO3$date)
+McKnight_NO3 <- xts(NO3$McKnight, order.by=NO3$date)
+NO3_ts <- cbind(Caine_NO3, McKnight_NO3)
+dygraph(NO3_ts, main = "NO3 concentration at GL4 outlet, 1981-2016") %>% 
+  dyOptions(drawPoints = TRUE, fillGraph = TRUE) %>%
+  dyRangeSelector()
