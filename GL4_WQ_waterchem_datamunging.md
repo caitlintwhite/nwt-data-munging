@@ -1,7 +1,7 @@
 Water quality and chemistry data munging for Green Lake 4
 ================
 CTW
-2018-03-17
+2018-03-18
 
 Script purpose
 --------------
@@ -282,3 +282,116 @@ Because of overlap in analytes, sites and location within sites, it would be gre
 The outlet samples were collected by both groups in the summer months (Jun - Oct). The Caine lake samples are ones collected from just below the ice in winter months (Nov - May), whereas the McKnight lake samples were only collected in summer and at various depths (see above).
 
 ![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-1.png)![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/plot%20actual%20data%20values-2.png)
+
+Data summary
+------------
+
+``` r
+# How many samples are there by month?
+GL4_waterchem %>%
+  mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
+  filter(location == "Outlet") %>%
+  ggplot() +
+  geom_point(aes(mon, value, col=source), alpha=0.4) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=90)) +
+  facet_wrap(~metric, scales = "free_y")
+```
+
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-1.png)
+
+``` r
+GL4_waterchem %>%
+  mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
+  filter(location == "Outlet") %>%
+  group_by(mon, metric, source) %>%
+  summarise(mean_value = mean(value, na.rm=TRUE), 
+            se = sd(value, na.rm=TRUE)/sqrt(length(value)),
+            nobs = length(value)) %>%
+  ggplot() +
+  geom_errorbar(aes(mon, ymax = mean_value +se, ymin = mean_value-se, col=source), width = 0.25, alpha=0.7) +
+  geom_point(aes(mon, mean_value, col=source), alpha=0.4) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=90)) +
+  facet_wrap(~metric, scales = "free_y")
+```
+
+    ## Warning: Removed 29 rows containing missing values (geom_errorbar).
+
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-2.png)
+
+``` r
+GL4_waterchem %>%
+  mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
+  filter(location == "Lake") %>%
+  ggplot() +
+  geom_point(aes(mon, value, col=year), alpha = 0.4) +
+  scale_color_distiller(palette= "BrBG") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=90)) +
+  facet_wrap(~metric, scales = "free_y")
+```
+
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-3.png)
+
+``` r
+GL4_waterchem %>%
+  mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
+  filter(location == "Lake") %>%
+  group_by(mon, depth, metric) %>%
+  summarise(mean_value = mean(value, na.rm=TRUE), 
+            se = sd(value, na.rm=TRUE)/sqrt(length(value)),
+            nobs = length(value)) %>%
+  ggplot() +
+  geom_errorbar(aes(mon, ymax=mean_value+se, ymin=mean_value-se, col=as.factor(depth)), width=0.25) +
+  geom_point(aes(mon, mean_value, fill=as.factor(depth)), col="gray50", pch=21, alpha = 0.4) +
+  scale_fill_brewer(name="Depth", palette= "PuBu", direction = 1) +
+  scale_color_brewer(name= "Depth", palette= "PuBu", direction = 1) +
+  labs(y = "Mean value", x = "Month", 
+       title = paste("Green Lake 4 water chemistry", min(GL4_waterchem$year), "-", max(GL4_waterchem$year)))+
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=90)) +
+  facet_wrap(~metric, scales = "free_y")
+```
+
+    ## Warning: Removed 83 rows containing missing values (geom_errorbar).
+
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-4.png)
+
+``` r
+GL4_WQ_long %>%
+  mutate(mon = month(date, label = TRUE, abbr = TRUE)) %>%
+  filter(location !="Lake") %>%
+  ggplot() +
+  geom_boxplot(aes(mon, value, group= mon), col= "gray50", alpha=0.4) +
+  geom_point(aes(mon, value, fill= yr), col= "gray50", pch=21, alpha=0.4) +
+  scale_fill_distiller(palette = "BrBG", direction = 1) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle= 90)) +
+  facet_wrap(location~metric, scales = "free_y", ncol=8)
+```
+
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-5.png)
+
+``` r
+GL4_WQ_long %>%
+  mutate(mon = month(date, label = TRUE, abbr = TRUE)) %>%
+  mutate(core_depth = ifelse(depth %in% 0:0.9, 0, depth)) %>%
+  filter(location == "Lake" & core_depth %in% c(0, 3, 9)) %>%
+  group_by(mon, metric, depth) %>%
+  summarise(mean_value = mean(value, na.rm=TRUE), 
+            se = sd(value, na.rm=TRUE)/sqrt(length(value)),
+            nobs = length(value)) %>%
+  ggplot() +
+  geom_point(aes(mon, mean_value, fill=as.factor(depth)), col="gray50", pch=21, position = position_dodge(width=0.2), alpha=0.7) +
+  geom_errorbar(aes(mon, ymax = mean_value +se, ymin = mean_value-se, col=as.factor(depth)), width = 0.25, alpha=0.7, position = position_dodge(width=0.2)) +
+  scale_color_brewer(name= "Depth", palette = "PuBu", direction = 1) +
+  scale_fill_brewer(name= "Depth", palette = "PuBu", direction = 1) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle= 90)) +
+  facet_wrap(~metric, scales = "free_y")
+```
+
+    ## Warning: Removed 29 rows containing missing values (geom_errorbar).
+
+![](GL4_WQ_waterchem_datamunging_files/figure-markdown_github/Summarize%20GL4%20outlet%20data-6.png)

@@ -293,7 +293,7 @@ Caine_long %>%
   group_by(year, location, metric) %>%
   summarise(nobs = length(metric)) %>%
   ggplot() +
-  geom_col(aes(year, nobs, fill=location), col="gray50", position = "identity", alpha=0.5) +
+  geom_col(aes(year, nobs, fill=location), col="gray50", position = "identity", alpha=0.3) +
   labs(x = "Year", y = "Number of observations",
        title = paste("2. Sampling frequency per year: Green Lake 4 water chemistry (PI: Nel Caine),",
                      min(Caine_long$year), "-", max(Caine_long$year)),
@@ -313,10 +313,13 @@ GL4_waterchem %>%
   mutate(grouping = factor(paste(source, location, sep="_"), levels = c("Caine_Outlet", "McKnight_Outlet", "McKnight_Inlet"))) %>%
   ggplot() +
   geom_area(aes(year, nobs, fill=grouping), col = "gray50", position = "identity", alpha=0.4) +
+  #geom_line(aes(year, nobs, col=grouping), alpha=0.7) +
+  #geom_point(aes(year, nobs, col=grouping), alpha=0.7) +
   labs(x = "Year", y = "Number of observations",
        title = paste("3. Annual sampling frequency: Green Lake 4 water chemistry", min(GL4_waterchem$year), "-", max(GL4_waterchem$year))) +
        #subtitle = "Bars stacked to show total number of observations per year, segments colored by data source") +
   scale_fill_brewer(name = "Data source", palette="Paired") +
+  scale_color_brewer(name = "Data source", palette="Paired") +
   scale_x_continuous(breaks=seq(1980, 2015, 5)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90)) +
@@ -588,4 +591,87 @@ ggplot(subset(test2, metric %in% c("d18O", "dDeut", "Trit")), aes(doy, value)) +
   theme_light() +
   facet_grid(local_site~metric, scales = "free_y")
 
+#' ## Data summary
+#' 
 
+#+ Summarize GL4 outlet data
+# How many samples are there by month?
+GL4_waterchem %>%
+  mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
+  filter(location == "Outlet") %>%
+  ggplot() +
+  geom_point(aes(mon, value, col=source), alpha=0.4) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=90)) +
+  facet_wrap(~metric, scales = "free_y")
+
+GL4_waterchem %>%
+  mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
+  filter(location == "Outlet") %>%
+  group_by(mon, metric, source) %>%
+  summarise(mean_value = mean(value, na.rm=TRUE), 
+            se = sd(value, na.rm=TRUE)/sqrt(length(value)),
+            nobs = length(value)) %>%
+  ggplot() +
+  geom_errorbar(aes(mon, ymax = mean_value +se, ymin = mean_value-se, col=source), width = 0.25, alpha=0.7) +
+  geom_point(aes(mon, mean_value, col=source), alpha=0.4) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=90)) +
+  facet_wrap(~metric, scales = "free_y")
+
+GL4_waterchem %>%
+  mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
+  filter(location == "Lake") %>%
+  ggplot() +
+  geom_point(aes(mon, value, col=year), alpha = 0.4) +
+  scale_color_distiller(palette= "BrBG") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=90)) +
+  facet_wrap(~metric, scales = "free_y")
+
+GL4_waterchem %>%
+  mutate(mon = month(date, label=TRUE, abbr = TRUE)) %>%
+  filter(location == "Lake") %>%
+  group_by(mon, depth, metric) %>%
+  summarise(mean_value = mean(value, na.rm=TRUE), 
+            se = sd(value, na.rm=TRUE)/sqrt(length(value)),
+            nobs = length(value)) %>%
+  ggplot() +
+  geom_errorbar(aes(mon, ymax=mean_value+se, ymin=mean_value-se, col=as.factor(depth)), width=0.25) +
+  geom_point(aes(mon, mean_value, fill=as.factor(depth)), col="gray50", pch=21, alpha = 0.4) +
+  scale_fill_brewer(name="Depth", palette= "PuBu", direction = 1) +
+  scale_color_brewer(name= "Depth", palette= "PuBu", direction = 1) +
+  labs(y = "Mean value", x = "Month", 
+       title = paste("Green Lake 4 water chemistry", min(GL4_waterchem$year), "-", max(GL4_waterchem$year)))+
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=90)) +
+  facet_wrap(~metric, scales = "free_y")
+
+
+GL4_WQ_long %>%
+  mutate(mon = month(date, label = TRUE, abbr = TRUE)) %>%
+  filter(location !="Lake") %>%
+  ggplot() +
+  geom_boxplot(aes(mon, value, group= mon), col= "gray50", alpha=0.4) +
+  geom_point(aes(mon, value, fill= yr), col= "gray50", pch=21, alpha=0.4) +
+  scale_fill_distiller(palette = "BrBG", direction = 1) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle= 90)) +
+  facet_wrap(location~metric, scales = "free_y", ncol=8)
+
+GL4_WQ_long %>%
+  mutate(mon = month(date, label = TRUE, abbr = TRUE)) %>%
+  mutate(core_depth = ifelse(depth %in% 0:0.9, 0, depth)) %>%
+  filter(location == "Lake" & core_depth %in% c(0, 3, 9)) %>%
+  group_by(mon, metric, depth) %>%
+  summarise(mean_value = mean(value, na.rm=TRUE), 
+            se = sd(value, na.rm=TRUE)/sqrt(length(value)),
+            nobs = length(value)) %>%
+  ggplot() +
+  geom_point(aes(mon, mean_value, fill=as.factor(depth)), col="gray50", pch=21, position = position_dodge(width=0.2), alpha=0.7) +
+  geom_errorbar(aes(mon, ymax = mean_value +se, ymin = mean_value-se, col=as.factor(depth)), width = 0.25, alpha=0.7, position = position_dodge(width=0.2)) +
+  scale_color_brewer(name= "Depth", palette = "PuBu", direction = 1) +
+  scale_fill_brewer(name= "Depth", palette = "PuBu", direction = 1) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle= 90)) +
+  facet_wrap(~metric, scales = "free_y")
