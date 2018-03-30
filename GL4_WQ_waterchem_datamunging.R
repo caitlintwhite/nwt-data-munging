@@ -269,6 +269,25 @@ GL4_waterchem <- rbind(Caine_long, McKnight_long)
 #' **All lakes ice phenology**
 
 #+ plot data availability, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 6
+
+# test heat map for data availability
+test <- GLV_ice_long %>%
+  dplyr::select(year, lake, event_date) %>%
+  unique() %>%
+  na.omit() %>% # no NAs
+  group_by(year, lake) %>%
+  summarise(nobs = length(event_date)) %>%
+  mutate(lake = factor(lake, levels = c("Silver", "Albion", "Green1",
+                                        "Green2", "Green3", "Green4",
+                                        "Green5", "Arikaree")))
+
+ggplot(test, aes(year, lake, fill=nobs)) + 
+  geom_tile(col="white") +
+  scale_fill_distiller(palette="OrRd", direction = 1) +
+  scale_x_continuous(expand = c(0, 0), breaks = seq(1980, 2017, 5)) + 
+  scale_y_discrete(expand = c(0,0)) +
+  theme_classic()
+
 # ice phenology dataset--
 GLV_ice_long %>%
   mutate(lake = factor(lake, levels = c("Silver", "Albion", "Green1",
@@ -498,6 +517,19 @@ GL4_WQ_long %>%
   theme_minimal() +
   theme(axis.text.x = element_text(angle=45, vjust=0.75, hjust=0.85)) +
   facet_grid(location~.)
+
+# alterative heat map
+GL4_waterchem %>%
+  dplyr::select(year, date, location) %>%
+  unique() %>%
+  group_by(year, location) %>%
+  summarise(nobs = length(date)) %>%
+  ggplot(aes(year, location, fill=nobs)) +
+  geom_tile(col="grey50") +
+  scale_x_continuous(expand = c(0,0), breaks=seq(1980, 2017, 5)) +
+  scale_y_discrete(expand = c(0,0)) +
+  scale_fill_distiller(palette= "OrRd", direction = 1) +
+  theme_classic()
 
 #' **QA note**: Plotting ice off with summer lake sampling date (above), I noticed a slight trend in delay of lake sampling over time. A delayed ice off trend wasn't what I remembered from the NWT renewal/the Preston et al. 2016 paper, and so I plotted first sample, ice break and ice off by year. 
 #' Since lake sampling started in 1998, there is a significant trend in lake first sampling date with time (ice break and ice off no). 
