@@ -1,6 +1,26 @@
-# All lakes and stream data
+#'---
+#' title: "NWT data munging: All lakes and stream data"
+#' author: CTW
+#' date: "`r format(Sys.Date())`"
+#' output: github_document
+#'---
+#'
+#' ## Script purpose
+#' Summarize data availability and test temporal trends figures for a "core" aquatic dataset (primarily focused on Green Lake 4).
+#' See GL4_WQ_waterchem_datamunging.md in this GitHub repository for preliminary data munging steps.
+#' This script reads in and combines all aquatic-related datasets (13 total) from the NWT data portal that are currently featured as "signature" datasets on the website:
+#'
+#' * Lake water quality (1)
+#' * Green Lake 4 phytoplankton (1)
+#' * Lake and stream water chemistry (8)
+#' * Stream discharge (3)
 
-# load needed libraries
+
+# -----------------
+#+ script setup, echo = FALSE, message = FALSE, warning = FALSE, include = FALSE
+# "include = FALSE" hides figures
+
+#load needed libraries
 library(tidyverse)
 library(lubridate)
 
@@ -127,34 +147,56 @@ flow_MAR <- read_csv("http://niwot.colorado.edu/data_csvs/mardisch.nc.data.csv",
                      trim_ws = TRUE)
 
 # assign locations
-flow_ALB$site <- "Albion_outlet"
-flow_GL4$site <- "GL4_outlet"
-flow_MAR$site <- "Martinelli_outlet"
+flow_ALB$site <- "ALBION"
+flow_GL4$site <- "GREEN LAKE 4"
+flow_MAR$site <- "MARTINELLI"
+
 # row-bind all together for master discharge dataset
 flow_NWT <- rbind(flow_ALB, flow_GL4, flow_MAR)  
+flow_NWT$location <- "Outlet"
+flow_NWT$ID <- paste(flow_NWT$site, flow_NWT$location)
+flow_NWT$ID <- factor(flow_NWT$ID, levels = c("ALBION Outlet", "MARTINELLI Outlet", "GREEN LAKE 4 Outlet"))
 
 #ggplot(flow_NWT, aes(date, log(discharge), col=site)) + geom_point(na.rm=TRUE, alpha=0.5) + theme_minimal() + theme(legend.position = "none")
 
+#------------------
+#' ## Data availability
+#' 
+#+ data availability figures, echo = FALSE, warning = FALSE, message =FALSE, fig.width = 8, fig.height = 6
+
 # heat map of flow data
 filter(flow_NWT, !is.na(discharge)) %>%
-  mutate(yr = year(date)) %>%
-  group_by(yr, site) %>%
+  mutate(yr = year(date),
+         ID = gsub(" O", "\nO", ID), 
+         ID = factor(ID, levels = c("ALBION\nOutlet","MARTINELLI\nOutlet", "GREEN LAKE 4\nOutlet"))) %>%
+  group_by(yr, site, location, ID) %>%
   summarise(nobs = length(date)) %>%
   ggplot() +
-  geom_tile(aes(yr, site, fill=nobs), col="grey50") +
-  scale_fill_distiller(palette = "PuBu", direction = 1) +
-  theme_minimal()
+  geom_tile(aes(yr, ID, fill=nobs), col="grey50") +
+  scale_fill_distiller(name = "# days", palette = "PuBu", direction = 1) +
+  scale_x_continuous(breaks = seq(1980, 2017, 4), expand = c(0,0)) +
+  scale_y_discrete(expand = c(0,0)) +
+  labs(x = "Year", y = "Sampling location\n(by elevation, lowest to highest)",
+       title = paste("1. NWT LTER daily stream discharge: data availability,", min(year(flow_NWT$date)), "-", max(year(flow_NWT$date))),
+       subtitle = "Colored by number of days per year with discharge data") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle=45, hjust=1))
 
 filter(flow_NWT, !is.na(discharge)) %>%
   mutate(yr = year(date)) %>%
-  group_by(yr, site) %>%
+  group_by(yr, site, location, ID) %>%
   summarise(nobs = length(date)) %>%
   ggplot() +
   geom_point(aes(yr, nobs), col="blue") +
   geom_line(aes(yr, nobs)) +
-  #scale_fill_distiller(palette = "PuBuGn", direction = 1) +
-  theme_minimal() +
-  facet_grid(.~site)
+  scale_y_continuous(breaks = seq(0, 365, 50)) +
+  scale_x_continuous(breaks = seq(1980, 2016, 4)) +
+  labs(x="Year", y = "Total days with discharge data",
+       title = paste("2. Alternative plot: NWT stream discharge data availability,", min(year(flow_NWT$date)), "-", max(year(flow_NWT$date))),
+       subtitle = "Arrayed by sampling location (lowest elevation to highest elevation)") +
+  theme_linedraw() +
+  theme(axis.text.x = element_text(angle=45, hjust=1)) +
+  facet_grid(.~ID)
 
 # put everything together minus discharge
 nwt_aquatic <- rbind(phytodat, wqdat, NWT_waterchem) %>% 
@@ -175,23 +217,33 @@ nwt_aquatic %>%
   ggplot(aes(yr, ID, fill=nobs)) + 
   geom_tile(col="grey50") +
   scale_fill_distiller(name="# days", palette= "Blues", direction = 1) +
-  labs(x="Year", y="Sampling location",
-       title = "NWT LTER aquatic data availability: annual sampling frequency, 1981 - 2017",
+  scale_x_continuous(expand = c(0,0), breaks = seq(1980, 2016,4)) +
+  scale_y_discrete(expand = c(0,0)) +
+  labs(x="Year", y="Sampling location (by elevation, highest to lowest)",
+       title = "3. NWT LTER aquatic data availability: annual sampling frequency, 1981 - 2017",
        subtitle = "Colored by total number of dates sampled per year") +
-  theme_minimal()
+  theme_classic() +
+  theme(axis.text.x = element_text(angle=45, hjust=1),
+        plot.title = element_text(size=12),
+        legend.title = element_text(size=10))
 
 nwt_aquatic %>%
   dplyr::select(dataset, site, ID, yr, date) %>%
   distinct() %>%
+  mutate(dataset = gsub("phytoplankton", "phyto-\nplankton", dataset)) %>%
   group_by(dataset, site, ID, yr) %>%
   summarise(nobs = length(date)) %>%
   ggplot(aes(yr, ID, fill=nobs)) + 
   geom_tile(col="grey50") +
   scale_fill_distiller(name = "# days", palette= "Blues", direction = 1) +
   scale_x_continuous(expand = c(0,0), breaks=seq(1980,2016, 4)) +
-  labs(x="Year", y="Sampling location",
-       title = "NWT LTER aquatic data availability: annual sampling frequency, 1981 - 2017",
+  scale_y_discrete(expand=c(0,0)) +
+  labs(x="Year", y="Sampling location (by elevation, highest to lowest)",
+       title = "4. NWT LTER aquatic data availability: annual sampling frequency, 1981 - 2017",
        subtitle = "Colored by total number of dates sampled per year, split by dataset") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle=90)) +
-  facet_wrap(~dataset)
+  theme_linedraw() +
+  theme(axis.text.x = element_text(angle=45, hjust=1),
+        #axis.text.y = element_text(size=10),
+        plot.title = element_text(size=12),
+        legend.title = element_text(size=10)) +
+  facet_grid(.~dataset, scales="free_x", space = "free_x")
