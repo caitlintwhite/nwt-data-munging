@@ -467,10 +467,10 @@ Q_cv <- filter(flow_GL4, month(date) %in% 6:9 & year(date) >1999) %>%
          mon = month(date),
          yr = year(date)) %>%
   group_by(yr, location) %>%
-  summarise(cv = mean(discharge, na.rm=TRUE)/sd(discharge, na.rm = TRUE)) %>%
+  summarise(cv = sd(discharge, na.rm = TRUE)/mean(discharge, na.rm=TRUE)) %>%
   ggplot(aes(as.factor(yr), cv)) +
   geom_point() +
-  labs(x="Year", y= "Q CV") +
+  labs(x="Year", y= "Q CV (sd:mean)") +
   theme_light() +
   theme(plot.margin = unit(c(0,0,.5,0), "lines")) +
   facet_grid(location~.)
