@@ -1,7 +1,7 @@
 NWT data munging: All lakes and stream data
 ================
 CTW
-2018-03-31
+2018-04-01
 
 Script purpose
 --------------
@@ -17,3 +17,12 @@ Data availability
 -----------------
 
 ![](nwt_aquatic_munging_files/figure-markdown_github/data%20availability%20figures-1.png)![](nwt_aquatic_munging_files/figure-markdown_github/data%20availability%20figures-2.png)![](nwt_aquatic_munging_files/figure-markdown_github/data%20availability%20figures-3.png)![](nwt_aquatic_munging_files/figure-markdown_github/data%20availability%20figures-4.png)
+
+Temporal trends
+---------------
+
+Some examples from Green Lake 4 ...
+
+![](nwt_aquatic_munging_files/figure-markdown_github/GL4%20temporal%20example-1.png)![](nwt_aquatic_munging_files/figure-markdown_github/GL4%20temporal%20example-2.png)
+
+![](nwt_aquatic_munging_files/figure-markdown_github/more%20trends-1.png)

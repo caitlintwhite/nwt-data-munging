@@ -270,24 +270,6 @@ GL4_waterchem <- rbind(Caine_long, McKnight_long)
 
 #+ plot data availability, echo = FALSE, warning = FALSE, message = FALSE, fig.width = 8, fig.height = 6
 
-# test heat map for data availability
-test <- GLV_ice_long %>%
-  dplyr::select(year, lake, event_date) %>%
-  unique() %>%
-  na.omit() %>% # no NAs
-  group_by(year, lake) %>%
-  summarise(nobs = length(event_date)) %>%
-  mutate(lake = factor(lake, levels = c("Silver", "Albion", "Green1",
-                                        "Green2", "Green3", "Green4",
-                                        "Green5", "Arikaree")))
-
-ggplot(test, aes(year, lake, fill=nobs)) + 
-  geom_tile(col="white") +
-  scale_fill_distiller(palette="OrRd", direction = 1) +
-  scale_x_continuous(expand = c(0, 0), breaks = seq(1980, 2017, 5)) + 
-  scale_y_discrete(expand = c(0,0)) +
-  theme_classic()
-
 # ice phenology dataset--
 GLV_ice_long %>%
   mutate(lake = factor(lake, levels = c("Silver", "Albion", "Green1",
