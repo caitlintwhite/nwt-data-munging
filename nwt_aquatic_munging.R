@@ -396,8 +396,9 @@ summer_GL4_NO3 <- filter(GL4_waterchem, month(date) %in% 6:9 & metric == "NO3-" 
   group_by(date, metric, doy, location) %>%
   summarise(mean_value = mean(value, na.rm=TRUE)) %>%
   ggplot(aes(doy, mean_value, fill=location)) +
-  geom_line() +
-  geom_point(size=0.75, alpha=0.7, pch=21) +
+  geom_line(col="grey50") +
+  geom_point(size=1, alpha=0.7, pch=21) +
+  #scale_color_brewer(name="Location", palette ="Set2") +
   scale_fill_brewer(name="Location", palette ="Blues") +
   scale_x_continuous(breaks=seq(150,275, 30)) +
   #scale_x_date(limits = c(as.Date("2000-06-01"), NA)) +
