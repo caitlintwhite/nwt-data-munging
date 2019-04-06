@@ -1,0 +1,122 @@
+"lost_spp","type","year","event","USDA_name"
+"SOMU","MM",1990,2,"Solidago multiradiata"
+"PHAL2","MM",1990,2,"Phleum alpinum"
+NA,"MM",1995,3,NA
+"MEOB","MM",1997,4,"Mertensia oblongifolia"
+"SARH2","MM",2006,5,"Saxifraga rhomboidea"
+"CALA10","MM",2008,6,"Carex lachenalii"
+"CANI2","MM",2010,7,"Carex nigricans"
+"TRDA2","MM",2011,8,"Trifolium dasyphyllum"
+NA,"MM",2012,9,NA
+"CAPH2","MM",2013,10,"Carex phaeocephala"
+"ANME2","MM",2013,10,"Antennaria media"
+"PHPU5","MM",2014,11,"Phlox pulvinata"
+"TEGR3","MM",2014,11,"Tetraneuris grandiflora"
+"TOPY","MM",2014,11,"Tonestus pygmaeus"
+"MIRU3","MM",2015,12,"Minuartia rubella"
+"POAL2","MM",2016,13,"Poa alpina"
+"GEAMA","MM",2016,13,"Gentianella amarella ssp. acuta"
+"POGLR2","MM",2016,13,"Poa glauca ssp. rupicola"
+"ORALA","MM",2016,13,"Oreoxis alpina ssp. alpina"
+"CAEL3","SB",1990,2,"Carex elynoides"
+"CAAL6","SB",1990,2,"Carex albonigra"
+"TRDA2","SB",1990,2,"Trifolium dasyphyllum"
+"SOMU","SB",1995,3,"Solidago multiradiata"
+"SELA","SB",1997,4,"Sedum lanceolatum"
+"SEFRB","SB",1997,4,"Senecio fremontii var. blitoides"
+"POVI3","SB",1997,4,"Polygonum viviparum"
+"CHANA2","SB",1997,4,"Chamerion angustifolium ssp. angustifolium"
+"ORALA","SB",2006,5,"Oreoxis alpina ssp. alpina"
+"CAPU","SB",2006,5,"Calamagrostis purpurascens"
+NA,"SB",2008,6,NA
+"GEAL2","SB",2010,7,"Gentiana algida"
+"CANI2","SB",2010,7,"Carex nigricans"
+"DRAU","SB",2011,8,"Draba aurea"
+"POGLR2","SB",2012,9,"Poa glauca ssp. rupicola"
+"STLO2","SB",2013,10,"Stellaria longipes"
+NA,"SB",2014,11,NA
+NA,"SB",2015,12,NA
+"PHAL2","SB",2016,13,"Phleum alpinum"
+"VEWO2","SB",2016,13,"Veronica wormskjoldii"
+"SOMU","WM",1990,2,"Solidago multiradiata"
+NA,"WM",1995,3,NA
+NA,"WM",1997,4,NA
+NA,"WM",2006,5,NA
+"POVI","WM",2008,6,"Polemonium viscosum"
+NA,"WM",2010,7,NA
+"CALA10","WM",2011,8,"Carex lachenalii"
+"POGLR2","WM",2012,9,"Poa glauca ssp. rupicola"
+"POAL2","WM",2013,10,"Poa alpina"
+"MIOB2","WM",2014,11,"Minuartia obtusiloba"
+"SANI8","WM",2014,11,"Salix nivalis"
+NA,"WM",2015,12,NA
+"GEAMA","WM",2016,13,"Gentianella amarella ssp. acuta"
+"SAGL","WM",2016,13,"Salix glauca"
+"POARG","WM",2016,13,"Poa arctica ssp. grayana"
+"MEOB","DM",1990,2,"Mertensia oblongifolia"
+"ANRO2","DM",1995,3,"Antennaria rosea"
+"DRBRC","DM",1997,4,"Draba breweri var. cana"
+"PRAN","DM",1997,4,"Primula angustifolia"
+"DRST4","DM",2006,5,"Draba streptocarpa"
+"POAL2","DM",2008,6,"Poa alpina"
+NA,"DM",2010,7,NA
+"ERCA14","DM",2011,8,"Erysimum capitatum"
+"ANSE4","DM",2012,9,"Androsace septentrionalis"
+NA,"DM",2013,10,NA
+"ELTRT","DM",2014,11,"Elymus trachycaulus ssp. trachycaulus"
+NA,"DM",2015,12,NA
+"ERSI3","DM",2016,13,"Erigeron simplex"
+"CEARS2","DM",2016,13,"Cerastium arvense ssp. strictum"
+"LUSP4","DM",2016,13,"Luzula spicata"
+"PHPU5","DM",2016,13,"Phlox pulvinata"
+"ANME2","DM",2016,13,"Antennaria media"
+"PACA15","DM",2016,13,"Packera cana"
+NA,"FF",1990,2,NA
+"CACA13","FF",1995,3,"Carex capitata"
+"RHRH4","FF",1997,4,"Rhodiola rhodantha"
+"RAAD","FF",1997,4,"Ranunculus adoneus"
+"CALE4","FF",2006,5,"Caltha leptosepala"
+"CASCS2","FF",2006,5,"Carex scopulorum var. scopulorum"
+"ERME2","FF",2006,5,"Erigeron melanocephalus"
+"TRNA2","FF",2008,6,"Trifolium nanum"
+NA,"FF",2010,7,NA
+NA,"FF",2011,8,NA
+"NOMO2","FF",2012,9,"Noccaea montana"
+NA,"FF",2013,10,NA
+"CAOC4","FF",2014,11,"Castilleja occidentalis"
+"DRST4","FF",2014,11,"Draba streptocarpa"
+"POGLR2","FF",2014,11,"Poa glauca ssp. rupicola"
+"ELTRT","FF",2015,12,"Elymus trachycaulus ssp. trachycaulus"
+"MIRU3","FF",2016,13,"Minuartia rubella"
+"POARG","FF",2016,13,"Poa arctica ssp. grayana"
+"STLO2","FF",2016,13,"Stellaria longipes"
+"POAL2","FF",2016,13,"Poa alpina"
+"SARH2","FF",2016,13,"Saxifraga rhomboidea"
+NA,"SF",1990,2,NA
+"CARUD","SF",1995,3,"Carex rupestris var. drummondiana"
+"POVI3","SF",1997,4,"Polygonum viviparum"
+"ERPI6","SF",1997,4,"Erigeron pinnatisectus"
+"SEDES","SF",2006,5,"Selaginella densa var. scopulorum"
+"KOMY","SF",2008,6,"Kobresia myosuroides"
+NA,"SF",2010,7,NA
+"SELA","SF",2011,8,"Sedum lanceolatum"
+"SARH2","SF",2012,9,"Saxifraga rhomboidea"
+"POGLR2","SF",2013,10,"Poa glauca ssp. rupicola"
+NA,"SF",2014,11,NA
+"MIOB2","SF",2015,12,"Minuartia obtusiloba"
+"POAL2","SF",2015,12,"Poa alpina"
+"CAOC4","SF",2015,12,"Castilleja occidentalis"
+"TRSP2","SF",2015,12,"Trisetum spicatum"
+"CEARS2","SF",2016,13,"Cerastium arvense ssp. strictum"
+"RHRH4","ST",1990,2,"Rhodiola rhodantha"
+NA,"ST",1996,3,NA
+NA,"ST",1997,4,NA
+"FEBR","ST",2006,5,"Festuca brachyphylla"
+"MELA3","ST",2008,6,"Mertensia lanceolata"
+NA,"ST",2010,7,NA
+"POARG","ST",2011,8,"Poa arctica ssp. grayana"
+"CASCS2","ST",2012,9,"Carex scopulorum var. scopulorum"
+NA,"ST",2013,10,NA
+"ERSI3","ST",2014,11,"Erigeron simplex"
+"SAPL2","ST",2015,12,"Salix planifolia"
+NA,"ST",2016,13,NA

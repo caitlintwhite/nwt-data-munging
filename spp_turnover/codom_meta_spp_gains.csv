@@ -1,0 +1,228 @@
+"spp_gains","plot","year","event","rem","nut","USDA_code","USDA_name","growth_habit"
+NA,"CAC",2003,2,"A","C",NA,NA,NA
+"CHIJAM","CAC",2004,3,"A","C","CHJA","Chionophila jamesii","forb"
+"DANINT","CAC",2004,3,"A","C","DAIN","Danthonia intermedia","graminoid"
+"LUZSPI","CAC",2004,3,"A","C","LUSP4","Luzula spicata","graminoid"
+NA,"CAC",2005,4,"A","C",NA,NA,NA
+"AREFEN","CAC",2006,5,"A","C","ARFE3","Arenaria fendleri","forb"
+"LEWPYG","CAC",2007,6,"A","C","LEPY2","Lewisia pygmaea","forb"
+"POAGLA","CAC",2007,6,"A","C","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,"CAC",2008,7,"A","C",NA,NA,NA
+"PACCRO","CAC",2009,8,"A","C","PACR5","Packera crocata","forb"
+NA,"CAC",2010,9,"A","C",NA,NA,NA
+NA,"CAC",2011,10,"A","C",NA,NA,NA
+NA,"CAC",2012,11,"A","C",NA,NA,NA
+NA,"CAC",2013,12,"A","C",NA,NA,NA
+"CARHET","CAC",2014,13,"A","C","CAHEC","Carex heteroneura var. chalciolepis","graminoid"
+"POAARC","CAC",2014,13,"A","C","POARG","Poa arctica ssp. grayana","graminoid"
+"CERARV","CAC",2015,14,"A","C","CEARS2","Cerastium arvense ssp. strictum","forb"
+"GENAMA","CAC",2015,14,"A","C","GEAM3","Gentianella amarella","forb"
+"BISVIV","CAN",2003,2,"A","N","POVI3","Polygonum viviparum","forb"
+"LEWPYG","CAN",2003,2,"A","N","LEPY2","Lewisia pygmaea","forb"
+"CHIJAM","CAN",2004,3,"A","N","CHJA","Chionophila jamesii","forb"
+"AREFEN","CAN",2005,4,"A","N","ARFE3","Arenaria fendleri","forb"
+"DANINT","CAN",2005,4,"A","N","DAIN","Danthonia intermedia","graminoid"
+"RANADO","CAN",2005,4,"A","N","RAAD","Ranunculus adoneus","forb"
+"MINOBT","CAN",2006,5,"A","N","MIOB2","Minuartia obtusiloba","forb"
+NA,"CAN",2007,6,"A","N",NA,NA,NA
+"POAALP","CAN",2008,7,"A","N","POAL2","Poa alpina","graminoid"
+"POAGLA","CAN",2009,8,"A","N","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,"CAN",2010,9,"A","N",NA,NA,NA
+NA,"CAN",2011,10,"A","N",NA,NA,NA
+NA,"CAN",2012,11,"A","N",NA,NA,NA
+"RHOINT","CAN",2013,12,"A","N","RHIN11","Rhodiola integrifolia","forb"
+"CARHET","CAN",2014,13,"A","N","CAHEC","Carex heteroneura var. chalciolepis","graminoid"
+"CERARV","CAN",2015,14,"A","N","CEARS2","Cerastium arvense ssp. strictum","forb"
+"GENAMA","CAN",2015,14,"A","N","GEAM3","Gentianella amarella","forb"
+"STEUMB","CAN",2016,15,"A","N","STUM","Stellaria umbellata","forb"
+"DRACRA2","CAN",2017,16,"A","N","DRCR2","Draba crassifolia","forb"
+"CARNOV","CAN",2018,17,"A","N","CANO3","Carex nova","graminoid"
+"LEWPYG","CAX",2003,2,"A","X","LEPY2","Lewisia pygmaea","forb"
+"CHIJAM","CAX",2004,3,"A","X","CHJA","Chionophila jamesii","forb"
+"DANINT","CAX",2004,3,"A","X","DAIN","Danthonia intermedia","graminoid"
+"RHORHO","CAX",2004,3,"A","X","RHRH4","Rhodiola rhodantha","forb"
+"SWEPER","CAX",2004,3,"A","X","SWPE","Swertia perennis","forb"
+"TRISPI","CAX",2004,3,"A","X","TRSP2","Trisetum spicatum","graminoid"
+"AREFEN","CAX",2005,4,"A","X","ARFE3","Arenaria fendleri","forb"
+"FESBRA","CAX",2005,4,"A","X","FEBR","Festuca brachyphylla","graminoid"
+"SEDLAN","CAX",2005,4,"A","X","SELA","Sedum lanceolatum","forb"
+"MINOBT","CAX",2006,5,"A","X","MIOB2","Minuartia obtusiloba","forb"
+NA,"CAX",2007,6,"A","X",NA,NA,NA
+"GENAMA","CAX",2008,7,"A","X","GEAM3","Gentianella amarella","forb"
+"POAALP","CAX",2008,7,"A","X","POAL2","Poa alpina","graminoid"
+"POAGLA","CAX",2009,8,"A","X","POGLR2","Poa glauca ssp. rupicola","graminoid"
+"SAXRHO","CAX",2009,8,"A","X","SARH2","Saxifraga rhomboidea","forb"
+NA,"CAX",2010,9,"A","X",NA,NA,NA
+NA,"CAX",2011,10,"A","X",NA,NA,NA
+NA,"CAX",2012,11,"A","X",NA,NA,NA
+NA,"CAX",2013,12,"A","X",NA,NA,NA
+"CARHET","CAX",2014,13,"A","X","CAHEC","Carex heteroneura var. chalciolepis","graminoid"
+"ERIMEL","CAX",2015,14,"A","X","ERME2","Erigeron melanocephalus","forb"
+NA,"CAX",2016,15,"A","X",NA,NA,NA
+NA,"CAX",2017,16,"A","X",NA,NA,NA
+"PRIANG","CAX",2018,17,"A","X","PRAN","Primula angustifolia","forb"
+"SELDEN","CAX",2018,17,"A","X","SEDES","Selaginella densa var. scopulorum","lycopod"
+"ERIPIN","CBX",2003,2,"B","X","ERPI6","Erigeron pinnatisectus","forb"
+"LLOSER","CBX",2003,2,"B","X","LLSE","Lloydia serotina","forb"
+"MERLAN","CBX",2003,2,"B","X","MELA3","Mertensia lanceolata","forb"
+"CHIJAM","CBX",2004,3,"B","X","CHJA","Chionophila jamesii","forb"
+"LEWPYG","CBX",2004,3,"B","X","LEPY2","Lewisia pygmaea","forb"
+"PEDGRO","CBX",2004,3,"B","X","PEGR2","Pedicularis groenlandica","forb"
+"RANADO","CBX",2004,3,"B","X","RAAD","Ranunculus adoneus","forb"
+"RHORHO","CBX",2004,3,"B","X","RHRH4","Rhodiola rhodantha","forb"
+"TRISPI","CBX",2004,3,"B","X","TRSP2","Trisetum spicatum","graminoid"
+"AREFEN","CBX",2005,4,"B","X","ARFE3","Arenaria fendleri","forb"
+"DANINT","CBX",2005,4,"B","X","DAIN","Danthonia intermedia","graminoid"
+"LUZSPI","CBX",2005,4,"B","X","LUSP4","Luzula spicata","graminoid"
+"RHOINT","CBX",2005,4,"B","X","RHIN11","Rhodiola integrifolia","forb"
+NA,"CBX",2006,5,"B","X",NA,NA,NA
+"GENAMA","CBX",2007,6,"B","X","GEAM3","Gentianella amarella","forb"
+NA,"CBX",2008,7,"B","X",NA,NA,NA
+"POAGLA","CBX",2009,8,"B","X","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,"CBX",2010,9,"B","X",NA,NA,NA
+NA,"CBX",2011,10,"B","X",NA,NA,NA
+NA,"CBX",2012,11,"B","X",NA,NA,NA
+"POAALP","CBX",2013,12,"B","X","POAL2","Poa alpina","graminoid"
+"CARHET","CBX",2014,13,"B","X","CAHEC","Carex heteroneura var. chalciolepis","graminoid"
+"SALIX_SP1","CBX",2014,13,"B","X","SALIX","Salix","shrub, subshrub"
+NA,"CBX",2015,14,"B","X",NA,NA,NA
+"SAXRHO","CBX",2016,15,"B","X","SARH2","Saxifraga rhomboidea","forb"
+"CAMROT","CBX",2017,16,"B","X","CARO2","Campanula rotundifolia","forb"
+"SEDLAN","CBX",2017,16,"B","X","SELA","Sedum lanceolatum","forb"
+"POAARC","CBX",2018,17,"B","X","POARG","Poa arctica ssp. grayana","graminoid"
+"SELDEN","CBX",2018,17,"B","X","SEDES","Selaginella densa var. scopulorum","lycopod"
+"GENPRO","CDC",2003,2,"D","C","GEPR3","Gentiana prostrata","forb"
+"LEWPYG","CDC",2003,2,"D","C","LEPY2","Lewisia pygmaea","forb"
+"CHIJAM","CDC",2004,3,"D","C","CHJA","Chionophila jamesii","forb"
+"POAGLA","CDC",2004,3,"D","C","POGLR2","Poa glauca ssp. rupicola","graminoid"
+"RHORHO","CDC",2004,3,"D","C","RHRH4","Rhodiola rhodantha","forb"
+"AREFEN","CDC",2005,4,"D","C","ARFE3","Arenaria fendleri","forb"
+"DANINT","CDC",2005,4,"D","C","DAIN","Danthonia intermedia","graminoid"
+"ALLGEY","CDC",2006,5,"D","C","ALGE","Allium geyeri","forb"
+"FESBRA","CDC",2006,5,"D","C","FEBR","Festuca brachyphylla","graminoid"
+"LUZSPI","CDC",2006,5,"D","C","LUSP4","Luzula spicata","graminoid"
+"SAXRHO","CDC",2007,6,"D","C","SARH2","Saxifraga rhomboidea","forb"
+NA,"CDC",2008,7,"D","C",NA,NA,NA
+NA,"CDC",2009,8,"D","C",NA,NA,NA
+"RANADO","CDC",2010,9,"D","C","RAAD","Ranunculus adoneus","forb"
+NA,"CDC",2011,10,"D","C",NA,NA,NA
+NA,"CDC",2012,11,"D","C",NA,NA,NA
+"GENAMA","CDC",2013,12,"D","C","GEAM3","Gentianella amarella","forb"
+"CARHET","CDC",2014,13,"D","C","CAHEC","Carex heteroneura var. chalciolepis","graminoid"
+"POAARC","CDC",2014,13,"D","C","POARG","Poa arctica ssp. grayana","graminoid"
+NA,"CDC",2015,14,"D","C",NA,NA,NA
+"LEWPYG","CDN",2003,2,"D","N","LEPY2","Lewisia pygmaea","forb"
+"RHOINT","CDN",2003,2,"D","N","RHIN11","Rhodiola integrifolia","forb"
+"CHIJAM","CDN",2004,3,"D","N","CHJA","Chionophila jamesii","forb"
+"LUZSPI","CDN",2004,3,"D","N","LUSP4","Luzula spicata","graminoid"
+"POAGLA","CDN",2004,3,"D","N","POGLR2","Poa glauca ssp. rupicola","graminoid"
+"AREFEN","CDN",2005,4,"D","N","ARFE3","Arenaria fendleri","forb"
+"DANINT","CDN",2005,4,"D","N","DAIN","Danthonia intermedia","graminoid"
+"POAALP","CDN",2005,4,"D","N","POAL2","Poa alpina","graminoid"
+"FESBRA","CDN",2006,5,"D","N","FEBR","Festuca brachyphylla","graminoid"
+"SOLMUL","CDN",2006,5,"D","N","SOMU","Solidago multiradiata","forb"
+NA,"CDN",2007,6,"D","N",NA,NA,NA
+NA,"CDN",2008,7,"D","N",NA,NA,NA
+NA,"CDN",2009,8,"D","N",NA,NA,NA
+NA,"CDN",2010,9,"D","N",NA,NA,NA
+NA,"CDN",2011,10,"D","N",NA,NA,NA
+NA,"CDN",2012,11,"D","N",NA,NA,NA
+NA,"CDN",2013,12,"D","N",NA,NA,NA
+NA,"CDN",2014,13,"D","N",NA,NA,NA
+"CARHET","CDN",2015,14,"D","N","CAHEC","Carex heteroneura var. chalciolepis","graminoid"
+"SEDLAN","CDN",2015,14,"D","N","SELA","Sedum lanceolatum","forb"
+NA,"CDN",2016,15,"D","N",NA,NA,NA
+"GENAMA","CDN",2017,16,"D","N","GEAM3","Gentianella amarella","forb"
+"CARNOV","CDN",2018,17,"D","N","CANO3","Carex nova","graminoid"
+"AREFEN","CDX",2003,2,"D","X","ARFE3","Arenaria fendleri","forb"
+"RHOINT","CDX",2003,2,"D","X","RHIN11","Rhodiola integrifolia","forb"
+"DANINT","CDX",2004,3,"D","X","DAIN","Danthonia intermedia","graminoid"
+"LEWPYG","CDX",2005,4,"D","X","LEPY2","Lewisia pygmaea","forb"
+"SEDLAN","CDX",2006,5,"D","X","SELA","Sedum lanceolatum","forb"
+"SOLMUL","CDX",2006,5,"D","X","SOMU","Solidago multiradiata","forb"
+"POAALP","CDX",2007,6,"D","X","POAL2","Poa alpina","graminoid"
+"POAGLA","CDX",2007,6,"D","X","POGLR2","Poa glauca ssp. rupicola","graminoid"
+"SALIX_SP1","CDX",2007,6,"D","X","SALIX","Salix","shrub, subshrub"
+NA,"CDX",2008,7,"D","X",NA,NA,NA
+"ALLGEY","CDX",2009,8,"D","X","ALGE","Allium geyeri","forb"
+"CHIJAM","CDX",2009,8,"D","X","CHJA","Chionophila jamesii","forb"
+"SAXRHO","CDX",2010,9,"D","X","SARH2","Saxifraga rhomboidea","forb"
+NA,"CDX",2011,10,"D","X",NA,NA,NA
+NA,"CDX",2012,11,"D","X",NA,NA,NA
+NA,"CDX",2013,12,"D","X",NA,NA,NA
+"CARHET","CDX",2014,13,"D","X","CAHEC","Carex heteroneura var. chalciolepis","graminoid"
+"POAARC","CDX",2014,13,"D","X","POARG","Poa arctica ssp. grayana","graminoid"
+"CERARV","CDX",2015,14,"D","X","CEARS2","Cerastium arvense ssp. strictum","forb"
+"GENAMA","CDX",2016,15,"D","X","GEAM3","Gentianella amarella","forb"
+NA,"CDX",2017,16,"D","X",NA,NA,NA
+"ANTMED","CDX",2018,17,"D","X","ANME2","Antennaria media","forb"
+"DRACRA2","CDX",2018,17,"D","X","DRCR2","Draba crassifolia","forb"
+"NOCFEN","CDX",2018,17,"D","X","NOFEG","Noccaea fendleri ssp. glauca","forb"
+"SELDEN","CDX",2018,17,"D","X","SEDES","Selaginella densa var. scopulorum","lycopod"
+NA,"CXC",2003,2,"X","C",NA,NA,NA
+NA,"CXC",2004,3,"X","C",NA,NA,NA
+"AREFEN","CXC",2005,4,"X","C","ARFE3","Arenaria fendleri","forb"
+"DANINT","CXC",2005,4,"X","C","DAIN","Danthonia intermedia","graminoid"
+"LEWPYG","CXC",2005,4,"X","C","LEPY2","Lewisia pygmaea","forb"
+"LUZSPI","CXC",2005,4,"X","C","LUSP4","Luzula spicata","graminoid"
+"TRISPI","CXC",2005,4,"X","C","TRSP2","Trisetum spicatum","graminoid"
+NA,"CXC",2006,5,"X","C",NA,NA,NA
+"CHIJAM","CXC",2007,6,"X","C","CHJA","Chionophila jamesii","forb"
+"FESBRA","CXC",2007,6,"X","C","FEBR","Festuca brachyphylla","graminoid"
+NA,"CXC",2008,7,"X","C",NA,NA,NA
+"POAGLA","CXC",2009,8,"X","C","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,"CXC",2010,9,"X","C",NA,NA,NA
+NA,"CXC",2011,10,"X","C",NA,NA,NA
+NA,"CXC",2012,11,"X","C",NA,NA,NA
+NA,"CXC",2013,12,"X","C",NA,NA,NA
+"CARHET","CXC",2014,13,"X","C","CAHEC","Carex heteroneura var. chalciolepis","graminoid"
+"POAARC","CXC",2014,13,"X","C","POARG","Poa arctica ssp. grayana","graminoid"
+"CERARV","CXC",2015,14,"X","C","CEARS2","Cerastium arvense ssp. strictum","forb"
+NA,"CXN",2003,2,"X","N",NA,NA,NA
+"BISVIV","CXN",2004,3,"X","N","POVI3","Polygonum viviparum","forb"
+"CHIJAM","CXN",2004,3,"X","N","CHJA","Chionophila jamesii","forb"
+"AREFEN","CXN",2005,4,"X","N","ARFE3","Arenaria fendleri","forb"
+"DANINT","CXN",2005,4,"X","N","DAIN","Danthonia intermedia","graminoid"
+NA,"CXN",2006,5,"X","N",NA,NA,NA
+NA,"CXN",2007,6,"X","N",NA,NA,NA
+"POAGLA","CXN",2008,7,"X","N","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,"CXN",2009,8,"X","N",NA,NA,NA
+NA,"CXN",2010,9,"X","N",NA,NA,NA
+NA,"CXN",2011,10,"X","N",NA,NA,NA
+NA,"CXN",2012,11,"X","N",NA,NA,NA
+NA,"CXN",2013,12,"X","N",NA,NA,NA
+"POAARC","CXN",2014,13,"X","N","POARG","Poa arctica ssp. grayana","graminoid"
+"CERARV","CXN",2015,14,"X","N","CEARS2","Cerastium arvense ssp. strictum","forb"
+"GENAMA","CXN",2015,14,"X","N","GEAM3","Gentianella amarella","forb"
+"STEUMB","CXN",2016,15,"X","N","STUM","Stellaria umbellata","forb"
+"DRACRA2","CXN",2017,16,"X","N","DRCR2","Draba crassifolia","forb"
+"ALLGEY","CXN",2018,17,"X","N","ALGE","Allium geyeri","forb"
+"CARNOV","CXN",2018,17,"X","N","CANO3","Carex nova","graminoid"
+"CHIJAM","CXX",2003,2,"X","X","CHJA","Chionophila jamesii","forb"
+"MERLAN","CXX",2003,2,"X","X","MELA3","Mertensia lanceolata","forb"
+"RHORHO","CXX",2003,2,"X","X","RHRH4","Rhodiola rhodantha","forb"
+"POAGLA","CXX",2004,3,"X","X","POGLR2","Poa glauca ssp. rupicola","graminoid"
+"TRISPI","CXX",2004,3,"X","X","TRSP2","Trisetum spicatum","graminoid"
+"AREFEN","CXX",2005,4,"X","X","ARFE3","Arenaria fendleri","forb"
+"DANINT","CXX",2005,4,"X","X","DAIN","Danthonia intermedia","graminoid"
+"ERIPIN","CXX",2005,4,"X","X","ERPI6","Erigeron pinnatisectus","forb"
+"LEWPYG","CXX",2005,4,"X","X","LEPY2","Lewisia pygmaea","forb"
+"RANADO","CXX",2005,4,"X","X","RAAD","Ranunculus adoneus","forb"
+"GENAMA","CXX",2006,5,"X","X","GEAM3","Gentianella amarella","forb"
+"LUZSPI","CXX",2006,5,"X","X","LUSP4","Luzula spicata","graminoid"
+"ACHMIL","CXX",2007,6,"X","X","ACMIA","Achillea millefolium var. alpicola","forb"
+"FESBRA","CXX",2007,6,"X","X","FEBR","Festuca brachyphylla","graminoid"
+"MINOBT","CXX",2007,6,"X","X","MIOB2","Minuartia obtusiloba","forb"
+NA,"CXX",2008,7,"X","X",NA,NA,NA
+"ALLGEY","CXX",2009,8,"X","X","ALGE","Allium geyeri","forb"
+NA,"CXX",2010,9,"X","X",NA,NA,NA
+"POAALP","CXX",2011,10,"X","X","POAL2","Poa alpina","graminoid"
+NA,"CXX",2012,11,"X","X",NA,NA,NA
+NA,"CXX",2013,12,"X","X",NA,NA,NA
+"CARHET","CXX",2014,13,"X","X","CAHEC","Carex heteroneura var. chalciolepis","graminoid"
+"SWEPER","CXX",2014,13,"X","X","SWPE","Swertia perennis","forb"
+"CERARV","CXX",2015,14,"X","X","CEARS2","Cerastium arvense ssp. strictum","forb"
+"ERIMEL","CXX",2015,14,"X","X","ERME2","Erigeron melanocephalus","forb"
+NA,"CXX",2016,15,"X","X",NA,NA,NA
+"PACCRO","CXX",2017,16,"X","X","PACR5","Packera crocata","forb"
+"SAXRHO","CXX",2018,17,"X","X","SARH2","Saxifraga rhomboidea","forb"

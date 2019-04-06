@@ -1,0 +1,1140 @@
+"lost_spp","year","event","sitekey","local_site","site","plot","rem","nut","USDA_code","USDA_name","growth_habit"
+NA,2003,2,"1_CAC","Longs",1,"CAC","A","C",NA,NA,NA
+NA,2004,3,"1_CAC","Longs",1,"CAC","A","C",NA,NA,NA
+NA,2005,4,"1_CAC","Longs",1,"CAC","A","C",NA,NA,NA
+NA,2006,5,"1_CAC","Longs",1,"CAC","A","C",NA,NA,NA
+NA,2007,6,"1_CAC","Longs",1,"CAC","A","C",NA,NA,NA
+NA,2008,7,"1_CAC","Longs",1,"CAC","A","C",NA,NA,NA
+NA,2009,8,"1_CAC","Longs",1,"CAC","A","C",NA,NA,NA
+NA,2010,9,"1_CAC","Longs",1,"CAC","A","C",NA,NA,NA
+NA,2011,10,"1_CAC","Longs",1,"CAC","A","C",NA,NA,NA
+NA,2012,11,"1_CAC","Longs",1,"CAC","A","C",NA,NA,NA
+NA,2013,12,"1_CAC","Longs",1,"CAC","A","C",NA,NA,NA
+"POAGLA",2014,13,"1_CAC","Longs",1,"CAC","A","C","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,2015,14,"1_CAC","Longs",1,"CAC","A","C",NA,NA,NA
+"CARSCO",2003,2,"2_CAC","Edge",2,"CAC","A","C","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2004,3,"2_CAC","Edge",2,"CAC","A","C",NA,NA,NA
+NA,2005,4,"2_CAC","Edge",2,"CAC","A","C",NA,NA,NA
+NA,2006,5,"2_CAC","Edge",2,"CAC","A","C",NA,NA,NA
+NA,2007,6,"2_CAC","Edge",2,"CAC","A","C",NA,NA,NA
+NA,2008,7,"2_CAC","Edge",2,"CAC","A","C",NA,NA,NA
+"CASOCC",2009,8,"2_CAC","Edge",2,"CAC","A","C","CAOC4","Castilleja occidentalis","forb"
+NA,2010,9,"2_CAC","Edge",2,"CAC","A","C",NA,NA,NA
+NA,2011,10,"2_CAC","Edge",2,"CAC","A","C",NA,NA,NA
+NA,2012,11,"2_CAC","Edge",2,"CAC","A","C",NA,NA,NA
+"CALLEP",2013,12,"2_CAC","Edge",2,"CAC","A","C","CALE4","Caltha leptosepala","forb"
+NA,2014,13,"2_CAC","Edge",2,"CAC","A","C",NA,NA,NA
+NA,2015,14,"2_CAC","Edge",2,"CAC","A","C",NA,NA,NA
+"BISVIV",2003,2,"3_CAC","Edge",3,"CAC","A","C","POVI3","Polygonum viviparum","forb"
+"POTDIV",2003,2,"3_CAC","Edge",3,"CAC","A","C","PODI2","Potentilla diversifolia","forb"
+"SIBPRO",2003,2,"3_CAC","Edge",3,"CAC","A","C","SIPR","Sibbaldia procumbens","forb"
+NA,2004,3,"3_CAC","Edge",3,"CAC","A","C",NA,NA,NA
+NA,2005,4,"3_CAC","Edge",3,"CAC","A","C",NA,NA,NA
+NA,2006,5,"3_CAC","Edge",3,"CAC","A","C",NA,NA,NA
+NA,2007,6,"3_CAC","Edge",3,"CAC","A","C",NA,NA,NA
+NA,2008,7,"3_CAC","Edge",3,"CAC","A","C",NA,NA,NA
+NA,2009,8,"3_CAC","Edge",3,"CAC","A","C",NA,NA,NA
+"CHIJAM",2010,9,"3_CAC","Edge",3,"CAC","A","C","CHJA","Chionophila jamesii","forb"
+NA,2011,10,"3_CAC","Edge",3,"CAC","A","C",NA,NA,NA
+NA,2012,11,"3_CAC","Edge",3,"CAC","A","C",NA,NA,NA
+"STELON",2013,12,"3_CAC","Edge",3,"CAC","A","C","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2014,13,"3_CAC","Edge",3,"CAC","A","C",NA,NA,NA
+NA,2015,14,"3_CAC","Edge",3,"CAC","A","C",NA,NA,NA
+NA,2003,2,"4_CAC","Tundra Lab",4,"CAC","A","C",NA,NA,NA
+NA,2004,3,"4_CAC","Tundra Lab",4,"CAC","A","C",NA,NA,NA
+NA,2005,4,"4_CAC","Tundra Lab",4,"CAC","A","C",NA,NA,NA
+NA,2006,5,"4_CAC","Tundra Lab",4,"CAC","A","C",NA,NA,NA
+NA,2007,6,"4_CAC","Tundra Lab",4,"CAC","A","C",NA,NA,NA
+"MERLAN",2008,7,"4_CAC","Tundra Lab",4,"CAC","A","C","MELA3","Mertensia lanceolata","forb"
+"CHIJAM",2009,8,"4_CAC","Tundra Lab",4,"CAC","A","C","CHJA","Chionophila jamesii","forb"
+"STELON",2009,8,"4_CAC","Tundra Lab",4,"CAC","A","C","STLOL7","Stellaria longipes ssp. longipes","forb"
+"LLOSER",2010,9,"4_CAC","Tundra Lab",4,"CAC","A","C","LLSE","Lloydia serotina","forb"
+NA,2011,10,"4_CAC","Tundra Lab",4,"CAC","A","C",NA,NA,NA
+NA,2012,11,"4_CAC","Tundra Lab",4,"CAC","A","C",NA,NA,NA
+NA,2013,12,"4_CAC","Tundra Lab",4,"CAC","A","C",NA,NA,NA
+"CARSCO",2014,13,"4_CAC","Tundra Lab",4,"CAC","A","C","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2015,14,"4_CAC","Tundra Lab",4,"CAC","A","C",NA,NA,NA
+"BISVIV",2003,2,"5_CAC","Watershed",5,"CAC","A","C","POVI3","Polygonum viviparum","forb"
+"GENALG",2003,2,"5_CAC","Watershed",5,"CAC","A","C","GEAL2","Gentiana algida","forb"
+NA,2004,3,"5_CAC","Watershed",5,"CAC","A","C",NA,NA,NA
+"CHIJAM",2005,4,"5_CAC","Watershed",5,"CAC","A","C","CHJA","Chionophila jamesii","forb"
+"TRISPI",2005,4,"5_CAC","Watershed",5,"CAC","A","C","TRSP2","Trisetum spicatum","graminoid"
+NA,2006,5,"5_CAC","Watershed",5,"CAC","A","C",NA,NA,NA
+NA,2007,6,"5_CAC","Watershed",5,"CAC","A","C",NA,NA,NA
+NA,2008,7,"5_CAC","Watershed",5,"CAC","A","C",NA,NA,NA
+"POAGLA",2009,8,"5_CAC","Watershed",5,"CAC","A","C","POGLR2","Poa glauca ssp. rupicola","graminoid"
+"LUZSPI",2010,9,"5_CAC","Watershed",5,"CAC","A","C","LUSP4","Luzula spicata","graminoid"
+"CARSCO",2011,10,"5_CAC","Watershed",5,"CAC","A","C","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2012,11,"5_CAC","Watershed",5,"CAC","A","C",NA,NA,NA
+NA,2013,12,"5_CAC","Watershed",5,"CAC","A","C",NA,NA,NA
+NA,2014,13,"5_CAC","Watershed",5,"CAC","A","C",NA,NA,NA
+"LLOSER",2015,14,"5_CAC","Watershed",5,"CAC","A","C","LLSE","Lloydia serotina","forb"
+"TRISPI",2003,2,"6_CAC","Lefty",6,"CAC","A","C","TRSP2","Trisetum spicatum","graminoid"
+NA,2004,3,"6_CAC","Lefty",6,"CAC","A","C",NA,NA,NA
+"BISVIV",2005,4,"6_CAC","Lefty",6,"CAC","A","C","POVI3","Polygonum viviparum","forb"
+"PHLALP",2005,4,"6_CAC","Lefty",6,"CAC","A","C","PHAL2","Phleum alpinum","graminoid"
+"STELON",2005,4,"6_CAC","Lefty",6,"CAC","A","C","STLOL7","Stellaria longipes ssp. longipes","forb"
+"CASOCC",2006,5,"6_CAC","Lefty",6,"CAC","A","C","CAOC4","Castilleja occidentalis","forb"
+"GENALG",2006,5,"6_CAC","Lefty",6,"CAC","A","C","GEAL2","Gentiana algida","forb"
+NA,2007,6,"6_CAC","Lefty",6,"CAC","A","C",NA,NA,NA
+NA,2008,7,"6_CAC","Lefty",6,"CAC","A","C",NA,NA,NA
+NA,2009,8,"6_CAC","Lefty",6,"CAC","A","C",NA,NA,NA
+NA,2010,9,"6_CAC","Lefty",6,"CAC","A","C",NA,NA,NA
+"POAGLA",2011,10,"6_CAC","Lefty",6,"CAC","A","C","POGLR2","Poa glauca ssp. rupicola","graminoid"
+"TRIPAR",2012,11,"6_CAC","Lefty",6,"CAC","A","C","TRPAP","Trifolium parryi ssp. parryi","forb"
+NA,2013,12,"6_CAC","Lefty",6,"CAC","A","C",NA,NA,NA
+"LEWPYG",2014,13,"6_CAC","Lefty",6,"CAC","A","C","LEPY2","Lewisia pygmaea","forb"
+NA,2015,14,"6_CAC","Lefty",6,"CAC","A","C",NA,NA,NA
+"ERISIM",2003,2,"7_CAC","Subalpine",7,"CAC","A","C","ERSI3","Erigeron simplex","forb"
+NA,2004,3,"7_CAC","Subalpine",7,"CAC","A","C",NA,NA,NA
+"CARSCO",2005,4,"7_CAC","Subalpine",7,"CAC","A","C","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2006,5,"7_CAC","Subalpine",7,"CAC","A","C",NA,NA,NA
+"AREFEN",2007,6,"7_CAC","Subalpine",7,"CAC","A","C","ARFE3","Arenaria fendleri","forb"
+NA,2008,7,"7_CAC","Subalpine",7,"CAC","A","C",NA,NA,NA
+NA,2009,8,"7_CAC","Subalpine",7,"CAC","A","C",NA,NA,NA
+NA,2010,9,"7_CAC","Subalpine",7,"CAC","A","C",NA,NA,NA
+NA,2011,10,"7_CAC","Subalpine",7,"CAC","A","C",NA,NA,NA
+NA,2012,11,"7_CAC","Subalpine",7,"CAC","A","C",NA,NA,NA
+NA,2013,12,"7_CAC","Subalpine",7,"CAC","A","C",NA,NA,NA
+NA,2014,13,"7_CAC","Subalpine",7,"CAC","A","C",NA,NA,NA
+"STELON",2015,14,"7_CAC","Subalpine",7,"CAC","A","C","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2003,2,"1_CAN","Longs",1,"CAN","A","N",NA,NA,NA
+"ERISIM",2004,3,"1_CAN","Longs",1,"CAN","A","N","ERSI3","Erigeron simplex","forb"
+NA,2005,4,"1_CAN","Longs",1,"CAN","A","N",NA,NA,NA
+NA,2006,5,"1_CAN","Longs",1,"CAN","A","N",NA,NA,NA
+NA,2007,6,"1_CAN","Longs",1,"CAN","A","N",NA,NA,NA
+"LLOSER",2008,7,"1_CAN","Longs",1,"CAN","A","N","LLSE","Lloydia serotina","forb"
+NA,2009,8,"1_CAN","Longs",1,"CAN","A","N",NA,NA,NA
+NA,2010,9,"1_CAN","Longs",1,"CAN","A","N",NA,NA,NA
+NA,2011,10,"1_CAN","Longs",1,"CAN","A","N",NA,NA,NA
+NA,2012,11,"1_CAN","Longs",1,"CAN","A","N",NA,NA,NA
+NA,2013,12,"1_CAN","Longs",1,"CAN","A","N",NA,NA,NA
+NA,2014,13,"1_CAN","Longs",1,"CAN","A","N",NA,NA,NA
+NA,2015,14,"1_CAN","Longs",1,"CAN","A","N",NA,NA,NA
+NA,2016,15,"1_CAN","Longs",1,"CAN","A","N",NA,NA,NA
+"STELON",2017,16,"1_CAN","Longs",1,"CAN","A","N","STLOL7","Stellaria longipes ssp. longipes","forb"
+"CASOCC",2018,17,"1_CAN","Longs",1,"CAN","A","N","CAOC4","Castilleja occidentalis","forb"
+"DRACRA2",2018,17,"1_CAN","Longs",1,"CAN","A","N","DRCR2","Draba crassifolia","forb"
+"RHOINT",2018,17,"1_CAN","Longs",1,"CAN","A","N","RHIN11","Rhodiola integrifolia","forb"
+"STEUMB",2018,17,"1_CAN","Longs",1,"CAN","A","N","STUM","Stellaria umbellata","forb"
+NA,2003,2,"2_CAN","Edge",2,"CAN","A","N",NA,NA,NA
+NA,2004,3,"2_CAN","Edge",2,"CAN","A","N",NA,NA,NA
+NA,2005,4,"2_CAN","Edge",2,"CAN","A","N",NA,NA,NA
+NA,2006,5,"2_CAN","Edge",2,"CAN","A","N",NA,NA,NA
+"AREFEN",2007,6,"2_CAN","Edge",2,"CAN","A","N","ARFE3","Arenaria fendleri","forb"
+"BISVIV",2007,6,"2_CAN","Edge",2,"CAN","A","N","POVI3","Polygonum viviparum","forb"
+NA,2008,7,"2_CAN","Edge",2,"CAN","A","N",NA,NA,NA
+NA,2009,8,"2_CAN","Edge",2,"CAN","A","N",NA,NA,NA
+NA,2010,9,"2_CAN","Edge",2,"CAN","A","N",NA,NA,NA
+NA,2011,10,"2_CAN","Edge",2,"CAN","A","N",NA,NA,NA
+NA,2012,11,"2_CAN","Edge",2,"CAN","A","N",NA,NA,NA
+NA,2014,12,"2_CAN","Edge",2,"CAN","A","N",NA,NA,NA
+NA,2015,13,"2_CAN","Edge",2,"CAN","A","N",NA,NA,NA
+NA,2016,14,"2_CAN","Edge",2,"CAN","A","N",NA,NA,NA
+NA,2017,15,"2_CAN","Edge",2,"CAN","A","N",NA,NA,NA
+NA,2018,16,"2_CAN","Edge",2,"CAN","A","N",NA,NA,NA
+"POTDIV",2003,2,"3_CAN","Edge",3,"CAN","A","N","PODI2","Potentilla diversifolia","forb"
+NA,2004,3,"3_CAN","Edge",3,"CAN","A","N",NA,NA,NA
+NA,2005,4,"3_CAN","Edge",3,"CAN","A","N",NA,NA,NA
+"LLOSER",2006,5,"3_CAN","Edge",3,"CAN","A","N","LLSE","Lloydia serotina","forb"
+NA,2007,6,"3_CAN","Edge",3,"CAN","A","N",NA,NA,NA
+NA,2008,7,"3_CAN","Edge",3,"CAN","A","N",NA,NA,NA
+"CARSCO",2009,8,"3_CAN","Edge",3,"CAN","A","N","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+"CASOCC",2010,9,"3_CAN","Edge",3,"CAN","A","N","CAOC4","Castilleja occidentalis","forb"
+NA,2011,10,"3_CAN","Edge",3,"CAN","A","N",NA,NA,NA
+NA,2012,11,"3_CAN","Edge",3,"CAN","A","N",NA,NA,NA
+NA,2013,12,"3_CAN","Edge",3,"CAN","A","N",NA,NA,NA
+NA,2014,13,"3_CAN","Edge",3,"CAN","A","N",NA,NA,NA
+NA,2015,14,"3_CAN","Edge",3,"CAN","A","N",NA,NA,NA
+NA,2016,15,"3_CAN","Edge",3,"CAN","A","N",NA,NA,NA
+NA,2017,16,"3_CAN","Edge",3,"CAN","A","N",NA,NA,NA
+NA,2018,17,"3_CAN","Edge",3,"CAN","A","N",NA,NA,NA
+"SIBPRO",2003,2,"4_CAN","Tundra Lab",4,"CAN","A","N","SIPR","Sibbaldia procumbens","forb"
+"CALLEP",2004,3,"4_CAN","Tundra Lab",4,"CAN","A","N","CALE4","Caltha leptosepala","forb"
+"CASOCC",2004,3,"4_CAN","Tundra Lab",4,"CAN","A","N","CAOC4","Castilleja occidentalis","forb"
+"BISVIV",2005,4,"4_CAN","Tundra Lab",4,"CAN","A","N","POVI3","Polygonum viviparum","forb"
+"ERISIM",2005,4,"4_CAN","Tundra Lab",4,"CAN","A","N","ERSI3","Erigeron simplex","forb"
+NA,2006,5,"4_CAN","Tundra Lab",4,"CAN","A","N",NA,NA,NA
+"PHLALP",2007,6,"4_CAN","Tundra Lab",4,"CAN","A","N","PHAL2","Phleum alpinum","graminoid"
+"STELON",2007,6,"4_CAN","Tundra Lab",4,"CAN","A","N","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2008,7,"4_CAN","Tundra Lab",4,"CAN","A","N",NA,NA,NA
+NA,2009,8,"4_CAN","Tundra Lab",4,"CAN","A","N",NA,NA,NA
+NA,2010,9,"4_CAN","Tundra Lab",4,"CAN","A","N",NA,NA,NA
+NA,2011,10,"4_CAN","Tundra Lab",4,"CAN","A","N",NA,NA,NA
+NA,2012,11,"4_CAN","Tundra Lab",4,"CAN","A","N",NA,NA,NA
+NA,2013,12,"4_CAN","Tundra Lab",4,"CAN","A","N",NA,NA,NA
+"CARSCO",2014,13,"4_CAN","Tundra Lab",4,"CAN","A","N","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2015,14,"4_CAN","Tundra Lab",4,"CAN","A","N",NA,NA,NA
+"LLOSER",2016,15,"4_CAN","Tundra Lab",4,"CAN","A","N","LLSE","Lloydia serotina","forb"
+NA,2017,16,"4_CAN","Tundra Lab",4,"CAN","A","N",NA,NA,NA
+"FESBRA",2018,17,"4_CAN","Tundra Lab",4,"CAN","A","N","FEBR","Festuca brachyphylla","graminoid"
+NA,2003,2,"5_CAN","Watershed",5,"CAN","A","N",NA,NA,NA
+NA,2004,3,"5_CAN","Watershed",5,"CAN","A","N",NA,NA,NA
+"CHIJAM",2005,4,"5_CAN","Watershed",5,"CAN","A","N","CHJA","Chionophila jamesii","forb"
+"AREFEN",2006,5,"5_CAN","Watershed",5,"CAN","A","N","ARFE3","Arenaria fendleri","forb"
+"CALLEP",2006,5,"5_CAN","Watershed",5,"CAN","A","N","CALE4","Caltha leptosepala","forb"
+NA,2007,6,"5_CAN","Watershed",5,"CAN","A","N",NA,NA,NA
+NA,2008,7,"5_CAN","Watershed",5,"CAN","A","N",NA,NA,NA
+NA,2009,8,"5_CAN","Watershed",5,"CAN","A","N",NA,NA,NA
+NA,2010,9,"5_CAN","Watershed",5,"CAN","A","N",NA,NA,NA
+"POAGLA",2011,10,"5_CAN","Watershed",5,"CAN","A","N","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,2012,11,"5_CAN","Watershed",5,"CAN","A","N",NA,NA,NA
+NA,2013,12,"5_CAN","Watershed",5,"CAN","A","N",NA,NA,NA
+"LEWPYG",2014,13,"5_CAN","Watershed",5,"CAN","A","N","LEPY2","Lewisia pygmaea","forb"
+"POAALP",2014,13,"5_CAN","Watershed",5,"CAN","A","N","POAL2","Poa alpina","graminoid"
+NA,2015,14,"5_CAN","Watershed",5,"CAN","A","N",NA,NA,NA
+"CERARV",2016,15,"5_CAN","Watershed",5,"CAN","A","N","CEARS2","Cerastium arvense ssp. strictum","forb"
+"GENALG",2017,16,"5_CAN","Watershed",5,"CAN","A","N","GEAL2","Gentiana algida","forb"
+"CARSCO",2018,17,"5_CAN","Watershed",5,"CAN","A","N","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2003,2,"6_CAN","Lefty",6,"CAN","A","N",NA,NA,NA
+NA,2004,3,"6_CAN","Lefty",6,"CAN","A","N",NA,NA,NA
+"BISVIV",2005,4,"6_CAN","Lefty",6,"CAN","A","N","POVI3","Polygonum viviparum","forb"
+"CASOCC",2006,5,"6_CAN","Lefty",6,"CAN","A","N","CAOC4","Castilleja occidentalis","forb"
+NA,2007,6,"6_CAN","Lefty",6,"CAN","A","N",NA,NA,NA
+NA,2008,7,"6_CAN","Lefty",6,"CAN","A","N",NA,NA,NA
+"LLOSER",2009,8,"6_CAN","Lefty",6,"CAN","A","N","LLSE","Lloydia serotina","forb"
+"POAGLA",2010,9,"6_CAN","Lefty",6,"CAN","A","N","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,2011,10,"6_CAN","Lefty",6,"CAN","A","N",NA,NA,NA
+NA,2012,11,"6_CAN","Lefty",6,"CAN","A","N",NA,NA,NA
+NA,2013,12,"6_CAN","Lefty",6,"CAN","A","N",NA,NA,NA
+"DANINT",2014,13,"6_CAN","Lefty",6,"CAN","A","N","DAIN","Danthonia intermedia","graminoid"
+NA,2015,14,"6_CAN","Lefty",6,"CAN","A","N",NA,NA,NA
+NA,2016,15,"6_CAN","Lefty",6,"CAN","A","N",NA,NA,NA
+NA,2017,16,"6_CAN","Lefty",6,"CAN","A","N",NA,NA,NA
+NA,2018,17,"6_CAN","Lefty",6,"CAN","A","N",NA,NA,NA
+"MERLAN",2003,2,"7_CAN","Subalpine",7,"CAN","A","N","MELA3","Mertensia lanceolata","forb"
+"SIBPRO",2004,3,"7_CAN","Subalpine",7,"CAN","A","N","SIPR","Sibbaldia procumbens","forb"
+NA,2005,4,"7_CAN","Subalpine",7,"CAN","A","N",NA,NA,NA
+"RANADO",2006,5,"7_CAN","Subalpine",7,"CAN","A","N","RAAD","Ranunculus adoneus","forb"
+NA,2007,6,"7_CAN","Subalpine",7,"CAN","A","N",NA,NA,NA
+"STELON",2008,7,"7_CAN","Subalpine",7,"CAN","A","N","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2009,8,"7_CAN","Subalpine",7,"CAN","A","N",NA,NA,NA
+"CARSCO",2010,9,"7_CAN","Subalpine",7,"CAN","A","N","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2011,10,"7_CAN","Subalpine",7,"CAN","A","N",NA,NA,NA
+NA,2012,11,"7_CAN","Subalpine",7,"CAN","A","N",NA,NA,NA
+NA,2013,12,"7_CAN","Subalpine",7,"CAN","A","N",NA,NA,NA
+NA,2014,13,"7_CAN","Subalpine",7,"CAN","A","N",NA,NA,NA
+NA,2015,14,"7_CAN","Subalpine",7,"CAN","A","N",NA,NA,NA
+NA,2016,15,"7_CAN","Subalpine",7,"CAN","A","N",NA,NA,NA
+NA,2017,16,"7_CAN","Subalpine",7,"CAN","A","N",NA,NA,NA
+NA,2018,17,"7_CAN","Subalpine",7,"CAN","A","N",NA,NA,NA
+NA,2003,2,"1_CAX","Longs",1,"CAX","A","X",NA,NA,NA
+NA,2004,3,"1_CAX","Longs",1,"CAX","A","X",NA,NA,NA
+NA,2005,4,"1_CAX","Longs",1,"CAX","A","X",NA,NA,NA
+"AREFEN",2006,5,"1_CAX","Longs",1,"CAX","A","X","ARFE3","Arenaria fendleri","forb"
+NA,2007,6,"1_CAX","Longs",1,"CAX","A","X",NA,NA,NA
+NA,2008,7,"1_CAX","Longs",1,"CAX","A","X",NA,NA,NA
+NA,2009,8,"1_CAX","Longs",1,"CAX","A","X",NA,NA,NA
+NA,2010,9,"1_CAX","Longs",1,"CAX","A","X",NA,NA,NA
+NA,2011,10,"1_CAX","Longs",1,"CAX","A","X",NA,NA,NA
+NA,2012,11,"1_CAX","Longs",1,"CAX","A","X",NA,NA,NA
+NA,2013,12,"1_CAX","Longs",1,"CAX","A","X",NA,NA,NA
+NA,2014,13,"1_CAX","Longs",1,"CAX","A","X",NA,NA,NA
+NA,2015,14,"1_CAX","Longs",1,"CAX","A","X",NA,NA,NA
+NA,2016,15,"1_CAX","Longs",1,"CAX","A","X",NA,NA,NA
+"ERISIM",2017,16,"1_CAX","Longs",1,"CAX","A","X","ERSI3","Erigeron simplex","forb"
+NA,2018,17,"1_CAX","Longs",1,"CAX","A","X",NA,NA,NA
+NA,2003,2,"2_CAX","Edge",2,"CAX","A","X",NA,NA,NA
+"CALLEP",2004,3,"2_CAX","Edge",2,"CAX","A","X","CALE4","Caltha leptosepala","forb"
+NA,2005,4,"2_CAX","Edge",2,"CAX","A","X",NA,NA,NA
+NA,2006,5,"2_CAX","Edge",2,"CAX","A","X",NA,NA,NA
+"AREFEN",2007,6,"2_CAX","Edge",2,"CAX","A","X","ARFE3","Arenaria fendleri","forb"
+NA,2008,7,"2_CAX","Edge",2,"CAX","A","X",NA,NA,NA
+"POAALP",2009,8,"2_CAX","Edge",2,"CAX","A","X","POAL2","Poa alpina","graminoid"
+NA,2010,9,"2_CAX","Edge",2,"CAX","A","X",NA,NA,NA
+"POAGLA",2011,10,"2_CAX","Edge",2,"CAX","A","X","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,2012,11,"2_CAX","Edge",2,"CAX","A","X",NA,NA,NA
+NA,2013,12,"2_CAX","Edge",2,"CAX","A","X",NA,NA,NA
+NA,2014,13,"2_CAX","Edge",2,"CAX","A","X",NA,NA,NA
+NA,2015,14,"2_CAX","Edge",2,"CAX","A","X",NA,NA,NA
+"GENAMA",2016,15,"2_CAX","Edge",2,"CAX","A","X","GEAM3","Gentianella amarella","forb"
+"FESBRA",2017,16,"2_CAX","Edge",2,"CAX","A","X","FEBR","Festuca brachyphylla","graminoid"
+NA,2018,17,"2_CAX","Edge",2,"CAX","A","X",NA,NA,NA
+NA,2003,2,"3_CAX","Edge",3,"CAX","A","X",NA,NA,NA
+NA,2004,3,"3_CAX","Edge",3,"CAX","A","X",NA,NA,NA
+"SWEPER",2005,4,"3_CAX","Edge",3,"CAX","A","X","SWPE","Swertia perennis","forb"
+NA,2006,5,"3_CAX","Edge",3,"CAX","A","X",NA,NA,NA
+NA,2007,6,"3_CAX","Edge",3,"CAX","A","X",NA,NA,NA
+"CHIJAM",2008,7,"3_CAX","Edge",3,"CAX","A","X","CHJA","Chionophila jamesii","forb"
+"LEWPYG",2009,8,"3_CAX","Edge",3,"CAX","A","X","LEPY2","Lewisia pygmaea","forb"
+NA,2010,9,"3_CAX","Edge",3,"CAX","A","X",NA,NA,NA
+NA,2011,10,"3_CAX","Edge",3,"CAX","A","X",NA,NA,NA
+NA,2012,11,"3_CAX","Edge",3,"CAX","A","X",NA,NA,NA
+NA,2013,12,"3_CAX","Edge",3,"CAX","A","X",NA,NA,NA
+NA,2014,13,"3_CAX","Edge",3,"CAX","A","X",NA,NA,NA
+NA,2015,14,"3_CAX","Edge",3,"CAX","A","X",NA,NA,NA
+NA,2016,15,"3_CAX","Edge",3,"CAX","A","X",NA,NA,NA
+NA,2017,16,"3_CAX","Edge",3,"CAX","A","X",NA,NA,NA
+"POTDIV",2018,17,"3_CAX","Edge",3,"CAX","A","X","PODI2","Potentilla diversifolia","forb"
+"BISVIV",2003,2,"4_CAX","Tundra Lab",4,"CAX","A","X","POVI3","Polygonum viviparum","forb"
+"SIBPRO",2003,2,"4_CAX","Tundra Lab",4,"CAX","A","X","SIPR","Sibbaldia procumbens","forb"
+NA,2004,3,"4_CAX","Tundra Lab",4,"CAX","A","X",NA,NA,NA
+"CASOCC",2005,4,"4_CAX","Tundra Lab",4,"CAX","A","X","CAOC4","Castilleja occidentalis","forb"
+NA,2006,5,"4_CAX","Tundra Lab",4,"CAX","A","X",NA,NA,NA
+"PHLALP",2007,6,"4_CAX","Tundra Lab",4,"CAX","A","X","PHAL2","Phleum alpinum","graminoid"
+"STELON",2007,6,"4_CAX","Tundra Lab",4,"CAX","A","X","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2008,7,"4_CAX","Tundra Lab",4,"CAX","A","X",NA,NA,NA
+NA,2009,8,"4_CAX","Tundra Lab",4,"CAX","A","X",NA,NA,NA
+NA,2010,9,"4_CAX","Tundra Lab",4,"CAX","A","X",NA,NA,NA
+NA,2011,10,"4_CAX","Tundra Lab",4,"CAX","A","X",NA,NA,NA
+NA,2012,11,"4_CAX","Tundra Lab",4,"CAX","A","X",NA,NA,NA
+NA,2013,12,"4_CAX","Tundra Lab",4,"CAX","A","X",NA,NA,NA
+"CARSCO",2014,13,"4_CAX","Tundra Lab",4,"CAX","A","X","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2015,14,"4_CAX","Tundra Lab",4,"CAX","A","X",NA,NA,NA
+NA,2016,15,"4_CAX","Tundra Lab",4,"CAX","A","X",NA,NA,NA
+NA,2017,16,"4_CAX","Tundra Lab",4,"CAX","A","X",NA,NA,NA
+NA,2018,17,"4_CAX","Tundra Lab",4,"CAX","A","X",NA,NA,NA
+"ALLGEY",2003,2,"5_CAX","Watershed",5,"CAX","A","X","ALGE","Allium geyeri","forb"
+"BISVIV",2003,2,"5_CAX","Watershed",5,"CAX","A","X","POVI3","Polygonum viviparum","forb"
+"CARSCO",2003,2,"5_CAX","Watershed",5,"CAX","A","X","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+"STELON",2003,2,"5_CAX","Watershed",5,"CAX","A","X","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2004,3,"5_CAX","Watershed",5,"CAX","A","X",NA,NA,NA
+"RHORHO",2005,4,"5_CAX","Watershed",5,"CAX","A","X","RHRH4","Rhodiola rhodantha","forb"
+NA,2006,5,"5_CAX","Watershed",5,"CAX","A","X",NA,NA,NA
+NA,2007,6,"5_CAX","Watershed",5,"CAX","A","X",NA,NA,NA
+NA,2008,7,"5_CAX","Watershed",5,"CAX","A","X",NA,NA,NA
+NA,2009,8,"5_CAX","Watershed",5,"CAX","A","X",NA,NA,NA
+"MERLAN",2010,9,"5_CAX","Watershed",5,"CAX","A","X","MELA3","Mertensia lanceolata","forb"
+"SAXRHO",2010,9,"5_CAX","Watershed",5,"CAX","A","X","SARH2","Saxifraga rhomboidea","forb"
+NA,2011,10,"5_CAX","Watershed",5,"CAX","A","X",NA,NA,NA
+NA,2012,11,"5_CAX","Watershed",5,"CAX","A","X",NA,NA,NA
+NA,2013,12,"5_CAX","Watershed",5,"CAX","A","X",NA,NA,NA
+"FESBRA",2014,13,"5_CAX","Watershed",5,"CAX","A","X","FEBR","Festuca brachyphylla","graminoid"
+NA,2015,14,"5_CAX","Watershed",5,"CAX","A","X",NA,NA,NA
+NA,2016,15,"5_CAX","Watershed",5,"CAX","A","X",NA,NA,NA
+NA,2017,16,"5_CAX","Watershed",5,"CAX","A","X",NA,NA,NA
+"CHIJAM",2018,17,"5_CAX","Watershed",5,"CAX","A","X","CHJA","Chionophila jamesii","forb"
+NA,2003,2,"6_CAX","Lefty",6,"CAX","A","X",NA,NA,NA
+NA,2004,3,"6_CAX","Lefty",6,"CAX","A","X",NA,NA,NA
+"STELON",2005,4,"6_CAX","Lefty",6,"CAX","A","X","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2006,5,"6_CAX","Lefty",6,"CAX","A","X",NA,NA,NA
+NA,2007,6,"6_CAX","Lefty",6,"CAX","A","X",NA,NA,NA
+"CASOCC",2008,7,"6_CAX","Lefty",6,"CAX","A","X","CAOC4","Castilleja occidentalis","forb"
+"CHIJAM",2008,7,"6_CAX","Lefty",6,"CAX","A","X","CHJA","Chionophila jamesii","forb"
+NA,2009,8,"6_CAX","Lefty",6,"CAX","A","X",NA,NA,NA
+"POAGLA",2010,9,"6_CAX","Lefty",6,"CAX","A","X","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,2011,10,"6_CAX","Lefty",6,"CAX","A","X",NA,NA,NA
+NA,2012,11,"6_CAX","Lefty",6,"CAX","A","X",NA,NA,NA
+NA,2013,12,"6_CAX","Lefty",6,"CAX","A","X",NA,NA,NA
+"BISVIV",2014,13,"6_CAX","Lefty",6,"CAX","A","X","POVI3","Polygonum viviparum","forb"
+"GENAMA",2014,13,"6_CAX","Lefty",6,"CAX","A","X","GEAM3","Gentianella amarella","forb"
+"TRIPAR",2015,14,"6_CAX","Lefty",6,"CAX","A","X","TRPAP","Trifolium parryi ssp. parryi","forb"
+"ERIMEL",2016,15,"6_CAX","Lefty",6,"CAX","A","X","ERME2","Erigeron melanocephalus","forb"
+NA,2017,16,"6_CAX","Lefty",6,"CAX","A","X",NA,NA,NA
+"DANINT",2018,17,"6_CAX","Lefty",6,"CAX","A","X","DAIN","Danthonia intermedia","graminoid"
+NA,2003,2,"7_CAX","Subalpine",7,"CAX","A","X",NA,NA,NA
+"ALLGEY",2004,3,"7_CAX","Subalpine",7,"CAX","A","X","ALGE","Allium geyeri","forb"
+"BISVIV",2004,3,"7_CAX","Subalpine",7,"CAX","A","X","POVI3","Polygonum viviparum","forb"
+NA,2005,4,"7_CAX","Subalpine",7,"CAX","A","X",NA,NA,NA
+NA,2006,5,"7_CAX","Subalpine",7,"CAX","A","X",NA,NA,NA
+NA,2007,6,"7_CAX","Subalpine",7,"CAX","A","X",NA,NA,NA
+NA,2008,7,"7_CAX","Subalpine",7,"CAX","A","X",NA,NA,NA
+NA,2009,8,"7_CAX","Subalpine",7,"CAX","A","X",NA,NA,NA
+"STELON",2010,9,"7_CAX","Subalpine",7,"CAX","A","X","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2011,10,"7_CAX","Subalpine",7,"CAX","A","X",NA,NA,NA
+"PHLALP",2012,11,"7_CAX","Subalpine",7,"CAX","A","X","PHAL2","Phleum alpinum","graminoid"
+NA,2013,12,"7_CAX","Subalpine",7,"CAX","A","X",NA,NA,NA
+NA,2014,13,"7_CAX","Subalpine",7,"CAX","A","X",NA,NA,NA
+NA,2015,14,"7_CAX","Subalpine",7,"CAX","A","X",NA,NA,NA
+"SEDLAN",2016,15,"7_CAX","Subalpine",7,"CAX","A","X","SELA","Sedum lanceolatum","forb"
+NA,2017,16,"7_CAX","Subalpine",7,"CAX","A","X",NA,NA,NA
+NA,2018,17,"7_CAX","Subalpine",7,"CAX","A","X",NA,NA,NA
+NA,2003,2,"1_CBX","Longs",1,"CBX","B","X",NA,NA,NA
+NA,2004,3,"1_CBX","Longs",1,"CBX","B","X",NA,NA,NA
+NA,2005,4,"1_CBX","Longs",1,"CBX","B","X",NA,NA,NA
+"AREFEN",2006,5,"1_CBX","Longs",1,"CBX","B","X","ARFE3","Arenaria fendleri","forb"
+NA,2007,6,"1_CBX","Longs",1,"CBX","B","X",NA,NA,NA
+NA,2008,7,"1_CBX","Longs",1,"CBX","B","X",NA,NA,NA
+NA,2009,8,"1_CBX","Longs",1,"CBX","B","X",NA,NA,NA
+NA,2010,9,"1_CBX","Longs",1,"CBX","B","X",NA,NA,NA
+NA,2011,10,"1_CBX","Longs",1,"CBX","B","X",NA,NA,NA
+NA,2012,11,"1_CBX","Longs",1,"CBX","B","X",NA,NA,NA
+NA,2013,12,"1_CBX","Longs",1,"CBX","B","X",NA,NA,NA
+"POAALP",2014,13,"1_CBX","Longs",1,"CBX","B","X","POAL2","Poa alpina","graminoid"
+"POAGLA",2014,13,"1_CBX","Longs",1,"CBX","B","X","POGLR2","Poa glauca ssp. rupicola","graminoid"
+"CASOCC",2015,14,"1_CBX","Longs",1,"CBX","B","X","CAOC4","Castilleja occidentalis","forb"
+NA,2016,15,"1_CBX","Longs",1,"CBX","B","X",NA,NA,NA
+NA,2017,16,"1_CBX","Longs",1,"CBX","B","X",NA,NA,NA
+"TRISPI",2018,17,"1_CBX","Longs",1,"CBX","B","X","TRSP2","Trisetum spicatum","graminoid"
+NA,2003,2,"2_CBX","Edge",2,"CBX","B","X",NA,NA,NA
+NA,2004,3,"2_CBX","Edge",2,"CBX","B","X",NA,NA,NA
+NA,2005,4,"2_CBX","Edge",2,"CBX","B","X",NA,NA,NA
+"AREFEN",2006,5,"2_CBX","Edge",2,"CBX","B","X","ARFE3","Arenaria fendleri","forb"
+NA,2007,6,"2_CBX","Edge",2,"CBX","B","X",NA,NA,NA
+NA,2008,7,"2_CBX","Edge",2,"CBX","B","X",NA,NA,NA
+NA,2009,8,"2_CBX","Edge",2,"CBX","B","X",NA,NA,NA
+NA,2010,9,"2_CBX","Edge",2,"CBX","B","X",NA,NA,NA
+"CASOCC",2011,10,"2_CBX","Edge",2,"CBX","B","X","CAOC4","Castilleja occidentalis","forb"
+NA,2012,11,"2_CBX","Edge",2,"CBX","B","X",NA,NA,NA
+NA,2013,12,"2_CBX","Edge",2,"CBX","B","X",NA,NA,NA
+NA,2014,13,"2_CBX","Edge",2,"CBX","B","X",NA,NA,NA
+NA,2015,14,"2_CBX","Edge",2,"CBX","B","X",NA,NA,NA
+NA,2016,15,"2_CBX","Edge",2,"CBX","B","X",NA,NA,NA
+NA,2017,16,"2_CBX","Edge",2,"CBX","B","X",NA,NA,NA
+"LEWPYG",2018,17,"2_CBX","Edge",2,"CBX","B","X","LEPY2","Lewisia pygmaea","forb"
+"BISVIV",2003,2,"3_CBX","Edge",3,"CBX","B","X","POVI3","Polygonum viviparum","forb"
+"ERISIM",2003,2,"3_CBX","Edge",3,"CBX","B","X","ERSI3","Erigeron simplex","forb"
+NA,2004,3,"3_CBX","Edge",3,"CBX","B","X",NA,NA,NA
+NA,2005,4,"3_CBX","Edge",3,"CBX","B","X",NA,NA,NA
+"AREFEN",2006,5,"3_CBX","Edge",3,"CBX","B","X","ARFE3","Arenaria fendleri","forb"
+NA,2007,6,"3_CBX","Edge",3,"CBX","B","X",NA,NA,NA
+"LEWPYG",2008,7,"3_CBX","Edge",3,"CBX","B","X","LEPY2","Lewisia pygmaea","forb"
+NA,2009,8,"3_CBX","Edge",3,"CBX","B","X",NA,NA,NA
+"LLOSER",2010,9,"3_CBX","Edge",3,"CBX","B","X","LLSE","Lloydia serotina","forb"
+NA,2011,10,"3_CBX","Edge",3,"CBX","B","X",NA,NA,NA
+NA,2012,11,"3_CBX","Edge",3,"CBX","B","X",NA,NA,NA
+NA,2013,12,"3_CBX","Edge",3,"CBX","B","X",NA,NA,NA
+NA,2014,13,"3_CBX","Edge",3,"CBX","B","X",NA,NA,NA
+NA,2015,14,"3_CBX","Edge",3,"CBX","B","X",NA,NA,NA
+NA,2016,15,"3_CBX","Edge",3,"CBX","B","X",NA,NA,NA
+"SALIX_SP1",2017,16,"3_CBX","Edge",3,"CBX","B","X","SALIX","Salix","shrub, subshrub"
+"POTDIV",2018,17,"3_CBX","Edge",3,"CBX","B","X","PODI2","Potentilla diversifolia","forb"
+"SAXRHO",2018,17,"3_CBX","Edge",3,"CBX","B","X","SARH2","Saxifraga rhomboidea","forb"
+NA,2003,2,"4_CBX","Tundra Lab",4,"CBX","B","X",NA,NA,NA
+"BISVIV",2004,3,"4_CBX","Tundra Lab",4,"CBX","B","X","POVI3","Polygonum viviparum","forb"
+"ERIPIN",2004,3,"4_CBX","Tundra Lab",4,"CBX","B","X","ERPI6","Erigeron pinnatisectus","forb"
+"STELON",2005,4,"4_CBX","Tundra Lab",4,"CBX","B","X","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2006,5,"4_CBX","Tundra Lab",4,"CBX","B","X",NA,NA,NA
+"PHLALP",2007,6,"4_CBX","Tundra Lab",4,"CBX","B","X","PHAL2","Phleum alpinum","graminoid"
+"AREFEN",2008,7,"4_CBX","Tundra Lab",4,"CBX","B","X","ARFE3","Arenaria fendleri","forb"
+"POTDIV",2009,8,"4_CBX","Tundra Lab",4,"CBX","B","X","PODI2","Potentilla diversifolia","forb"
+"RHOINT",2010,9,"4_CBX","Tundra Lab",4,"CBX","B","X","RHIN11","Rhodiola integrifolia","forb"
+NA,2011,10,"4_CBX","Tundra Lab",4,"CBX","B","X",NA,NA,NA
+NA,2012,11,"4_CBX","Tundra Lab",4,"CBX","B","X",NA,NA,NA
+NA,2013,12,"4_CBX","Tundra Lab",4,"CBX","B","X",NA,NA,NA
+"CARSCO",2014,13,"4_CBX","Tundra Lab",4,"CBX","B","X","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2015,14,"4_CBX","Tundra Lab",4,"CBX","B","X",NA,NA,NA
+NA,2016,15,"4_CBX","Tundra Lab",4,"CBX","B","X",NA,NA,NA
+"CASOCC",2017,16,"4_CBX","Tundra Lab",4,"CBX","B","X","CAOC4","Castilleja occidentalis","forb"
+NA,2018,17,"4_CBX","Tundra Lab",4,"CBX","B","X",NA,NA,NA
+"CARSCO",2003,2,"5_CBX","Watershed",5,"CBX","B","X","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2004,3,"5_CBX","Watershed",5,"CBX","B","X",NA,NA,NA
+"BISVIV",2005,4,"5_CBX","Watershed",5,"CBX","B","X","POVI3","Polygonum viviparum","forb"
+"CHIJAM",2005,4,"5_CBX","Watershed",5,"CBX","B","X","CHJA","Chionophila jamesii","forb"
+"PEDGRO",2005,4,"5_CBX","Watershed",5,"CBX","B","X","PEGR2","Pedicularis groenlandica","forb"
+NA,2006,5,"5_CBX","Watershed",5,"CBX","B","X",NA,NA,NA
+NA,2007,6,"5_CBX","Watershed",5,"CBX","B","X",NA,NA,NA
+NA,2008,7,"5_CBX","Watershed",5,"CBX","B","X",NA,NA,NA
+NA,2009,8,"5_CBX","Watershed",5,"CBX","B","X",NA,NA,NA
+NA,2010,9,"5_CBX","Watershed",5,"CBX","B","X",NA,NA,NA
+NA,2011,10,"5_CBX","Watershed",5,"CBX","B","X",NA,NA,NA
+NA,2012,11,"5_CBX","Watershed",5,"CBX","B","X",NA,NA,NA
+NA,2013,12,"5_CBX","Watershed",5,"CBX","B","X",NA,NA,NA
+NA,2014,13,"5_CBX","Watershed",5,"CBX","B","X",NA,NA,NA
+NA,2015,14,"5_CBX","Watershed",5,"CBX","B","X",NA,NA,NA
+NA,2016,15,"5_CBX","Watershed",5,"CBX","B","X",NA,NA,NA
+NA,2017,16,"5_CBX","Watershed",5,"CBX","B","X",NA,NA,NA
+"CAMROT",2018,17,"5_CBX","Watershed",5,"CBX","B","X","CARO2","Campanula rotundifolia","forb"
+"BISVIV",2003,2,"6_CBX","Lefty",6,"CBX","B","X","POVI3","Polygonum viviparum","forb"
+NA,2004,3,"6_CBX","Lefty",6,"CBX","B","X",NA,NA,NA
+"STELON",2005,4,"6_CBX","Lefty",6,"CBX","B","X","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2006,5,"6_CBX","Lefty",6,"CBX","B","X",NA,NA,NA
+NA,2007,6,"6_CBX","Lefty",6,"CBX","B","X",NA,NA,NA
+"CASOCC",2008,7,"6_CBX","Lefty",6,"CBX","B","X","CAOC4","Castilleja occidentalis","forb"
+NA,2009,8,"6_CBX","Lefty",6,"CBX","B","X",NA,NA,NA
+NA,2010,9,"6_CBX","Lefty",6,"CBX","B","X",NA,NA,NA
+"AREFEN",2011,10,"6_CBX","Lefty",6,"CBX","B","X","ARFE3","Arenaria fendleri","forb"
+"POAGLA",2011,10,"6_CBX","Lefty",6,"CBX","B","X","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,2012,11,"6_CBX","Lefty",6,"CBX","B","X",NA,NA,NA
+NA,2013,12,"6_CBX","Lefty",6,"CBX","B","X",NA,NA,NA
+NA,2014,13,"6_CBX","Lefty",6,"CBX","B","X",NA,NA,NA
+NA,2015,14,"6_CBX","Lefty",6,"CBX","B","X",NA,NA,NA
+"TRISPI",2016,15,"6_CBX","Lefty",6,"CBX","B","X","TRSP2","Trisetum spicatum","graminoid"
+NA,2017,16,"6_CBX","Lefty",6,"CBX","B","X",NA,NA,NA
+"GENAMA",2018,17,"6_CBX","Lefty",6,"CBX","B","X","GEAM3","Gentianella amarella","forb"
+NA,2003,2,"7_CBX","Subalpine",7,"CBX","B","X",NA,NA,NA
+"MERLAN",2004,3,"7_CBX","Subalpine",7,"CBX","B","X","MELA3","Mertensia lanceolata","forb"
+"STELON",2005,4,"7_CBX","Subalpine",7,"CBX","B","X","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2006,5,"7_CBX","Subalpine",7,"CBX","B","X",NA,NA,NA
+NA,2007,6,"7_CBX","Subalpine",7,"CBX","B","X",NA,NA,NA
+"RHOINT",2008,7,"7_CBX","Subalpine",7,"CBX","B","X","RHIN11","Rhodiola integrifolia","forb"
+NA,2009,8,"7_CBX","Subalpine",7,"CBX","B","X",NA,NA,NA
+NA,2010,9,"7_CBX","Subalpine",7,"CBX","B","X",NA,NA,NA
+"LUZSPI",2011,10,"7_CBX","Subalpine",7,"CBX","B","X","LUSP4","Luzula spicata","graminoid"
+NA,2012,11,"7_CBX","Subalpine",7,"CBX","B","X",NA,NA,NA
+NA,2013,12,"7_CBX","Subalpine",7,"CBX","B","X",NA,NA,NA
+NA,2014,13,"7_CBX","Subalpine",7,"CBX","B","X",NA,NA,NA
+"RHORHO",2015,14,"7_CBX","Subalpine",7,"CBX","B","X","RHRH4","Rhodiola rhodantha","forb"
+"FESBRA",2016,15,"7_CBX","Subalpine",7,"CBX","B","X","FEBR","Festuca brachyphylla","graminoid"
+"ARTSCO",2017,16,"7_CBX","Subalpine",7,"CBX","B","X","ARSC","Artemisia scopulorum","forb"
+NA,2018,17,"7_CBX","Subalpine",7,"CBX","B","X",NA,NA,NA
+NA,2003,2,"1_CDC","Longs",1,"CDC","D","C",NA,NA,NA
+"ERISIM",2004,3,"1_CDC","Longs",1,"CDC","D","C","ERSI3","Erigeron simplex","forb"
+"BISVIV",2005,4,"1_CDC","Longs",1,"CDC","D","C","POVI3","Polygonum viviparum","forb"
+"RHOINT",2005,4,"1_CDC","Longs",1,"CDC","D","C","RHIN11","Rhodiola integrifolia","forb"
+"RHORHO",2005,4,"1_CDC","Longs",1,"CDC","D","C","RHRH4","Rhodiola rhodantha","forb"
+"AREFEN",2006,5,"1_CDC","Longs",1,"CDC","D","C","ARFE3","Arenaria fendleri","forb"
+NA,2007,6,"1_CDC","Longs",1,"CDC","D","C",NA,NA,NA
+NA,2008,7,"1_CDC","Longs",1,"CDC","D","C",NA,NA,NA
+NA,2009,8,"1_CDC","Longs",1,"CDC","D","C",NA,NA,NA
+"CASOCC",2010,9,"1_CDC","Longs",1,"CDC","D","C","CAOC4","Castilleja occidentalis","forb"
+NA,2011,10,"1_CDC","Longs",1,"CDC","D","C",NA,NA,NA
+NA,2012,11,"1_CDC","Longs",1,"CDC","D","C",NA,NA,NA
+NA,2013,12,"1_CDC","Longs",1,"CDC","D","C",NA,NA,NA
+"POAGLA",2014,13,"1_CDC","Longs",1,"CDC","D","C","POGLR2","Poa glauca ssp. rupicola","graminoid"
+"CHIJAM",2015,14,"1_CDC","Longs",1,"CDC","D","C","CHJA","Chionophila jamesii","forb"
+"MERLAN",2015,14,"1_CDC","Longs",1,"CDC","D","C","MELA3","Mertensia lanceolata","forb"
+NA,2003,2,"2_CDC","Edge",2,"CDC","D","C",NA,NA,NA
+"CALLEP",2004,3,"2_CDC","Edge",2,"CDC","D","C","CALE4","Caltha leptosepala","forb"
+"GENPRO",2004,3,"2_CDC","Edge",2,"CDC","D","C","GEPR3","Gentiana prostrata","forb"
+"RHORHO",2005,4,"2_CDC","Edge",2,"CDC","D","C","RHRH4","Rhodiola rhodantha","forb"
+NA,2006,5,"2_CDC","Edge",2,"CDC","D","C",NA,NA,NA
+"AREFEN",2007,6,"2_CDC","Edge",2,"CDC","D","C","ARFE3","Arenaria fendleri","forb"
+"PHLALP",2007,6,"2_CDC","Edge",2,"CDC","D","C","PHAL2","Phleum alpinum","graminoid"
+NA,2008,7,"2_CDC","Edge",2,"CDC","D","C",NA,NA,NA
+"POAALP",2009,8,"2_CDC","Edge",2,"CDC","D","C","POAL2","Poa alpina","graminoid"
+"STELON",2009,8,"2_CDC","Edge",2,"CDC","D","C","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2010,9,"2_CDC","Edge",2,"CDC","D","C",NA,NA,NA
+NA,2011,10,"2_CDC","Edge",2,"CDC","D","C",NA,NA,NA
+"POTDIV",2012,11,"2_CDC","Edge",2,"CDC","D","C","PODI2","Potentilla diversifolia","forb"
+"LLOSER",2013,12,"2_CDC","Edge",2,"CDC","D","C","LLSE","Lloydia serotina","forb"
+"RHOINT",2014,13,"2_CDC","Edge",2,"CDC","D","C","RHIN11","Rhodiola integrifolia","forb"
+NA,2015,14,"2_CDC","Edge",2,"CDC","D","C",NA,NA,NA
+"RHOINT",2003,2,"3_CDC","Edge",3,"CDC","D","C","RHIN11","Rhodiola integrifolia","forb"
+"BISVIV",2004,3,"3_CDC","Edge",3,"CDC","D","C","POVI3","Polygonum viviparum","forb"
+NA,2005,4,"3_CDC","Edge",3,"CDC","D","C",NA,NA,NA
+NA,2006,5,"3_CDC","Edge",3,"CDC","D","C",NA,NA,NA
+NA,2007,6,"3_CDC","Edge",3,"CDC","D","C",NA,NA,NA
+"TRISPI",2008,7,"3_CDC","Edge",3,"CDC","D","C","TRSP2","Trisetum spicatum","graminoid"
+NA,2009,8,"3_CDC","Edge",3,"CDC","D","C",NA,NA,NA
+NA,2010,9,"3_CDC","Edge",3,"CDC","D","C",NA,NA,NA
+NA,2011,10,"3_CDC","Edge",3,"CDC","D","C",NA,NA,NA
+NA,2012,11,"3_CDC","Edge",3,"CDC","D","C",NA,NA,NA
+NA,2013,12,"3_CDC","Edge",3,"CDC","D","C",NA,NA,NA
+"CHIJAM",2014,13,"3_CDC","Edge",3,"CDC","D","C","CHJA","Chionophila jamesii","forb"
+NA,2015,14,"3_CDC","Edge",3,"CDC","D","C",NA,NA,NA
+NA,2003,2,"4_CDC","Tundra Lab",4,"CDC","D","C",NA,NA,NA
+NA,2004,3,"4_CDC","Tundra Lab",4,"CDC","D","C",NA,NA,NA
+"STELON",2005,4,"4_CDC","Tundra Lab",4,"CDC","D","C","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2006,5,"4_CDC","Tundra Lab",4,"CDC","D","C",NA,NA,NA
+NA,2007,6,"4_CDC","Tundra Lab",4,"CDC","D","C",NA,NA,NA
+NA,2008,7,"4_CDC","Tundra Lab",4,"CDC","D","C",NA,NA,NA
+NA,2009,8,"4_CDC","Tundra Lab",4,"CDC","D","C",NA,NA,NA
+NA,2010,9,"4_CDC","Tundra Lab",4,"CDC","D","C",NA,NA,NA
+NA,2011,10,"4_CDC","Tundra Lab",4,"CDC","D","C",NA,NA,NA
+NA,2012,11,"4_CDC","Tundra Lab",4,"CDC","D","C",NA,NA,NA
+NA,2013,12,"4_CDC","Tundra Lab",4,"CDC","D","C",NA,NA,NA
+"CARSCO",2014,13,"4_CDC","Tundra Lab",4,"CDC","D","C","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2015,14,"4_CDC","Tundra Lab",4,"CDC","D","C",NA,NA,NA
+NA,2003,2,"5_CDC","Watershed",5,"CDC","D","C",NA,NA,NA
+"LEWPYG",2004,3,"5_CDC","Watershed",5,"CDC","D","C","LEPY2","Lewisia pygmaea","forb"
+"CHIJAM",2005,4,"5_CDC","Watershed",5,"CDC","D","C","CHJA","Chionophila jamesii","forb"
+"POAGLA",2005,4,"5_CDC","Watershed",5,"CDC","D","C","POGLR2","Poa glauca ssp. rupicola","graminoid"
+"RHORHO",2005,4,"5_CDC","Watershed",5,"CDC","D","C","RHRH4","Rhodiola rhodantha","forb"
+NA,2006,5,"5_CDC","Watershed",5,"CDC","D","C",NA,NA,NA
+"ALLGEY",2007,6,"5_CDC","Watershed",5,"CDC","D","C","ALGE","Allium geyeri","forb"
+"STELON",2007,6,"5_CDC","Watershed",5,"CDC","D","C","STLOL7","Stellaria longipes ssp. longipes","forb"
+"RHOINT",2008,7,"5_CDC","Watershed",5,"CDC","D","C","RHIN11","Rhodiola integrifolia","forb"
+"SAXRHO",2008,7,"5_CDC","Watershed",5,"CDC","D","C","SARH2","Saxifraga rhomboidea","forb"
+NA,2009,8,"5_CDC","Watershed",5,"CDC","D","C",NA,NA,NA
+NA,2010,9,"5_CDC","Watershed",5,"CDC","D","C",NA,NA,NA
+NA,2011,10,"5_CDC","Watershed",5,"CDC","D","C",NA,NA,NA
+NA,2012,11,"5_CDC","Watershed",5,"CDC","D","C",NA,NA,NA
+"CASOCC",2013,12,"5_CDC","Watershed",5,"CDC","D","C","CAOC4","Castilleja occidentalis","forb"
+NA,2014,13,"5_CDC","Watershed",5,"CDC","D","C",NA,NA,NA
+NA,2015,14,"5_CDC","Watershed",5,"CDC","D","C",NA,NA,NA
+NA,2003,2,"6_CDC","Lefty",6,"CDC","D","C",NA,NA,NA
+NA,2004,3,"6_CDC","Lefty",6,"CDC","D","C",NA,NA,NA
+"STELON",2005,4,"6_CDC","Lefty",6,"CDC","D","C","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2006,5,"6_CDC","Lefty",6,"CDC","D","C",NA,NA,NA
+NA,2007,6,"6_CDC","Lefty",6,"CDC","D","C",NA,NA,NA
+"BISVIV",2008,7,"6_CDC","Lefty",6,"CDC","D","C","POVI3","Polygonum viviparum","forb"
+NA,2009,8,"6_CDC","Lefty",6,"CDC","D","C",NA,NA,NA
+NA,2010,9,"6_CDC","Lefty",6,"CDC","D","C",NA,NA,NA
+"CASOCC",2011,10,"6_CDC","Lefty",6,"CDC","D","C","CAOC4","Castilleja occidentalis","forb"
+NA,2012,11,"6_CDC","Lefty",6,"CDC","D","C",NA,NA,NA
+NA,2013,12,"6_CDC","Lefty",6,"CDC","D","C",NA,NA,NA
+NA,2014,13,"6_CDC","Lefty",6,"CDC","D","C",NA,NA,NA
+NA,2015,14,"6_CDC","Lefty",6,"CDC","D","C",NA,NA,NA
+NA,2003,2,"7_CDC","Subalpine",7,"CDC","D","C",NA,NA,NA
+NA,2004,3,"7_CDC","Subalpine",7,"CDC","D","C",NA,NA,NA
+"BISVIV",2005,4,"7_CDC","Subalpine",7,"CDC","D","C","POVI3","Polygonum viviparum","forb"
+"STELON",2006,5,"7_CDC","Subalpine",7,"CDC","D","C","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2007,6,"7_CDC","Subalpine",7,"CDC","D","C",NA,NA,NA
+NA,2008,7,"7_CDC","Subalpine",7,"CDC","D","C",NA,NA,NA
+NA,2009,8,"7_CDC","Subalpine",7,"CDC","D","C",NA,NA,NA
+NA,2010,9,"7_CDC","Subalpine",7,"CDC","D","C",NA,NA,NA
+NA,2011,10,"7_CDC","Subalpine",7,"CDC","D","C",NA,NA,NA
+NA,2012,11,"7_CDC","Subalpine",7,"CDC","D","C",NA,NA,NA
+"CARSCO",2013,12,"7_CDC","Subalpine",7,"CDC","D","C","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+"LLOSER",2013,12,"7_CDC","Subalpine",7,"CDC","D","C","LLSE","Lloydia serotina","forb"
+"POAALP",2013,12,"7_CDC","Subalpine",7,"CDC","D","C","POAL2","Poa alpina","graminoid"
+"TRIPAR",2014,13,"7_CDC","Subalpine",7,"CDC","D","C","TRPAP","Trifolium parryi ssp. parryi","forb"
+NA,2015,14,"7_CDC","Subalpine",7,"CDC","D","C",NA,NA,NA
+"GENALG",2003,2,"1_CDN","Longs",1,"CDN","D","N","GEAL2","Gentiana algida","forb"
+NA,2004,3,"1_CDN","Longs",1,"CDN","D","N",NA,NA,NA
+NA,2005,4,"1_CDN","Longs",1,"CDN","D","N",NA,NA,NA
+"AREFEN",2006,5,"1_CDN","Longs",1,"CDN","D","N","ARFE3","Arenaria fendleri","forb"
+NA,2007,6,"1_CDN","Longs",1,"CDN","D","N",NA,NA,NA
+NA,2008,7,"1_CDN","Longs",1,"CDN","D","N",NA,NA,NA
+NA,2009,8,"1_CDN","Longs",1,"CDN","D","N",NA,NA,NA
+NA,2010,9,"1_CDN","Longs",1,"CDN","D","N",NA,NA,NA
+NA,2011,10,"1_CDN","Longs",1,"CDN","D","N",NA,NA,NA
+"BISBIS",2012,11,"1_CDN","Longs",1,"CDN","D","N","POBI6","Polygonum bistortoides","forb"
+NA,2013,12,"1_CDN","Longs",1,"CDN","D","N",NA,NA,NA
+NA,2014,13,"1_CDN","Longs",1,"CDN","D","N",NA,NA,NA
+NA,2015,14,"1_CDN","Longs",1,"CDN","D","N",NA,NA,NA
+"LLOSER",2016,15,"1_CDN","Longs",1,"CDN","D","N","LLSE","Lloydia serotina","forb"
+"POAGLA",2017,16,"1_CDN","Longs",1,"CDN","D","N","POGLR2","Poa glauca ssp. rupicola","graminoid"
+"LUZSPI",2018,17,"1_CDN","Longs",1,"CDN","D","N","LUSP4","Luzula spicata","graminoid"
+"TRISPI",2018,17,"1_CDN","Longs",1,"CDN","D","N","TRSP2","Trisetum spicatum","graminoid"
+NA,2003,2,"2_CDN","Edge",2,"CDN","D","N",NA,NA,NA
+"BISVIV",2004,3,"2_CDN","Edge",2,"CDN","D","N","POVI3","Polygonum viviparum","forb"
+"ERISIM",2004,3,"2_CDN","Edge",2,"CDN","D","N","ERSI3","Erigeron simplex","forb"
+"LLOSER",2004,3,"2_CDN","Edge",2,"CDN","D","N","LLSE","Lloydia serotina","forb"
+NA,2005,4,"2_CDN","Edge",2,"CDN","D","N",NA,NA,NA
+"AREFEN",2006,5,"2_CDN","Edge",2,"CDN","D","N","ARFE3","Arenaria fendleri","forb"
+NA,2007,6,"2_CDN","Edge",2,"CDN","D","N",NA,NA,NA
+NA,2008,7,"2_CDN","Edge",2,"CDN","D","N",NA,NA,NA
+NA,2009,8,"2_CDN","Edge",2,"CDN","D","N",NA,NA,NA
+NA,2010,9,"2_CDN","Edge",2,"CDN","D","N",NA,NA,NA
+NA,2011,10,"2_CDN","Edge",2,"CDN","D","N",NA,NA,NA
+"GENALG",2012,11,"2_CDN","Edge",2,"CDN","D","N","GEAL2","Gentiana algida","forb"
+NA,2013,12,"2_CDN","Edge",2,"CDN","D","N",NA,NA,NA
+NA,2014,13,"2_CDN","Edge",2,"CDN","D","N",NA,NA,NA
+NA,2015,14,"2_CDN","Edge",2,"CDN","D","N",NA,NA,NA
+"CALLEP",2016,15,"2_CDN","Edge",2,"CDN","D","N","CALE4","Caltha leptosepala","forb"
+NA,2017,16,"2_CDN","Edge",2,"CDN","D","N",NA,NA,NA
+NA,2018,17,"2_CDN","Edge",2,"CDN","D","N",NA,NA,NA
+NA,2003,2,"3_CDN","Edge",3,"CDN","D","N",NA,NA,NA
+NA,2004,3,"3_CDN","Edge",3,"CDN","D","N",NA,NA,NA
+NA,2005,4,"3_CDN","Edge",3,"CDN","D","N",NA,NA,NA
+NA,2006,5,"3_CDN","Edge",3,"CDN","D","N",NA,NA,NA
+NA,2007,6,"3_CDN","Edge",3,"CDN","D","N",NA,NA,NA
+NA,2008,7,"3_CDN","Edge",3,"CDN","D","N",NA,NA,NA
+"CASOCC",2009,8,"3_CDN","Edge",3,"CDN","D","N","CAOC4","Castilleja occidentalis","forb"
+NA,2010,9,"3_CDN","Edge",3,"CDN","D","N",NA,NA,NA
+NA,2011,10,"3_CDN","Edge",3,"CDN","D","N",NA,NA,NA
+NA,2012,11,"3_CDN","Edge",3,"CDN","D","N",NA,NA,NA
+NA,2013,12,"3_CDN","Edge",3,"CDN","D","N",NA,NA,NA
+NA,2014,13,"3_CDN","Edge",3,"CDN","D","N",NA,NA,NA
+NA,2015,14,"3_CDN","Edge",3,"CDN","D","N",NA,NA,NA
+NA,2016,15,"3_CDN","Edge",3,"CDN","D","N",NA,NA,NA
+NA,2017,16,"3_CDN","Edge",3,"CDN","D","N",NA,NA,NA
+"ERISIM",2018,17,"3_CDN","Edge",3,"CDN","D","N","ERSI3","Erigeron simplex","forb"
+"LUZSPI",2018,17,"3_CDN","Edge",3,"CDN","D","N","LUSP4","Luzula spicata","graminoid"
+"CASOCC",2003,2,"4_CDN","Tundra Lab",4,"CDN","D","N","CAOC4","Castilleja occidentalis","forb"
+NA,2004,3,"4_CDN","Tundra Lab",4,"CDN","D","N",NA,NA,NA
+NA,2005,4,"4_CDN","Tundra Lab",4,"CDN","D","N",NA,NA,NA
+NA,2006,5,"4_CDN","Tundra Lab",4,"CDN","D","N",NA,NA,NA
+NA,2007,6,"4_CDN","Tundra Lab",4,"CDN","D","N",NA,NA,NA
+NA,2008,7,"4_CDN","Tundra Lab",4,"CDN","D","N",NA,NA,NA
+"LEWPYG",2009,8,"4_CDN","Tundra Lab",4,"CDN","D","N","LEPY2","Lewisia pygmaea","forb"
+NA,2010,9,"4_CDN","Tundra Lab",4,"CDN","D","N",NA,NA,NA
+NA,2011,10,"4_CDN","Tundra Lab",4,"CDN","D","N",NA,NA,NA
+NA,2012,11,"4_CDN","Tundra Lab",4,"CDN","D","N",NA,NA,NA
+NA,2013,12,"4_CDN","Tundra Lab",4,"CDN","D","N",NA,NA,NA
+NA,2014,13,"4_CDN","Tundra Lab",4,"CDN","D","N",NA,NA,NA
+NA,2015,14,"4_CDN","Tundra Lab",4,"CDN","D","N",NA,NA,NA
+"MINOBT",2016,15,"4_CDN","Tundra Lab",4,"CDN","D","N","MIOB2","Minuartia obtusiloba","forb"
+NA,2017,16,"4_CDN","Tundra Lab",4,"CDN","D","N",NA,NA,NA
+NA,2018,17,"4_CDN","Tundra Lab",4,"CDN","D","N",NA,NA,NA
+"RHORHO",2003,2,"5_CDN","Watershed",5,"CDN","D","N","RHRH4","Rhodiola rhodantha","forb"
+NA,2004,3,"5_CDN","Watershed",5,"CDN","D","N",NA,NA,NA
+NA,2005,4,"5_CDN","Watershed",5,"CDN","D","N",NA,NA,NA
+NA,2006,5,"5_CDN","Watershed",5,"CDN","D","N",NA,NA,NA
+NA,2007,6,"5_CDN","Watershed",5,"CDN","D","N",NA,NA,NA
+NA,2008,7,"5_CDN","Watershed",5,"CDN","D","N",NA,NA,NA
+NA,2009,8,"5_CDN","Watershed",5,"CDN","D","N",NA,NA,NA
+NA,2010,9,"5_CDN","Watershed",5,"CDN","D","N",NA,NA,NA
+"POAGLA",2011,10,"5_CDN","Watershed",5,"CDN","D","N","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,2012,11,"5_CDN","Watershed",5,"CDN","D","N",NA,NA,NA
+NA,2013,12,"5_CDN","Watershed",5,"CDN","D","N",NA,NA,NA
+"CHIJAM",2014,13,"5_CDN","Watershed",5,"CDN","D","N","CHJA","Chionophila jamesii","forb"
+NA,2015,14,"5_CDN","Watershed",5,"CDN","D","N",NA,NA,NA
+"FESBRA",2016,15,"5_CDN","Watershed",5,"CDN","D","N","FEBR","Festuca brachyphylla","graminoid"
+NA,2017,16,"5_CDN","Watershed",5,"CDN","D","N",NA,NA,NA
+"CARSCO",2018,17,"5_CDN","Watershed",5,"CDN","D","N","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+"MERLAN",2018,17,"5_CDN","Watershed",5,"CDN","D","N","MELA3","Mertensia lanceolata","forb"
+"PRIANG",2003,2,"6_CDN","Lefty",6,"CDN","D","N","PRAN","Primula angustifolia","forb"
+NA,2004,3,"6_CDN","Lefty",6,"CDN","D","N",NA,NA,NA
+"STELON",2005,4,"6_CDN","Lefty",6,"CDN","D","N","STLOL7","Stellaria longipes ssp. longipes","forb"
+"BISVIV",2006,5,"6_CDN","Lefty",6,"CDN","D","N","POVI3","Polygonum viviparum","forb"
+"SOLMUL",2007,6,"6_CDN","Lefty",6,"CDN","D","N","SOMU","Solidago multiradiata","forb"
+NA,2008,7,"6_CDN","Lefty",6,"CDN","D","N",NA,NA,NA
+NA,2009,8,"6_CDN","Lefty",6,"CDN","D","N",NA,NA,NA
+NA,2010,9,"6_CDN","Lefty",6,"CDN","D","N",NA,NA,NA
+NA,2011,10,"6_CDN","Lefty",6,"CDN","D","N",NA,NA,NA
+NA,2012,11,"6_CDN","Lefty",6,"CDN","D","N",NA,NA,NA
+NA,2013,12,"6_CDN","Lefty",6,"CDN","D","N",NA,NA,NA
+"CALLEP",2014,13,"6_CDN","Lefty",6,"CDN","D","N","CALE4","Caltha leptosepala","forb"
+"SALIX_SP1",2014,13,"6_CDN","Lefty",6,"CDN","D","N","SALIX","Salix","shrub, subshrub"
+NA,2015,14,"6_CDN","Lefty",6,"CDN","D","N",NA,NA,NA
+NA,2016,15,"6_CDN","Lefty",6,"CDN","D","N",NA,NA,NA
+"SIBPRO",2017,16,"6_CDN","Lefty",6,"CDN","D","N","SIPR","Sibbaldia procumbens","forb"
+"GENAMA",2018,17,"6_CDN","Lefty",6,"CDN","D","N","GEAM3","Gentianella amarella","forb"
+"MERLAN",2003,2,"7_CDN","Subalpine",7,"CDN","D","N","MELA3","Mertensia lanceolata","forb"
+"PHLALP",2004,3,"7_CDN","Subalpine",7,"CDN","D","N","PHAL2","Phleum alpinum","graminoid"
+NA,2005,4,"7_CDN","Subalpine",7,"CDN","D","N",NA,NA,NA
+"ACHMIL",2006,5,"7_CDN","Subalpine",7,"CDN","D","N","ACMIA","Achillea millefolium var. alpicola","forb"
+NA,2007,6,"7_CDN","Subalpine",7,"CDN","D","N",NA,NA,NA
+NA,2008,7,"7_CDN","Subalpine",7,"CDN","D","N",NA,NA,NA
+NA,2009,8,"7_CDN","Subalpine",7,"CDN","D","N",NA,NA,NA
+NA,2010,9,"7_CDN","Subalpine",7,"CDN","D","N",NA,NA,NA
+NA,2011,10,"7_CDN","Subalpine",7,"CDN","D","N",NA,NA,NA
+NA,2012,11,"7_CDN","Subalpine",7,"CDN","D","N",NA,NA,NA
+NA,2013,12,"7_CDN","Subalpine",7,"CDN","D","N",NA,NA,NA
+"CASOCC",2014,13,"7_CDN","Subalpine",7,"CDN","D","N","CAOC4","Castilleja occidentalis","forb"
+"CARSCO",2015,14,"7_CDN","Subalpine",7,"CDN","D","N","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+"RHORHO",2016,15,"7_CDN","Subalpine",7,"CDN","D","N","RHRH4","Rhodiola rhodantha","forb"
+NA,2017,16,"7_CDN","Subalpine",7,"CDN","D","N",NA,NA,NA
+"SIBPRO",2018,17,"7_CDN","Subalpine",7,"CDN","D","N","SIPR","Sibbaldia procumbens","forb"
+NA,2003,2,"1_CDX","Longs",1,"CDX","D","X",NA,NA,NA
+NA,2004,3,"1_CDX","Longs",1,"CDX","D","X",NA,NA,NA
+NA,2005,4,"1_CDX","Longs",1,"CDX","D","X",NA,NA,NA
+"AREFEN",2006,5,"1_CDX","Longs",1,"CDX","D","X","ARFE3","Arenaria fendleri","forb"
+NA,2007,6,"1_CDX","Longs",1,"CDX","D","X",NA,NA,NA
+"LEWPYG",2008,7,"1_CDX","Longs",1,"CDX","D","X","LEPY2","Lewisia pygmaea","forb"
+NA,2009,8,"1_CDX","Longs",1,"CDX","D","X",NA,NA,NA
+NA,2010,9,"1_CDX","Longs",1,"CDX","D","X",NA,NA,NA
+NA,2011,10,"1_CDX","Longs",1,"CDX","D","X",NA,NA,NA
+NA,2012,11,"1_CDX","Longs",1,"CDX","D","X",NA,NA,NA
+"POAGLA",2013,12,"1_CDX","Longs",1,"CDX","D","X","POGLR2","Poa glauca ssp. rupicola","graminoid"
+"POAALP",2014,13,"1_CDX","Longs",1,"CDX","D","X","POAL2","Poa alpina","graminoid"
+"SEDLAN",2014,13,"1_CDX","Longs",1,"CDX","D","X","SELA","Sedum lanceolatum","forb"
+NA,2015,14,"1_CDX","Longs",1,"CDX","D","X",NA,NA,NA
+NA,2016,15,"1_CDX","Longs",1,"CDX","D","X",NA,NA,NA
+NA,2017,16,"1_CDX","Longs",1,"CDX","D","X",NA,NA,NA
+"SALIX_SP1",2018,17,"1_CDX","Longs",1,"CDX","D","X","SALIX","Salix","shrub, subshrub"
+"ERISIM",2003,2,"2_CDX","Edge",2,"CDX","D","X","ERSI3","Erigeron simplex","forb"
+"LLOSER",2004,3,"2_CDX","Edge",2,"CDX","D","X","LLSE","Lloydia serotina","forb"
+"RHORHO",2005,4,"2_CDX","Edge",2,"CDX","D","X","RHRH4","Rhodiola rhodantha","forb"
+"AREFEN",2006,5,"2_CDX","Edge",2,"CDX","D","X","ARFE3","Arenaria fendleri","forb"
+"RHOINT",2006,5,"2_CDX","Edge",2,"CDX","D","X","RHIN11","Rhodiola integrifolia","forb"
+NA,2007,6,"2_CDX","Edge",2,"CDX","D","X",NA,NA,NA
+NA,2008,7,"2_CDX","Edge",2,"CDX","D","X",NA,NA,NA
+NA,2009,8,"2_CDX","Edge",2,"CDX","D","X",NA,NA,NA
+NA,2010,9,"2_CDX","Edge",2,"CDX","D","X",NA,NA,NA
+NA,2011,10,"2_CDX","Edge",2,"CDX","D","X",NA,NA,NA
+NA,2012,11,"2_CDX","Edge",2,"CDX","D","X",NA,NA,NA
+NA,2013,12,"2_CDX","Edge",2,"CDX","D","X",NA,NA,NA
+NA,2014,13,"2_CDX","Edge",2,"CDX","D","X",NA,NA,NA
+NA,2015,14,"2_CDX","Edge",2,"CDX","D","X",NA,NA,NA
+NA,2016,15,"2_CDX","Edge",2,"CDX","D","X",NA,NA,NA
+NA,2017,16,"2_CDX","Edge",2,"CDX","D","X",NA,NA,NA
+NA,2018,17,"2_CDX","Edge",2,"CDX","D","X",NA,NA,NA
+"RHORHO",2003,2,"3_CDX","Edge",3,"CDX","D","X","RHRH4","Rhodiola rhodantha","forb"
+NA,2004,3,"3_CDX","Edge",3,"CDX","D","X",NA,NA,NA
+NA,2005,4,"3_CDX","Edge",3,"CDX","D","X",NA,NA,NA
+NA,2006,5,"3_CDX","Edge",3,"CDX","D","X",NA,NA,NA
+"TRIPAR",2007,6,"3_CDX","Edge",3,"CDX","D","X","TRPAP","Trifolium parryi ssp. parryi","forb"
+NA,2008,7,"3_CDX","Edge",3,"CDX","D","X",NA,NA,NA
+NA,2009,8,"3_CDX","Edge",3,"CDX","D","X",NA,NA,NA
+NA,2010,9,"3_CDX","Edge",3,"CDX","D","X",NA,NA,NA
+NA,2011,10,"3_CDX","Edge",3,"CDX","D","X",NA,NA,NA
+"BISVIV",2012,11,"3_CDX","Edge",3,"CDX","D","X","POVI3","Polygonum viviparum","forb"
+"SIBPRO",2012,11,"3_CDX","Edge",3,"CDX","D","X","SIPR","Sibbaldia procumbens","forb"
+NA,2013,12,"3_CDX","Edge",3,"CDX","D","X",NA,NA,NA
+NA,2014,13,"3_CDX","Edge",3,"CDX","D","X",NA,NA,NA
+NA,2015,14,"3_CDX","Edge",3,"CDX","D","X",NA,NA,NA
+NA,2016,15,"3_CDX","Edge",3,"CDX","D","X",NA,NA,NA
+"TRISPI",2017,16,"3_CDX","Edge",3,"CDX","D","X","TRSP2","Trisetum spicatum","graminoid"
+NA,2018,17,"3_CDX","Edge",3,"CDX","D","X",NA,NA,NA
+NA,2003,2,"4_CDX","Tundra Lab",4,"CDX","D","X",NA,NA,NA
+NA,2004,3,"4_CDX","Tundra Lab",4,"CDX","D","X",NA,NA,NA
+NA,2005,4,"4_CDX","Tundra Lab",4,"CDX","D","X",NA,NA,NA
+"AREFEN",2006,5,"4_CDX","Tundra Lab",4,"CDX","D","X","ARFE3","Arenaria fendleri","forb"
+NA,2007,6,"4_CDX","Tundra Lab",4,"CDX","D","X",NA,NA,NA
+NA,2008,7,"4_CDX","Tundra Lab",4,"CDX","D","X",NA,NA,NA
+NA,2009,8,"4_CDX","Tundra Lab",4,"CDX","D","X",NA,NA,NA
+NA,2010,9,"4_CDX","Tundra Lab",4,"CDX","D","X",NA,NA,NA
+NA,2011,10,"4_CDX","Tundra Lab",4,"CDX","D","X",NA,NA,NA
+"BISVIV",2012,11,"4_CDX","Tundra Lab",4,"CDX","D","X","POVI3","Polygonum viviparum","forb"
+NA,2013,12,"4_CDX","Tundra Lab",4,"CDX","D","X",NA,NA,NA
+"CARSCO",2014,13,"4_CDX","Tundra Lab",4,"CDX","D","X","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2015,14,"4_CDX","Tundra Lab",4,"CDX","D","X",NA,NA,NA
+"SAXRHO",2016,15,"4_CDX","Tundra Lab",4,"CDX","D","X","SARH2","Saxifraga rhomboidea","forb"
+NA,2017,16,"4_CDX","Tundra Lab",4,"CDX","D","X",NA,NA,NA
+NA,2018,17,"4_CDX","Tundra Lab",4,"CDX","D","X",NA,NA,NA
+"BISVIV",2003,2,"5_CDX","Watershed",5,"CDX","D","X","POVI3","Polygonum viviparum","forb"
+"MERLAN",2003,2,"5_CDX","Watershed",5,"CDX","D","X","MELA3","Mertensia lanceolata","forb"
+"SIBPRO",2003,2,"5_CDX","Watershed",5,"CDX","D","X","SIPR","Sibbaldia procumbens","forb"
+NA,2004,3,"5_CDX","Watershed",5,"CDX","D","X",NA,NA,NA
+NA,2005,4,"5_CDX","Watershed",5,"CDX","D","X",NA,NA,NA
+NA,2006,5,"5_CDX","Watershed",5,"CDX","D","X",NA,NA,NA
+NA,2007,6,"5_CDX","Watershed",5,"CDX","D","X",NA,NA,NA
+NA,2008,7,"5_CDX","Watershed",5,"CDX","D","X",NA,NA,NA
+NA,2009,8,"5_CDX","Watershed",5,"CDX","D","X",NA,NA,NA
+"ALLGEY",2010,9,"5_CDX","Watershed",5,"CDX","D","X","ALGE","Allium geyeri","forb"
+NA,2011,10,"5_CDX","Watershed",5,"CDX","D","X",NA,NA,NA
+NA,2012,11,"5_CDX","Watershed",5,"CDX","D","X",NA,NA,NA
+NA,2013,12,"5_CDX","Watershed",5,"CDX","D","X",NA,NA,NA
+NA,2014,13,"5_CDX","Watershed",5,"CDX","D","X",NA,NA,NA
+"STELON",2015,14,"5_CDX","Watershed",5,"CDX","D","X","STLOL7","Stellaria longipes ssp. longipes","forb"
+"SOLMUL",2016,15,"5_CDX","Watershed",5,"CDX","D","X","SOMU","Solidago multiradiata","forb"
+"MINOBT",2017,16,"5_CDX","Watershed",5,"CDX","D","X","MIOB2","Minuartia obtusiloba","forb"
+NA,2018,17,"5_CDX","Watershed",5,"CDX","D","X",NA,NA,NA
+NA,2003,2,"6_CDX","Lefty",6,"CDX","D","X",NA,NA,NA
+"BISVIV",2004,3,"6_CDX","Lefty",6,"CDX","D","X","POVI3","Polygonum viviparum","forb"
+"LLOSER",2004,3,"6_CDX","Lefty",6,"CDX","D","X","LLSE","Lloydia serotina","forb"
+"STELON",2005,4,"6_CDX","Lefty",6,"CDX","D","X","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2006,5,"6_CDX","Lefty",6,"CDX","D","X",NA,NA,NA
+NA,2007,6,"6_CDX","Lefty",6,"CDX","D","X",NA,NA,NA
+NA,2008,7,"6_CDX","Lefty",6,"CDX","D","X",NA,NA,NA
+NA,2009,8,"6_CDX","Lefty",6,"CDX","D","X",NA,NA,NA
+NA,2010,9,"6_CDX","Lefty",6,"CDX","D","X",NA,NA,NA
+"CASOCC",2011,10,"6_CDX","Lefty",6,"CDX","D","X","CAOC4","Castilleja occidentalis","forb"
+NA,2012,11,"6_CDX","Lefty",6,"CDX","D","X",NA,NA,NA
+"ALLGEY",2013,12,"6_CDX","Lefty",6,"CDX","D","X","ALGE","Allium geyeri","forb"
+NA,2014,13,"6_CDX","Lefty",6,"CDX","D","X",NA,NA,NA
+"SOLMUL",2015,14,"6_CDX","Lefty",6,"CDX","D","X","SOMU","Solidago multiradiata","forb"
+"LEWPYG",2016,15,"6_CDX","Lefty",6,"CDX","D","X","LEPY2","Lewisia pygmaea","forb"
+NA,2017,16,"6_CDX","Lefty",6,"CDX","D","X",NA,NA,NA
+NA,2018,17,"6_CDX","Lefty",6,"CDX","D","X",NA,NA,NA
+"CASOCC",2003,2,"7_CDX","Subalpine",7,"CDX","D","X","CAOC4","Castilleja occidentalis","forb"
+NA,2004,3,"7_CDX","Subalpine",7,"CDX","D","X",NA,NA,NA
+NA,2005,4,"7_CDX","Subalpine",7,"CDX","D","X",NA,NA,NA
+"MERLAN",2006,5,"7_CDX","Subalpine",7,"CDX","D","X","MELA3","Mertensia lanceolata","forb"
+"RANADO",2006,5,"7_CDX","Subalpine",7,"CDX","D","X","RAAD","Ranunculus adoneus","forb"
+NA,2007,6,"7_CDX","Subalpine",7,"CDX","D","X",NA,NA,NA
+"POAALP",2008,7,"7_CDX","Subalpine",7,"CDX","D","X","POAL2","Poa alpina","graminoid"
+NA,2009,8,"7_CDX","Subalpine",7,"CDX","D","X",NA,NA,NA
+NA,2010,9,"7_CDX","Subalpine",7,"CDX","D","X",NA,NA,NA
+NA,2011,10,"7_CDX","Subalpine",7,"CDX","D","X",NA,NA,NA
+NA,2012,11,"7_CDX","Subalpine",7,"CDX","D","X",NA,NA,NA
+NA,2013,12,"7_CDX","Subalpine",7,"CDX","D","X",NA,NA,NA
+NA,2014,13,"7_CDX","Subalpine",7,"CDX","D","X",NA,NA,NA
+NA,2015,14,"7_CDX","Subalpine",7,"CDX","D","X",NA,NA,NA
+NA,2016,15,"7_CDX","Subalpine",7,"CDX","D","X",NA,NA,NA
+NA,2017,16,"7_CDX","Subalpine",7,"CDX","D","X",NA,NA,NA
+NA,2018,17,"7_CDX","Subalpine",7,"CDX","D","X",NA,NA,NA
+"SAXRHO",2003,2,"1_CXC","Longs",1,"CXC","X","C","SARH2","Saxifraga rhomboidea","forb"
+NA,2004,3,"1_CXC","Longs",1,"CXC","X","C",NA,NA,NA
+NA,2005,4,"1_CXC","Longs",1,"CXC","X","C",NA,NA,NA
+"AREFEN",2006,5,"1_CXC","Longs",1,"CXC","X","C","ARFE3","Arenaria fendleri","forb"
+"MINOBT",2007,6,"1_CXC","Longs",1,"CXC","X","C","MIOB2","Minuartia obtusiloba","forb"
+"CHIJAM",2008,7,"1_CXC","Longs",1,"CXC","X","C","CHJA","Chionophila jamesii","forb"
+"POAALP",2009,8,"1_CXC","Longs",1,"CXC","X","C","POAL2","Poa alpina","graminoid"
+NA,2010,9,"1_CXC","Longs",1,"CXC","X","C",NA,NA,NA
+NA,2011,10,"1_CXC","Longs",1,"CXC","X","C",NA,NA,NA
+NA,2012,11,"1_CXC","Longs",1,"CXC","X","C",NA,NA,NA
+NA,2013,12,"1_CXC","Longs",1,"CXC","X","C",NA,NA,NA
+"POAGLA",2014,13,"1_CXC","Longs",1,"CXC","X","C","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,2015,14,"1_CXC","Longs",1,"CXC","X","C",NA,NA,NA
+NA,2003,2,"2_CXC","Edge",2,"CXC","X","C",NA,NA,NA
+NA,2004,3,"2_CXC","Edge",2,"CXC","X","C",NA,NA,NA
+NA,2005,4,"2_CXC","Edge",2,"CXC","X","C",NA,NA,NA
+"AREFEN",2006,5,"2_CXC","Edge",2,"CXC","X","C","ARFE3","Arenaria fendleri","forb"
+NA,2007,6,"2_CXC","Edge",2,"CXC","X","C",NA,NA,NA
+NA,2008,7,"2_CXC","Edge",2,"CXC","X","C",NA,NA,NA
+"CARSCO",2009,8,"2_CXC","Edge",2,"CXC","X","C","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+"STELON",2009,8,"2_CXC","Edge",2,"CXC","X","C","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2010,9,"2_CXC","Edge",2,"CXC","X","C",NA,NA,NA
+NA,2011,10,"2_CXC","Edge",2,"CXC","X","C",NA,NA,NA
+NA,2012,11,"2_CXC","Edge",2,"CXC","X","C",NA,NA,NA
+NA,2013,12,"2_CXC","Edge",2,"CXC","X","C",NA,NA,NA
+NA,2014,13,"2_CXC","Edge",2,"CXC","X","C",NA,NA,NA
+NA,2015,14,"2_CXC","Edge",2,"CXC","X","C",NA,NA,NA
+NA,2003,2,"3_CXC","Edge",3,"CXC","X","C",NA,NA,NA
+NA,2004,3,"3_CXC","Edge",3,"CXC","X","C",NA,NA,NA
+NA,2005,4,"3_CXC","Edge",3,"CXC","X","C",NA,NA,NA
+"LEWPYG",2006,5,"3_CXC","Edge",3,"CXC","X","C","LEPY2","Lewisia pygmaea","forb"
+NA,2007,6,"3_CXC","Edge",3,"CXC","X","C",NA,NA,NA
+NA,2008,7,"3_CXC","Edge",3,"CXC","X","C",NA,NA,NA
+NA,2009,8,"3_CXC","Edge",3,"CXC","X","C",NA,NA,NA
+"CASOCC",2010,9,"3_CXC","Edge",3,"CXC","X","C","CAOC4","Castilleja occidentalis","forb"
+NA,2011,10,"3_CXC","Edge",3,"CXC","X","C",NA,NA,NA
+NA,2012,11,"3_CXC","Edge",3,"CXC","X","C",NA,NA,NA
+"BISVIV",2013,12,"3_CXC","Edge",3,"CXC","X","C","POVI3","Polygonum viviparum","forb"
+"SALIX_SP1",2014,13,"3_CXC","Edge",3,"CXC","X","C","SALIX","Salix","shrub, subshrub"
+NA,2015,14,"3_CXC","Edge",3,"CXC","X","C",NA,NA,NA
+NA,2003,2,"4_CXC","Tundra Lab",4,"CXC","X","C",NA,NA,NA
+NA,2004,3,"4_CXC","Tundra Lab",4,"CXC","X","C",NA,NA,NA
+NA,2005,4,"4_CXC","Tundra Lab",4,"CXC","X","C",NA,NA,NA
+NA,2006,5,"4_CXC","Tundra Lab",4,"CXC","X","C",NA,NA,NA
+NA,2007,6,"4_CXC","Tundra Lab",4,"CXC","X","C",NA,NA,NA
+NA,2008,7,"4_CXC","Tundra Lab",4,"CXC","X","C",NA,NA,NA
+NA,2009,8,"4_CXC","Tundra Lab",4,"CXC","X","C",NA,NA,NA
+NA,2010,9,"4_CXC","Tundra Lab",4,"CXC","X","C",NA,NA,NA
+"CHIJAM",2011,10,"4_CXC","Tundra Lab",4,"CXC","X","C","CHJA","Chionophila jamesii","forb"
+NA,2012,11,"4_CXC","Tundra Lab",4,"CXC","X","C",NA,NA,NA
+NA,2013,12,"4_CXC","Tundra Lab",4,"CXC","X","C",NA,NA,NA
+"CARSCO",2014,13,"4_CXC","Tundra Lab",4,"CXC","X","C","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+"CARHET",2015,14,"4_CXC","Tundra Lab",4,"CXC","X","C","CAHEC","Carex heteroneura var. chalciolepis","graminoid"
+NA,2003,2,"5_CXC","Watershed",5,"CXC","X","C",NA,NA,NA
+NA,2004,3,"5_CXC","Watershed",5,"CXC","X","C",NA,NA,NA
+NA,2005,4,"5_CXC","Watershed",5,"CXC","X","C",NA,NA,NA
+"AREFEN",2006,5,"5_CXC","Watershed",5,"CXC","X","C","ARFE3","Arenaria fendleri","forb"
+"CALLEP",2007,6,"5_CXC","Watershed",5,"CXC","X","C","CALE4","Caltha leptosepala","forb"
+NA,2008,7,"5_CXC","Watershed",5,"CXC","X","C",NA,NA,NA
+NA,2009,8,"5_CXC","Watershed",5,"CXC","X","C",NA,NA,NA
+NA,2010,9,"5_CXC","Watershed",5,"CXC","X","C",NA,NA,NA
+NA,2011,10,"5_CXC","Watershed",5,"CXC","X","C",NA,NA,NA
+"LEWPYG",2012,11,"5_CXC","Watershed",5,"CXC","X","C","LEPY2","Lewisia pygmaea","forb"
+NA,2013,12,"5_CXC","Watershed",5,"CXC","X","C",NA,NA,NA
+"CARSCO",2014,13,"5_CXC","Watershed",5,"CXC","X","C","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2015,14,"5_CXC","Watershed",5,"CXC","X","C",NA,NA,NA
+"GENAMA",2003,2,"6_CXC","Lefty",6,"CXC","X","C","GEAM3","Gentianella amarella","forb"
+NA,2004,3,"6_CXC","Lefty",6,"CXC","X","C",NA,NA,NA
+NA,2005,4,"6_CXC","Lefty",6,"CXC","X","C",NA,NA,NA
+NA,2006,5,"6_CXC","Lefty",6,"CXC","X","C",NA,NA,NA
+NA,2007,6,"6_CXC","Lefty",6,"CXC","X","C",NA,NA,NA
+"CHIJAM",2008,7,"6_CXC","Lefty",6,"CXC","X","C","CHJA","Chionophila jamesii","forb"
+"FESBRA",2008,7,"6_CXC","Lefty",6,"CXC","X","C","FEBR","Festuca brachyphylla","graminoid"
+NA,2009,8,"6_CXC","Lefty",6,"CXC","X","C",NA,NA,NA
+"POAGLA",2010,9,"6_CXC","Lefty",6,"CXC","X","C","POGLR2","Poa glauca ssp. rupicola","graminoid"
+"CARSCO",2011,10,"6_CXC","Lefty",6,"CXC","X","C","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+"CASOCC",2012,11,"6_CXC","Lefty",6,"CXC","X","C","CAOC4","Castilleja occidentalis","forb"
+"SIBPRO",2012,11,"6_CXC","Lefty",6,"CXC","X","C","SIPR","Sibbaldia procumbens","forb"
+NA,2013,12,"6_CXC","Lefty",6,"CXC","X","C",NA,NA,NA
+"PEDGRO",2014,13,"6_CXC","Lefty",6,"CXC","X","C","PEGR2","Pedicularis groenlandica","forb"
+"TRISPI",2014,13,"6_CXC","Lefty",6,"CXC","X","C","TRSP2","Trisetum spicatum","graminoid"
+NA,2015,14,"6_CXC","Lefty",6,"CXC","X","C",NA,NA,NA
+"BISVIV",2003,2,"7_CXC","Subalpine",7,"CXC","X","C","POVI3","Polygonum viviparum","forb"
+NA,2004,3,"7_CXC","Subalpine",7,"CXC","X","C",NA,NA,NA
+"STELON",2005,4,"7_CXC","Subalpine",7,"CXC","X","C","STLOL7","Stellaria longipes ssp. longipes","forb"
+"CARSCO",2006,5,"7_CXC","Subalpine",7,"CXC","X","C","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+"DANINT",2007,6,"7_CXC","Subalpine",7,"CXC","X","C","DAIN","Danthonia intermedia","graminoid"
+NA,2008,7,"7_CXC","Subalpine",7,"CXC","X","C",NA,NA,NA
+"ARTSCO",2009,8,"7_CXC","Subalpine",7,"CXC","X","C","ARSC","Artemisia scopulorum","forb"
+NA,2010,9,"7_CXC","Subalpine",7,"CXC","X","C",NA,NA,NA
+NA,2011,10,"7_CXC","Subalpine",7,"CXC","X","C",NA,NA,NA
+NA,2012,11,"7_CXC","Subalpine",7,"CXC","X","C",NA,NA,NA
+NA,2013,12,"7_CXC","Subalpine",7,"CXC","X","C",NA,NA,NA
+NA,2014,13,"7_CXC","Subalpine",7,"CXC","X","C",NA,NA,NA
+"LEWPYG",2015,14,"7_CXC","Subalpine",7,"CXC","X","C","LEPY2","Lewisia pygmaea","forb"
+"TRIPAR",2015,14,"7_CXC","Subalpine",7,"CXC","X","C","TRPAP","Trifolium parryi ssp. parryi","forb"
+NA,2003,2,"1_CXN","Longs",1,"CXN","X","N",NA,NA,NA
+"ERISIM",2004,3,"1_CXN","Longs",1,"CXN","X","N","ERSI3","Erigeron simplex","forb"
+NA,2005,4,"1_CXN","Longs",1,"CXN","X","N",NA,NA,NA
+"AREFEN",2006,5,"1_CXN","Longs",1,"CXN","X","N","ARFE3","Arenaria fendleri","forb"
+NA,2007,6,"1_CXN","Longs",1,"CXN","X","N",NA,NA,NA
+"CHIJAM",2008,7,"1_CXN","Longs",1,"CXN","X","N","CHJA","Chionophila jamesii","forb"
+"LEWPYG",2008,7,"1_CXN","Longs",1,"CXN","X","N","LEPY2","Lewisia pygmaea","forb"
+NA,2009,8,"1_CXN","Longs",1,"CXN","X","N",NA,NA,NA
+NA,2010,9,"1_CXN","Longs",1,"CXN","X","N",NA,NA,NA
+NA,2011,10,"1_CXN","Longs",1,"CXN","X","N",NA,NA,NA
+NA,2012,11,"1_CXN","Longs",1,"CXN","X","N",NA,NA,NA
+NA,2013,12,"1_CXN","Longs",1,"CXN","X","N",NA,NA,NA
+"CASOCC",2014,13,"1_CXN","Longs",1,"CXN","X","N","CAOC4","Castilleja occidentalis","forb"
+"POAGLA",2014,13,"1_CXN","Longs",1,"CXN","X","N","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,2015,14,"1_CXN","Longs",1,"CXN","X","N",NA,NA,NA
+NA,2016,15,"1_CXN","Longs",1,"CXN","X","N",NA,NA,NA
+NA,2017,16,"1_CXN","Longs",1,"CXN","X","N",NA,NA,NA
+"DRACRA2",2018,17,"1_CXN","Longs",1,"CXN","X","N","DRCR2","Draba crassifolia","forb"
+"GENALG",2018,17,"1_CXN","Longs",1,"CXN","X","N","GEAL2","Gentiana algida","forb"
+"LUZSPI",2018,17,"1_CXN","Longs",1,"CXN","X","N","LUSP4","Luzula spicata","graminoid"
+"TRISPI",2003,2,"2_CXN","Edge",2,"CXN","X","N","TRSP2","Trisetum spicatum","graminoid"
+NA,2004,3,"2_CXN","Edge",2,"CXN","X","N",NA,NA,NA
+NA,2005,4,"2_CXN","Edge",2,"CXN","X","N",NA,NA,NA
+"AREFEN",2006,5,"2_CXN","Edge",2,"CXN","X","N","ARFE3","Arenaria fendleri","forb"
+NA,2007,6,"2_CXN","Edge",2,"CXN","X","N",NA,NA,NA
+NA,2008,7,"2_CXN","Edge",2,"CXN","X","N",NA,NA,NA
+NA,2009,8,"2_CXN","Edge",2,"CXN","X","N",NA,NA,NA
+NA,2010,9,"2_CXN","Edge",2,"CXN","X","N",NA,NA,NA
+NA,2011,10,"2_CXN","Edge",2,"CXN","X","N",NA,NA,NA
+NA,2012,11,"2_CXN","Edge",2,"CXN","X","N",NA,NA,NA
+NA,2013,12,"2_CXN","Edge",2,"CXN","X","N",NA,NA,NA
+NA,2014,13,"2_CXN","Edge",2,"CXN","X","N",NA,NA,NA
+"CHIJAM",2015,14,"2_CXN","Edge",2,"CXN","X","N","CHJA","Chionophila jamesii","forb"
+NA,2016,15,"2_CXN","Edge",2,"CXN","X","N",NA,NA,NA
+"LEWPYG",2017,16,"2_CXN","Edge",2,"CXN","X","N","LEPY2","Lewisia pygmaea","forb"
+"LLOSER",2018,17,"2_CXN","Edge",2,"CXN","X","N","LLSE","Lloydia serotina","forb"
+"CASOCC",2003,2,"3_CXN","Edge",3,"CXN","X","N","CAOC4","Castilleja occidentalis","forb"
+NA,2004,3,"3_CXN","Edge",3,"CXN","X","N",NA,NA,NA
+"ERISIM",2005,4,"3_CXN","Edge",3,"CXN","X","N","ERSI3","Erigeron simplex","forb"
+NA,2006,5,"3_CXN","Edge",3,"CXN","X","N",NA,NA,NA
+"LEWPYG",2007,6,"3_CXN","Edge",3,"CXN","X","N","LEPY2","Lewisia pygmaea","forb"
+NA,2008,7,"3_CXN","Edge",3,"CXN","X","N",NA,NA,NA
+NA,2009,8,"3_CXN","Edge",3,"CXN","X","N",NA,NA,NA
+"BISVIV",2010,9,"3_CXN","Edge",3,"CXN","X","N","POVI3","Polygonum viviparum","forb"
+NA,2011,10,"3_CXN","Edge",3,"CXN","X","N",NA,NA,NA
+NA,2012,11,"3_CXN","Edge",3,"CXN","X","N",NA,NA,NA
+NA,2013,12,"3_CXN","Edge",3,"CXN","X","N",NA,NA,NA
+NA,2014,13,"3_CXN","Edge",3,"CXN","X","N",NA,NA,NA
+NA,2015,14,"3_CXN","Edge",3,"CXN","X","N",NA,NA,NA
+NA,2016,15,"3_CXN","Edge",3,"CXN","X","N",NA,NA,NA
+NA,2017,16,"3_CXN","Edge",3,"CXN","X","N",NA,NA,NA
+"POAALP",2018,17,"3_CXN","Edge",3,"CXN","X","N","POAL2","Poa alpina","graminoid"
+NA,2003,2,"4_CXN","Tundra Lab",4,"CXN","X","N",NA,NA,NA
+NA,2004,3,"4_CXN","Tundra Lab",4,"CXN","X","N",NA,NA,NA
+"CARSCO",2005,4,"4_CXN","Tundra Lab",4,"CXN","X","N","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+"CASOCC",2005,4,"4_CXN","Tundra Lab",4,"CXN","X","N","CAOC4","Castilleja occidentalis","forb"
+"ERISIM",2005,4,"4_CXN","Tundra Lab",4,"CXN","X","N","ERSI3","Erigeron simplex","forb"
+"STELON",2005,4,"4_CXN","Tundra Lab",4,"CXN","X","N","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2006,5,"4_CXN","Tundra Lab",4,"CXN","X","N",NA,NA,NA
+"PHLALP",2007,6,"4_CXN","Tundra Lab",4,"CXN","X","N","PHAL2","Phleum alpinum","graminoid"
+NA,2008,7,"4_CXN","Tundra Lab",4,"CXN","X","N",NA,NA,NA
+NA,2009,8,"4_CXN","Tundra Lab",4,"CXN","X","N",NA,NA,NA
+NA,2010,9,"4_CXN","Tundra Lab",4,"CXN","X","N",NA,NA,NA
+NA,2011,10,"4_CXN","Tundra Lab",4,"CXN","X","N",NA,NA,NA
+NA,2012,11,"4_CXN","Tundra Lab",4,"CXN","X","N",NA,NA,NA
+NA,2013,12,"4_CXN","Tundra Lab",4,"CXN","X","N",NA,NA,NA
+NA,2014,13,"4_CXN","Tundra Lab",4,"CXN","X","N",NA,NA,NA
+NA,2015,14,"4_CXN","Tundra Lab",4,"CXN","X","N",NA,NA,NA
+NA,2016,15,"4_CXN","Tundra Lab",4,"CXN","X","N",NA,NA,NA
+NA,2017,16,"4_CXN","Tundra Lab",4,"CXN","X","N",NA,NA,NA
+"GEUROS",2018,17,"4_CXN","Tundra Lab",4,"CXN","X","N","GEROT","Geum rossii var. turbinatum","forb"
+NA,2003,2,"5_CXN","Watershed",5,"CXN","X","N",NA,NA,NA
+NA,2004,3,"5_CXN","Watershed",5,"CXN","X","N",NA,NA,NA
+"CHIJAM",2005,4,"5_CXN","Watershed",5,"CXN","X","N","CHJA","Chionophila jamesii","forb"
+"RHORHO",2005,4,"5_CXN","Watershed",5,"CXN","X","N","RHRH4","Rhodiola rhodantha","forb"
+NA,2006,5,"5_CXN","Watershed",5,"CXN","X","N",NA,NA,NA
+NA,2007,6,"5_CXN","Watershed",5,"CXN","X","N",NA,NA,NA
+NA,2008,7,"5_CXN","Watershed",5,"CXN","X","N",NA,NA,NA
+NA,2009,8,"5_CXN","Watershed",5,"CXN","X","N",NA,NA,NA
+NA,2010,9,"5_CXN","Watershed",5,"CXN","X","N",NA,NA,NA
+NA,2011,10,"5_CXN","Watershed",5,"CXN","X","N",NA,NA,NA
+"CASOCC",2012,11,"5_CXN","Watershed",5,"CXN","X","N","CAOC4","Castilleja occidentalis","forb"
+"FESBRA",2012,11,"5_CXN","Watershed",5,"CXN","X","N","FEBR","Festuca brachyphylla","graminoid"
+NA,2013,12,"5_CXN","Watershed",5,"CXN","X","N",NA,NA,NA
+NA,2014,13,"5_CXN","Watershed",5,"CXN","X","N",NA,NA,NA
+"POAGLA",2015,14,"5_CXN","Watershed",5,"CXN","X","N","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,2016,15,"5_CXN","Watershed",5,"CXN","X","N",NA,NA,NA
+"STEUMB",2017,16,"5_CXN","Watershed",5,"CXN","X","N","STUM","Stellaria umbellata","forb"
+"TRISPI",2017,16,"5_CXN","Watershed",5,"CXN","X","N","TRSP2","Trisetum spicatum","graminoid"
+"BISVIV",2018,17,"5_CXN","Watershed",5,"CXN","X","N","POVI3","Polygonum viviparum","forb"
+NA,2003,2,"6_CXN","Lefty",6,"CXN","X","N",NA,NA,NA
+"CASOCC",2004,3,"6_CXN","Lefty",6,"CXN","X","N","CAOC4","Castilleja occidentalis","forb"
+"GENALG",2004,3,"6_CXN","Lefty",6,"CXN","X","N","GEAL2","Gentiana algida","forb"
+"LLOSER",2004,3,"6_CXN","Lefty",6,"CXN","X","N","LLSE","Lloydia serotina","forb"
+"BISVIV",2005,4,"6_CXN","Lefty",6,"CXN","X","N","POVI3","Polygonum viviparum","forb"
+"STELON",2005,4,"6_CXN","Lefty",6,"CXN","X","N","STLOL7","Stellaria longipes ssp. longipes","forb"
+"AREFEN",2006,5,"6_CXN","Lefty",6,"CXN","X","N","ARFE3","Arenaria fendleri","forb"
+NA,2007,6,"6_CXN","Lefty",6,"CXN","X","N",NA,NA,NA
+NA,2008,7,"6_CXN","Lefty",6,"CXN","X","N",NA,NA,NA
+NA,2009,8,"6_CXN","Lefty",6,"CXN","X","N",NA,NA,NA
+NA,2010,9,"6_CXN","Lefty",6,"CXN","X","N",NA,NA,NA
+"POAGLA",2011,10,"6_CXN","Lefty",6,"CXN","X","N","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,2012,11,"6_CXN","Lefty",6,"CXN","X","N",NA,NA,NA
+"POTDIV",2013,12,"6_CXN","Lefty",6,"CXN","X","N","PODI2","Potentilla diversifolia","forb"
+"CARSCO",2014,13,"6_CXN","Lefty",6,"CXN","X","N","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2015,14,"6_CXN","Lefty",6,"CXN","X","N",NA,NA,NA
+NA,2016,15,"6_CXN","Lefty",6,"CXN","X","N",NA,NA,NA
+NA,2017,16,"6_CXN","Lefty",6,"CXN","X","N",NA,NA,NA
+"FESBRA",2018,17,"6_CXN","Lefty",6,"CXN","X","N","FEBR","Festuca brachyphylla","graminoid"
+NA,2003,2,"7_CXN","Subalpine",7,"CXN","X","N",NA,NA,NA
+NA,2004,3,"7_CXN","Subalpine",7,"CXN","X","N",NA,NA,NA
+NA,2005,4,"7_CXN","Subalpine",7,"CXN","X","N",NA,NA,NA
+NA,2006,5,"7_CXN","Subalpine",7,"CXN","X","N",NA,NA,NA
+NA,2007,6,"7_CXN","Subalpine",7,"CXN","X","N",NA,NA,NA
+"ERISIM",2008,7,"7_CXN","Subalpine",7,"CXN","X","N","ERSI3","Erigeron simplex","forb"
+NA,2009,8,"7_CXN","Subalpine",7,"CXN","X","N",NA,NA,NA
+"CARSCO",2010,9,"7_CXN","Subalpine",7,"CXN","X","N","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2011,10,"7_CXN","Subalpine",7,"CXN","X","N",NA,NA,NA
+NA,2012,11,"7_CXN","Subalpine",7,"CXN","X","N",NA,NA,NA
+NA,2013,12,"7_CXN","Subalpine",7,"CXN","X","N",NA,NA,NA
+"SIBPRO",2014,13,"7_CXN","Subalpine",7,"CXN","X","N","SIPR","Sibbaldia procumbens","forb"
+NA,2015,14,"7_CXN","Subalpine",7,"CXN","X","N",NA,NA,NA
+"RHORHO",2016,15,"7_CXN","Subalpine",7,"CXN","X","N","RHRH4","Rhodiola rhodantha","forb"
+NA,2017,16,"7_CXN","Subalpine",7,"CXN","X","N",NA,NA,NA
+NA,2018,17,"7_CXN","Subalpine",7,"CXN","X","N",NA,NA,NA
+NA,2003,2,"1_CXX","Longs",1,"CXX","X","X",NA,NA,NA
+"RHORHO",2004,3,"1_CXX","Longs",1,"CXX","X","X","RHRH4","Rhodiola rhodantha","forb"
+"BISVIV",2005,4,"1_CXX","Longs",1,"CXX","X","X","POVI3","Polygonum viviparum","forb"
+NA,2006,5,"1_CXX","Longs",1,"CXX","X","X",NA,NA,NA
+"GENALG",2007,6,"1_CXX","Longs",1,"CXX","X","X","GEAL2","Gentiana algida","forb"
+NA,2008,7,"1_CXX","Longs",1,"CXX","X","X",NA,NA,NA
+NA,2009,8,"1_CXX","Longs",1,"CXX","X","X",NA,NA,NA
+NA,2010,9,"1_CXX","Longs",1,"CXX","X","X",NA,NA,NA
+NA,2011,10,"1_CXX","Longs",1,"CXX","X","X",NA,NA,NA
+NA,2012,11,"1_CXX","Longs",1,"CXX","X","X",NA,NA,NA
+NA,2013,12,"1_CXX","Longs",1,"CXX","X","X",NA,NA,NA
+"POAGLA",2014,13,"1_CXX","Longs",1,"CXX","X","X","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,2015,14,"1_CXX","Longs",1,"CXX","X","X",NA,NA,NA
+NA,2016,15,"1_CXX","Longs",1,"CXX","X","X",NA,NA,NA
+NA,2017,16,"1_CXX","Longs",1,"CXX","X","X",NA,NA,NA
+NA,2018,17,"1_CXX","Longs",1,"CXX","X","X",NA,NA,NA
+NA,2003,2,"2_CXX","Edge",2,"CXX","X","X",NA,NA,NA
+"ERISIM",2004,3,"2_CXX","Edge",2,"CXX","X","X","ERSI3","Erigeron simplex","forb"
+"MERLAN",2004,3,"2_CXX","Edge",2,"CXX","X","X","MELA3","Mertensia lanceolata","forb"
+NA,2005,4,"2_CXX","Edge",2,"CXX","X","X",NA,NA,NA
+NA,2006,5,"2_CXX","Edge",2,"CXX","X","X",NA,NA,NA
+NA,2007,6,"2_CXX","Edge",2,"CXX","X","X",NA,NA,NA
+"AREFEN",2008,7,"2_CXX","Edge",2,"CXX","X","X","ARFE3","Arenaria fendleri","forb"
+NA,2009,8,"2_CXX","Edge",2,"CXX","X","X",NA,NA,NA
+NA,2010,9,"2_CXX","Edge",2,"CXX","X","X",NA,NA,NA
+NA,2011,10,"2_CXX","Edge",2,"CXX","X","X",NA,NA,NA
+NA,2012,11,"2_CXX","Edge",2,"CXX","X","X",NA,NA,NA
+NA,2013,12,"2_CXX","Edge",2,"CXX","X","X",NA,NA,NA
+NA,2014,13,"2_CXX","Edge",2,"CXX","X","X",NA,NA,NA
+"SWEPER",2015,14,"2_CXX","Edge",2,"CXX","X","X","SWPE","Swertia perennis","forb"
+"LLOSER",2016,15,"2_CXX","Edge",2,"CXX","X","X","LLSE","Lloydia serotina","forb"
+"LEWPYG",2017,16,"2_CXX","Edge",2,"CXX","X","X","LEPY2","Lewisia pygmaea","forb"
+"CHIJAM",2018,17,"2_CXX","Edge",2,"CXX","X","X","CHJA","Chionophila jamesii","forb"
+"RHOINT",2018,17,"2_CXX","Edge",2,"CXX","X","X","RHIN11","Rhodiola integrifolia","forb"
+NA,2003,2,"3_CXX","Edge",3,"CXX","X","X",NA,NA,NA
+NA,2004,3,"3_CXX","Edge",3,"CXX","X","X",NA,NA,NA
+NA,2005,4,"3_CXX","Edge",3,"CXX","X","X",NA,NA,NA
+NA,2006,5,"3_CXX","Edge",3,"CXX","X","X",NA,NA,NA
+NA,2007,6,"3_CXX","Edge",3,"CXX","X","X",NA,NA,NA
+NA,2008,7,"3_CXX","Edge",3,"CXX","X","X",NA,NA,NA
+"AREFEN",2009,8,"3_CXX","Edge",3,"CXX","X","X","ARFE3","Arenaria fendleri","forb"
+"CHIJAM",2010,9,"3_CXX","Edge",3,"CXX","X","X","CHJA","Chionophila jamesii","forb"
+NA,2011,10,"3_CXX","Edge",3,"CXX","X","X",NA,NA,NA
+"RHOINT",2012,11,"3_CXX","Edge",3,"CXX","X","X","RHIN11","Rhodiola integrifolia","forb"
+NA,2013,12,"3_CXX","Edge",3,"CXX","X","X",NA,NA,NA
+NA,2014,13,"3_CXX","Edge",3,"CXX","X","X",NA,NA,NA
+NA,2015,14,"3_CXX","Edge",3,"CXX","X","X",NA,NA,NA
+NA,2016,15,"3_CXX","Edge",3,"CXX","X","X",NA,NA,NA
+NA,2017,16,"3_CXX","Edge",3,"CXX","X","X",NA,NA,NA
+"LEWPYG",2018,17,"3_CXX","Edge",3,"CXX","X","X","LEPY2","Lewisia pygmaea","forb"
+NA,2003,2,"4_CXX","Tundra Lab",4,"CXX","X","X",NA,NA,NA
+NA,2004,3,"4_CXX","Tundra Lab",4,"CXX","X","X",NA,NA,NA
+NA,2005,4,"4_CXX","Tundra Lab",4,"CXX","X","X",NA,NA,NA
+"RANADO",2006,5,"4_CXX","Tundra Lab",4,"CXX","X","X","RAAD","Ranunculus adoneus","forb"
+NA,2007,6,"4_CXX","Tundra Lab",4,"CXX","X","X",NA,NA,NA
+NA,2008,7,"4_CXX","Tundra Lab",4,"CXX","X","X",NA,NA,NA
+"LLOSER",2009,8,"4_CXX","Tundra Lab",4,"CXX","X","X","LLSE","Lloydia serotina","forb"
+NA,2010,9,"4_CXX","Tundra Lab",4,"CXX","X","X",NA,NA,NA
+"CHIJAM",2011,10,"4_CXX","Tundra Lab",4,"CXX","X","X","CHJA","Chionophila jamesii","forb"
+NA,2012,11,"4_CXX","Tundra Lab",4,"CXX","X","X",NA,NA,NA
+NA,2013,12,"4_CXX","Tundra Lab",4,"CXX","X","X",NA,NA,NA
+"CARSCO",2014,13,"4_CXX","Tundra Lab",4,"CXX","X","X","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2015,14,"4_CXX","Tundra Lab",4,"CXX","X","X",NA,NA,NA
+"CALLEP",2016,15,"4_CXX","Tundra Lab",4,"CXX","X","X","CALE4","Caltha leptosepala","forb"
+"LUZSPI",2016,15,"4_CXX","Tundra Lab",4,"CXX","X","X","LUSP4","Luzula spicata","graminoid"
+NA,2017,16,"4_CXX","Tundra Lab",4,"CXX","X","X",NA,NA,NA
+NA,2018,17,"4_CXX","Tundra Lab",4,"CXX","X","X",NA,NA,NA
+"BISVIV",2003,2,"5_CXX","Watershed",5,"CXX","X","X","POVI3","Polygonum viviparum","forb"
+"CARSCO",2003,2,"5_CXX","Watershed",5,"CXX","X","X","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+NA,2004,3,"5_CXX","Watershed",5,"CXX","X","X",NA,NA,NA
+NA,2005,4,"5_CXX","Watershed",5,"CXX","X","X",NA,NA,NA
+NA,2006,5,"5_CXX","Watershed",5,"CXX","X","X",NA,NA,NA
+"GENALG",2007,6,"5_CXX","Watershed",5,"CXX","X","X","GEAL2","Gentiana algida","forb"
+NA,2008,7,"5_CXX","Watershed",5,"CXX","X","X",NA,NA,NA
+NA,2009,8,"5_CXX","Watershed",5,"CXX","X","X",NA,NA,NA
+"ALLGEY",2010,9,"5_CXX","Watershed",5,"CXX","X","X","ALGE","Allium geyeri","forb"
+NA,2011,10,"5_CXX","Watershed",5,"CXX","X","X",NA,NA,NA
+NA,2012,11,"5_CXX","Watershed",5,"CXX","X","X",NA,NA,NA
+NA,2013,12,"5_CXX","Watershed",5,"CXX","X","X",NA,NA,NA
+NA,2014,13,"5_CXX","Watershed",5,"CXX","X","X",NA,NA,NA
+NA,2015,14,"5_CXX","Watershed",5,"CXX","X","X",NA,NA,NA
+"STELON",2016,15,"5_CXX","Watershed",5,"CXX","X","X","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2017,16,"5_CXX","Watershed",5,"CXX","X","X",NA,NA,NA
+NA,2018,17,"5_CXX","Watershed",5,"CXX","X","X",NA,NA,NA
+NA,2003,2,"6_CXX","Lefty",6,"CXX","X","X",NA,NA,NA
+NA,2004,3,"6_CXX","Lefty",6,"CXX","X","X",NA,NA,NA
+"STELON",2005,4,"6_CXX","Lefty",6,"CXX","X","X","STLOL7","Stellaria longipes ssp. longipes","forb"
+NA,2006,5,"6_CXX","Lefty",6,"CXX","X","X",NA,NA,NA
+"BISVIV",2007,6,"6_CXX","Lefty",6,"CXX","X","X","POVI3","Polygonum viviparum","forb"
+"ACHMIL",2008,7,"6_CXX","Lefty",6,"CXX","X","X","ACMIA","Achillea millefolium var. alpicola","forb"
+"TRIPAR",2008,7,"6_CXX","Lefty",6,"CXX","X","X","TRPAP","Trifolium parryi ssp. parryi","forb"
+NA,2009,8,"6_CXX","Lefty",6,"CXX","X","X",NA,NA,NA
+NA,2010,9,"6_CXX","Lefty",6,"CXX","X","X",NA,NA,NA
+"POAGLA",2011,10,"6_CXX","Lefty",6,"CXX","X","X","POGLR2","Poa glauca ssp. rupicola","graminoid"
+NA,2012,11,"6_CXX","Lefty",6,"CXX","X","X",NA,NA,NA
+NA,2013,12,"6_CXX","Lefty",6,"CXX","X","X",NA,NA,NA
+NA,2014,13,"6_CXX","Lefty",6,"CXX","X","X",NA,NA,NA
+NA,2015,14,"6_CXX","Lefty",6,"CXX","X","X",NA,NA,NA
+"ERIMEL",2016,15,"6_CXX","Lefty",6,"CXX","X","X","ERME2","Erigeron melanocephalus","forb"
+"GENAMA",2016,15,"6_CXX","Lefty",6,"CXX","X","X","GEAM3","Gentianella amarella","forb"
+NA,2017,16,"6_CXX","Lefty",6,"CXX","X","X",NA,NA,NA
+NA,2018,17,"6_CXX","Lefty",6,"CXX","X","X",NA,NA,NA
+NA,2003,2,"7_CXX","Subalpine",7,"CXX","X","X",NA,NA,NA
+"ARTSCO",2004,3,"7_CXX","Subalpine",7,"CXX","X","X","ARSC","Artemisia scopulorum","forb"
+NA,2005,4,"7_CXX","Subalpine",7,"CXX","X","X",NA,NA,NA
+"ERIPIN",2006,5,"7_CXX","Subalpine",7,"CXX","X","X","ERPI6","Erigeron pinnatisectus","forb"
+"LEWPYG",2007,6,"7_CXX","Subalpine",7,"CXX","X","X","LEPY2","Lewisia pygmaea","forb"
+NA,2008,7,"7_CXX","Subalpine",7,"CXX","X","X",NA,NA,NA
+NA,2009,8,"7_CXX","Subalpine",7,"CXX","X","X",NA,NA,NA
+"CARSCO",2010,9,"7_CXX","Subalpine",7,"CXX","X","X","CASCS2","Carex scopulorum var. scopulorum","graminoid"
+"TRIPAR",2010,9,"7_CXX","Subalpine",7,"CXX","X","X","TRPAP","Trifolium parryi ssp. parryi","forb"
+NA,2011,10,"7_CXX","Subalpine",7,"CXX","X","X",NA,NA,NA
+"POAALP",2012,11,"7_CXX","Subalpine",7,"CXX","X","X","POAL2","Poa alpina","graminoid"
+NA,2013,12,"7_CXX","Subalpine",7,"CXX","X","X",NA,NA,NA
+NA,2014,13,"7_CXX","Subalpine",7,"CXX","X","X",NA,NA,NA
+NA,2015,14,"7_CXX","Subalpine",7,"CXX","X","X",NA,NA,NA
+NA,2016,15,"7_CXX","Subalpine",7,"CXX","X","X",NA,NA,NA
+NA,2017,16,"7_CXX","Subalpine",7,"CXX","X","X",NA,NA,NA
+NA,2018,17,"7_CXX","Subalpine",7,"CXX","X","X",NA,NA,NA
