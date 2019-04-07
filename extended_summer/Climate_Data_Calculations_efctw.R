@@ -20,7 +20,7 @@ library(plotrix)
 #Saddletemp<-read.csv("~/Dropbox/EmilyComputerBackup/Documents/NWTlter/Saddletemp&ppt/sdltdayv.ml.data.infilled.csv",na.strings = c("."))
 
 # > CTW: read in ctw's infilled temperature dataset (NSF data + ctw infilling 2015-2017)
-Saddletemp <- read_csv("/Users/serahsierra/Documents/Suding\ Lab/NWT_GRA/sdl_temp_infilled_19822017_ctw.csv",
+Saddletemp <- read_csv("extended_summer/output_path/sdl_temp_infilled_19822017_ctw.csv",
                       trim_ws=TRUE, 
                       na = c("", "NA"))
 # > CTW: check it read in correctly

@@ -32,7 +32,26 @@
 ### example lapse rates used with the example data set:
 #lr <- c(-2.33,-3.49,-5.06,-6.63,-5.65,-6.45,-5.82,-5.4,-5.75,-5.24,-5.87,-3.82)
 lr<-c(0,0,0,0,0,0,0,0,0,0,0,0)
-aet <- function(station.elev=3528, site.elev=3528, lapse=lr, fc=75, latitude=40.05){#values for D1 are: elev=3739, latitutde=40.06
+
+
+# > CTW: other prep before running loop
+## > load needed libraries if not already..
+library(tidyverse)
+library(lubridate)
+library(reshape)
+options(stringsAsFactors = F)
+# specify pathway to data
+datpath <- "extended_summer/output_data/"
+
+# read in data
+## jennings
+jennings <- read.csv(paste0(datpath, "jennings/hcn_jennings.csv"))
+## nwt_renewal/ctw infilled (all years)
+suding_all <- read.csv(paste0(datpath, "suding/hcn_suding.csv"))
+## nwt_renewal (years overlap with jennings only [1990-2013])
+suding_jenningsyrs <- read.csv(paste0(datpath, "suding/hcn_suding_19902013.csv"))
+
+aet <- function(station.elev=3528, site.elev=3528, lapse=lr, fc=75, latitude=40.05, dat = jennings){#values for D1 are: elev=3739, latitutde=40.06
   
   ###   LOAD DATA FILE AND CREATE MATRICES:
   ###  tmin[ye,mo,da], tmax[ye,mo,da], pcp[ye,mo,da] 
@@ -41,54 +60,7 @@ aet <- function(station.elev=3528, site.elev=3528, lapse=lr, fc=75, latitude=40.
   
   #hcn<-read.table(file="/Users/farrer/Dropbox/EmilyComputerBackup/Documents/NWTlter/Saddletemp&ppt/Saddle_precip_temp_formoisturedeficit1982.csv", header=TRUE, sep=",", na.strings=".")#file.choose() 
   #hcn<-read.table(file="/Users/farrer/Dropbox/EmilyComputerBackup/Documents/NWTlter/D1temp&ppt/D1_precip_temp_formoisturedeficit.csv", header=TRUE, sep=",", na.strings=".") #the file needs to start with Jan 1
-  
-  # > CTW: read in my infilled 1982-2017 precip data (NSF data + ctw infilling 2015-2017)
-  pcp <- read_csv("/Users/serahsierra/Documents/Suding\ Lab/NWT_GRA/sdl_ppt_infill_19822017_ctw.csv",
-                  trim_ws=TRUE, 
-                  na = c("", "NA"))
-  # clean up, format column names to match Emily's (Year, Month, Day, PCP)
-  pcp <- pcp %>%
-    #filter(`date` > as.Date("1981-07-31")) %>% # start at Jan 1 1982
-    dplyr::select(yr, mon, day, ppt_tot) %>%
-    dplyr::rename(Year = yr,
-                  Month = mon,
-                  Day = `day`,
-                  PCP = ppt_tot)
- 
-  
-   temp <- read_csv("/Users/serahsierra/Documents/Suding\ Lab/NWT_GRA/sdl_temp_infilled_19822017_ctw.csv",
-                   trim_ws=TRUE, 
-                   na = c("", "NA"))
-  # clean up, format column names to match Emily's (Year, Month, Day, TMIN, TMAX)
-  temp <- temp %>%
-    dplyr::select(date, airtemp_max, airtemp_min) %>%
-    #filter(`date` > as.Date("1981-07-31")) %>% # start at Jan 1 1982
-    mutate(Year = year(`date`),
-           Month = month(`date`),
-           Day = day(`date`)) %>%
-    dplyr::rename(TMIN = airtemp_min,
-                  TMAX = airtemp_max) %>%
-    select(Year, Month, Day, TMIN, TMAX)
-  # > CTW: combine pcp and temp to get hcn df (cols: Year, Month, Day, TMIN, TMAX, PCP)
-  hcn <- full_join(temp, pcp)
-  summary(hcn)
-  head(hcn) # starts at Jan 1
-  tail(hcn) # ends at Dec 31
-  
-  # > CTW test: try adding in 0's for Jan 1 1981 - July 30 1981 so code will run without breaking using real July 31-Dec 1981 data
-  # will need to compare to Emily's numbers to make sure 0s didn't change anything fundamentally (their results should be kicked out in the code anyway since keep Sep and onwards only each year)
-  ###  vars to use: Day Month Year TMIN TMAX PCP
-  dates <- seq(from = as.Date("1981-01-01"), to = as.Date("2017-12-31"), by = "day")
-  dates <- data.frame(`date` = dates) %>%
-    mutate(Year = year(`date`),
-           Month = month(`date`),
-           Day = day(`date`))
-  hcn_new <- left_join(dates, hcn)
-  hcn_new$TMIN[which(is.na(hcn_new$TMIN))] <- 0
-  hcn_new$TMAX[which(is.na(hcn_new$TMAX))] <- 0
-  hcn_new$PCP[which(is.na(hcn_new$PCP))] <- 0
-  hcn <- hcn_new
-  
+  hcn <- dat
   year.1 <- hcn$Year[1]  # first year in the data file
   n.years <- hcn$Year[length(hcn$Year)]-year.1+1
   
@@ -99,6 +71,7 @@ aet <- function(station.elev=3528, site.elev=3528, lapse=lr, fc=75, latitude=40.
   #tmax <- array(data=NA, dim=c(n.years, 12, 31), dimnames=c("year","month","day"))
   #pcp <- array(data=NA, dim=c(n.years, 12, 31), dimnames=c("year","month","day"))
   
+
   ### CONVERT TO DEG C AND TO MM PRECIP
   for(i in 1:length(hcn$TMAX)){
     ye <- hcn$Year[i]-year.1+1
@@ -358,7 +331,7 @@ aet <- function(station.elev=3528, site.elev=3528, lapse=lr, fc=75, latitude=40.
   return(AET_out)
 }
 ## write.table(AET_out,"aet.txt")
-write.table(AET_out,"/Users/serahsierra/Documents/Suding\ Lab/NWT_GRA/climate_update/aet.txt")
+write.table(AET_out,paste0(datpath, "jennings/extsum_pca_input/aet.txt"))
 
 aet_results75 <- aet()
 #aet_results75D1 <- aet()#D1 needs to be rerun with actual elevation
@@ -421,7 +394,7 @@ pet5<-pet5[-1,];pet5<-pet5[-37,]#remove first and last row b/c not full data
 SaddlePETwateryear<-pet5
 
 #write.csv(SaddlePETwateryear,"~/Dropbox/EmilyComputerBackup/Documents/NWTlter/Saddletemp&ppt/SaddlePETwateryear.csv",row.names=F,quote=F)
-write.csv(SaddlePETwateryear,"/Users/serahsierra/Documents/Suding\ Lab/NWT_GRA/climate_update/SaddlePETwateryear.csv",row.names=F,quote=F)
+write.csv(SaddlePETwateryear,paste0("extended_summer/output_data/extsum_pca_input/SaddlePETwateryear_", dataset, ".csv"),row.names=F,quote=F)
 
 
 #use pet from above to get spr, sum and fal. I could do winter but it is really low and I don't think it is biolgically useful. 
@@ -434,7 +407,7 @@ petseason<-cbind(year=pet$year,petspr,petsum,petfal2)
 defpetseason<-cbind(defseason,petseason[,2:4])
 
 #write.csv(defpetseason,"~/Dropbox/EmilyComputerBackup/Documents/NWTlter/Saddletemp&ppt/defpetseason.csv",row.names=F,quote=F)
-write.csv(defpetseason,"/Users/serahsierra/Documents/Suding\ Lab/NWT_GRA/climate_update/defpetseason.csv",row.names=F,quote=F)
+write.csv(defpetseason,paste0("extended_summer/output_data/extsum_pca_input/defpetseason_",dataset,".csv"),row.names=F,quote=F)
 
 #potential evapotranspiration of 360 is the treeline cutoff. 320 is my greatest one from D1 (335 is the greatest one from Saddle) so that looks reasonable. See Global Environment Change: Remote Sensing and GIS Perspectives, edited by R.B. Singh
 
