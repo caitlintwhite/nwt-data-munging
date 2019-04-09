@@ -29,16 +29,14 @@
 #DEF = the deficit
 #SUR = surplus
 
-### example lapse rates used with the example data set:
-#lr <- c(-2.33,-3.49,-5.06,-6.63,-5.65,-6.45,-5.82,-5.4,-5.75,-5.24,-5.87,-3.82)
-lr<-c(0,0,0,0,0,0,0,0,0,0,0,0) # <-- CTW: used by EF for NWT renewal 2015
-
+# ---------------------------------------
 # > CTW: other prep before running loop
 ## start with clean environment
 rm(list = ls())
 options(stringsAsFactors = F) # strings read in as characters, not factors
 
 ## load needed libraries if not already..
+library(tidyverse)
 library(reshape)
 options(stringsAsFactors = F)
 ## specify pathway to data
@@ -52,23 +50,30 @@ suding_all <- read.csv(paste0(datpath, "suding/hcn_suding.csv"))
 ## nwt_renewal (years overlap with jennings only [1990-2013])
 suding_jenningsyrs <- read.csv(paste0(datpath, "suding/hcn_suding_19902013.csv"))
 
-aet <- function(station.elev=3528, site.elev=3528, lapse=lr, fc=75, latitude=40.05, dat = jennings){#values for D1 are: elev=3739, latitutde=40.06
+# set lapse rate:
+### example lapse rates used with the example data set:
+#lr <- c(-2.33,-3.49,-5.06,-6.63,-5.65,-6.45,-5.82,-5.4,-5.75,-5.24,-5.87,-3.82)
+lr<-c(0,0,0,0,0,0,0,0,0,0,0,0) # <-- CTW: used by EF for NWT renewal 2015
+station.elev=3528; site.elev=3528; lapse=lr; fc=75; latitude=40.05; dat = jennings
+
+# ----------------------------
+
+aet <- function(station.elev=3528, site.elev=3528, lapse=lr, fc=75, latitude=40.05, hcn){#values for D1 are: elev=3739, latitutde=40.06
   
   ###   LOAD DATA FILE AND CREATE MATRICES:
   ###  tmin[ye,mo,da], tmax[ye,mo,da], pcp[ye,mo,da] 
   ###   == minimum daily temperature, maximum daily temperature and precip for the year, month, and day.
   ###     ye ranges from 1 to n.years.
   
-  #hcn<-read.table(file="/Users/farrer/Dropbox/EmilyComputerBackup/Documents/NWTlter/Saddletemp&ppt/Saddle_precip_temp_formoisturedeficit1982.csv", header=TRUE, sep=",", na.strings=".")#file.choose() 
+  #hcn<-read.table(file.choose(), header=TRUE, sep=",", na.strings=".")
   #hcn<-read.table(file="/Users/farrer/Dropbox/EmilyComputerBackup/Documents/NWTlter/D1temp&ppt/D1_precip_temp_formoisturedeficit.csv", header=TRUE, sep=",", na.strings=".") #the file needs to start with Jan 1
-  hcn <- dat
   year.1 <- hcn$Year[1]  # first year in the data file
   n.years <- hcn$Year[length(hcn$Year)]-year.1+1
   
   tmin <- array(data=NA, dim=c(n.years, 12, 31))
   tmax <- array(data=NA, dim=c(n.years, 12, 31))
   pcp <- array(data=NA, dim=c(n.years, 12, 31))
-  #tmin <- array(data=NA, dim=c(n.years, 12, 31), dimnames=c("year","month","day"))
+  #tmin <- array(data=NA, dim=c(n.years, 12, 31), dimnames=c("year", "month", "day"))
   #tmax <- array(data=NA, dim=c(n.years, 12, 31), dimnames=c("year","month","day"))
   #pcp <- array(data=NA, dim=c(n.years, 12, 31), dimnames=c("year","month","day"))
   
@@ -331,17 +336,22 @@ aet <- function(station.elev=3528, site.elev=3528, lapse=lr, fc=75, latitude=40.
   
   return(AET_out)
 }
+
 ## write.table(AET_out,"aet.txt")
 write.table(AET_out,paste0(datpath, "jennings/extsum_pca_input/aet.txt"))
 
-aet_results75 <- aet()
+aet_results75 <- aet(hcn = jennings)
 #aet_results75D1 <- aet()#D1 needs to be rerun with actual elevation
 plot(1:12,aet_results75[31,14:25])
-
+plot(1:12,aet_results75[nrow(aet_results75), # plot last year in record
+                        # DEF from Jan to Dec
+                        which(colnames(aet_results75) == "DEF.Jan"):which(colnames(aet_results75) == "DEF.Dec")])
 
 
 #Change it to water year
-def<-as.data.frame(cbind(year=aet_results75[,1],aet_results75[,14:25]))
+def<-as.data.frame(cbind(year=aet_results75[,1],
+                         aet_results75[,which(colnames(aet_results75) == "DEF.Jan"):which(colnames(aet_results75) == "DEF.Dec")])
+                         )
 def2<-melt.data.frame(def,id.vars=c('year'))
 def3<-separate(data=def2,col=variable,into=c("def","month"),sep="\\.")
 def3$def<-NULL
@@ -360,13 +370,13 @@ def4$water_yr[def4$month==12]<-def4$water_yr[def4$month==12]+1
 def5<-aggregate.data.frame(def4$def,by=list(year=def4$water_yr),sum)
 colnames(def5)[2]<-"def"
 #def5<-def5[-1,];def5<-def5[-37,]#remove first and last (row b/c not full data
-def5 <- def5[def5$year %in% 1982:2017,]
+def5 <- def5[def5$year %in% min(hcn$Year):max(hcn$Year),]
 Saddlemoisturewateryear<-def5
 
 #use def from above to get sum and fal, deficit is 0 in dec, jan, feb, mar, apr, may
 defsum<-rowSums(def[7:9])
 deffal<-rowSums(def[10:12]) #fall needs to be ajusted to be on wateryear
-deffal2<-c(NA,deffal[1:36]) # > last fall value is the first quarter of WY2018, shift each value downwards to align with correct water year
+deffal2<-c(NA,deffal[1:length(deffal)]) # > last fall value is the first quarter of WY2018, shift each value downwards to align with correct water year
 defseason<-cbind(year=def$year,defsum,deffal2)
 
 
@@ -391,7 +401,7 @@ pet4$water_yr[pet4$month==12]<-pet4$water_yr[pet4$month==12]+1
 
 pet5<-aggregate.data.frame(pet4$pet,by=list(year=pet4$water_yr),sum)
 colnames(pet5)[2]<-"pet"
-pet5<-pet5[-1,];pet5<-pet5[-37,]#remove first and last row b/c not full data
+pet5<-pet5[-1,];pet5<-pet5[-(nrow(pet5)),]#remove first and last row b/c not full data
 SaddlePETwateryear<-pet5
 
 #write.csv(SaddlePETwateryear,"~/Dropbox/EmilyComputerBackup/Documents/NWTlter/Saddletemp&ppt/SaddlePETwateryear.csv",row.names=F,quote=F)

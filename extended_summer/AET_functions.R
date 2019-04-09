@@ -1,3 +1,13 @@
+# functions used for AET in extended summer analysis
+# compiled by: ctw
+# april 2019
+
+# functions include:
+# 1) aet: computes AET, by Daniel Gavin (accessed 2019 apr 8: https://pages.uoregon.edu/dgavin/software/AET_calculator.txt)
+# 2) AETecoyear: summarizes aet output by "water-year" (sep-aug ecoyear) and seasons
+
+
+# ---------------------------------------------------
 ###  COMPUTE WILLMOTT / THORTHWAITE AET USING *DAILY* DATA
 ###  MODIFIED FROM FORTRAN PROGRAM 'WATBUG' BY C. WILLMOTT
 ###  ftp://climate.geog.udel.edu/pub/software/watbug
@@ -16,9 +26,6 @@
 ###  station.elev and site.elev (elevations of the climate data station and study site in meters)
 ###  lapse = array of 12 monthly temperature lapse rates in deg C/km.
 ###  fc = field capacity of the soil (in mm)
-#100mm, Global Environment Change: Remote Sensing and GIS Perspectives edited by R.B. Singh (thin rocky soils of the Front Range)
-#150mm, http://climhy.lternet.edu/documents/climdes/nwt/nwtclim.htm, says it is from D1. Cliff has "tundra" (not saddle) data, with an average soil depth of 39cm (but the max they measured to was 100, so that might be underestimating), so 150/100*50=75 is probably a good estimate
-#possibly I need to adjust for soil depth (I think the assumption is 1 m) in Mountain Geography: Physical and Human Dimensions, edited by Martin F. Price, Alton C. Byers, Donald A. Friend, Thomas Kohler, Larry W. Price, they have a table from niwot that goes down to 60cm. Also the Temperature Regime for Selected SOils in the United States USDA pub has Niwot soil temp probes going down 50cm. Costello and Schmidt Environmental Microbiology (2006) in wet meadow did sampling down to ~35cm. 
 ###  latitude (the latitude of the study site (in degrees)
 
 ### NOTE: the water in the soil is carried over from one year to the next; 
@@ -31,56 +38,52 @@
 
 ### example lapse rates used with the example data set:
 #lr <- c(-2.33,-3.49,-5.06,-6.63,-5.65,-6.45,-5.82,-5.4,-5.75,-5.24,-5.87,-3.82)
-lr<-c(0,0,0,0,0,0,0,0,0,0,0,0) # <-- CTW: used by EF for NWT renewal 2015
+#station.elev=90; site.elev=550; lapse=lr; fc=75; latitude=44
+# > CTW: added in "m" term to specify whether temp and precip units are "metric" (C and mm) or "american" (F and inches)
+# > m term will instruct whether to converts units to metric or not
 
-# > CTW: other prep before running loop
-## start with clean environment
-rm(list = ls())
-options(stringsAsFactors = F) # strings read in as characters, not factors
-
-## load needed libraries if not already..
-library(reshape)
-options(stringsAsFactors = F)
-## specify pathway to data
-datpath <- "extended_summer/output_data/"
-
-# read in data
-## jennings
-jennings <- read.csv(paste0(datpath, "jennings/hcn_jennings.csv"))
-## nwt_renewal/ctw infilled (all years)
-suding_all <- read.csv(paste0(datpath, "suding/hcn_suding.csv"))
-## nwt_renewal (years overlap with jennings only [1990-2013])
-suding_jenningsyrs <- read.csv(paste0(datpath, "suding/hcn_suding_19902013.csv"))
-
-aet <- function(station.elev=3528, site.elev=3528, lapse=lr, fc=75, latitude=40.05, dat = jennings){#values for D1 are: elev=3739, latitutde=40.06
+aet <- function(station.elev, site.elev, lapse, fc, latitude, m){
   
   ###   LOAD DATA FILE AND CREATE MATRICES:
   ###  tmin[ye,mo,da], tmax[ye,mo,da], pcp[ye,mo,da] 
   ###   == minimum daily temperature, maximum daily temperature and precip for the year, month, and day.
   ###     ye ranges from 1 to n.years.
   
-  #hcn<-read.table(file="/Users/farrer/Dropbox/EmilyComputerBackup/Documents/NWTlter/Saddletemp&ppt/Saddle_precip_temp_formoisturedeficit1982.csv", header=TRUE, sep=",", na.strings=".")#file.choose() 
-  #hcn<-read.table(file="/Users/farrer/Dropbox/EmilyComputerBackup/Documents/NWTlter/D1temp&ppt/D1_precip_temp_formoisturedeficit.csv", header=TRUE, sep=",", na.strings=".") #the file needs to start with Jan 1
-  hcn <- dat
+  hcn<-read.table(file=file.choose(), header=TRUE, sep=",", na.strings= c(".", " ", "", "NA", NA))
+  print("Summary of input data:")
+  print(summary(hcn))
+  ###  vars to use: Day Month Year TMIN TMAX PCP
+  
   year.1 <- hcn$Year[1]  # first year in the data file
   n.years <- hcn$Year[length(hcn$Year)]-year.1+1
   
   tmin <- array(data=NA, dim=c(n.years, 12, 31))
   tmax <- array(data=NA, dim=c(n.years, 12, 31))
   pcp <- array(data=NA, dim=c(n.years, 12, 31))
-  #tmin <- array(data=NA, dim=c(n.years, 12, 31), dimnames=c("year","month","day"))
-  #tmax <- array(data=NA, dim=c(n.years, 12, 31), dimnames=c("year","month","day"))
-  #pcp <- array(data=NA, dim=c(n.years, 12, 31), dimnames=c("year","month","day"))
   
-
   ### CONVERT TO DEG C AND TO MM PRECIP
-  for(i in 1:length(hcn$TMAX)){
-    ye <- hcn$Year[i]-year.1+1
-    mo <- hcn$Month[i]
-    da <- hcn$Day[i]
-    tmin[ye,mo,da] <- hcn$TMIN[i]#(hcn$TMIN[i]-32)*5/9
-    tmax[ye,mo,da] <- hcn$TMAX[i]#(hcn$TMAX[i]-32)*5/9
-    pcp[ye,mo,da] <- hcn$PCP[i]#(hcn$PCP[i])*25.4
+  # halt function if units are not metric or american
+  stopifnot(m %in% c("metric", "american"))
+  # if units already metric, keep as they are
+  if(m == "metric") {
+    for(i in 1:length(hcn$TMAX)){
+      ye <- hcn$Year[i]-year.1+1
+      mo <- hcn$Month[i]
+      da <- hcn$Day[i]
+      tmin[ye,mo,da] <- hcn$TMIN[i]
+      tmax[ye,mo,da] <- hcn$TMAX[i]
+      pcp[ye,mo,da] <- hcn$PCP[i]
+    }
+  } else{
+    # convert to metric units
+    for(i in 1:length(hcn$TMAX)){
+      ye <- hcn$Year[i]-year.1+1
+      mo <- hcn$Month[i]
+      da <- hcn$Day[i]
+      tmin[ye,mo,da] <- (hcn$TMIN[i]-32)*5/9
+      tmax[ye,mo,da] <- (hcn$TMAX[i]-32)*5/9
+      pcp[ye,mo,da] <- (hcn$PCP[i])*25.4
+    }
   }
   
   ## len.month[year,month] = number of days in month
@@ -160,8 +163,8 @@ aet <- function(station.elev=3528, site.elev=3528, lapse=lr, fc=75, latitude=40.
       if(tmean.mo[mo] > 0){
         ix <- ix+((tmean.mo[mo]/5)^1.514)
       }
-      ax=.000000675*(ix^3)-.0000771*(ix^2)+.0179*ix+.49   ### ax=a monthly constant
     }
+    ax=.000000675*(ix^3)-.0000771*(ix^2)+.0179*ix+.49   ### ax=an annual constant
     
     julian <- 1
     pet <- array(NA,366)
@@ -192,7 +195,7 @@ aet <- function(station.elev=3528, site.elev=3528, lapse=lr, fc=75, latitude=40.
           if(tmean.site<26.5){
             pet[julian] <- 16*(10*tmean.site/ix)^ax
           } else {
-            pet[julian] <- 415.85+32.24*tmean.site-.43*tmean.site*tmean.site
+            pet[julian] <- -415.85+32.24*tmean.site-.43*tmean.site*tmean.site
           }
         }
         pet_sum <- pet_sum+pet[julian]
@@ -332,83 +335,113 @@ aet <- function(station.elev=3528, site.elev=3528, lapse=lr, fc=75, latitude=40.
   return(AET_out)
 }
 ## write.table(AET_out,"aet.txt")
-write.table(AET_out,paste0(datpath, "jennings/extsum_pca_input/aet.txt"))
-
-aet_results75 <- aet()
-#aet_results75D1 <- aet()#D1 needs to be rerun with actual elevation
-plot(1:12,aet_results75[31,14:25])
 
 
-
-#Change it to water year
-def<-as.data.frame(cbind(year=aet_results75[,1],aet_results75[,14:25]))
-def2<-melt.data.frame(def,id.vars=c('year'))
-def3<-separate(data=def2,col=variable,into=c("def","month"),sep="\\.")
-def3$def<-NULL
-colnames(def3)[3]<-"def"
-head(def3)
-
-#moisture deficit - define water year, same as year for all months except 9, 10, 11, 12, for which it is the following year
-def4<-def3[order(def3$year),]
-def4$month<-rep(1:12)
-def4$water_yr<-def4$year
-def4$water_yr[def4$month==9]<-def4$water_yr[def4$month==9]+1
-def4$water_yr[def4$month==10]<-def4$water_yr[def4$month==10]+1
-def4$water_yr[def4$month==11]<-def4$water_yr[def4$month==11]+1
-def4$water_yr[def4$month==12]<-def4$water_yr[def4$month==12]+1
-
-def5<-aggregate.data.frame(def4$def,by=list(year=def4$water_yr),sum)
-colnames(def5)[2]<-"def"
-#def5<-def5[-1,];def5<-def5[-37,]#remove first and last (row b/c not full data
-def5 <- def5[def5$year %in% 1982:2017,]
-Saddlemoisturewateryear<-def5
-
-#use def from above to get sum and fal, deficit is 0 in dec, jan, feb, mar, apr, may
-defsum<-rowSums(def[7:9])
-deffal<-rowSums(def[10:12]) #fall needs to be ajusted to be on wateryear
-deffal2<-c(NA,deffal[1:36]) # > last fall value is the first quarter of WY2018, shift each value downwards to align with correct water year
-defseason<-cbind(year=def$year,defsum,deffal2)
-
-
-# > CTW: recalc defsum and deffal in tidyverse to check rows
-
-#PET - Change it to water year
-pet<-as.data.frame(cbind(year=aet_results75[,1],aet_results75[,38:49]))
-pet2<-melt.data.frame(pet,id.vars=c('year'))
-pet3<-separate(data=pet2,col=variable,into=c("pet","month"),sep="\\.")
-pet3$pet<-NULL
-colnames(pet3)[3]<-"pet"
-head(pet3)
-
-#define water year, same as year for all months except 9,10, 11, 12, for which it is the following year
-pet4<-pet3[order(pet3$year),]
-pet4$month<-rep(1:12)
-pet4$water_yr<-pet4$year
-pet4$water_yr[pet4$month==9]<-pet4$water_yr[pet4$month==9]+1
-pet4$water_yr[pet4$month==10]<-pet4$water_yr[pet4$month==10]+1
-pet4$water_yr[pet4$month==11]<-pet4$water_yr[pet4$month==11]+1
-pet4$water_yr[pet4$month==12]<-pet4$water_yr[pet4$month==12]+1
-
-pet5<-aggregate.data.frame(pet4$pet,by=list(year=pet4$water_yr),sum)
-colnames(pet5)[2]<-"pet"
-pet5<-pet5[-1,];pet5<-pet5[-37,]#remove first and last row b/c not full data
-SaddlePETwateryear<-pet5
-
-#write.csv(SaddlePETwateryear,"~/Dropbox/EmilyComputerBackup/Documents/NWTlter/Saddletemp&ppt/SaddlePETwateryear.csv",row.names=F,quote=F)
-write.csv(SaddlePETwateryear,paste0("extended_summer/output_data/extsum_pca_input/SaddlePETwateryear_", dataset, ".csv"),row.names=F,quote=F)
-
-
-#use pet from above to get spr, sum and fal. I could do winter but it is really low and I don't think it is biolgically useful. 
-petspr<-rowSums(pet[4:6])
-petsum<-rowSums(pet[7:9])
-petfal<-rowSums(pet[10:12]) #fall needs to be ajusted to be on wateryear
-petfal2<-c(NA,petfal[1:36]) # > shift each fall value 1 row down to align with correct water year
-petseason<-cbind(year=pet$year,petspr,petsum,petfal2)
-
-defpetseason<-cbind(defseason,petseason[,2:4])
-
-#write.csv(defpetseason,"~/Dropbox/EmilyComputerBackup/Documents/NWTlter/Saddletemp&ppt/defpetseason.csv",row.names=F,quote=F)
-write.csv(defpetseason,paste0("extended_summer/output_data/extsum_pca_input/defpetseason_",dataset,".csv"),row.names=F,quote=F)
-
-#potential evapotranspiration of 360 is the treeline cutoff. 320 is my greatest one from D1 (335 is the greatest one from Saddle) so that looks reasonable. See Global Environment Change: Remote Sensing and GIS Perspectives, edited by R.B. Singh
-
+# ----------------------------------------
+AETecoyear <- function(aet_results, outpath){
+  
+  # FXN REQS:
+  ### aet_results = data table output from AET function: rows = year; columns are year, and AET, DEF, SUR and PET for each month (each in its own column) [49 total columns]
+  ### outpath = pathway to where data written out
+  
+  ### libraries needed
+  require(dplyr)
+  require(reshape)
+  
+  ## NOTES: 
+  ### seasons as defined for 2015 NWT renewal...
+  ### spring = mar, apr, may
+  ### summer =  jun, jul, aug
+  ### fall = sep, oct, nov
+  ### wint = dec, jan, feb
+  
+  ### water year used = "ecoyear" (sep - aug), not hydrologic water year (oct-sep)
+  
+  
+  #shift aet output from calendar year to water year
+  def<-as.data.frame(cbind(year=aet_results[,1],
+                           aet_results[,which(colnames(aet_results) == "DEF.Jan"):which(colnames(aet_results) == "DEF.Dec")])
+  )
+  def2<-melt.data.frame(def,id.vars=c('year')) # melt() = gather()
+  def3<-separate(data=def2,col=variable,into=c("def","month"),sep="\\.") # split DEF.mon into two cols by the period
+  def3$def<-NULL # remove DEF column
+  colnames(def3)[3]<-"def"
+  head(def3)
+  
+  # set order of months in calendar to convert character month to numeric month (without lubridate package)
+  month_levels <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+  
+  #moisture deficit - define water year, same as year for all months except 9, 10, 11, 12, for which it is the following year
+  def4<-def3[order(def3$year),]
+  #def4$month<-rep(1:12)
+  def4$month <- factor(def4$month, levels = month_levels) # convert to factor to be sure numeric months assigned correctly
+  def4$month <- as.numeric(def4$month)
+  def4$water_yr<-def4$year
+  def4$water_yr[def4$month > 8]<-def4$water_yr[def4$month > 8]+1
+  
+  
+  def5<-aggregate.data.frame(def4$def,by=list(year=def4$water_yr),sum)
+  colnames(def5)[2]<-"def"
+  # only keep water years that have all 12 months
+  yrs_keep <- sapply(split(def4$month, def4$water_yr), function(x) length(x) == 12)
+  yrs_keep <- names(yrs_keep)[yrs_keep]
+  Saddlemoisturewateryear <- def5[def5$year %in% yrs_keep,]
+  
+  
+  #use def from above to get sum and fal, deficit is 0 in dec, jan, feb, mar, apr, may
+  defsum<-rowSums(def[which(colnames(def) == "DEF.Jun"):which(colnames(def) == "DEF.Aug")]);names(defsum)<-def$year
+  deffal<-rowSums(def[which(colnames(def) == "DEF.Sep"):which(colnames(def) == "DEF.Nov")]);names(deffal)<-(def$year +1) # since fall part of next water year, add 1 to (calendar) year for appropriate water year name
+  defseason<-cbind(year=as.numeric(yrs_keep),
+                   sum_DEF = defsum[names(defsum) %in% yrs_keep],
+                   fal_DEF = deffal[names(deffal) %in% yrs_keep])
+  
+  
+  #PET - Change it to water year
+  pet<-as.data.frame(cbind(year=aet_results[,1],
+                           aet_results[,which(colnames(aet_results) == "PET.Jan"):which(colnames(aet_results) == "PET.Dec")]))
+  pet2<-melt.data.frame(pet,id.vars=c('year'))
+  pet3<-separate(data=pet2,col=variable,into=c("pet","month"),sep="\\.")
+  pet3$pet<-NULL
+  colnames(pet3)[3]<-"pet"
+  head(pet3)
+  
+  #define water year, same as year for all months except 9,10, 11, 12, for which it is the following year
+  pet4<-pet3[order(pet3$year),]
+  #pet4$month<-rep(1:12)
+  pet4$month <- factor(pet4$month, levels = month_levels) # convert to factor to be sure numeric months assigned correctly
+  pet4$month <- as.numeric(pet4$month)
+  pet4$water_yr<-pet4$year
+  pet4$water_yr[pet4$month>8]<-pet4$water_yr[pet4$month>8]+1
+  
+  
+  pet5<-aggregate.data.frame(pet4$pet,by=list(year=pet4$water_yr),sum)
+  colnames(pet5)[2]<-"pet"
+  SaddlePETwateryear<-pet5[pet5$year %in% yrs_keep,]
+  
+  
+  #use pet from above to get spr, sum and fal. 
+  # EF note: I could do winter but it is really low and I don't think it is biolgically useful. 
+  petspr<-rowSums(pet[which(colnames(pet) == "PET.Mar"):which(colnames(pet) == "PET.May")]); names(petspr)<-(def$year)
+  petsum<-rowSums(pet[which(colnames(pet) == "PET.Jun"):which(colnames(pet) == "PET.Aug")]); names(petsum)<-(def$year)
+  petfal<-rowSums(pet[which(colnames(pet) == "PET.Sep"):which(colnames(pet) == "PET.Nov")]); names(petfal)<-(pet$year+1) # since fall part of next water year, add 1 to (calendar) year for appropriate water year name
+  petseason<-cbind(year=as.numeric(yrs_keep),
+                   spr_PET = petspr[names(petspr) %in% yrs_keep],
+                   sum_PET = petsum[names(petsum) %in% yrs_keep],
+                   fal_PET = petfal[names(petfal) %in% yrs_keep])
+  
+  defpetseason<-merge(defseason,petseason) # joins on the year
+  
+  #EF note: potential evapotranspiration of 360 is the treeline cutoff. 320 is my greatest one from D1 (335 is the greatest one from Saddle) so that looks reasonable. See Global Environment Change: Remote Sensing and GIS Perspectives, edited by R.B. Singh
+  
+  # save results
+  print(paste("Yearly moisture deficit, yearly potential ET, and seasonal potential ET datasets written out to", outpath))
+  write.csv(Saddlemoisturewateryear,paste0(outpath, "Saddlemoisturewateryear.csv"),row.names=F,quote=F)
+  write.csv(SaddlePETwateryear,paste0(outpath, "SaddlePETwateryear.csv"),row.names=F,quote=F)
+  write.csv(defpetseason,paste0(outpath, "defpetseason.csv"),row.names=F,quote=F)
+  
+  # output all results to global environment
+  defyrseason <- merge(Saddlemoisturewateryear, SaddlePETwateryear)
+  defyrseason <- merge(defyrseason, defpetseason)
+  print("Returning combined yearly and seasonal moisture deficit and PET data frame to global environment.")
+  return(defyrseason)
+}

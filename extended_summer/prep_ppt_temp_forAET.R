@@ -15,11 +15,11 @@ jennings <- read.csv("https://portal.edirepository.org/nis/dataviewer?packageid=
                      strip.white = T,
                      na.strings = na_vals)
 
-# CTW: my infilled 1982-2017 precip data (NSF data + ctw infilling 2015-2017)
+# CTW: infilled 1982-2017 precip data (NSF renewal data [HH/EF] + ctw infilling 2015-2017)
 suding_ppt <- read.csv("extended_summer/output_data/suding/sdl_ppt_infill_19822017_ctw.csv",
                        strip.white = TRUE, 
                        na.strings = na_vals)
-# CTW: my infilled 1982-2017 temp data (NSF data + ctw infilling 2015-2017)
+# CTW: infilled 1982-2017 temp data (NSF data [HH/EF] + ctw infilling 2015-2017)
 suding_temp <- read.csv("extended_summer/output_data/suding/sdl_temp_infilled_19822017_ctw.csv",
                         strip.white = T,
                         na.strings = na_vals)
