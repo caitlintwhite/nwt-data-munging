@@ -194,6 +194,19 @@ deltaviolin_fig <- ggplot(long_compare, aes(0, delta)) +
 ggsave("extended_summer/figs/PCAsensitivity_metricdelta.png", deltaviolin_fig, 
        width = 6, height = 5, units = "in", scale = 1.4)
 
+climatemetrics_raw_fig <- ggplot(long_compare, aes(eco_year, nsf_val)) +
+  geom_line(col = "dodgerblue2", alpha = 0.5) +
+  geom_point(col = "dodgerblue2", alpha = 0.5) +
+  geom_line(data = long_compare, aes(eco_year, jennings_val), color = "chocolate4", alpha = 0.5) +
+  geom_point(data = long_compare, aes(eco_year, jennings_val), color = "chocolate4", alpha = 0.5) +
+  labs(title = "NWT summer climate metrics used in PCA and PC1 and PC2 scores, by data source",
+       subtitle = "Sources: blue = NWT NSF renewal data (1991-2013), brown = Jennings et al. 2018 (1991-2013)",
+       y = "NWT summer climate value",
+       x = "Year") +
+  facet_wrap(~var, scales = "free_y")
+  
+ggsave("extended_summer/figs/PCAsensitivity_summermetrics.png", climatemetrics_raw_fig)
+
 # plot(1:12,aet_results75[31,14:25])
 # 
 # par(mfrow = c(round(nrow(aet_results75)/8),round(nrow(aet_results75)/4)))
