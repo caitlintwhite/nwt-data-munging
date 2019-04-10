@@ -49,7 +49,7 @@ sdl_jennings <- jennings %>%
   ungroup() %>%
   mutate(Month = month(date),
          Day = day(date)) %>%
-  dplyr::select(Year, Month, Day, TMIN, TMAX, PCP)
+  dplyr::select(date, Year, Month, Day, TMIN, TMAX, PCP)
 
 # review (needs to start at Jan 1 [first yyyy], and end Dec 31 [last yyyy])
 summary(sdl_jennings)

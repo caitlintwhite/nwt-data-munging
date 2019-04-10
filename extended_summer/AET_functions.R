@@ -42,14 +42,15 @@
 # > CTW: added in "m" term to specify whether temp and precip units are "metric" (C and mm) or "american" (F and inches)
 # > m term will instruct whether to converts units to metric or not
 
-aet <- function(station.elev, site.elev, lapse, fc, latitude, m){
+aet <- function(aetdat, m = "metric", station.elev, site.elev, lapse, fc, latitude){
   
   ###   LOAD DATA FILE AND CREATE MATRICES:
   ###  tmin[ye,mo,da], tmax[ye,mo,da], pcp[ye,mo,da] 
   ###   == minimum daily temperature, maximum daily temperature and precip for the year, month, and day.
   ###     ye ranges from 1 to n.years.
   
-  hcn<-read.table(file=file.choose(), header=TRUE, sep=",", na.strings= c(".", " ", "", "NA", NA))
+  #hcn<-read.table(file=file.choose(), header=TRUE, sep=",", na.strings= c(".", " ", "", "NA", NA))
+  hcn <- aetdat
   print("Summary of input data:")
   print(summary(hcn))
   ###  vars to use: Day Month Year TMIN TMAX PCP
@@ -345,7 +346,7 @@ AETecoyear <- function(aet_results, outpath){
   ### outpath = pathway to where data written out
   
   ### libraries needed
-  require(dplyr)
+  require(tidyr)
   require(reshape)
   
   ## NOTES: 
@@ -442,6 +443,7 @@ AETecoyear <- function(aet_results, outpath){
   # output all results to global environment
   defyrseason <- merge(Saddlemoisturewateryear, SaddlePETwateryear)
   defyrseason <- merge(defyrseason, defpetseason)
+  colnames(defyrseason) <- gsub("def|DEF", "moisturedeficit", colnames(defyrseason))
   print("Returning combined yearly and seasonal moisture deficit and PET data frame to global environment.")
   return(defyrseason)
 }

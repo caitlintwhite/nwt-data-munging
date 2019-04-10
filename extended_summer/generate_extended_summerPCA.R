@@ -8,7 +8,7 @@
 
 # > This PCA code come from Lauren Hallett's climate_PCA.R
 
-extendedSummer <- function(dat, year, outpath){
+extendedSummer <- function(pcadat, year, outpath){
   
   require(vegan)
   require(corrgram)
@@ -19,9 +19,9 @@ extendedSummer <- function(dat, year, outpath){
   
   ##THE PCA FOR SUBSEQUENT ANALYSIS: SUMMER-RELATED VARIABLES WITH LONG-TIME SERIES
   ##Summer-only variables with all the possible years (so, fewer variables)
-  climateSummer <- get(dat)
+  climateSummer <- pcadat
   colnames(climateSummer)[which(colnames(climateSummer)== year)] <- "year"
-  climateSummer <- climateSummer[c("year", "sum_meanT", "sum_precip", "sum_moisuturedeficit", "sum_PET", "sum_GDD",
+  climateSummer <- climateSummer[c("year", "sum_meanT", "sum_precip", "sum_moisturedeficit", "sum_PET", "sum_GDD",
                                    "fivedayrunning5C", "fivedayrunning12C", "GSLthreedayneg3C", "iceoff_GL4")]
   climateSummer <- na.omit(climateSummer)
   row.names(climateSummer)<-climateSummer$year
@@ -41,13 +41,13 @@ extendedSummer <- function(dat, year, outpath){
   sumallyrsSummary <- summary(sumallPCA)
   sumallyrs_siteloadings <- as.data.frame(sumallyrsSummary[["sites"]])
   sumallyrs_siteloadings$year <- climateSummer$year
-  sumallyrs_siteloadings <- sumallyrs_siteloadings[c("year", which(colnames(sumallyrs_siteloadings)=="PC1"):which(colnames(sumallyrs_siteloadings)=="PC6"))]
+  sumallyrs_siteloadings <- sumallyrs_siteloadings[,c(which(colnames(sumallyrs_siteloadings)=="year"), which(colnames(sumallyrs_siteloadings)=="PC1"):which(colnames(sumallyrs_siteloadings)=="PC6"))]
   sumallyrs_sploadings <- as.data.frame(sumallyrsSummary[["species"]])
   sumallyrs_sploadings$variable <- rownames(sumallyrs_sploadings) 
-  sumallyrs_sploadings <- sumallyrs_sploadings[c("variable", which(colnames(sumallyrs_sploadings)=="PC1"):which(colnames(sumallyrs_sploadings)=="PC6"))]
+  sumallyrs_sploadings <- sumallyrs_sploadings[c(which(colnames(sumallyrs_sploadings)=="variable"), which(colnames(sumallyrs_sploadings)=="PC1"):which(colnames(sumallyrs_sploadings)=="PC6"))]
   
   #Make the summer all years output (year scores)
-  sumallyrsOutput<-as.data.frame(scores(sumallPCA, choices=c(1,2), display=c("sites"))) %>%
+  sumallyrsOutput<-as.data.frame(scores(sumallPCA, choices=c(1,2), display=c("sites")))
   sumallyrsOutput$site <- row.names(climateSummer) 
   names(sumallyrsOutput)[1:2]=c("sumallPC1", "sumallPC2")
   
@@ -56,18 +56,16 @@ extendedSummer <- function(dat, year, outpath){
   sumallyrsVarout$variable<-rownames(sumallyrsVarout)
   
   write.csv(sumallyrsVarout,paste0(outpath, "NWT_sumallPCVarout_",min(climateSummer$year), max(climateSummer$year), ".csv"), row.names = F, quote = F)
+  write.csv(sumallyrsOutput,paste0(outpath, "NWT_sumallPCOutput_",min(climateSummer$year), max(climateSummer$year), ".csv"), row.names = F, quote = F)
   
   
   ### **** Compile final merged data frame
   
-  NWT_summerPCAclimate <- sumallyrsOutput
-  NWT_summerPCAclimate$year <- as.numeric(year)
-    mutate(year = as.numeric(year)) %>%
-    dplyr::rename(eco_year = `year`) %>%
-    dplyr::select(eco_year, sumallPC1, sumallPC2) %>%
-    left_join(ClimateAll, by = "eco_year") %>%
-    as.data.frame()
+  NWT_summerPCAclimate <- as.data.frame(sumallyrsOutput)
+  colnames(NWT_summerPCAclimate)[3] <- "eco_year"
+  NWT_summerPCAclimate$eco_year <- as.numeric(NWT_summerPCAclimate$eco_year)
+  NWT_summerPCAclimate <- merge(NWT_summerPCAclimate, climateSummer, by.x="eco_year", by.y = "year", all.x =T)
   
-  write.csv(NWT_summerPCAclimate, paste0(outpath, "NWT_sumallPCclimate_",min(climateSummer$year), max(climatesummer$year),".csv"), row.names=F, quote = F)
-  
+  write.csv(NWT_summerPCAclimate, paste0(outpath, "NWT_sumallPCclimate_",min(climateSummer$year), max(climateSummer$year),".csv"), row.names=F, quote = F)
+  return(NWT_summerPCAclimate)
 }

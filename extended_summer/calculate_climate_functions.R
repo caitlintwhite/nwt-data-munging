@@ -3,13 +3,13 @@
 # CTW slightly modified EF's code to be more generic, so can re-use on future climate datasets (i.e. EF wrote for NWT data through 2014 only)
 
 
-summarizeTemp <- function(tempdat, date, tmin, tmax, tmean, outpath){
+summarizeTemp <- function(tempdat, date, tmin, tmax, tmean = NULL, outpath){
   # libraries needed
   require(lubridate)
   require(reshape)
   
   ##Saddle temp data
-  Saddletemp <- get(tempdat)
+  Saddletemp <- tempdat
   
   print("Checking data for NAs...")
   # ensure no NAs in tmin or tmax
@@ -17,7 +17,7 @@ summarizeTemp <- function(tempdat, date, tmin, tmax, tmean, outpath){
   stopifnot(sum(is.na(Saddletemp[[tmax]]))==0)
   
   # if mean temp already present, check for NAs and calculate mean from tmin, tmax for any NAs
-  if(tmean != "no"){
+  if(!is.null(tmean)){
     # rename column
     colnames(Saddletemp)[colnames(Saddletemp)==tmean] <- "mean_temp"
     if(sum(is.na(Saddletemp$mean_temp))>0){
@@ -267,12 +267,12 @@ summarizeTemp <- function(tempdat, date, tmin, tmax, tmean, outpath){
   
   # return compiled temp dataset
   #SaddleGDD #calendar year
-  compiled_temp <- cbind(Saddletemp3short, sum_GDD = SaddleGDDwateryearsum$GDDsum, GDD = SaddleGDDwateryear$GDD,fivedayrunning5C=Saddlefivedayrunning5C$fivedayrunning,fivedayrunning12C=Saddlefivedayrunning12C$fivedayrunning, GSLthreeday0C = Saddlemintempthreeday0$GSLthreeday0C, GSLthreedaynt3C = Saddlemintempthreedayneg3$GSLthreedayneg3C)
+  compiled_temp <- cbind(Saddletemp3short, sum_GDD = SaddleGDDwateryearsum$GDDsum, GDD = SaddleGDDwateryear$GDD,fivedayrunning5C=Saddlefivedayrunning5C$fivedayrunning,fivedayrunning12C=Saddlefivedayrunning12C$fivedayrunning, GSLthreeday0C = Saddlemintempthreeday0$GSLthreeday0C, GSLthreedayneg3C = Saddlemintempthreedayneg3$GSLthreedayneg3C)
   return(compiled_temp)
 }
 
 
-summarizePrecip <- function(pptdat, date, precip, correction, outpath){
+summarizePrecip <- function(pptdat, date, precip, correction=FALSE, outpath){
   
   require(lubridate)
   require(reshape)
@@ -282,7 +282,7 @@ summarizePrecip <- function(pptdat, date, precip, correction, outpath){
   # > CTW: read in infilled through 2017 precip (NSF proposal data + 2015-2017 infilled by ctw)
   # > IMPORTANTE: all precip values in this have already been snow corrected as Emily did (months not JJA * 0.39)
   
-  Saddleprecip <- get(pptdat)
+  Saddleprecip <- pptdat
   
   # ensure no NAs in tmin or tmax
   stopifnot(sum(is.na(Saddleprecip[[precip]]))==0)
@@ -338,12 +338,13 @@ summarizePrecip <- function(pptdat, date, precip, correction, outpath){
   
   
   ###### FINISHING #####
-  #export daily values for AET # values are corrected for blowing snow
-  write.csv(Saddleprecip,paste0(outpath, "Saddleprecip_summary.csv"),row.names=F,quote=F)
-  
-  # return compiled precip summary
-  compiled_precip <- merge(Saddleprecip3short)
-  return(compiled_precip)
+  if(correction){
+    #export daily values for AET # values are corrected for blowing snow
+    write.csv(Saddleprecip, paste0(outpath, "Saddleprecip_wintercorrected.csv"), row.names = F, quote = F)
+  }
+  # write out and return summarized precip data
+  write.csv(Saddleprecip3short,paste0(outpath, "Saddleprecip3short.csv"),row.names=F,quote=F)
+  return(Saddleprecip3short)
   
 }
 
@@ -352,7 +353,7 @@ summarizePrecip <- function(pptdat, date, precip, correction, outpath){
 
 
 
-summariseSnowmelt <- function(snowdat, date, site, depth){
+summarizeSnowmelt <- function(snowdat, outpath, date = "date", site = "sort_num", depth = "mean_depth"){
   
   require(lubridate)
   require(reshape)
@@ -363,7 +364,7 @@ summariseSnowmelt <- function(snowdat, date, site, depth){
   
   #saddlesnow<-read.csv("/Users/farrer/Dropbox/EmilyComputerBackup/Documents/NWTlter/SaddleSnowDepth/NWT_SaddleGridSnow_1992.2014Emily.csv")
   # > CTW: will try using data on NWT portal (current though 2017, not QAd by me)
-  saddlesnow <- get(snowdat)
+  saddlesnow <- snowdat
   
   head(saddlesnow)
   tail(saddlesnow)
@@ -479,7 +480,40 @@ summariseSnowmelt <- function(snowdat, date, site, depth){
 }
 
 
-compileClimate <- function(temp=NULL, precip=NULL, AET=NULL, snow=NULL){
+summarizeIceoff <- function(outpath){
+  # needed library
+  require(tidyr)
+  
+  # read in data from EDI, unless provided
+  lakeice <- read.csv("http://niwot.colorado.edu/data_csvs/glakeice.nc.data.csv",
+                      stringsAsFactors = F,
+                      strip.white = TRUE,
+                      na.strings = c("NaN", NA, "NA ", " ", ""))
+  
+  # remove dates, keep only julian days, only day ice free and day ice on (ignore ice break)
+  lakeice <- lakeice[!grepl("date|break", colnames(lakeice))]
+  #rename to match 2015 climate dataset colnames
+  colnames(lakeice)[which(grepl("clear", colnames(lakeice), ignore.case = T))] <- "iceoff"
+  colnames(lakeice)[which(grepl("form", colnames(lakeice), ignore.case = T))] <- "iceon"
+  
+  lakeice$lake <- gsub("Green|green", "GL", lakeice$lake)
+  lakeice <- lakeice[order(lakeice$year, lakeice$lake),]
+  lakeice <- gather(lakeice, event, val, iceoff:iceon)
+  lakeice <- unite(lakeice, var, event, lake)
+  lakeice <- spread(lakeice, var, val)
+  
+  #infill GL4 iceoff date with Jen Morse estimate if missing
+  ## missing in EDI dataset still as of 2019-04-10
+  if(is.na(lakeice$iceoff_GL4[lakeice$year ==2017])){
+    lakeice$iceoff_GL4[lakeice$year ==2017] <- 199 # "2017-07-18" estimated from Jen Morse emails & looking at GL4 WQ first sample, used lubridate yday to calculate
+  }
+  
+  # write out
+  write.csv(lakeice, paste0(outpath, "GLVlakeice.csv"), row.names = F, quote = F)
+  return(lakeice)
+}
+
+compileClimate <- function(temp=NULL, precip=NULL, AET=NULL, snowmelt=NULL, ice = NULL, outpath){
   
   ###### Getting all files together for dataset #####
   #Saddle files to merge for full Saddle climate data set
@@ -495,44 +529,43 @@ compileClimate <- function(temp=NULL, precip=NULL, AET=NULL, snow=NULL){
   # Saddlefivedayrunning12C
   
   # extract column of year for merging data frames
-  base <- get(c(temp, precip, AET, snowmelt)) # prioritize order by datasets with most years
+  datnames <- c(deparse(quote(temp)), deparse(quote(precip)), deparse(quote(AET)), deparse(quote(snowmelt)), deparse(quote(ice)))
+  base <- get(datnames) # prioritize order by datasets with most years
   # initiate data frame with eco_year
   ClimateAll <- data.frame(eco_year = base[,1])
   # join in datasets specified in function
   if(!is.null(temp)){
-    tempdat <- get(temp)
+    tempdat <- temp
     colnames(tempdat)[1] <- "eco_year"
-    ClimateAll <- merge(ClimateAll, tempdat, by.x = "eco_year", by.y = "water_year", all.x = T)
+    ClimateAll <- merge(ClimateAll, tempdat, by = "eco_year", all.x = T)
   }
   if(!is.null(precip)){
-    pptdat <- get(precip)
+    pptdat <- precip
     colnames(pptdat)[1] <- "eco_year"
-    ClimateAll <- merge(ClimateAll, pptdat, by.x = "eco_year", by.y = "water_year", all.x = T)
+    ClimateAll <- merge(ClimateAll, pptdat, by = "eco_year", all.x = T)
   }
   if(!is.null(AET)){
-    aetdat <- get(AET)
+    aetdat <- AET
     colnames(aetdat)[colnames(aetdat)=="def"] <- "moisturedeficit"
-    ClimateAll <- merge(Climateall, aetdat, by.x = "eco_year", by.y = "year", all.x = T)
+    ClimateAll <- merge(ClimateAll, aetdat, by.x = "eco_year", by.y = "year", all.x = T)
   }
   if(!is.null(snowmelt)){
-    meltdat <- get(snowmelt)
+    meltdat <- snowmelt
     colnames(meltdat)[1]<-"eco_year"
     meltdat$rock_meltout<-NULL
     meltdat$sf_meltout<-NULL
     meltdat$st_meltout<-NULL
-    ClimateAll<-merge(ClimateAll,sdlmeltout, by ="eco_year", all.x = T)
+    ClimateAll<-merge(ClimateAll,meltdat, by ="eco_year", all.x = T)
   }
-  
+  if(!is.null(ice)){
+    lakedat <- ice
+    colnames(lakedat)[1] <- "eco_year"
+    ClimateAll <- merge(ClimateAll, lakedat, by = "eco_year", all.x = T) 
+  }
   # finishing
   write.csv(ClimateAll, paste0(outpath, "ClimateAll.csv"), row.names = F, quote = F)
   return(ClimateAll)
 }
-
-
-
-
-
-
 
 
 
