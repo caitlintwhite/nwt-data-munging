@@ -7,20 +7,24 @@
 #'
 #' ### Sensitivity of extended summer scores and input metrics to source precip/temp dataset
 #' 
-#' ![Extended Summer PC score over time, by data source](figs/PCAsensitivity_PC1overtime.png)
+#' Regardless of input dataset used, PC1 explains 50% of the variation in the summer climate data.
+#' 
+#' 
 #' Fig 1. 
-#' ![Difference between NWT-derived extended summer score and Jennings-derived extended summer score](figs/PCAsensitivity_deltaPC1_overtime.png)
+#' ![Extended Summer PC score over time, by data source](figs/PCAsensitivity_PC1overtime.png)
 #' Fig 2.
+#' ![Difference between NWT-derived extended summer score and Jennings-derived extended summer score](figs/PCAsensitivity_deltaPC1_overtime.png)
 #' 
-#' ![Extended summer year ordination](figs/PCAsensitivity_yrloadings.png)
 #' Fig 3.
-#' ![Extended summer variable loadings](figs/PCAsensitivity_sploadings.png)
+#' ![Extended summer year ordination](figs/PCAsensitivity_yrloadings.png)
 #' Fig 4.
+#' ![Extended summer variable loadings](figs/PCAsensitivity_sploadings.png)
 #' 
-#' ![Input summer metrics, by data source](figs/PCAsensitivity_summermetrics.png)
 #' Fig 5.
-#' ![Difference in summer metric derived from NWT NSF data and Jennings et al. infilled data](figs/PCAsensitivity_metricdelta.png)
+#' ![Input summer metrics, by data source](figs/PCAsensitivity_summermetrics.png)
 #' Fig 6.
+#' ![Difference in summer metric derived from NWT NSF data and Jennings et al. infilled data](figs/PCAsensitivity_metricdelta.png)
+#' 
 #' 
 
 #' ### Compare raw source data
@@ -59,7 +63,7 @@ master <- gather(master, met, val, TMIN:PCP)
 ggplot(master, aes(date, val, col = source)) +
   geom_point(alpha = 0.5) +
   scale_color_manual(values = c("chocolate2", "dodgerblue2")) +
-  ggtitle("Daily total precipitation, TMIN, and TMAX, 1990-2013, by dataset source") +
+  ggtitle("Fig 7. Daily total precipitation, TMIN, and TMAX, 1990-2013, by dataset source") +
   facet_grid(met~., scales = "free_y")
 
 #' Looking at temperature by season, the biggest differences are in the summer months (JJA): 
@@ -68,13 +72,13 @@ ggplot(master, aes(date, val, col = source)) +
 ggplot(subset(master, season == "Summer" & met == "TMAX"), aes(jday, val, col = source)) +
   geom_point(alpha = 0.5) +
   scale_color_manual(values = c("chocolate2", "dodgerblue2")) +
-  ggtitle("Summer (Jun-Aug) TMAX, by source and year") +
+  ggtitle("Fig 8. Summer (Jun-Aug) TMAX, by source and year") +
   facet_wrap(~Year)
 
 ggplot(subset(master, season == "Summer" & met == "TMIN"), aes(jday, val, col = source)) +
   geom_point(alpha = 0.5) +
   scale_color_manual(values = c("chocolate2", "dodgerblue2")) +
-  ggtitle("Summer (Jun-Aug) TMIN, by source and year") +
+  ggtitle("Fig 9. Summer (Jun-Aug) TMIN, by source and year") +
   facet_wrap(~Year)
 
 #' Spring and fall temperatures in both datasets overlap better compared to the summer months. 
@@ -85,25 +89,25 @@ ggplot(subset(master, season == "Summer" & met == "TMIN"), aes(jday, val, col = 
 ggplot(subset(master, season == "Spring" & met == "TMAX"), aes(jday, val, col = source)) +
   geom_point(alpha = 0.5) +
   scale_color_manual(values = c("chocolate2", "dodgerblue2")) +
-  ggtitle("Spring (Mar-May) TMAX, by source and year") +
+  ggtitle("Fig 10. Spring (Mar-May) TMAX, by source and year") +
   facet_wrap(~Year)
 
 ggplot(subset(master, season == "Spring" & met == "TMIN"), aes(jday, val, col = source)) +
   geom_point(alpha = 0.5) +
   scale_color_manual(values = c("chocolate2", "dodgerblue2")) +
-  ggtitle("Spring (Mar-May) TMIN, by source and year") +
+  ggtitle("Fig 11. Spring (Mar-May) TMIN, by source and year") +
   facet_wrap(~Year)
 
 
 ggplot(subset(master, season == "Fall" & met == "TMAX"), aes(jday, val, col = source)) +
   geom_point(alpha = 0.5) +
   scale_color_manual(values = c("chocolate2", "dodgerblue2")) +
-  ggtitle("Fall (Sep-Nov) TMIN, by source and year") +
+  ggtitle("Fig 12. Fall (Sep-Nov) TMAX, by source and year") +
   facet_wrap(~Year)
 
 ggplot(subset(master, season == "Fall" & met == "TMIN"), aes(jday, val, col = source)) +
   geom_point(alpha = 0.5) +
   scale_color_manual(values = c("chocolate2", "dodgerblue2")) +
-  ggtitle("Fall (Sep-Nov) TMIN, by source and year") +
+  ggtitle("Fig 13. Fall (Sep-Nov) TMIN, by source and year") +
   facet_wrap(~Year)
 

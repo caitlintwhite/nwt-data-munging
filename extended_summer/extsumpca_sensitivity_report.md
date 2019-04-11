@@ -5,11 +5,13 @@ CTW
 
 ### Sensitivity of extended summer scores and input metrics to source precip/temp dataset
 
-![Extended Summer PC score over time, by data source](figs/PCAsensitivity_PC1overtime.png) Fig 1. ![Difference between NWT-derived extended summer score and Jennings-derived extended summer score](figs/PCAsensitivity_deltaPC1_overtime.png) Fig 2.
+Regardless of input dataset used, PC1 explains 50% of the variation in the summer climate data.
 
-![Extended summer year ordination](figs/PCAsensitivity_yrloadings.png) Fig 3. ![Extended summer variable loadings](figs/PCAsensitivity_sploadings.png) Fig 4.
+Fig 1. ![Extended Summer PC score over time, by data source](figs/PCAsensitivity_PC1overtime.png) Fig 2. ![Difference between NWT-derived extended summer score and Jennings-derived extended summer score](figs/PCAsensitivity_deltaPC1_overtime.png)
 
-![Input summer metrics, by data source](figs/PCAsensitivity_summermetrics.png) Fig 5. ![Difference in summer metric derived from NWT NSF data and Jennings et al. infilled data](figs/PCAsensitivity_metricdelta.png) Fig 6.
+Fig 3. ![Extended summer year ordination](figs/PCAsensitivity_yrloadings.png) Fig 4. ![Extended summer variable loadings](figs/PCAsensitivity_sploadings.png)
+
+Fig 5. ![Input summer metrics, by data source](figs/PCAsensitivity_summermetrics.png) Fig 6. ![Difference in summer metric derived from NWT NSF data and Jennings et al. infilled data](figs/PCAsensitivity_metricdelta.png)
 
 ### Compare raw source data
 
