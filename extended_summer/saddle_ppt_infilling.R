@@ -1,7 +1,5 @@
 # infilling for saddle precip 2015-current date on EDI
 
-## IMPORTANT!!: check and replace url link to most recent version of temp and precip datasets on EDI before running#
-## -- > 6/1/2019: see if SCE has a utility function to automate check and replacement (think so.. need to add in)
 
 # hierarchy of infill methods for precip
 # 1) method 1 (ratio method) using D1
@@ -26,13 +24,42 @@
 
 # > CTW calculated ratios by month instead of by day, didn't trust variation day to day enough, wanted to generate more conservative infilling estimates 
 
-# ------------------
-# load needed libraries
+# -- SETUP ------
+# clean environment, load needed libraries, modify default settings
+rm(list = ls())
 library(tidyverse)
 library(lubridate)
 options(stringsAsFactors = F)
 theme_set(theme_bw())
 
+
+# -- FUNCTIONS -----
+# SCE + CTW code to determine most recent version of package ID and read in current dataset on EDI
+#function to determine current version of data package on EDI
+getCurrentVersion<-function(edi_id){
+  versions=readLines(paste0('https://pasta.lternet.edu/package/eml/knb-lter-nwt/', edi_id), warn=FALSE)
+  currentV <- max(as.numeric(versions))
+  return(currentV)
+}
+# function to get entity ID for current version
+getEntityId <- function(edi_id, version){
+  entID <- readLines(paste0('https://pasta.lternet.edu/package/eml/knb-lter-nwt/', edi_id, "/", version, "/"), warn=FALSE)[1]
+  entID <- gsub(paste0("http.*/",edi_id,"/",version,"/"), "", entID) # remove all chars except what comes after last /
+  return(entID)
+}
+# reads in tabular dataset for data package that has only one csv data file (could make more generic with read table, but should know what you're reading in to use)
+getTabular <- function(edi_id, na_vals = c("", "NA", NA, NaN, ".", "NaN", " ")){
+  v <- getCurrentVersion(edi_id)
+  id <- getEntityId(edi_id, v)
+  dat <- read.csv(paste0("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.", edi_id, ".", v, 
+                         "&entityid=", id),
+                  strip.white =TRUE, na.strings = na_vals)
+  print(paste0("Reading in knb-lter-nwt.", edi_id, ".", v))
+  return(dat)
+}
+
+
+# -- GET DATA -----
 # data used in NSF proposal
 # Hope Humphries sent the infilled saddle data to Emily Farrer, CTW doesn't know how infilled
 # assume infilled data sent to HH from Tim Kittel, and methodology likely similar to that used in Jennings, Molotch, and Kittel 2018
@@ -45,9 +72,29 @@ NSF_precip <- read_csv("~/Dropbox/NWT_data/Saddle_precip_temp_formoisturedeficit
 ## NOTE: Emily's data has already been corrected for snow blowing Sep-May (multiply chart value * 0.39)
 ## NOTE2: If revise this analysis, correction should only be applied Oct-May from what CTW has read, but will follow what Emily did
 
+
+# read in  data from EDI data portal
+# sdl chart precip data
+sdl_chartpcp <- getTabular(416)
+# c1 chart precip data
+c1_chartpcp <- getTabular(414)
+# d1 chart precip data
+d1_chartpcp <- getTabular(415)
 # Jennings, Molotch, and Kittel (2018) infilled data for sdl, d1 and c1
 # Keith Jennings et al. infilled *hourly* data
-Jennings_infill <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.168.1&entityid=d4385f9a680c860c9c444e021ea1a35d")
+Jennings_infill <- getTabular(168) 
+
+
+# -- PREP DATA -----
+glimpse(sdl_chartpcp)
+glimpse(d1_chartpcp)
+glimpse(c1_chartpcp)
+glimpse(Jennings_infill)
+# convert dates in precip datasets to date class
+sdl_chartpcp$date <- as.Date(sdl_chartpcp$date, format = "%Y-%m-%d")
+c1_chartpcp$date <- as.Date(c1_chartpcp$date, format = "%Y-%m-%d")
+d1_chartpcp$date <- as.Date(d1_chartpcp$date, format = "%Y-%m-%d")
+Jennings_infill$date <- as.Date(Jennings_infill$date, format = "%Y-%m-%d")
 
 # summarise Jennings et al. data to daily totals (ppt), or max, min, or mean (temp)
 Jennings_summarized <- Jennings_infill %>%
@@ -57,34 +104,15 @@ Jennings_summarized <- Jennings_infill %>%
             airtemp_min = min(airtemp_avg),
             airtemp_avg = mean(airtemp_avg))
 
+
 ######################
 ## Precip infilling ##
 ######################
 
-# read in datasets
-# read in precip chart data from EDI
-# > read in from EDI data portal
-sdl_chartpcp <- read.csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.416.9&entityid=349ce23ddfa9d2bc1df7f5361763a6e7",
-                         strip.white = TRUE,
-                         na.strings = c("", "NA", "NaN"))
-
-# chart data from NWT data portal
-c1_chartpcp <- read.csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.414.11&entityid=71088f2abe48d1fd0ff32c929940ad64",
-                        strip.white = TRUE,
-                        na.strings = c("", "NA", "NaN"))
-
-d1_chartpcp <- read.csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.415.12&entityid=800d7f29ac09a43e2ab06344bfa27566",
-                        strip.white = TRUE,
-                        na.strings = c("", "NA", "NaN"))
-
-# convert dates in precip datasets to date class
-sdl_chartpcp$date <- as.Date(sdl_chartpcp$date, format = "%Y-%m-%d")
-c1_chartpcp$date <- as.Date(c1_chartpcp$date, format = "%Y-%m-%d")
-d1_chartpcp$date <- as.Date(d1_chartpcp$date, format = "%Y-%m-%d")
-
 # ID missing dates in sdl precip dataset
 pcp_missing_date <- sdl_chartpcp$date[is.na(sdl_chartpcp$ppt_tot)] #& year(sdl_chartpcp$date)>2014]
-
+# count of missing ppt dates by year
+sapply(split(pcp_missing_date, year(pcp_missing_date)), length) # there are missing ppt vals in every year..
 
 # quick check that can merge Jennings et al. precip total with chart data 
 # NWT stopped infilling chart precip data after 2008
@@ -105,7 +133,6 @@ Jennings_summarized[c("LTER_site", "local_site", "date", "ppt_tot")] %>%
   dplyr::rename(d1_ppt = ppt_tot) %>%
   ggplot() +
   geom_point(aes(Jennings_ppt, d1_ppt), col = "blue", alpha=0.5) +
-  #geom_point(aes(date, Jennings_ppt), col = "chocolate1", alpha = 0.5) +
   theme_bw()
 
 ## > going to use Jennings et al. 1990-2013 (last date available) then add in D1 chart data for more recent years
@@ -351,19 +378,20 @@ ggplot(aes(doy, ppt_tot)) +
 ## combine all years, all data for final infilled data set
 # NSF proposal data + ctw infilled 2015-current data
 
-sdl_ppt_infill_19822017 <- NSF_precip %>%
+sdl_ppt_infill_1982current <- NSF_precip %>%
   mutate(yr = year(date),
          mon = month(date),
          `day` = day(date),
          source = "NSF proposal data") %>%
   dplyr::select(LTER_site, local_site, `date`, yr, mon, `day`, ppt_tot, source) %>%
-  rbind(subset(sdl_ppt_infill_20152017, year(date)>=2015))
+  rbind(subset(sdl_ppt_infill_20152017, year(date)>=2015)) %>%
+  filter(!year(date) == 2019) #2019 not complete yet
 
-summary(sdl_ppt_infill_19822017) # no NAs, complete
-write.csv(sdl_ppt_infill_19822017, "extended_summer/output_data/suding/allyrs/sdl_ppt_infill_19822018_ctw.csv")
+summary(sdl_ppt_infill_1982current) # no NAs, complete
+write.csv(sdl_ppt_infill_1982current, "extended_summer/output_data/suding/allyrs/sdl_ppt_infill_19822018_nsfctw.csv")
 
 # plot to see how it looks all together
-ggplot(sdl_ppt_infill_19822017, aes(date, ppt_tot, col =source)) +
+ggplot(sdl_ppt_infill_1982current, aes(date, ppt_tot, col =source)) +
   geom_point(alpha = 0.5) +
   labs(title = paste0("NWT LTER: Saddle daily precipition, 1982-", substr(max(sdl_ppt_infill_20152017$date),1,4), ", colored by data source"),
        subtitle = "Sources: Infilling from C1 or D1 chart done using the ratio method in the saddle ppt chart metadata",
