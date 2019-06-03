@@ -15,12 +15,12 @@ jennings <- read.csv("https://portal.edirepository.org/nis/dataviewer?packageid=
                      strip.white = T,
                      na.strings = na_vals)
 
-# CTW: infilled 1982-2017 precip data (NSF renewal data [HH/EF] + ctw infilling 2015-2017)
-suding_ppt <- read.csv("extended_summer/output_data/suding/sdl_ppt_infill_19822017_ctw.csv",
+# CTW: infilled 1982-2017 precip data (NSF renewal data [HH/EF] + ctw infilling 2015-current)
+suding_ppt <- read.csv("extended_summer/output_data/suding/allyrs/sdl_ppt_infill_19822018_nsfctw.csv",
                        strip.white = TRUE, 
                        na.strings = na_vals)
-# CTW: infilled 1982-2017 temp data (NSF data [HH/EF] + ctw infilling 2015-2017)
-suding_temp <- read.csv("extended_summer/output_data/suding/sdl_temp_infilled_19822017_ctw.csv",
+# CTW: infilled 1982-2017 temp data (NSF data [HH/EF] + ctw infilling 2015-current)
+suding_temp <- read.csv("extended_summer/output_data/suding/allyrs/sdl_temp_infilled_19822018_nsfctw.csv",
                         strip.white = T,
                         na.strings = na_vals)
 
@@ -96,12 +96,12 @@ temp <- suding_temp %>%
 suding_hcn <- full_join(temp, pcp)
 summary(suding_hcn)
 head(suding_hcn) # starts at July 31 1981
-tail(suding_hcn) # ends at Dec 31 2017
+tail(suding_hcn) # ends at Dec 31 2018
 
 # > CTW test: try adding in 0's for Jan 1 1981 - July 30 1981 so code will run without breaking using real July 31-Dec 1981 data
 # will need to compare to Emily's numbers to make sure 0s didn't change anything fundamentally (their results should be kicked out in the code anyway since keep Sep and onwards only each year)
 ###  vars to use: Day Month Year TMIN TMAX PCP
-dates <- seq(from = as.Date("1981-01-01"), to = as.Date("2017-12-31"), by = "day")
+dates <- seq(from = as.Date("1981-01-01"), to = as.Date("2018-12-31"), by = "day")
 dates <- data.frame(`date` = dates) %>%
   mutate(Year = year(`date`),
          Month = month(`date`),
@@ -125,5 +125,5 @@ tail(suding_hcn_jenningsdates) # ends Dec 31 2013
 # -- FINISHING -----
 # write out hcn datasets
 write.csv(sdl_jennings, paste0(datpath, "jennings/hcn_jennings.csv"), quote = F, row.names = F)
-write.csv(suding_hcn, paste0(datpath, "suding/hcn_suding.csv"), quote = F, row.names = F)
-write.csv(suding_hcn_jenningsdates, paste0(datpath, "suding/hcn_suding_19902013.csv"), quote = F, row.names = F)
+write.csv(suding_hcn, paste0(datpath, "suding/allyrs/hcn_suding.csv"), quote = F, row.names = F)
+write.csv(suding_hcn_jenningsdates, paste0(datpath, "suding/sensitivity_subset/hcn_suding_19902013.csv"), quote = F, row.names = F)
