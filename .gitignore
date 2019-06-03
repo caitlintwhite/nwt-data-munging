@@ -3,7 +3,6 @@
 .RData
 .Ruserdata
 .DS_store
-
 extended_summer/.DS_Store
 extended_summer/figs/.DS_Store
 extended_summer/NWT_temprecip_datacomparison_files/.DS_Store
@@ -13,3 +12,4 @@ extended_summer/output_data/suding/allyrs/.DS_Store
 extended_summer/output_data/suding/allyrs/extsum_pca_input/.DS_Store
 extended_summer/output_data/suding/sensitivity_subset/.DS_Store
 extended_summer/output_data/jennings/.DS_Store
+.DS_Store
