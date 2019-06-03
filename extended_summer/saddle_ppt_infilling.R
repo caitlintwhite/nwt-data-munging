@@ -388,7 +388,7 @@ sdl_ppt_infill_1982current <- NSF_precip %>%
   filter(!year(date) == 2019) #2019 not complete yet
 
 summary(sdl_ppt_infill_1982current) # no NAs, complete
-write.csv(sdl_ppt_infill_1982current, "extended_summer/output_data/suding/allyrs/sdl_ppt_infill_19822018_nsfctw.csv")
+write.csv(sdl_ppt_infill_1982current, "extended_summer/output_data/suding/allyrs/sdl_ppt_infill_19822018_nsfctw.csv", row.names = FALSE)
 
 # plot to see how it looks all together
 ggplot(sdl_ppt_infill_1982current, aes(date, ppt_tot, col =source)) +

@@ -480,15 +480,12 @@ summarizeSnowmelt <- function(snowdat, outpath, date = "date", site = "sort_num"
 }
 
 
-summarizeIceoff <- function(outpath){
+summarizeIceoff <- function(lakedat, outpath){
   # needed library
   require(tidyr)
   
-  # read in data from EDI, unless provided
-  lakeice <- read.csv("http://niwot.colorado.edu/data_csvs/glakeice.nc.data.csv",
-                      stringsAsFactors = F,
-                      strip.white = TRUE,
-                      na.strings = c("NaN", NA, "NA ", " ", ""))
+  # data read in from EDI (provided by user)
+  lakeice <- lakedat
   
   # remove dates, keep only julian days, only day ice free and day ice on (ignore ice break)
   lakeice <- lakeice[!grepl("date|break", colnames(lakeice))]

@@ -107,9 +107,9 @@ dates <- data.frame(`date` = dates) %>%
          Month = month(`date`),
          Day = day(`date`))
 suding_hcn_new <- left_join(dates, suding_hcn)
-suding_hcn_new$TMIN[which(is.na(suding_hcn_new$TMIN))] <- 0
-suding_hcn_new$TMAX[which(is.na(suding_hcn_new$TMAX))] <- 0
-suding_hcn_new$PCP[which(is.na(suding_hcn_new$PCP))] <- 0
+suding_hcn_new$TMIN[is.na(suding_hcn_new$TMIN)] <- 0
+suding_hcn_new$TMAX[is.na(suding_hcn_new$TMAX)] <- 0
+suding_hcn_new$PCP[is.na(suding_hcn_new$PCP)] <- 0
 suding_hcn <- suding_hcn_new
 # review
 head(suding_hcn)

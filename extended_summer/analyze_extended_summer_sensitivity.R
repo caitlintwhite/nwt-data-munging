@@ -9,11 +9,38 @@ rm(list = ls())
 source("extended_summer/AET_functions.R")
 source("extended_summer/calculate_climate_functions.R")
 source("extended_summer/generate_extended_summerPCA.R")
+library(ggplot2)
+library(dplyr)
 options(stringsAsFactors = F)
 theme_set(theme_bw())
 
-library(ggplot2)
-library(dplyr)
+
+# -- FUNCTIONS TO READ IN EDI DATASETS -----
+# SCE + CTW code to determine most recent version of package ID and read in current dataset on EDI
+#function to determine current version of data package on EDI
+getCurrentVersion<-function(edi_id){
+  versions=readLines(paste0('https://pasta.lternet.edu/package/eml/knb-lter-nwt/', edi_id), warn=FALSE)
+  currentV <- max(as.numeric(versions))
+  return(currentV)
+}
+# function to get entity ID for current version
+getEntityId <- function(edi_id, version){
+  entID <- readLines(paste0('https://pasta.lternet.edu/package/eml/knb-lter-nwt/', edi_id, "/", version, "/"), warn=FALSE)[1]
+  entID <- gsub(paste0("http.*/",edi_id,"/",version,"/"), "", entID) # remove all chars except what comes after last /
+  return(entID)
+}
+# reads in tabular dataset for data package that has only one csv data file (could make more generic with read table, but should know what you're reading in to use)
+getTabular <- function(edi_id, na_vals = c("", "NA", NA, NaN, ".", "NaN", " ")){
+  v <- getCurrentVersion(edi_id)
+  id <- getEntityId(edi_id, v)
+  dat <- read.csv(paste0("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.", edi_id, ".", v, 
+                         "&entityid=", id),
+                  strip.white =TRUE, na.strings = na_vals)
+  print(paste0("Reading in knb-lter-nwt.", edi_id, ".", v))
+  return(dat)
+}
+
+
 
 # set lapse rate for aet function
 lr<-c(0,0,0,0,0,0,0,0,0,0,0,0) # <-- CTW: used by EF for NWT renewal 2015
@@ -22,11 +49,8 @@ lr<-c(0,0,0,0,0,0,0,0,0,0,0,0) # <-- CTW: used by EF for NWT renewal 2015
 nwt_met_allyrs <- read.csv("extended_summer/output_data/suding/allyrs/hcn_suding.csv")
 nwt_met_subset <- read.csv("extended_summer/output_data/suding/sensitivity_subset/hcn_suding_19902013.csv")
 jennings_met <- read.csv("extended_summer/output_data/jennings/hcn_jennings.csv")
-snow <- read.csv("http://niwot.colorado.edu/data_csvs/saddsnow.dw.data.csv",
-                 na.strings = c("NA", " ", "NaN"),
-                 strip.white = TRUE,
-                 stringsAsFactors = F)
-
+snow <- getTabular(31)
+lakedat <- getTabular(106)
 
 # review
 str(nwt_met_allyrs)
@@ -35,7 +59,7 @@ str(jennings_met) # needs date column
 
 # summarize datasets that aren't dependent on temp or precip (i.e. can be used in any sensitvity analysis for NWT extended summer PCA)
 nwt_allyrs_snowmelt <- summarizeSnowmelt(snow, outpath = "extended_summer/output_data/")
-nwt_allyrs_ice <- summarizeIceoff(outpath = "extended_summer/output_data/")
+nwt_allyrs_ice <- summarizeIceoff(lakedat, outpath = "extended_summer/output_data/")
 
 # summarize datasets sensitive to input daily temp and precip
 
@@ -84,7 +108,7 @@ PC1time_fig <- ggplot(masterPCA, aes(eco_year, sumallPC1)) +
   labs(y = "Extended Summer PC score",
        x = "Year",
        title = "Extended summer PC1 by daily temp and precip data source",
-       subtitle = "top: NWT NSF renewal data + CTW infilled (following published dataset methods), 1982-2017;\nmiddle:NSF renewal data (1991-2013);bottom:Jennings infilled (1991-2013)") +
+       subtitle = "top: NWT NSF renewal data + CTW infilled (following published dataset methods), 1982-2018;\nmiddle:NSF renewal data (1991-2013);bottom:Jennings infilled (1991-2013)") +
   scale_x_continuous(breaks = seq(1980, 2020, 5)) +
   facet_grid(source~.)
 
@@ -109,19 +133,19 @@ ggsave("extended_summer/figs/PCAsensitivity_deltaPC1_overtime.png", deltaPC1time
        units = "in", scale = 0.8)
 
 # read in scores to plot
-nwt_allyrs_loadings <- read.csv("extended_summer/output_data/suding/allyrs/NWT_sumallPCVarout_19822017.csv")
+nwt_allyrs_loadings <- read.csv("extended_summer/output_data/suding/allyrs/NWT_sumallPCVarout_19822018.csv")
 nwt_subset_loadings <- read.csv("extended_summer/output_data/suding/sensitivity_subset/NWT_sumallPCVarout_19912013.csv")
 jennings_loadings <- read.csv("extended_summer/output_data/jennings/NWT_sumallPCVarout_19912013.csv")
 
 
-nwt_allyrs_loadings$source <- "NSF renewal + CTW infill 2015-2017"
+nwt_allyrs_loadings$source <- "NSF renewal + CTW infill 2015-2018"
 nwt_subset_loadings$source <- "NWT NSF renewal"
 jennings_loadings$source <- "Jennings et al. 2018"
 
 masterloadings <- rbind(nwt_allyrs_loadings,
                         nwt_subset_loadings,
                         jennings_loadings)
-masterloadings$source <- factor(masterloadings$source, levels = c("NSF renewal + CTW infill 2015-2017",
+masterloadings$source <- factor(masterloadings$source, levels = c("NSF renewal + CTW infill 2015-2018",
                                                         "NWT NSF renewal", "Jennings et al. 2018"))
 
 sploadings_fig <- ggplot(masterloadings, aes(PC1, PC2)) +
@@ -130,7 +154,7 @@ sploadings_fig <- ggplot(masterloadings, aes(PC1, PC2)) +
   geom_label(aes(label = variable, col = variable), fontface = "bold", size = 3) +
   #coord_equal() +
   #scale_x_continuous(breaks = seq(1980, 2020, 5)) +
-  labs(title = "PCA 'species' loadings comparison: NSF/CTW 1982-2017, NSF 1991-2013, Jennings 1991-2013") +
+  labs(title = "PCA 'species' loadings comparison: NSF/CTW 1982-2018, NSF 1991-2013, Jennings 1991-2013") +
   #scale_color_brewer(palette = "Set1") +
   facet_grid(.~source) +
   theme(legend.position = "none")
@@ -150,8 +174,8 @@ yrloadings_fig <- masterPCA %>%
   geom_label(aes(label = eco_year, col = as.factor(eco_year)), fontface = "bold", size = 3) +
   #coord_equal() +
   #scale_x_continuous(breaks = seq(1980, 2020, 5)) +
-  labs(title = "PCA year loadings comparison: NSF/CTW 1982-2017, NSF 1991-2013, Jennings 1991-2013",
-       subtitle = "CTW infilled 2015-2017 chart missing data following published dataset methods") +
+  labs(title = "PCA year loadings comparison: NSF/CTW 1982-2018, NSF 1991-2013, Jennings 1991-2013",
+       subtitle = "CTW infilled 2015-2018 chart missing data following published dataset methods") +
   labs(x = "NWT summer climate PC1", 
        y = "NWT summer climate PC2") +
   facet_grid(decade~source) +
