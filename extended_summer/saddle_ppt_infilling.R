@@ -1,4 +1,7 @@
-# infilling for saddle precip 2015-2017
+# infilling for saddle precip 2015-current date on EDI
+
+## IMPORTANT!!: check and replace url link to most recent version of temp and precip datasets on EDI before running#
+## -- > 6/1/2019: see if SCE has a utility function to automate check and replacement (think so.. need to add in)
 
 # hierarchy of infill methods for precip
 # 1) method 1 (ratio method) using D1
@@ -6,8 +9,8 @@
 
 # some rules:
 # use same precip data used in NSF proposal for years 1982 - 2014
-# add in chart data for 2015-2017, NAs infilled by CTW using ratio method from NWT metadata
-# for 2015-2017, only keep raw chart data where qdays = 1; qdays > 1 --> NA (infill)
+# add in chart data for 2015-current, NAs infilled by CTW using ratio method from NWT metadata
+# for 2015-current, only keep raw chart data where qdays = 1; qdays > 1 --> NA (infill)
 # ratios calculated based on days both sdl and infill source site had observations
 
 ## from methods section in NWT saddle chart precip metadata:
@@ -27,6 +30,8 @@
 # load needed libraries
 library(tidyverse)
 library(lubridate)
+options(stringsAsFactors = F)
+theme_set(theme_bw())
 
 # data used in NSF proposal
 # Hope Humphries sent the infilled saddle data to Emily Farrer, CTW doesn't know how infilled
@@ -42,7 +47,7 @@ NSF_precip <- read_csv("~/Dropbox/NWT_data/Saddle_precip_temp_formoisturedeficit
 
 # Jennings, Molotch, and Kittel (2018) infilled data for sdl, d1 and c1
 # Keith Jennings et al. infilled *hourly* data
-Jennings_infill <- read_csv("http://niwot.colorado.edu/data_csvs/infillclimate_c1_d1_sdl.hourly.kj.data.csv")
+Jennings_infill <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.168.1&entityid=d4385f9a680c860c9c444e021ea1a35d")
 
 # summarise Jennings et al. data to daily totals (ppt), or max, min, or mean (temp)
 Jennings_summarized <- Jennings_infill %>%
@@ -59,21 +64,26 @@ Jennings_summarized <- Jennings_infill %>%
 # read in datasets
 # read in precip chart data from EDI
 # > read in from EDI data portal
-sdl_chartpcp <- read_csv("https://portal.lternet.edu/nis/dataviewer?packageid=knb-lter-nwt.416.8&entityid=c1c73287f2e10039c0d89dba8fd44993",
-                         trim_ws = TRUE,
-                         na = c("", "NA", "NaN"))
+sdl_chartpcp <- read.csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.416.9&entityid=349ce23ddfa9d2bc1df7f5361763a6e7",
+                         strip.white = TRUE,
+                         na.strings = c("", "NA", "NaN"))
 
 # chart data from NWT data portal
-c1_chartpcp <- read_csv("http://niwot.colorado.edu/data_csvs/c-1pdayv.ml.data.csv",
-                        na = c("", "NA", "NaN"))
+c1_chartpcp <- read.csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.414.11&entityid=71088f2abe48d1fd0ff32c929940ad64",
+                        strip.white = TRUE,
+                        na.strings = c("", "NA", "NaN"))
 
-d1_chartpcp <- read_csv("http://niwot.colorado.edu/data_csvs/d-1pdayv.ml.data.csv",
-                        na = c("", "NA", "NaN"))
-# correct d1 chart precip ppt_tot name to match others
-names(d1_chartpcp)[4] <- "ppt_tot"
+d1_chartpcp <- read.csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.415.12&entityid=800d7f29ac09a43e2ab06344bfa27566",
+                        strip.white = TRUE,
+                        na.strings = c("", "NA", "NaN"))
 
-# ID missing dates in 2015-2017
-pcp_missing_date <- sdl_chartpcp$date[is.na(sdl_chartpcp$ppt_tot) & year(sdl_chartpcp$date)>2014]
+# convert dates in precip datasets to date class
+sdl_chartpcp$date <- as.Date(sdl_chartpcp$date, format = "%Y-%m-%d")
+c1_chartpcp$date <- as.Date(c1_chartpcp$date, format = "%Y-%m-%d")
+d1_chartpcp$date <- as.Date(d1_chartpcp$date, format = "%Y-%m-%d")
+
+# ID missing dates in sdl precip dataset
+pcp_missing_date <- sdl_chartpcp$date[is.na(sdl_chartpcp$ppt_tot)] #& year(sdl_chartpcp$date)>2014]
 
 
 # quick check that can merge Jennings et al. precip total with chart data 
@@ -105,6 +115,7 @@ d1_Jchart_pcp <- Jennings_summarized[c("LTER_site", "local_site", "date", "ppt_t
   filter(local_site == "d1") %>%
   mutate(qdays = 1) %>%
   rbind(d1_chartpcp[year(d1_chartpcp$date)>2013, c("LTER_site", "local_site", "date", "ppt_tot", "qdays")]) %>%
+  #dplyr::select(d1_chartpcp, -flag_ppt_tot) %>%
   mutate(ppt_tot_clean = ifelse(qdays == 1, ppt_tot, NA))
 
 plot(d1_Jchart_pcp$date, d1_Jchart_pcp$ppt_tot_clean) # 2014 and on is raw chart data, qdays == 1
@@ -115,11 +126,13 @@ sdl_Jchart_pcp <- Jennings_summarized[c("LTER_site", "local_site", "date", "ppt_
   rbind(NSF_precip[year(NSF_precip$date)==2014,]) %>%
   mutate(qdays = 1) %>%
   rbind(sdl_chartpcp[year(sdl_chartpcp$date)>2014, c("LTER_site", "local_site", "date", "ppt_tot", "qdays")]) %>%
+  #dplyr::select(sdl_chartpcp, -flag_ppt_tot) %>%
   mutate(ppt_tot_clean = ifelse(qdays == 1, ppt_tot, NA))
 
 # correct sdl_chartpcp values for blowing snow (multiply months Sep - May by 0.39) [Sep to May following Emily's method]
 sdl_Jchart_pcp <- sdl_Jchart_pcp %>%
   mutate(ppt_tot_clean_crt = ifelse(year(`date`)>2014 & month(`date`) %in% c(1:5, 9:12),
+           #ifelse(month(`date`) %in% c(1:5, 9:12),
                                  ppt_tot_clean * 0.39, ppt_tot_clean))
 
 plot(sdl_Jchart_pcp$date, sdl_Jchart_pcp$ppt_tot_clean) # 2015 and on is raw chart data, qdays == 1
@@ -129,7 +142,7 @@ ggplot(sdl_Jchart_pcp) +
   geom_point(aes(date, ppt_tot_clean_crt, 
                  col = month(`date`) %in% c(6:8)), # is data from summer or not
              alpha = 0.5) +
-  labs(title = "Daily precip at saddle, 1990-2017 where qdays = 1 (corrected for blowing snow in non-summer months)",
+  labs(title = paste0("Daily precip at saddle, 1990-", max(year(sdl_Jchart_pcp$date)), ", where qdays = 1 (corrected for blowing snow in non-summer months)"),
        subtitle = "Precip data 1990-2013 summarized to daily values from Jennings et al. 2018 daily infilled saddle data",
        y = "ppt (mm)") +
   theme_bw()
@@ -142,7 +155,7 @@ d1_pcp_infill_dat <- left_join(d1_Jchart_pcp, sdl_Jchart_pcp, by = c("LTER_site"
          mon = month(date),
          doy = yday(date),
          day = day(date)) %>%
-  #filter(yr < 2014) %>% # to QA adding in raw data, doesn't change values in major way
+  filter(date >= min(sdl_chartpcp$date)) %>% # limit range to range of sdl chart data
   dplyr::select(LTER_site, date, yr, mon, day, doy, ppt_tot_clean.x, ppt_tot_clean_crt) %>%
   dplyr::rename(d1_ppt = ppt_tot_clean.x,
                 sdl_ppt = ppt_tot_clean_crt) %>%
@@ -210,9 +223,10 @@ c1_Jchart_pcp <- Jennings_summarized[c("LTER_site", "local_site", "date", "ppt_t
   filter(local_site == "c1") %>%
   mutate(qdays = 1) %>%
   rbind(c1_chartpcp[year(c1_chartpcp$date)>2013, c("LTER_site", "local_site", "date", "ppt_tot", "qdays")]) %>%
+  # dplyr::select(c1_chartpcp, -flag_ppt_tot) %>%
   mutate(ppt_tot_clean = ifelse(qdays == 1, ppt_tot, NA))
 
-plot(c1_Jchart_pcp$date, c1_Jchart_pcp$ppt_tot_clean) # 2014 and on is raw chart data, qdays == 1
+plot(c1_Jchart_pcp$date, c1_Jchart_pcp$ppt_tot_clean) # all raw chart data, qdays == 1
 # later years look a little higher in precip.. (artifact?)
 # boxplot by year to check: do added years have greater precip?
 boxplot(c1_Jchart_pcp$ppt_tot_clean~year(c1_Jchart_pcp$date)) # doesn't look like it
@@ -226,7 +240,7 @@ c1_pcp_infill_dat <- left_join(c1_Jchart_pcp, sdl_Jchart_pcp, by = c("LTER_site"
          mon = month(date),
          doy = yday(date),
          day = day(date)) %>%
-  #filter(yr < 2014) %>% # to QA adding in NSF and raw data, doesn't change values in major way
+  filter(date >= min(sdl_chartpcp$date)) %>% # earlier decade data look funny, so not including in ratio calculation
   dplyr::select(LTER_site, date, yr, mon, day, doy, ppt_tot_clean.x, ppt_tot_clean_crt) %>%
   dplyr::rename(c1_ppt = ppt_tot_clean.x,
                 sdl_ppt = ppt_tot_clean_crt) %>%
@@ -298,7 +312,7 @@ compare_ppt_infill <- sdl_infilled_byd1 %>%
   dplyr::rename(d1_sdl_infill = sdl_infill) %>%
   left_join(sdl_infilled_byc1) %>%
   dplyr::rename(c1_sdl_infill = sdl_infill) %>%
-  filter(yr > 2014) %>%
+  filter(yr > 2008) %>%
   mutate(delta_d1_c1 = d1_sdl_infill - c1_sdl_infill)
 
 range(compare_ppt_infill$delta_d1_c1, na.rm=T)
@@ -309,6 +323,7 @@ plot(compare_ppt_infill$delta_d1_c1 ~ compare_ppt_infill$mon,
 abline(a=0, b=0, col = "grey")
 
 sdl_ppt_infill_20152017 <- compare_ppt_infill %>%
+  filter(date >= min(sdl_chartpcp$date)) %>%
   mutate(ppt_tot = ifelse(!is.na(d1_sdl_infill), d1_sdl_infill, c1_sdl_infill),
          source = ifelse(!is.na(sdl_ppt), "sdl chart", 
                          ifelse(!is.na(d1_sdl_infill), "d1 infill", "c1 infill")),
@@ -323,7 +338,7 @@ sdl_ppt_infill_20152017 %>%
 ggplot(aes(doy, ppt_tot)) +
   geom_line(col = "grey50") +
   geom_point(aes(col = source), alpha=0.5) +
-  labs(title = "NWT LTER: Saddle daily precipitation 2015-2017, colored by data source",
+  labs(title = paste0("NWT LTER: Saddle daily precipitation 2015-", substr(max(sdl_ppt_infill_20152017$date),1,4), ", colored by data source"),
        subtitle = "Sources: CTW QA'd Saddle chart data (excluded qdays > 1), or infilling via ratio method from D1 or C1",
        y = "Total daily ppt (mm)",
        x = "Day of year") +
@@ -334,7 +349,7 @@ ggplot(aes(doy, ppt_tot)) +
 
 ## ---------------------------------------  
 ## combine all years, all data for final infilled data set
-# NSF proposal data + ctw infilled 2015-2017 data
+# NSF proposal data + ctw infilled 2015-current data
 
 sdl_ppt_infill_19822017 <- NSF_precip %>%
   mutate(yr = year(date),
@@ -342,15 +357,15 @@ sdl_ppt_infill_19822017 <- NSF_precip %>%
          `day` = day(date),
          source = "NSF proposal data") %>%
   dplyr::select(LTER_site, local_site, `date`, yr, mon, `day`, ppt_tot, source) %>%
-  rbind(sdl_ppt_infill_20152017)
+  rbind(subset(sdl_ppt_infill_20152017, year(date)>=2015))
 
 summary(sdl_ppt_infill_19822017) # no NAs, complete
-#write.csv(sdl_ppt_infill_19822017, "/Users/serahsierra/Documents/Suding\ Lab/NWT_GRA/sdl_ppt_infill_19822017_ctw.csv")
+write.csv(sdl_ppt_infill_19822017, "extended_summer/output_data/suding/allyrs/sdl_ppt_infill_19822018_ctw.csv")
 
 # plot to see how it looks all together
 ggplot(sdl_ppt_infill_19822017, aes(date, ppt_tot, col =source)) +
   geom_point(alpha = 0.5) +
-  labs(title = "NWT LTER: Saddle daily precipition, 1982-2017, colored by data source",
+  labs(title = paste0("NWT LTER: Saddle daily precipition, 1982-", substr(max(sdl_ppt_infill_20152017$date),1,4), ", colored by data source"),
        subtitle = "Sources: Infilling from C1 or D1 chart done using the ratio method in the saddle ppt chart metadata",
        y = "Daily precipitation (mm)",
        x = "Date") +
