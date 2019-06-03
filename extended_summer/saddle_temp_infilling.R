@@ -21,6 +21,7 @@
 rm(list = ls())
 library(tidyverse)
 library(lubridate)
+library(cowplot)
 options(stringsAsFactors = F)
 theme_set(theme_bw())
 
@@ -625,27 +626,42 @@ cr23xtmin_monthly_regress <- subset(sdlcr23x, date %in% tmin_dates_remain) %>%
 
 
 # visualize estimates and error with available saddle chart data
-ggplot(cr1000tmax_monthly_regress, aes(missing_date, fit)) +
+#top figure
+tmaxpred_fig <- ggplot(cr1000tmax_monthly_regress, aes(missing_date, fit)) +
   geom_errorbar(aes(ymax = upr, ymin = lwr), col = "dodgerblue") +
   geom_errorbar(data = max_temp_infill_2wk, aes(ymax = upr, ymin = lwr), col = "goldenrod") +
   geom_errorbar(data = cr23xtmax_monthly_regress, aes(ymax = upr, ymin = lwr), col = "orchid") +
-  geom_point(col = "dodgerblue4") +
-  geom_point(data = cr23xtmax_monthly_regress, aes(missing_date, fit), col = "purple") +
-  geom_point(data = max_temp_infill_2wk, aes(missing_date, fit), col = "chocolate4") +
-  geom_point(data = subset(sdl_charttemp, date > "2009-12-31" & !is.na(airtemp_max)), aes(date, airtemp_max), pch = 1)
-boxplot(tmax_monthly_regress$se)
+  geom_point(col = "dodgerblue4", alpha = 0.5) +
+  geom_point(data = cr23xtmax_monthly_regress, aes(missing_date, fit), col = "purple", alpha = 0.5) +
+  geom_point(data = max_temp_infill_2wk, aes(missing_date, fit), col = "chocolate4", alpha = 0.5) +
+  geom_point(data = subset(sdl_charttemp, date > "2009-12-31" & !is.na(airtemp_max)), aes(date, airtemp_max), pch = 1) +
+  labs(y = "TMAX (°C)",
+       x = NULL,
+       title = "Saddle chart daily temperature, with infilled missing values and 95% prediction intervals",
+       subtitle = "Infill method using Saddle logger: Brown = 2wk moving window lm, Purple = CR23X monthly lm, Blue = CR1000 monthly lm") +
+  theme(axis.text.x = element_blank())
 
-ggplot(cr1000tmin_monthly_regress, aes(missing_date, fit)) +
+boxplot(cr1000tmax_monthly_regress$se)
+#bottom figure
+tminpred_fig <- ggplot(cr1000tmin_monthly_regress, aes(missing_date, fit)) +
   geom_errorbar(aes(ymax = upr, ymin = lwr), col = "dodgerblue") +
   geom_errorbar(data = min_temp_infill_2wk, aes(ymax = upr, ymin = lwr), col = "goldenrod") +
   geom_errorbar(data = cr23xtmin_monthly_regress, aes(ymax = upr, ymin = lwr), col = "orchid") +
-  geom_point(col = "dodgerblue4") +
-  geom_point(data = cr23xtmin_monthly_regress, aes(missing_date, fit), col = "purple") +
-  geom_point(data = min_temp_infill_2wk, aes(missing_date, fit), col = "chocolate4") +
-  geom_point(data = subset(sdl_charttemp, date > "2009-12-31" & !is.na(airtemp_min)), aes(date, airtemp_min), pch = 1)
-boxplot(tmin_monthly_regress$se)
+  geom_point(col = "dodgerblue4", alpha = 0.5) +
+  geom_point(data = cr23xtmin_monthly_regress, aes(missing_date, fit), col = "purple", alpha = 0.5) +
+  geom_point(data = min_temp_infill_2wk, aes(missing_date, fit), col = "chocolate4", alpha = 0.5) +
+  geom_point(data = subset(sdl_charttemp, date > "2009-12-31" & !is.na(airtemp_min)), aes(date, airtemp_min), pch = 1) +
+  labs(y = "TMIN (°C)",
+       x = "Date")
+boxplot(cr1000tmin_monthly_regress$se)
 
 # note: low value is 2011 is real. checked manually against saddle logger data, and compared day before and day after, along with historic lows in saddle chart data
+
+# write out pretty plot
+predfig <- plot_grid(tmaxpred_fig, tminpred_fig,
+                     nrow = 2, rel_heights = c(1,0.9))
+predfig
+ggsave("extended_summer/figs/sdl_infilledtemp_2010ongoing.png", predfig, scale = 1.4)
 
 # compile all estimated results and write out for reference
 predicted_tmax_all <- rbind(cr1000tmax_monthly_regress, cr23xtmax_monthly_regress, max_temp_infill_2wk) %>%
