@@ -49,13 +49,14 @@ lr<-c(0,0,0,0,0,0,0,0,0,0,0,0) # <-- CTW: used by EF for NWT renewal 2015
 nwt_met_allyrs <- read.csv("extended_summer/output_data/suding/allyrs/hcn_suding.csv")
 nwt_met_subset <- read.csv("extended_summer/output_data/suding/sensitivity_subset/hcn_suding_19902013.csv")
 jennings_met <- read.csv("extended_summer/output_data/jennings/hcn_jennings.csv")
+ctw_met <- read.csv("extended_summer/output_data/ctw/hcn_ctw.csv")
 snow <- getTabular(31)
 lakedat <- getTabular(106)
 
 # review
 str(nwt_met_allyrs)
 str(nwt_met_subset)
-str(jennings_met) # needs date column
+str(jennings_met)
 
 # summarize datasets that aren't dependent on temp or precip (i.e. can be used in any sensitvity analysis for NWT extended summer PCA)
 nwt_allyrs_snowmelt <- summarizeSnowmelt(snow, outpath = "extended_summer/output_data/")
@@ -92,13 +93,24 @@ jennings_subset_PCA <- extendedSummer(jennings_subset_climate, "eco_year", outpa
 
 
 
+# --- CTW INFILL ONLY, ALL YEARS -----
+# nwt, all years, ctw 2010-2018 infilled temp and precip data (following chart metadata methods, no nsf data)
+nwt_raw_allyrs <- aet(ctw_met, station.elev=3528, site.elev=3528, lapse=lr, fc=75, latitude=40.05)
+nwt_raw_aet <- AETecoyear(nwt_raw_allyrs, "extended_summer/output_data/ctw/extsum_pca_input/")
+nwt_raw_temp <- summarizeTemp(ctw_met, date = "date", tmin = "TMIN", tmax = "TMAX", outpath = "extended_summer/output_data/ctw/extsum_pca_input/")
+nwt_raw_ppt <- summarizePrecip(ctw_met,date = "date", precip = "PCP", outpath = "extended_summer/output_data/ctw/extsum_pca_input/")
+nwt_raw_climate <- compileClimate(temp = nwt_raw_temp, precip = nwt_raw_ppt, AET = nwt_raw_aet, snowmelt = nwt_allyrs_snowmelt, ice = nwt_allyrs_ice, outpath = "extended_summer/output_data/ctw/extsum_pca_input/")
+nwt_raw_PCA <- extendedSummer(nwt_raw_climate, "eco_year", outpath = "extended_summer/output_data/ctw/")
+
+
 # -- COMPARE VISUALLY -----
 jennings_subset_PCA$source <- "Jennings et al. 2018"
 nwt_subset_PCA$source <- "NSF renewal"
 nwt_allyrs_PCA$source <- "NSF renewal + CTW"
+nwt_raw_PCA$source <- "Raw + CTW"
 
-masterPCA <- rbind(jennings_subset_PCA, nwt_subset_PCA, nwt_allyrs_PCA)
-masterPCA$source <- factor(masterPCA$source, levels = c("NSF renewal + CTW",
+masterPCA <- rbind(jennings_subset_PCA, nwt_subset_PCA, nwt_allyrs_PCA, nwt_raw_PCA)
+masterPCA$source <- factor(masterPCA$source, levels = c("Raw + CTW","NSF renewal + CTW",
                                                         "NSF renewal", "Jennings et al. 2018"))
 PC1time_fig <- ggplot(masterPCA, aes(eco_year, sumallPC1)) +
   geom_hline(aes(yintercept = 0)) +
@@ -108,9 +120,9 @@ PC1time_fig <- ggplot(masterPCA, aes(eco_year, sumallPC1)) +
   labs(y = "Extended Summer PC score",
        x = "Year",
        title = "Extended summer PC1 by daily temp and precip data source",
-       subtitle = "top: NWT NSF renewal data + CTW infilled (following published dataset methods), 1982-2018;\nmiddle:NSF renewal data (1991-2013);bottom:Jennings infilled (1991-2013)") +
+       subtitle = "top down: raw Saddle chart + CTW infilled 2010-2018 (following published dataset methods) (1982-2018); NWT NSF renewal\ndata + CTW infilled 2015-2018 (1982-2018); NSF renewal data (1991-2013); Jennings infilled (1991-2013)") +
   scale_x_continuous(breaks = seq(1980, 2020, 5)) +
-  facet_grid(source~.)
+  facet_grid(source~., labeller = label_wrap_gen(width = 9))
 
 ggsave("extended_summer/figs/PCAsensitivity_PC1overtime.png", PC1time_fig)
 
@@ -136,16 +148,19 @@ ggsave("extended_summer/figs/PCAsensitivity_deltaPC1_overtime.png", deltaPC1time
 nwt_allyrs_loadings <- read.csv("extended_summer/output_data/suding/allyrs/NWT_sumallPCVarout_19822018.csv")
 nwt_subset_loadings <- read.csv("extended_summer/output_data/suding/sensitivity_subset/NWT_sumallPCVarout_19912013.csv")
 jennings_loadings <- read.csv("extended_summer/output_data/jennings/NWT_sumallPCVarout_19912013.csv")
+ctw_loadings <- read.csv("extended_summer/output_data/ctw/NWT_sumallPCVarout_19822018.csv")
 
 
 nwt_allyrs_loadings$source <- "NSF renewal + CTW infill 2015-2018"
 nwt_subset_loadings$source <- "NWT NSF renewal"
 jennings_loadings$source <- "Jennings et al. 2018"
+ctw_loadings$source <- "Raw + CTW infill 2010-2018"
 
 masterloadings <- rbind(nwt_allyrs_loadings,
                         nwt_subset_loadings,
-                        jennings_loadings)
-masterloadings$source <- factor(masterloadings$source, levels = c("NSF renewal + CTW infill 2015-2018",
+                        jennings_loadings,
+                        ctw_loadings)
+masterloadings$source <- factor(masterloadings$source, levels = c("Raw + CTW infill 2010-2018","NSF renewal + CTW infill 2015-2018",
                                                         "NWT NSF renewal", "Jennings et al. 2018"))
 
 sploadings_fig <- ggplot(masterloadings, aes(PC1, PC2)) +
@@ -154,10 +169,11 @@ sploadings_fig <- ggplot(masterloadings, aes(PC1, PC2)) +
   geom_label(aes(label = variable, col = variable), fontface = "bold", size = 3) +
   #coord_equal() +
   #scale_x_continuous(breaks = seq(1980, 2020, 5)) +
-  labs(title = "PCA 'species' loadings comparison: NSF/CTW 1982-2018, NSF 1991-2013, Jennings 1991-2013") +
+  labs(title = "PCA 'species' loadings comparison: Raw/CTW 1982-2018, NSF/CTW 1982-2018, NSF 1991-2013, Jennings 1991-2013") +
   #scale_color_brewer(palette = "Set1") +
   facet_grid(.~source) +
-  theme(legend.position = "none")
+  theme(legend.position = "none",
+        plot.title = element_text(size = 12))
 
 ggsave("extended_summer/figs/PCAsensitivity_sploadings.png", sploadings_fig,
        width = 10,
@@ -174,13 +190,13 @@ yrloadings_fig <- masterPCA %>%
   geom_label(aes(label = eco_year, col = as.factor(eco_year)), fontface = "bold", size = 3) +
   #coord_equal() +
   #scale_x_continuous(breaks = seq(1980, 2020, 5)) +
-  labs(title = "PCA year loadings comparison: NSF/CTW 1982-2018, NSF 1991-2013, Jennings 1991-2013",
-       subtitle = "CTW infilled 2015-2018 chart missing data following published dataset methods") +
+  labs(title = "PCA year loadings comparison: Raw/CTW 1982-2018, NSF/CTW 1982-2018, NSF 1991-2013, Jennings 1991-2013",
+       subtitle = "CTW infilled Saddle chart missing data following published dataset methods") +
   labs(x = "NWT summer climate PC1", 
        y = "NWT summer climate PC2") +
   facet_grid(decade~source) +
   theme(legend.position = "none",
-        plot.title = element_text(size = 10),
+        plot.title = element_text(size = 9),
         plot.subtitle = element_text(size = 9))
 
 ggsave("extended_summer/figs/PCAsensitivity_yrloadings.png", yrloadings_fig,

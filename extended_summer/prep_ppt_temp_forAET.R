@@ -23,7 +23,10 @@ suding_ppt <- read.csv("extended_summer/output_data/suding/allyrs/sdl_ppt_infill
 suding_temp <- read.csv("extended_summer/output_data/suding/allyrs/sdl_temp_infilled_19822018_nsfctw.csv",
                         strip.white = T,
                         na.strings = na_vals)
-
+# CTW: raw sdl chart temp data + ctw infilling 2010-current (first NAs in raw data appear in 2010)
+ctw_temp <- read.csv("extended_summer/output_data/ctw/sdl_temp_infilled_19822018_ctwonly.csv",
+                    strip.white = T,
+                    na.strings = na_vals)
 
 # -- PREP JENNINGS DATA -----
 # examine jennings et al. data and structure
@@ -84,6 +87,15 @@ temp <- suding_temp %>%
                 TMAX = airtemp_max) %>%
   select(Year, Month, Day, TMIN, TMAX)
 
+temp2 <- ctw_temp %>%
+  dplyr::select(date, airtemp_max, airtemp_min) %>%
+  #filter(`date` > as.Date("1981-07-31")) %>% # start at Jan 1 1982
+  mutate(Year = year(`date`),
+         Month = month(`date`),
+         Day = day(`date`)) %>%
+  dplyr::rename(TMIN = airtemp_min,
+                TMAX = airtemp_max) %>%
+  select(Year, Month, Day, TMIN, TMAX)
 
 
 # -- PREP HCN FOR AET -----
@@ -122,8 +134,35 @@ head(suding_hcn_jenningsdates) # starts Jan 1 1990
 tail(suding_hcn_jenningsdates) # ends Dec 31 2013
 
 
+# repeat for alternate temp dataset (infilled by metadata methods only 2010-on, no nsf data)
+# > CTW: combine pcp and temp to get hcn df (cols: Year, Month, Day, TMIN, TMAX, PCP)
+ctw_hcn <- full_join(temp2, pcp)
+summary(ctw_hcn)
+head(ctw_hcn) # starts at July 31 1981
+tail(ctw_hcn) # ends at Dec 31 2018
+
+# > CTW test: try adding in 0's for Jan 1 1981 - July 30 1981 so code will run without breaking using real July 31-Dec 1981 data
+# will need to compare to Emily's numbers to make sure 0s didn't change anything fundamentally (their results should be kicked out in the code anyway since keep Sep and onwards only each year)
+###  vars to use: Day Month Year TMIN TMAX PCP
+dates <- seq(from = as.Date("1981-01-01"), to = as.Date("2018-12-31"), by = "day")
+dates <- data.frame(`date` = dates) %>%
+  mutate(Year = year(`date`),
+         Month = month(`date`),
+         Day = day(`date`))
+ctw_hcn_new <- left_join(dates, ctw_hcn)
+ctw_hcn_new$TMIN[is.na(ctw_hcn_new$TMIN)] <- 0
+ctw_hcn_new$TMAX[is.na(ctw_hcn_new$TMAX)] <- 0
+ctw_hcn_new$PCP[is.na(ctw_hcn_new$PCP)] <- 0
+ctw_hcn <- ctw_hcn_new
+# review
+head(ctw_hcn)
+tail(ctw_hcn)
+
+
+
 # -- FINISHING -----
 # write out hcn datasets
 write.csv(sdl_jennings, paste0(datpath, "jennings/hcn_jennings.csv"), quote = F, row.names = F)
 write.csv(suding_hcn, paste0(datpath, "suding/allyrs/hcn_suding.csv"), quote = F, row.names = F)
 write.csv(suding_hcn_jenningsdates, paste0(datpath, "suding/sensitivity_subset/hcn_suding_19902013.csv"), quote = F, row.names = F)
+write.csv(ctw_hcn, paste0(datpath, "ctw/hcn_ctw.csv"), quote = F, row.names = F)
