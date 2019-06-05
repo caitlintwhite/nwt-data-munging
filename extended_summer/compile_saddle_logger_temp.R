@@ -37,6 +37,8 @@ glimpse(sdlchart) # flags cols present
 
 # drop cols not needed in cr logger dataset (i.e. only need airtemp cols up thru avg airtemp)
 crlogs <- crlogs[,1:12]
+# drop solar radiation in dp211
+dp211 <- dp211[!grepl("solrad", names(dp211))]
 
 # convert dates in all to Date class
 dp211$date <- as.Date(dp211$date, format = "%Y-%m-%d")
@@ -48,10 +50,42 @@ sapply(crlogs[grepl("flag", colnames(crlogs))], function(x) summary(as.factor(x)
 sapply(sdlchart[grepl("flag", colnames(sdlchart))], function(x) summary(as.factor(x))) # 246 tmax, 238 tmin "1" flags; 14 tmax, 16 tmin "2" flags
 # saddle chart flags: 1 = infilled by regression; 2 = infilled by standard deviation (take sd through that day in all years available)
 
+# look at tails for any obvious bad values
+## cr data loggers
+sapply(crlogs[grepl("^airtemp", colnames(crlogs))], function(x) tail(sort(x))) #okay
+sapply(crlogs[grepl("^airtemp", colnames(crlogs))], function(x)tail(sort(x, decreasing = T))) #-187 in airtemp_min
+## dp211 logger
+sapply(dp211[grepl("^airtemp", colnames(dp211))], function(x) tail(sort(x))) #77.5 in airtemp_max
+sapply(dp211[grepl("^airtemp", colnames(dp211))], function(x)tail(sort(x, decreasing = T))) #-50 in airtemp_min
+## sdl chart
+sapply(sdlchart[grepl("^airtemp", colnames(sdlchart))], function(x) tail(sort(x))) #okay, high max value agrees with cr logger high value
+sapply(sdlchart[grepl("^airtemp", colnames(sdlchart))], function(x)tail(sort(x, decreasing = T))) #okay
+
+# were mean values affected by bad values in logger dataset?
+na.omit(crlogs[crlogs$airtemp_min == -187, grepl("^airtemp", colnames(crlogs))]) #doesn't look like it
+#       airtemp_max airtemp_min airtemp_avg
+# 6087       0.812        -187    -3.32507
+na.omit(dp211[dp211$airtemp_min == -50, grepl("^airtemp", colnames(dp211))]) #row 1068 has the bad maxtemp value also
+#         airtemp_max airtemp_min airtemp_avg
+# 1068        77.5         -50         0.6
+# 4179        -2.5         -50        -7.4
+# 4347         0.5         -50       -31.8
+# 4766         5.5         -50        -0.7
+# 5145        12.5         -50         3.0
+
+# change bad values to NAs and move on
+crlogs$airtemp_min[crlogs$airtemp_min == -187 & !is.na(crlogs$airtemp_min)] <- NA
+dp211$airtemp_min[dp211$airtemp_min == -50 & !is.na(dp211$airtemp_min)] <- NA
+dp211$airtemp_max[dp211$airtemp_max == 77.5 & !is.na(dp211$airtemp_max)] <- NA
+
+summary(dp211[grepl("^airtemp", colnames(dp211))])
+summary(crlogs[grepl("^airtemp", colnames(crlogs))])
+summary(sdlchart[grepl("^airtemp", colnames(sdlchart))])
+# ranges look reasonable. move on..
 
 
 
-# -- VISUAL COMPARE TEMP DATASETS -----
+# -- REVIEW AND PREP SDL CHART DATA FOR PAIRING WITH LOGGER DATA -----
 # visualize infilled sdl chart values
 ggplot(sdlchart, aes(yday(date), airtemp_min, col = as.factor(flag_airtemp_min))) +
   geom_point(alpha = 0.5) +
@@ -62,15 +96,26 @@ ggplot(sdlchart, aes(yday(date), airtemp_max, col = as.factor(flag_airtemp_max))
   ggtitle("sdl chart tmin; colors = infilled method by NWT (1, regression; 2, sd; NA, no infill done)") +
   facet_wrap(~year(date))
 
+# combine logger temp datasets for comparison with saddle
+sdllong <- sdlchart %>%
+  gather(metric, chart_temp, airtemp_max:airtemp_avg)
+sdlflags <- subset(sdllong, grepl("flag", metric)) %>%
+  rename(chart_flag = chart_temp) %>%
+  mutate(metric = gsub("flag_", "", metric))
+sdllong <- subset(sdllong, !grepl("flag", metric)) %>%
+  left_join(sdlflags)
+rm(sdlflags)
+
+
 
 # -- VISUAL QA DP211 DATASET ----
 # time series with NA vals infilled to visualize where data absent
 dp211 %>%
-  gather(met, val, airtemp_max:solrad_tot) %>%
+  gather(met, val, airtemp_max:ncol(.)) %>%
   mutate(NAval = ifelse(is.na(val), "yes", "no"),
          val = ifelse(is.na(val), 0, val)) %>% # infill NAs with 0 to see missing
   ggplot(aes(date, val, col = NAval)) +
-  geom_point(alpha = 0.5) + # clearly some bad values (sensor fail?), but not too many
+  geom_point(alpha = 0.5) +
   scale_color_manual(values = c("yes" = "red", "no" = "black")) +
   facet_wrap(~met)
 
@@ -83,7 +128,7 @@ ggplot(dp211, aes(jday,airtemp_max)) +
 # make dp211 data long form with flags for plotting
 dp211_long <- dp211 %>%
   mutate(mon = month(date)) %>%
-  dplyr::select(-c(airtemp_avg, solrad_tot)) %>%
+  dplyr::select(-airtemp_avg) %>%
   gather(met, val, airtemp_max,airtemp_min) %>%
   group_by(met) %>%
   mutate(lag1 = lag(val, 1),
@@ -113,42 +158,48 @@ dp211_long <- dp211 %>%
 # plot daily values, highlight values 3sds outside monthly mean
 ggplot(subset(dp211_long, met == "airtemp_min"), aes(jday,val)) +
   geom_line() +
-  geom_point(data = subset(dp211_long, met == "airtemp_min" & mas3sd == "yes" & lagflag %in% c(NA,"yes")), aes(jday, val), col ="red", alpha = 0.5) + 
+  geom_point(data = subset(dp211_long, met == "airtemp_min" & mas3sd == "yes"), aes(jday, val), col ="red", alpha = 0.5) + 
+  geom_point(data = subset(dp211_long, met == "airtemp_min" & lagflag == "yes"), aes(jday, val), col ="orange", alpha = 0.5) + 
+  geom_point(data = subset(dp211_long, met == "airtemp_min" & leadflag == "yes"), aes(jday, val), col ="blue", alpha = 0.5) + 
   labs(title = "Saddle DP211 logger: TMIN, red pts = more than 3sd from monthly grand mean",
        y = "TMIN (°C)", x = "Day of year") +
-  facet_wrap(~year)
+  facet_wrap(~year, scales = "free_x")
 ggplot(subset(dp211_long, met == "airtemp_max"), aes(jday,val)) +
   geom_line() +
-  geom_point(data = subset(dp211_long, met == "airtemp_max" & mas3sd == "yes" & leadflag == "yes" & lagflag == "yes"), aes(jday, val), col ="red", alpha = 0.5) + 
+  #geom_point(data = subset(dp211_long, met == "airtemp_max" & mas3sd == "yes" & leadflag == "yes" & lagflag == "yes"), aes(jday, val), col ="red", alpha = 0.5) + 
+  geom_point(data = subset(dp211_long, met == "airtemp_max" & mas3sd == "yes"), aes(jday, val), col ="red", alpha = 0.5) + 
+  geom_point(data = subset(dp211_long, met == "airtemp_max" & lagflag == "yes"), aes(jday, val), col ="orange", alpha = 0.5) + 
+  geom_point(data = subset(dp211_long, met == "airtemp_max" & leadflag == "yes"), aes(jday, val), col ="blue", alpha = 0.5) + 
   labs(title = "Saddle DP211 logger: TMAX, red pts = more than 3sd from monthly grand mean",
        y = "TMAX (°C)", x = "Day of year") +
   facet_wrap(~year)
 
 # day-to-day differences
-ggplot(dp211_long, aes(date, day1delta)) +
+ggplot(dp211_long, aes(date, deltabck)) +
   geom_line() +
-  geom_point(data = subset(dp211_long, lag_mas3sd == "yes"), aes(date, day1delta), col ="red", alpha = 0.5) + 
+  geom_point(data = subset(dp211_long, lagflag == "yes" & leadflag == "yes"), aes(date, deltabck), col ="red", alpha = 0.5) + 
   facet_wrap(~met, scales = "free_y")
 ggplot(subset(dp211_long, met == "airtemp_max"), aes(jday, deltafwd)) +
   geom_line() +
   geom_point(data = subset(dp211_long, met == "airtemp_max" & leadflag == "yes" & lagflag == "yes"), aes(jday, deltafwd), col ="red", alpha = 0.5) + 
   facet_wrap(~year)
-ggplot(subset(dp211_long, met == "airtemp_min"), aes(jday, day1delta)) +
+ggplot(subset(dp211_long, met == "airtemp_min"), aes(jday, deltafwd)) +
   geom_line() +
-  geom_point(data = subset(dp211_long, met == "airtemp_min" & lag_mas3sd == "yes"), aes(jday, day1delta), col ="red", alpha = 0.5) + 
+  geom_point(data = subset(dp211_long, met == "airtemp_min" & leadflag == "yes" & lagflag == "yes"), aes(jday, deltafwd), col ="red", alpha = 0.5) + 
   facet_wrap(~year)
 
 # monthly boxplots
 dp211 %>%
-  dplyr::select(-solrad_tot) %>%
   gather(met, val, airtemp_max:airtemp_avg) %>%
   ggplot(aes(month(date), val, group = month(date))) +
   geom_boxplot() +
-  geom_jitter(alpha = 0.5, width = 0.2) + # clearly some bad values (sensor fail?), but not too many
+  geom_jitter(alpha = 0.5, width = 0.2, col = "dodgerblue") +
   scale_x_continuous(breaks = seq(1,12,1)) +
-  facet_wrap(~met) # bad values in airtemp min, airtemp max, probably airtemp avg (in april, but check against saddle)
+  facet_wrap(~met)
 # jan and dec values also look a little funky (appears some jan dates comparably warm to spring days?), but since ext sum PCA doesn't rely on jan or dec values, not a concern to address
 
+
+# -- VISUAL QA CR LOGGERS (BY LOGGER)-----
 # cr data loggers
 crlogs[!grepl("flag", colnames(crlogs))] %>% # all flags are "n"
   gather(met, val, airtemp_max, airtemp_min,airtemp_avg) %>%
@@ -158,6 +209,7 @@ crlogs[!grepl("flag", colnames(crlogs))] %>% # all flags are "n"
   geom_point(alpha = 0.5) + # clearly some bad values (sensor fail?), but not too many
   scale_color_manual(values = c("yes" = "red", "no" = "black")) +
   facet_wrap(~met) # 1 bad value in airtemp_min (after 2015)
+
 # monthly boxplots
 crlogs[!grepl("flag", colnames(crlogs))] %>% # all flags are "n"
   gather(met, val, airtemp_max, airtemp_min,airtemp_avg) %>%
@@ -167,15 +219,6 @@ crlogs[!grepl("flag", colnames(crlogs))] %>% # all flags are "n"
   scale_x_continuous(breaks = seq(1,12,1)) +
   facet_wrap(~met) 
 
-
-# combine logger temp datasets for comparison with saddle
-sdllong <- sdlchart %>%
-  gather(metric, chart_temp, airtemp_max:airtemp_avg)
-sdlflags <- subset(sdllong, grepl("flag", metric)) %>%
-  rename(chart_flag = chart_temp) %>%
-  mutate(metric = gsub("flag_", "", metric))
-sdllong <- subset(sdllong, !grepl("flag", metric)) %>%
-  left_join(sdlflags)
 
 logdat_all <- mutate(dp211, logger = "dp211") %>%
   dplyr::select(logger, date:airtemp_avg) %>%
@@ -189,6 +232,21 @@ logdat_all %>%
   geom_abline(aes(slope = 1, intercept = 0), col = "blue") +
   scale_color_viridis_d() + 
   facet_wrap(logger~metric, scales = "free")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   
 
 # test NEON sensor QA script on dp211
