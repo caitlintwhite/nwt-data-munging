@@ -27,7 +27,7 @@ theme_set(theme_bw())
 
 
 # -- FUNCTIONS -----
-source(edi_functions.R)
+source("edi_functions.R")
 
 
 # -- GET DATA -----
