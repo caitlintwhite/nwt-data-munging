@@ -27,13 +27,18 @@ dp211 <- getTabular(80)
 crlogs <- read.csv("/Users/serahsierra/Documents/nwt_lter/unpub_data/sdlcr23x-cr1000.daily.ml.data.csv",
                    strip.white = T, na.strings = c("", " ", ".", NA, NaN, "NA", "NaN"))
 sdlchart <- getTabular(413)
-
+# keith jennings et al. infill (best reference for data quality?) -- **hourly data**
+jennings <- getTabular(168)
+# read in jennings raw data to compare uncorrected daily max and min temp
+jenraw <- read.csv("/Users/serahsierra/Documents/nwt_lter/unpub_data/sdl_hrly_met_data_all_NOQC.csv", na.strings = na_vals)
+  
 
 # -- REVIEW DATA -----
 # review how dats read in
 glimpse(dp211) # no flag cols
 glimpse(crlogs) # flag cols present
 glimpse(sdlchart) # flags cols present
+glimpse(jennings)
 
 # drop cols not needed in cr logger dataset (i.e. only need airtemp cols up thru avg airtemp)
 crlogs <- crlogs[,1:12]
@@ -44,6 +49,36 @@ dp211 <- dp211[!grepl("solrad", names(dp211))]
 dp211$date <- as.Date(dp211$date, format = "%Y-%m-%d")
 crlogs$date <- as.Date(crlogs$date, format = "%Y-%m-%d")
 sdlchart$date <- as.Date(sdlchart$date, format = "%Y-%m-%d")
+jennings$date <- as.Date(jennings$date, format = "%Y-%m-%d")
+jenraw$date <- as.Date(jenraw$date, format = "%Y-%m-%d")
+
+
+# aggregate jennings et al. airtemp to daily summary values (max, min)
+jendaily <- dplyr::select(jennings, LTER_site, local_site, year:date, airtemp_avg) %>%
+  subset(local_site == "sdl") %>%
+  group_by(LTER_site, local_site, year, jday, date) %>%
+  summarize(airtemp_min = min(airtemp_avg),
+         airtemp_max = max(airtemp_avg))
+# repeat for raw values
+summary(duplicated(jenraw$datetime)) # no timestamps are duplicated, that's good
+jenraw_daily <- dplyr::select(jenraw, year:temp, logger) %>%
+  group_by(date, doy) %>%
+  summarize(airtemp_min = min(temp),
+            airtemp_max = max(temp))
+
+ggplot(data = jenraw_daily, aes(date, airtemp_min)) +
+  geom_point(alpha = 0.5) +
+  geom_point(data = jendaily, aes(date, airtemp_min), col = "salmon", alpha = 0.4) +
+  geom_point(data = dp211, aes(date, airtemp_min), col = "navajowhite", alpha = 0.3) +
+  geom_point(data = crlogs, aes(date, airtemp_min), col = "white", alpha = 0.3) +
+  theme_dark()
+
+ggplot(data = jenraw_daily, aes(date, airtemp_max)) +
+  geom_point(alpha = 0.5) +
+  geom_point(data = jendaily, aes(date, airtemp_max), col = "salmon", alpha = 0.4) +
+  geom_point(data = dp211, aes(date, airtemp_max), col = "navajowhite", alpha = 0.3) +
+  #geom_point(data = crlogs, aes(date, airtemp_max), col = "white", alpha = 0.3) +
+  theme_dark()
 
 # unique values of flags? and frequency of their occurrence?
 sapply(crlogs[grepl("flag", colnames(crlogs))], function(x) summary(as.factor(x))) # only n's, correspond to no flag
@@ -60,6 +95,9 @@ sapply(dp211[grepl("^airtemp", colnames(dp211))], function(x)tail(sort(x, decrea
 ## sdl chart
 sapply(sdlchart[grepl("^airtemp", colnames(sdlchart))], function(x) tail(sort(x))) #okay, high max value agrees with cr logger high value
 sapply(sdlchart[grepl("^airtemp", colnames(sdlchart))], function(x)tail(sort(x, decreasing = T))) #okay
+## jennings (not expecting anything but to be sure..)
+sapply(jendaily[grepl("^airtemp", colnames(jendaily))], function(x) tail(sort(x))) # reasonable
+sapply(jendaily[grepl("^airtemp", colnames(jendaily))], function(x)tail(sort(x, decreasing = T))) #reasonable
 
 # were mean values affected by bad values in logger dataset?
 na.omit(crlogs[crlogs$airtemp_min == -187, grepl("^airtemp", colnames(crlogs))]) #doesn't look like it
@@ -82,6 +120,9 @@ summary(dp211[grepl("^airtemp", colnames(dp211))])
 summary(crlogs[grepl("^airtemp", colnames(crlogs))])
 summary(sdlchart[grepl("^airtemp", colnames(sdlchart))])
 # ranges look reasonable. move on..
+
+# prep jennings long form
+jenlong <- gather(jendaily, met, jenval, airtemp_max, airtemp_min)
 
 
 
@@ -126,7 +167,7 @@ ggplot(dp211, aes(jday,airtemp_max)) +
   facet_wrap(~year, scales = "free_y")
 
 # make dp211 data long form with flags for plotting
-dp211_long <- dp211 %>%
+dp211_long <- arrange(dp211, date) %>% # arrange by date to make sure
   mutate(mon = month(date)) %>%
   dplyr::select(-airtemp_avg) %>%
   gather(met, val, airtemp_max,airtemp_min) %>%
@@ -153,7 +194,22 @@ dp211_long <- dp211 %>%
   # flag vals outside 3sd from monthly mean, and calculate day to day deltas
   mutate(mas3sd = ifelse(val < tmon_lo | val > tmon_hi, "yes", "no"),
          leadflag = ifelse(abs(deltafwd) > lead_thresh, "yes", "no"),
-         lagflag = ifelse(abs(deltabck) > lag_thresh, "yes", "no"))
+         lagflag = ifelse(abs(deltabck) > lag_thresh, "yes", "no")) %>%
+  # pair sdl chart data for comparing with flagged logger values
+  left_join(sdllong, by = c("date", "met" = "metric")) %>%
+  # crunch difference with sdl logger val and flag if more 3sd than grand mean (don't expect seasonal or monthly logger departure from sdl chart?)
+  mutate(delta_chart = val - chart_temp,
+         deltachart_mean = mean(abs(delta_chart), na.rm = T),
+         deltachart_sd = sd(abs(delta_chart), na.rm =T),
+         deltachart_thresh = deltachart_mean + 3*deltachart_sd,
+         deltachart_flag = ifelse(abs(delta_chart) > deltachart_thresh, "yes", "no")) %>%
+  # pair jennings dataset to compare with flagged logger values
+  left_join(jenlong) %>%
+  mutate(delta_jen = val - jenval,
+         deltajen_mean = mean(abs(delta_jen), na.rm = T),
+         deltajen_sd = sd(abs(delta_jen), na.rm =T),
+         deltajen_thresh = deltajen_mean + 3*deltajen_sd,
+         deltajen_flag = ifelse(abs(delta_jen) > deltajen_thresh, "yes", "no"))
 
 # plot daily values, highlight values 3sds outside monthly mean
 ggplot(subset(dp211_long, met == "airtemp_min"), aes(jday,val)) +
@@ -198,17 +254,126 @@ dp211 %>%
   facet_wrap(~met)
 # jan and dec values also look a little funky (appears some jan dates comparably warm to spring days?), but since ext sum PCA doesn't rely on jan or dec values, not a concern to address
 
+# look for logger sensor getting stuck
+View(subset(dp211_long, deltabck == 0 & deltafwd == 0))
+
+
+# plot dp211 deltas with sdl chart
+ggplot(dp211_long, aes(date, delta_chart)) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_point(data = subset(dp211_long, deltabck == 0 & deltafwd == 0), aes(date, delta_chart), col = "green", size = 5, pch = 4) +
+  geom_point(data = subset(dp211_long, mas3sd == "yes"), aes(date, delta_chart), col = "purple", size = 4, pch = 1) +
+  geom_point(data = subset(dp211_long, lagflag == "yes"), aes(date, delta_chart), col = "blue", size = 3, alpha = 0.5) +
+  geom_point(aes(col = deltachart_flag), alpha = 0.5) +
+  scale_color_manual(values = c("yes" = "red", "no" = "black"))
+
+# there is a negative temporal trend in dp211-jennings infilled temp values...
+# ctw saw this same negative temporal trend sdl chart-jennings infilled delta in a different analysis..
+ggplot(dp211_long, aes(date, delta_jen)) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_point(data = subset(dp211_long, deltabck == 0 & deltafwd == 0), aes(date, delta_jen), col = "green", size = 5, pch = 4) +
+  geom_point(data = subset(dp211_long, mas3sd == "yes"), aes(date, delta_jen), col = "purple", size = 4, pch = 1) +
+  geom_point(data = subset(dp211_long, lagflag == "yes"), aes(date, delta_jen), col = "blue", size = 3, alpha = 0.5) +
+  geom_point(aes(col = deltajen_flag), alpha = 0.5) +
+  scale_color_manual(values = c("yes" = "red", "no" = "black")) +
+  facet_wrap(~met)
+
+
 
 # -- VISUAL QA CR LOGGERS (BY LOGGER)-----
-# cr data loggers
+# repeat above for CR logger data
+# occurence of missing values in cr logger data
 crlogs[!grepl("flag", colnames(crlogs))] %>% # all flags are "n"
   gather(met, val, airtemp_max, airtemp_min,airtemp_avg) %>%
   mutate(NAval = ifelse(is.na(val), "yes", "no"),
          val = ifelse(is.na(val), 0, val)) %>% # infill NAs with 0 to see missing
   ggplot(aes(date, val, col = NAval)) +
-  geom_point(alpha = 0.5) + # clearly some bad values (sensor fail?), but not too many
+  geom_point(alpha = 0.5) +
   scale_color_manual(values = c("yes" = "red", "no" = "black")) +
-  facet_wrap(~met) # 1 bad value in airtemp_min (after 2015)
+  facet_wrap(~met)
+
+# make long form with deltas and flags
+crlogs_long <- crlogs[,!grepl("flag", colnames(crlogs))] %>% #remove flag cols
+  arrange(date, logger) %>% # be sure arranged by date since two loggers involved
+  mutate(mon = month(date)) %>%
+  dplyr::select(-airtemp_avg) %>% # discard mean airtemp
+  gather(met, val, airtemp_max,airtemp_min) %>%
+  group_by(met, logger) %>%
+  # calculate lead and lags
+  mutate(lag1 = lag(val, 1),
+         lead1 = lead(val, 1)) %>%
+  ungroup() %>%
+  # calculate fwd and backward deltas
+  mutate(deltafwd = val-lead1,
+         deltabck = val-lag1) %>%
+  group_by(mon, met, logger) %>%
+  # identify points more than 3sd from their monthly mean
+  # group by month to calculate monthly mean and sd with upper and lower bounds
+  mutate(tmon_mean = mean(val, na.rm =T),
+         tmon_sd = sd(val, na.rm = T),
+         tmon_hi = tmon_mean + 3*tmon_sd,
+         tmon_lo = tmon_mean - 3*tmon_sd,
+         lead_mean = mean(abs(deltafwd), na.rm =T),
+         lead_sd = sd(abs(deltafwd), na.rm = T),
+         lead_thresh = lead_mean + 3*lead_sd,
+         lag_mean = mean(abs(deltabck), na.rm =T),
+         lag_sd = sd(abs(deltabck), na.rm = T),
+         lag_thresh = lag_mean + 3*lag_sd) %>%
+  ungroup() %>%
+  # flag vals outside 3sd from monthly mean or outside 3sd day-to-day delta
+  mutate(mas3sd = ifelse(val < tmon_lo | val > tmon_hi, "yes", "no"),
+         leadflag = ifelse(abs(deltafwd) > lead_thresh, "yes", "no"),
+         lagflag = ifelse(abs(deltabck) > lag_thresh, "yes", "no")) %>%
+  # pair sdl chart data for comparing with flagged logger values
+  left_join(sdllong, by = c("LTER_site", "local_site", "date", "met" = "metric")) %>%
+  # crunch difference with sdl logger val and flag if more 3sd than grand mean (don't expect seasonal or monthly logger departure from sdl chart?)
+  mutate(delta_chart = val - chart_temp,
+         deltachart_mean = mean(abs(delta_chart), na.rm = T),
+         deltachart_sd = sd(abs(delta_chart), na.rm =T),
+         deltachart_thresh = deltachart_mean + 3*deltachart_sd,
+         deltachart_flag = ifelse(abs(delta_chart) > deltachart_thresh, "yes", "no")) %>%
+  # pair jennings dataset to compare with flagged logger values
+  left_join(jenlong) %>%
+  mutate(delta_jen = val - jenval,
+         deltajen_mean = mean(abs(delta_jen), na.rm = T),
+         deltajen_sd = sd(abs(delta_jen), na.rm =T),
+         deltajen_thresh = deltajen_mean + 3*deltajen_sd,
+         deltajen_flag = ifelse(abs(delta_jen) > deltajen_thresh, "yes", "no"))
+
+
+# plot out daily vals, colored if more than 3sd outside daily delta and/or logger historic monthly mean
+ggplot(subset(crlogs_long, met == "airtemp_min"), aes(jday,val)) +
+  geom_line() +
+  geom_point(data = subset(crlogs_long, met == "airtemp_min" & mas3sd == "yes"), aes(jday, val), col ="red", alpha = 0.5) + 
+  geom_point(data = subset(crlogs_long, met == "airtemp_min" & lagflag == "yes"), aes(jday, val), col ="orange", alpha = 0.5) + 
+  geom_point(data = subset(crlogs_long, met == "airtemp_min" & leadflag == "yes"), aes(jday, val), col ="blue", alpha = 0.5) + 
+  labs(title = "Saddle CR loggers: TMIN, red pts = more than 3sd from monthly grand mean",
+       y = "TMIN (°C)", x = "Day of year") +
+  facet_wrap(~year, scales = "free_x")
+ggplot(subset(crlogs_long, met == "airtemp_max"), aes(jday,val)) +
+  geom_line() +
+  #geom_point(data = subset(crlogs_long, met == "airtemp_max" & mas3sd == "yes" & leadflag == "yes" & lagflag == "yes"), aes(jday, val), col ="red", alpha = 0.5) + 
+  geom_point(data = subset(crlogs_long, met == "airtemp_max" & mas3sd == "yes"), aes(jday, val), col ="red", alpha = 0.5) + 
+  geom_point(data = subset(crlogs_long, met == "airtemp_max" & lagflag == "yes"), aes(jday, val), col ="orange", alpha = 0.5) + 
+  geom_point(data = subset(crlogs_long, met == "airtemp_max" & leadflag == "yes"), aes(jday, val), col ="blue", alpha = 0.5) + 
+  labs(title = "Saddle CR loggers: TMAX, red pts = more than 3sd from monthly grand mean",
+       y = "TMAX (°C)", x = "Day of year") +
+  facet_wrap(~year)
+
+# day-to-day differences
+ggplot(crlogs_long, aes(date, deltabck)) +
+  geom_line() +
+  geom_point(data = subset(crlogs_long, lagflag == "yes" & leadflag == "yes"), aes(date, deltabck), col ="red", alpha = 0.5) + 
+  facet_wrap(~met, scales = "free_y")
+ggplot(subset(crlogs_long, met == "airtemp_max"), aes(jday, deltafwd)) +
+  geom_line() +
+  geom_point(data = subset(crlogs_long, met == "airtemp_max" & leadflag == "yes" & lagflag == "yes"), aes(jday, deltafwd), col ="red", alpha = 0.5) + 
+  facet_wrap(~year)
+ggplot(subset(crlogs_long, met == "airtemp_min"), aes(jday, deltafwd)) +
+  geom_line() +
+  geom_point(data = subset(crlogs_long, met == "airtemp_min" & leadflag == "yes" & lagflag == "yes"), aes(jday, deltafwd), col ="red", alpha = 0.5) + 
+  facet_wrap(~year)
+
 
 # monthly boxplots
 crlogs[!grepl("flag", colnames(crlogs))] %>% # all flags are "n"
@@ -220,24 +385,80 @@ crlogs[!grepl("flag", colnames(crlogs))] %>% # all flags are "n"
   facet_wrap(~met) 
 
 
-logdat_all <- mutate(dp211, logger = "dp211") %>%
-  dplyr::select(logger, date:airtemp_avg) %>%
-  rbind(dplyr::select(crlogs, logger:airtemp_max, airtemp_min, airtemp_avg)) %>%
-  gather(metric, logger_temp, airtemp_max:airtemp_avg)
 
-logdat_all %>%
-  left_join(sdllong) %>%
-  ggplot(aes(logger_temp, chart_temp)) +
+# plot crlogs deltas with sdl chart
+ggplot(crlogs_long, aes(date, delta_chart)) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_point(data = subset(crlogs_long, deltabck == 0 & deltafwd == 0), aes(date, delta_chart), col = "green", size = 5, pch = 4) +
+  geom_point(data = subset(crlogs_long, mas3sd == "yes"), aes(date, delta_chart), col = "purple", size = 4, pch = 1) +
+  geom_point(data = subset(crlogs_long, lagflag == "yes"), aes(date, delta_chart), col = "blue", size = 3, alpha = 0.5) +
+  geom_point(aes(col = deltachart_flag), alpha = 0.5) +
+  scale_color_manual(values = c("yes" = "red", "no" = "black"))
+
+# beginning of new sensor implementation in 2000 looks awful.. the rest not too bad? not sure why gap around 0 difference line.. maybe something to do with a tolerance level specified in keith's infilling?
+ggplot(crlogs_long, aes(date, delta_jen)) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_point(data = subset(crlogs_long, deltabck == 0 & deltafwd == 0), aes(date, delta_jen), col = "green", size = 5, pch = 4) +
+  geom_point(data = subset(crlogs_long, mas3sd == "yes"), aes(date, delta_jen), col = "purple", size = 4, pch = 1) +
+  geom_point(data = subset(crlogs_long, lagflag == "yes"), aes(date, delta_jen), col = "blue", size = 3, alpha = 0.5) +
+  geom_point(aes(col = deltajen_flag), alpha = 0.5) +
+  scale_color_manual(values = c("yes" = "red", "no" = "black"))
+
+
+## -- STACK ALL LOGGER DATA ------
+# combine all to plot out for KNS and SCE to look at...
+logdat_all <- mutate(dp211_long, logger = "dp211") %>%
+  dplyr::select(colnames(crlogs_long)) %>%
+  rbind(crlogs_long)
+
+
+# plot all logger deltas with sdl chart
+ggplot(logdat_all, aes(date, delta_chart)) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_point(data = subset(logdat_all, deltabck == 0 & deltafwd == 0), aes(date, delta_chart), col = "green", size = 5, pch = 4) +
+  geom_point(data = subset(logdat_all, mas3sd == "yes"), aes(date, delta_chart), col = "purple", size = 4, pch = 1) +
+  geom_point(data = subset(logdat_all, lagflag == "yes"), aes(date, delta_chart), col = "blue", size = 3, alpha = 0.5) +
+  geom_point(aes(col = deltachart_flag), alpha = 0.5) +
+  scale_color_manual(values = c("yes" = "red", "no" = "black"))
+
+# beginning of new sensor implementation in 2000 looks awful.. the rest not too bad? not sure why gap around 0 difference line.. maybe something to do with a tolerance level specified in keith's infilling?
+ggplot(logdat_all, aes(date, delta_jen)) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_point(data = subset(logdat_all, deltabck == 0 & deltafwd == 0), aes(date, delta_jen), col = "green", size = 5, pch = 4) +
+  geom_point(data = subset(logdat_all, mas3sd == "yes"), aes(date, delta_jen), col = "purple", size = 4, pch = 1) +
+  geom_point(data = subset(logdat_all, lagflag == "yes"), aes(date, delta_jen), col = "blue", size = 3, alpha = 0.5) +
+  geom_point(aes(col = deltajen_flag), alpha = 0.5) +
+  scale_color_manual(values = c("yes" = "red", "no" = "black")) +
+  facet_wrap(~met)
+
+# plot logger temp against chart temp
+ggplot(logdat_all, aes(val, chart_temp)) +
   geom_point(aes(col = logger), alpha = 0.5) +
   geom_abline(aes(slope = 1, intercept = 0), col = "blue") +
   scale_color_viridis_d() + 
-  facet_wrap(logger~metric, scales = "free")
+  facet_wrap(logger~met, scales = "free")
+
+# plot logger temp against chart temp
+ggplot(logdat_all, aes(val, jenval)) +
+  geom_point(aes(col = logger), alpha = 0.5) +
+  geom_abline(aes(slope = 1, intercept = 0), col = "blue") +
+  scale_color_viridis_d() + 
+  facet_wrap(logger~met, scales = "free")
+
+# plot logger temps over time, look for obvious breaks/steps in values based on change in logger (i.e. dp211 -> cr23x -> cr1000)
+sdltemp_temporal <- ggplot(logdat_all, aes(date, val)) +
+  geom_point(aes(col = logger), alpha = 0.5) +
+  scale_color_viridis_d(option = "B") + 
+  facet_wrap(~met) +
+  theme_dark() +
+  labs(y = "Daily temperature (°C)",
+       x = "Date",
+       title = "Daily Tmax and Tmin at the Saddle, colored by data logger source",
+       subtitle = "Tmin range comparable over time between loggers, Tmax range discrepancy for DP211 vs CR loggers")
 
 
-
-
-
-
+ggsave("extended_summer/figs/sdl_loggertemp_1990-ongoing.pdf", sdltemp_temporal,
+       scale = 2)
 
 
 
