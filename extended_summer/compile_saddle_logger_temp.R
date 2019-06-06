@@ -31,6 +31,12 @@ sdlchart <- getTabular(413)
 jennings <- getTabular(168)
 # read in jennings raw data to compare uncorrected daily max and min temp
 jenraw <- read.csv("/Users/serahsierra/Documents/nwt_lter/unpub_data/sdl_hrly_met_data_all_NOQC.csv", na.strings = na_vals)
+#nwt renewal data  
+nwt_temps <- read.csv("~/Dropbox/NWT_data/Saddle_precip_temp_formoisturedeficit.csv") %>%
+  mutate(`date` = as.Date(paste(Year,Month,Day, sep="-")),
+         LTER_site = "NWT",
+         local_site = "sdl") %>%
+  dplyr::select(LTER_site, local_site, date, TMIN, TMAX) 
   
 
 # -- REVIEW DATA -----
@@ -65,20 +71,6 @@ jenraw_daily <- dplyr::select(jenraw, year:temp, logger) %>%
   group_by(date, doy) %>%
   summarize(airtemp_min = min(temp),
             airtemp_max = max(temp))
-
-ggplot(data = jenraw_daily, aes(date, airtemp_min)) +
-  geom_point(alpha = 0.5) +
-  geom_point(data = jendaily, aes(date, airtemp_min), col = "salmon", alpha = 0.4) +
-  geom_point(data = dp211, aes(date, airtemp_min), col = "navajowhite", alpha = 0.3) +
-  geom_point(data = crlogs, aes(date, airtemp_min), col = "white", alpha = 0.3) +
-  theme_dark()
-
-ggplot(data = jenraw_daily, aes(date, airtemp_max)) +
-  geom_point(alpha = 0.5) +
-  geom_point(data = jendaily, aes(date, airtemp_max), col = "salmon", alpha = 0.4) +
-  geom_point(data = dp211, aes(date, airtemp_max), col = "navajowhite", alpha = 0.3) +
-  #geom_point(data = crlogs, aes(date, airtemp_max), col = "white", alpha = 0.3) +
-  theme_dark()
 
 # unique values of flags? and frequency of their occurrence?
 sapply(crlogs[grepl("flag", colnames(crlogs))], function(x) summary(as.factor(x))) # only n's, correspond to no flag
@@ -395,7 +387,7 @@ ggplot(crlogs_long, aes(date, delta_chart)) +
   geom_point(aes(col = deltachart_flag), alpha = 0.5) +
   scale_color_manual(values = c("yes" = "red", "no" = "black"))
 
-# beginning of new sensor implementation in 2000 looks awful.. the rest not too bad? not sure why gap around 0 difference line.. maybe something to do with a tolerance level specified in keith's infilling?
+# beginning of new sensor implementation in 2000 looks awful.. the rest not too bad? gap around 0 line is due to directional differences in deltas for tmin and tmax
 ggplot(crlogs_long, aes(date, delta_jen)) +
   geom_hline(aes(yintercept = 0)) +
   geom_point(data = subset(crlogs_long, deltabck == 0 & deltafwd == 0), aes(date, delta_jen), col = "green", size = 5, pch = 4) +
@@ -403,6 +395,7 @@ ggplot(crlogs_long, aes(date, delta_jen)) +
   geom_point(data = subset(crlogs_long, lagflag == "yes"), aes(date, delta_jen), col = "blue", size = 3, alpha = 0.5) +
   geom_point(aes(col = deltajen_flag), alpha = 0.5) +
   scale_color_manual(values = c("yes" = "red", "no" = "black"))
+
 
 
 ## -- STACK ALL LOGGER DATA ------
@@ -421,7 +414,7 @@ ggplot(logdat_all, aes(date, delta_chart)) +
   geom_point(aes(col = deltachart_flag), alpha = 0.5) +
   scale_color_manual(values = c("yes" = "red", "no" = "black"))
 
-# beginning of new sensor implementation in 2000 looks awful.. the rest not too bad? not sure why gap around 0 difference line.. maybe something to do with a tolerance level specified in keith's infilling?
+# beginning of new sensor implementation in 2000 looks awful.. the rest not too bad?
 ggplot(logdat_all, aes(date, delta_jen)) +
   geom_hline(aes(yintercept = 0)) +
   geom_point(data = subset(logdat_all, deltabck == 0 & deltafwd == 0), aes(date, delta_jen), col = "green", size = 5, pch = 4) +
@@ -461,14 +454,116 @@ ggsave("extended_summer/figs/sdl_loggertemp_1990-ongoing.pdf", sdltemp_temporal,
        scale = 2)
 
 
+#compare dp211 data against jennings infilled and raw data source for jennings et al
+# min temp comparison
+ggplot(data = jenraw_daily, aes(date, airtemp_min)) +
+  geom_point(alpha = 0.5) +
+  geom_point(data = jendaily, aes(date, airtemp_min), col = "salmon", alpha = 0.4) +
+  geom_point(data = dp211, aes(date, airtemp_min), col = "navajowhite", alpha = 0.3) +
+  geom_point(data = crlogs, aes(date, airtemp_min), col = "white", alpha = 0.3) +
+  theme_dark()
+# max temp comparison
+ggplot(data = jenraw_daily, aes(date, airtemp_max)) +
+  geom_point(alpha = 0.5) +
+  geom_point(data = jendaily, aes(date, airtemp_max), col = "salmon", alpha = 0.4) +
+  geom_point(data = dp211, aes(date, airtemp_max), col = "navajowhite", alpha = 0.3) +
+  #geom_point(data = crlogs, aes(date, airtemp_max), col = "white", alpha = 0.3) +
+  theme_dark()
 
 
 
-
-
-
-
+## -- PROJECT SADDLE CHART USING CR LOGGERS -----
+# 2019-06-04: After reviewing temp discrepancies, KNS suggests using saddle loggers and projects 1980s chart data to logger values (use most recent logger)
+# for dp211.. can try standardize max temp? [but that will mess up temp threshold tallies]
+# > SCE suggests dropping dp211 sensor data, and using only saddle chart and CR logger data (project 1982-2000 chart data)
+#!! use NWT renewal chart data bc (assuming) prepped by tim kittel's methodology?, and only need to use until CR 1000 comes in
   
+# combine nsf nwt temp data and cr1000 logger data
+cr1000nsf_df <- rename(nwt_temps, airtemp_min = TMIN, airtemp_max = TMAX) %>%
+  gather(met, nsfval, airtemp_min, airtemp_max) %>%
+  full_join(subset(crlogs_long, logger == "cr1000")) %>%
+  mutate(mon = as.factor(month(`date`)))
+
+ggplot(cr1000nsf_df, aes(val, nsfval)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(aes(intercept = 0, slope = 1), col = "red") +
+  facet_wrap(~ met, scales = "free")
+
+# simple regressions..
+nsfcr1000tmax_lm <- lm(val ~ mon + nsfval, data = subset(cr1000nsf_df, met == "airtemp_max"))
+summary(nsfcr1000tmax_lm)  
+plot(nsfcr1000tmax_lm)
+
+nsfcr1000tmin_lm <- lm(val ~ mon + nsfval, data = subset(cr1000nsf_df, met == "airtemp_min"))
+summary(nsfcr1000tmin_lm) 
+plot(nsfcr1000tmin_lm)
+
+nsfcr1000tminsimple_lm <- lm(val ~ nsfval, data = subset(cr1000nsf_df, met == "airtemp_min"))
+summary(nsfcr1000tminsimple_lm) 
+plot(nsfcr1000tminsimple_lm)
+
+anova(nsfcr1000tmin_lm, nsfcr1000tminsimple_lm) #including month is better
+
+# predict sdl chart values based on simple regression
+predtmax <- predict.lm(nsfcr1000tmax_lm, newdata = subset(cr1000nsf_df, met == "airtemp_max"), se.fit = T, interval = "prediction")
+predtmin <- predict.lm(nsfcr1000tmin_lm, newdata = subset(cr1000nsf_df, met == "airtemp_min"), se.fit = T, interval = "prediction")
+
+newdat_tmax <- subset(cr1000nsf_df, met == "airtemp_max") %>%
+  dplyr::select(date,year,mon, jday, met, logger, val, nsfval) %>%
+  cbind(data.frame(predtmax$fit, se = predtmax$se.fit))
+#colnames(newdat)[colnames(newdat) %in% c("fit", "upr", "lwr", "se")] <- paste0("TMAX", colnames(newdat)[grepl("fit|lwr|upr|se", colnames(newdat))])
+newdat_tmin <- subset(cr1000nsf_df, met == "airtemp_min") %>%
+  dplyr::select(date,year,mon, jday, met, logger, val, nsfval) %>%
+  cbind(data.frame(predtmin$fit, se = predtmin$se.fit))
+
+newdat <- rbind(newdat_tmax, newdat_tmin) %>%
+  as.data.frame() %>%
+  mutate(year = year(`date`),
+         jday = yday(`date`)) %>%
+  rename(doy = jday,
+         cr1000_temp = val,
+         nsf_chart_temp = nsfval,
+         PIupr = upr,
+         PIlwr = lwr)
+
+# look at prediction over time with interval
+ggplot(newdat) +
+  #geom_errorbar(aes(date, fit, ymax = PIupr, ymin = PIlwr)) +
+  geom_point(aes(date, cr1000_temp), col = "dodgerblue", alpha = 0.5) +
+  geom_point(aes(date, fit),alpha = 0.3) +
+  facet_wrap(~met)
+
+ggplot(subset(newdat, met == "airtemp_max")) +
+  geom_errorbar(aes(doy, ymax = PIupr, ymin = PIlwr)) +
+  geom_point(aes(doy, cr1000_temp), col = "dodgerblue", alpha = 0.5) +
+  geom_point(aes(doy, fit),alpha = 0.3) +
+  facet_wrap(~year)
+#look at overlapping years only
+ggplot(subset(newdat, met == "airtemp_max" & year %in% c(2012,2013,2014))) +
+  geom_errorbar(aes(doy, ymax = PIupr, ymin = PIlwr), col = "chocolate2", alpha =0.8) +
+  geom_point(aes(doy, cr1000_temp), col = "dodgerblue", alpha = 0.5) +
+  geom_point(aes(doy, fit),alpha = 0.5, col = "navajowhite") +
+  geom_point(data = subset(crlogs, year == 2012 & logger == "cr23x"), aes(jday, airtemp_max), col = "purple", alpha = 0.3) +
+  facet_wrap(~year) +
+  theme_gray()
+
+ggplot(newdat, aes(nsf_chart_temp, cr1000_temp)) +
+  geom_point(alpha = 0.5) +
+  geom_point(data = subset(newdat, date > as.Date("2012-12-05")), aes(nsf_chart_temp, fit), col ="seagreen", alpha = 0.5) +
+  geom_abline(aes(intercept = 0, slope = 1), col ="blue") +
+  facet_wrap(~met)
+
+
+
+# write out and see what happens with PC scores
+write.csv(newdat, "extended_summer/output_data/ctw/predict_cr1000temp_1982-ongoing.csv", row.names = F)
+
+
+
+
+
+
+
 
 # test NEON sensor QA script on dp211
 dp211temps <- dplyr::select(dp211, airtemp_min, airtemp_max)

@@ -27,6 +27,10 @@ suding_temp <- read.csv("extended_summer/output_data/suding/allyrs/sdl_temp_infi
 ctw_temp <- read.csv("extended_summer/output_data/ctw/sdl_temp_infilled_19822018_ctwonly.csv",
                     strip.white = T,
                     na.strings = na_vals)
+# CTW: backwards predicted cr1000 vals
+prd_c1000temp <- read.csv("extended_summer/output_data/ctw/predict_cr1000temp_1982-ongoing.csv",
+                          strip.white = T,
+                          na.strings = na_vals)
 
 # -- PREP JENNINGS DATA -----
 # examine jennings et al. data and structure
@@ -98,6 +102,22 @@ temp2 <- ctw_temp %>%
   select(Year, Month, Day, TMIN, TMAX)
 
 
+# -- PREP BACKWARDS INFILLED CR1000 with ppt ----
+# clean up, format column names to match Emily's (Year, Month, Day, TMIN, TMAX)
+cr1000temp_allyrs <- prd_c1000temp %>%
+  # prioritize actual saddle logger temp over predicted saddle logger temp
+  mutate(hcntemp = ifelse(!is.na(cr1000_temp), cr1000_temp, fit)) %>%
+  dplyr::select(date, met, hcntemp) %>%
+  spread(met, hcntemp) %>%
+  #filter(`date` > as.Date("1981-07-31")) %>% # start at Jan 1 1982
+  mutate(Year = year(`date`),
+         Month = month(`date`),
+         Day = day(`date`)) %>%
+  dplyr::rename(TMIN = airtemp_min,
+                TMAX = airtemp_max) %>%
+  select(Year, Month, Day, TMIN, TMAX)
+
+
 # -- PREP HCN FOR AET -----
 ###   LOAD DATA FILE AND CREATE MATRICES:
 ###  tmin[ye,mo,da], tmax[ye,mo,da], pcp[ye,mo,da] 
@@ -159,6 +179,19 @@ head(ctw_hcn)
 tail(ctw_hcn)
 
 
+# cr1000 backwards predicted dataset
+cr1000clim_allyrs <- left_join(cr1000temp_allyrs, pcp)
+# infill from Jan 1 1981 with 0 so AET will run on full year (can use true 1981 fall metrics)
+cr1000_hcn_new <- left_join(dates, cr1000clim_allyrs)
+cr1000_hcn_new$TMIN[is.na(cr1000_hcn_new$TMIN)] <- 0
+cr1000_hcn_new$TMAX[is.na(cr1000_hcn_new$TMAX)] <- 0
+cr1000_hcn_new$PCP[is.na(cr1000_hcn_new$PCP)] <- 0
+cr1000_hcn <- cr1000_hcn_new
+# review
+head(cr1000_hcn)
+tail(cr1000_hcn)
+
+
 
 # -- FINISHING -----
 # write out hcn datasets
@@ -166,3 +199,4 @@ write.csv(sdl_jennings, paste0(datpath, "jennings/hcn_jennings.csv"), quote = F,
 write.csv(suding_hcn, paste0(datpath, "suding/allyrs/hcn_suding.csv"), quote = F, row.names = F)
 write.csv(suding_hcn_jenningsdates, paste0(datpath, "suding/sensitivity_subset/hcn_suding_19902013.csv"), quote = F, row.names = F)
 write.csv(ctw_hcn, paste0(datpath, "ctw/hcn_ctw.csv"), quote = F, row.names = F)
+write.csv(cr1000_hcn, paste0(datpath, "ctw/cr1000hcn_ctw.csv"), quote = F, row.names = F)
