@@ -639,3 +639,13 @@ dp211 %>%
   anomalize(remainder) %>%
   time_recompose() %>%
   plot_anomalies(time_recomposed = TRUE, ncol = 3, alpha_dots = 0.5)
+
+
+# plot sdl chart raw vs cr1000 raw
+ggplot(subset(crlogs_long, logger = "cr1000" & year > 2013)) +
+  geom_line(aes(date, val), col = "navajowhite", alpha = 0.6, lwd = 1) +
+  geom_line(aes(date, chart_temp), col = "dodgerblue", alpha = 0.8) +
+  facet_wrap(~ met) +
+  theme_dark()
+
+sapply(split(sdlchart$airtemp_max, year(sdlchart$date)), function(x) max(x, na.rm = T))
