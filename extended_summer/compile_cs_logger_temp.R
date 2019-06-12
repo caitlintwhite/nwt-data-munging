@@ -250,19 +250,38 @@ visual_qa <- function(dat, qadat, sorttime = "date"){
 
 
 # --- QA EXTREMES (TMIN/TMAX) -----
+# grand max and min
+check_max <- crall_long %>%
+  group_by(logger, met) %>%
+  filter(cr_temp == max(cr_temp, na.rm = T))
+qa_max <- visual_qa(crall_long_master, check_max)
+plot_grid(plotlist = qa_max)
+
+check_min <- crall_long %>%
+  group_by(logger, met) %>%
+  filter(cr_temp == min(cr_temp, na.rm = T))
+qa_min <- visual_qa(crall_long_master, check_min)
+plot_grid(plotlist = qa_min)
+
 # monthly max temps of tmin and tmax
 check_monthly_max <- crall_long %>%
   group_by(logger, met, mon) %>%
   filter(cr_temp == max(cr_temp, na.rm = T))
 
 qa_mon_max <- visual_qa(crall_long_master, check_monthly_max, sorttime = "mon")
-cr21x_max <- qa_mon_21x[grep("cr21x", qa_mon_max)]
-plot_grid(plotlist = test)
 
+# visualize logger monthly maximums, by logger and metric
+## max of airtemp_max
+plot_grid(plotlist = qa_mon_max[grep("cr21x.*airtemp_max", qa_mon_max)])
+plot_grid(plotlist = qa_mon_max[grep("cr23x.*airtemp_max", qa_mon_max)])
+plot_grid(plotlist = qa_mon_max[grep("cr1000.*airtemp_max", qa_mon_max)])
+## max of airtemp_min
+plot_grid(plotlist = qa_mon_max[grep("cr21x.*airtemp_min", qa_mon_max)])
+plot_grid(plotlist = qa_mon_max[grep("cr23x.*airtemp_min", qa_mon_max)])
+plot_grid(plotlist = qa_mon_max[grep("cr1000.*airtemp_min", qa_mon_max)])
 
 # monthly min temps of tmin and tmax
 check_monthly_min <- crall_long %>%
-  subset(logger == "cr21x") %>%
   group_by(logger, met, mon) %>%
   filter(cr_temp == min(cr_temp, na.rm = T))
 
@@ -273,7 +292,7 @@ check_monthly_min <- crall_long %>%
 
 
 
-# -- CHECK EXTREMES (GRAND TMIN ADN TMAX) VALUES -----
+# -- CHECK EXTREMES (GRAND TMIN AND TMAX) VALUES -----
 # look at tails for any obvious bad values
 ## cr 21x
 sapply(cr21x[grepl("temp", colnames(cr21x))], function(x) tail(sort(x))) #31.45.. Jen Morse said she thinks max T shouldn't exceed 30, and is it reasonable max/min temp occured at midnight?
