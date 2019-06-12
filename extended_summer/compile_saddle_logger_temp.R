@@ -14,6 +14,7 @@
 rm(list = ls())
 library(tidyverse)
 library(lubridate)
+library(xml2)
 options(stringsAsFactors = F)
 theme_set(theme_bw())
 na_vals <- c("", " ", ".", NA, NaN, "NA", "NaN")
@@ -22,7 +23,16 @@ na_vals <- c("", " ", ".", NA, NaN, "NA", "NaN")
 source("edi_functions.R")
 
 # -- GET DATA -----
+#data pod 211
 dp211 <- getTabular(80)
+#campbell logger 1990- # no colnames in data file so read in from copy/paste url
+cr21x <- read_csv("http://pasta.lternet.edu/package/data/eml/knb-lter-nwt/78/2/74edfb5a907b5d4960d1e1dbe08faba4", col_names = FALSE, na = na_vals, trim_ws = T)
+cr21xeml <- readLines("https://portal.edirepository.org/nis/metadataviewer?packageid=knb-lter-nwt.78.2&contentType=application/xml")
+cr21x_names <- cr21xeml[grep("attributeName", cr21xeml)] %>%
+  str_extract(">.*<") %>% 
+  gsub("<|>", "",.)
+#set colnames for cr21x data
+colnames(cr21x) <- cr21x_names
 #crlogs <- getTabular() # most current logger dataset not on EDI yet, provided by SCE
 crlogs <- read.csv("/Users/serahsierra/Documents/nwt_lter/unpub_data/sdlcr23x-cr1000.daily.ml.data.csv",
                    strip.white = T, na.strings = c("", " ", ".", NA, NaN, "NA", "NaN"))
@@ -42,6 +52,7 @@ nwt_temps <- read.csv("~/Dropbox/NWT_data/Saddle_precip_temp_formoisturedeficit.
 # -- REVIEW DATA -----
 # review how dats read in
 glimpse(dp211) # no flag cols
+glimpse(cr21x) # no flag cols, date is date class
 glimpse(crlogs) # flag cols present
 glimpse(sdlchart) # flags cols present
 glimpse(jennings)
@@ -50,6 +61,8 @@ glimpse(jennings)
 crlogs <- crlogs[,1:12]
 # drop solar radiation in dp211
 dp211 <- dp211[!grepl("solrad", names(dp211))]
+# drop non airtemp cols in cr21x
+cr21x <- cr21x[grepl("date|Julian|maximum temp|minimum temp", colnames(cr21x))]
 
 # convert dates in all to Date class
 dp211$date <- as.Date(dp211$date, format = "%Y-%m-%d")
@@ -78,10 +91,12 @@ sapply(sdlchart[grepl("flag", colnames(sdlchart))], function(x) summary(as.facto
 # saddle chart flags: 1 = infilled by regression; 2 = infilled by standard deviation (take sd through that day in all years available)
 
 # look at tails for any obvious bad values
-## cr data loggers
+## cr 21x
+sapply(cr21x[grepl("temp", colnames(cr21x))], function(x) tail(sort(x))) #okay
+sapply(cr21x[grepl("temp", colnames(cr21x))], function(x)tail(sort(x, decreasing = T))) #-187 in airtemp_min
+## cr 23x, 1000 data loggers
 sapply(crlogs[grepl("^airtemp", colnames(crlogs))], function(x) tail(sort(x))) #okay
-sapply(crlogs[grepl("^airtemp", colnames(crlogs))], function(x)tail(sort(x, decreasing = T))) #-187 in airtemp_min
-## dp211 logger
+sapply(crlogs[grepl("^airtemp", colnames(crlogs))], function(x)tail(sort(x, decreasing = T))) #-75 and -6999 in min temp
 sapply(dp211[grepl("^airtemp", colnames(dp211))], function(x) tail(sort(x))) #77.5 in airtemp_max
 sapply(dp211[grepl("^airtemp", colnames(dp211))], function(x)tail(sort(x, decreasing = T))) #-50 in airtemp_min
 ## sdl chart
@@ -104,11 +119,13 @@ na.omit(dp211[dp211$airtemp_min == -50, grepl("^airtemp", colnames(dp211))]) #ro
 # 5145        12.5         -50         3.0
 
 # change bad values to NAs and move on
+cr21x$`minimum temperature`[cr21x$`minimum temperature` < -70 & !is.na(cr21x$`minimum temperature`)] <- NA
 crlogs$airtemp_min[crlogs$airtemp_min == -187 & !is.na(crlogs$airtemp_min)] <- NA
 dp211$airtemp_min[dp211$airtemp_min == -50 & !is.na(dp211$airtemp_min)] <- NA
 dp211$airtemp_max[dp211$airtemp_max == 77.5 & !is.na(dp211$airtemp_max)] <- NA
 
 summary(dp211[grepl("^airtemp", colnames(dp211))])
+summary(cr21x[grepl("temp", colnames(cr21x))])
 summary(crlogs[grepl("^airtemp", colnames(crlogs))])
 summary(sdlchart[grepl("^airtemp", colnames(sdlchart))])
 # ranges look reasonable. move on..
@@ -274,6 +291,14 @@ ggplot(dp211_long, aes(date, delta_jen)) +
 
 # -- VISUAL QA CR LOGGERS (BY LOGGER)-----
 # repeat above for CR logger data
+# cr21x
+## plot raw data with saddle chart
+ggplot(cr21x, aes(date, `minimum temperature`)) +
+  geom_point(alpha = 0.5) +
+  geom_point(data = subset(sdlchart, date <= max(cr21x$date) & date >= min(cr21x$date)), aes(date, airtemp_min), col = "seagreen", alpha = 0.3)
+ggplot(cr21x, aes(date, `maximum temperature`)) +
+  geom_point(alpha = 0.5) +
+  geom_point(data = subset(sdlchart, date <= max(cr21x$date) & date >= min(cr21x$date)), aes(date, airtemp_max), col = "seagreen", alpha = 0.3)
 # occurence of missing values in cr logger data
 crlogs[!grepl("flag", colnames(crlogs))] %>% # all flags are "n"
   gather(met, val, airtemp_max, airtemp_min,airtemp_avg) %>%
@@ -285,10 +310,19 @@ crlogs[!grepl("flag", colnames(crlogs))] %>% # all flags are "n"
   facet_wrap(~met)
 
 # make long form with deltas and flags
-crlogs_long <- crlogs[,!grepl("flag", colnames(crlogs))] %>% #remove flag cols
+crlogs_long <- cr21x[!grepl("time", colnames(cr21x))] %>%
+  rename(jday = `Julian day`, 
+         airtemp_max = `maximum temperature`, 
+         airtemp_min = `minimum temperature`) %>%
+  mutate(LTER_site = "NWT",
+         local_site = "sdl", 
+         year = year(date), 
+         logger = "cr21x") %>%
+  dplyr::select(LTER_site, local_site, logger, date, year, jday, airtemp_max, airtemp_min) %>%
+  rbind(crlogs[,!grepl("flag|airtemp_avg", colnames(crlogs))]) %>% #remove flag cols and mean temp
   arrange(date, logger) %>% # be sure arranged by date since two loggers involved
   mutate(mon = month(date)) %>%
-  dplyr::select(-airtemp_avg) %>% # discard mean airtemp
+  #dplyr::select(-airtemp_avg) %>% # discard mean airtemp
   gather(met, val, airtemp_max,airtemp_min) %>%
   group_by(met, logger) %>%
   # calculate lead and lags
@@ -379,22 +413,26 @@ crlogs[!grepl("flag", colnames(crlogs))] %>% # all flags are "n"
 
 
 # plot crlogs deltas with sdl chart
-ggplot(crlogs_long, aes(date, delta_chart)) +
+ggplot(crlogs_long, aes(date, delta_chart, col = logger)) +
   geom_hline(aes(yintercept = 0)) +
-  geom_point(data = subset(crlogs_long, deltabck == 0 & deltafwd == 0), aes(date, delta_chart), col = "green", size = 5, pch = 4) +
-  geom_point(data = subset(crlogs_long, mas3sd == "yes"), aes(date, delta_chart), col = "purple", size = 4, pch = 1) +
-  geom_point(data = subset(crlogs_long, lagflag == "yes"), aes(date, delta_chart), col = "blue", size = 3, alpha = 0.5) +
-  geom_point(aes(col = deltachart_flag), alpha = 0.5) +
-  scale_color_manual(values = c("yes" = "red", "no" = "black"))
+  geom_point(alpha = 0.5) +
+  facet_wrap(~met)
+  #geom_point(data = subset(crlogs_long, deltabck == 0 & deltafwd == 0), aes(date, delta_chart), col = "green", size = 5, pch = 4) +
+  #geom_point(data = subset(crlogs_long, mas3sd == "yes"), aes(date, delta_chart), col = "purple", size = 4, pch = 1) +
+  #geom_point(data = subset(crlogs_long, lagflag == "yes"), aes(date, delta_chart), col = "blue", size = 3, alpha = 0.5) +
+  #geom_point(aes(col = deltachart_flag), alpha = 0.5) +
+  #scale_color_manual(values = c("yes" = "red", "no" = "black"))
 
 # beginning of new sensor implementation in 2000 looks awful.. the rest not too bad? gap around 0 line is due to directional differences in deltas for tmin and tmax
-ggplot(crlogs_long, aes(date, delta_jen)) +
+ggplot(crlogs_long, aes(date, delta_jen, col = logger)) +
   geom_hline(aes(yintercept = 0)) +
-  geom_point(data = subset(crlogs_long, deltabck == 0 & deltafwd == 0), aes(date, delta_jen), col = "green", size = 5, pch = 4) +
-  geom_point(data = subset(crlogs_long, mas3sd == "yes"), aes(date, delta_jen), col = "purple", size = 4, pch = 1) +
-  geom_point(data = subset(crlogs_long, lagflag == "yes"), aes(date, delta_jen), col = "blue", size = 3, alpha = 0.5) +
-  geom_point(aes(col = deltajen_flag), alpha = 0.5) +
-  scale_color_manual(values = c("yes" = "red", "no" = "black"))
+  geom_point(alpha = 0.5) +
+  facet_wrap(~met)
+  # geom_point(data = subset(crlogs_long, deltabck == 0 & deltafwd == 0), aes(date, delta_jen), col = "green", size = 5, pch = 4) +
+  # geom_point(data = subset(crlogs_long, mas3sd == "yes"), aes(date, delta_jen), col = "purple", size = 4, pch = 1) +
+  # geom_point(data = subset(crlogs_long, lagflag == "yes"), aes(date, delta_jen), col = "blue", size = 3, alpha = 0.5) +
+  # geom_point(aes(col = deltajen_flag), alpha = 0.5) +
+  # scale_color_manual(values = c("yes" = "red", "no" = "black"))
 
 
 
@@ -565,11 +603,24 @@ write.csv(newdat, "extended_summer/output_data/ctw/predict_cr1000temp_1982-ongoi
 
 
 
-# test NEON sensor QA script on dp211
+# test NEON sensor QA script on dp211 and crlogs
 dp211temps <- dplyr::select(dp211, airtemp_min, airtemp_max)
 dp211dates <- as.POSIXlt.Date(dp211$date)
+crtemps <- dplyr::select(crlogs_long, logger, date, met, val) %>%
+  spread(met, val) %>%
+  arrange(date) %>%
+  # 4 dates overlap btwn cr21x and cr23x, average those values for now to run through NEON QA
+  group_by(date) %>%
+  summarise(TMAX = mean(airtemp_max, na.rm =T),
+            TMIN = mean(airtemp_min, na.rm = T)) %>%
+  ungroup()
+  #dplyr::select(TMAX, TMIN)
+crdates <- as.POSIXlt.Date(crtemps$date)
+crtemps <- crtemps[,2:3]
 source("extended_summer/neon_sensor_QA.R")
 test <- def.plau(dp211temps, ts = dp211dates, RngMin = c(-35, -35), RngMax = c(25,25), TestNull = c(T,T), DiffStepMax = c(30,30), NumGap = c(3,3))
+crtest <- def.plau(crtemps, ts = crdates, RngMin = c(-40, -40), RngMax = c(32,32), TestNull = c(T,T), DiffStepMax = c(30,30), NumGap = c(3,3))
+
 
 testdf <- dp211 %>%
   dplyr::select(date, jday, airtemp_max) %>%
