@@ -328,9 +328,23 @@ check_daily_diff2 <- filter(working_dat, flag_diffsdl == T & flag_diffd1 == T & 
 qa_daily_diff2 <- visual_qa(working_dat, check_daily_diff2)
 plot_grid(plotlist = qa_daily_diff2) 
 # > round 2: 
-# > 
+# > 1990-08-18: flag and remove, other datasets were staying flat or getting warmer
 # > leave 1992-07-02 value (low, but entire 20 day period shows logger cooler in tmin than chart sources)
+# > 1996-12-19: same from round 1, shift 1996-12-17 to 1996-12-30 back by 1 day so lines up with chart trends
 
+working_dat <- flag_temp(check_daily_diff2[check_daily_diff2$date == "1990-08-18",], "comparative deviance")
+# manual adjustment to cr_temp tmin vals in dec 1996
+## view both tmin and tmax before adjusting
+subset(working_dat, date > "1996-12-13" & date < "1997-01-13") %>%
+  dplyr::select(date, met, cr_temp, sdl_temp) %>%
+  gather(datsource, temp_c, cr_temp:ncol(.)) %>%
+  ggplot(aes(date, temp_c, col = datsource)) +
+  geom_line() +
+  geom_point(alpha = 0.6) +
+  scale_color_viridis_d() +
+  facet_wrap(~met)
+# > it looks like both tmin and tmax could be shifted back 1 day
+# > select 1996-12-17 through 1997-jan-06 since everything in early jan is NA anyway (i.e. doesn't matter if NA is shifted to an NA)  
 
 
 # -- QA EXTREMES (TMIN/TMAX) -----
