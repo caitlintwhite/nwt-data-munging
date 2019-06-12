@@ -249,20 +249,125 @@ visual_qa <- function(dat, qadat, sorttime = "date"){
 
 
 # -- QA SENSOR FAILS (OBVIOUS OUTLIERS) -----
+# create working copy
+working_dat <- crall_long_master
+# add empty col for qa flags added
+working_dat$qa_flag <- NA
+
+# look at tails for any obvious bad values
+## logger temp, split by logger
+with(working_dat, lapply(split(cr_temp, paste(met, logger)), function(x) tail(sort(x)))) #31.45.. Jen Morse said she thinks max T shouldn't exceed 30
+with(working_dat, lapply(split(cr_temp, paste(met, logger)), function(x) tail(sort(x, decreasing = T)))) #cr21x: -75 and -6999 in airtemp_min; cr1000: -187 tmin
+
+## chart data
+#sdl
+with(working_dat, lapply(split(sdl_temp, met), function(x) tail(sort(x))))
+with(working_dat, lapply(split(sdl_temp, met), function(x) tail(sort(x, decreasing = T)))) #-38 is kind of a jump from other tmin, but not impossible value
+#d1
+with(working_dat, lapply(split(d1_temp, met), function(x) tail(sort(x))))
+with(working_dat, lapply(split(d1_temp, met), function(x) tail(sort(x, decreasing = T))))
+#c1
+with(working_dat, lapply(split(c1_temp, met), function(x) tail(sort(x))))
+with(working_dat, lapply(split(c1_temp, met), function(x) tail(sort(x, decreasing = T))))
+
+# flag: -187 in cr1000; anything < -70 in cr21x (-75 and -6999)
+working_dat$qa_flag[working_dat$cr_temp < -50 & !is.na(working_dat$cr_temp)] <- "sensor fail"
+# remove bad values from working cr_temp before moving on
+working_dat$cr_temp[!is.na(working_dat$qa_flag)] <- NA
+
+
+
+# -- FLAG DAILY DEPARTURES FROM COMPARATIVE DATASETS -----
+# function to difference daily logger temp from comparative chart dataset daily temps
+diff_daily <- function(dat){
+  dat %>%
+  mutate(cr_diff_sdl = abs(cr_temp-sdl_temp),
+         cr_diff_d1 = abs(cr_temp-d1_temp),
+         cr_diff_c1 = abs(cr_temp-c1_temp)) %>%
+  group_by(logger, met, mon) %>%
+  # set threshold for sdl logger deviance at 3sd away from the absolute average difference (by logger, metric, and month)
+  mutate(thresh_diff_sdl = mean(cr_diff_sdl, na.rm = T) + (3*sd(cr_diff_sdl, na.rm = T)),
+         thresh_diff_d1 = mean(cr_diff_d1, na.rm = T) + (3*sd(cr_diff_d1, na.rm = T)),
+         thresh_diff_c1 = mean(cr_diff_c1, na.rm = T) + (3*sd(cr_diff_c1, na.rm = T))) %>%
+  ungroup() %>%
+  # flag logger value if exceeds daily diff threshold for chart comparative datasets
+  mutate(flag_diffsdl = cr_diff_sdl > thresh_diff_sdl,
+         flag_diffd1 = cr_diff_d1 > thresh_diff_d1,
+         flag_diffc1 = cr_diff_c1 > thresh_diff_c1)
+}
+
+# round 1 diff daily and flagging
+working_dat <- diff_daily(working_dat)  
+# check logger temps that exceed daily deviance allowed on all three chart datasets
+check_daily_diff1 <- filter(working_dat, flag_diffsdl == T & flag_diffd1 == T & flag_diffc1 == T)
+# run through visual qa
+qa_daily_diff1 <- visual_qa(working_dat, check_daily_diff1)
+plot_grid(plotlist = qa_daily_diff1) 
+# round 1: all look bad excep tmin on 1996-12-19 (looks kind of of like temps ot shifted fwd one day for that week?) 
+flag_dailydiff1 <- subset(check_daily_diff1, date!= "1996-12-19")
+
+# function for flagging and removing high values in working dataset
+flag_temp <- function(flagdat, error = 1){
+  tempdat <- flagdat
+  for(row in 1:nrow(tempdat)){
+    pos <- with(working_dat, which(met == tempdat$met[row] & logger == tempdat$logger[row] & date == tempdat$date[row]))
+    working_dat$qa_flag[pos] <- error
+    working_dat$cr_temp[pos] <- NA 
+  }
+  return(working_dat)
+}
+
+# flag and remove values in working dataset
+working_dat <- flag_temp(flag_dailydiff1, error = "comparative deviance")
+
+# round 2 daily diff (recalc mean and deviance with bad deviance values from round 1 removed)
+working_dat <- diff_daily(working_dat)
+# check logger temps that exceed daily deviance allowed on all three chart datasets
+check_daily_diff2 <- filter(working_dat, flag_diffsdl == T & flag_diffd1 == T & flag_diffc1 == T)
+# run through visual qa
+qa_daily_diff2 <- visual_qa(working_dat, check_daily_diff2)
+plot_grid(plotlist = qa_daily_diff2) 
+# > round 2: 
+# > 
+# > leave 1992-07-02 value (low, but entire 20 day period shows logger cooler in tmin than chart sources)
+
 
 
 # -- QA EXTREMES (TMIN/TMAX) -----
+## IMPORTANTE!!: 
+## logger lifecycles: cr21x = 1980s-2000; cr23x = 2000 - 2012; cr1000 = dec 2012 - ongoing
+## panel arrangement: cr21x = left panel, cr23x = middle, cr1000 = right panel
+
 # grand max and min
-check_max <- crall_long %>%
+check_max <- working_dat %>%
   group_by(logger, met) %>%
   filter(cr_temp == max(cr_temp, na.rm = T))
-qa_max <- visual_qa(crall_long_master, check_max)
-plot_grid(plotlist = qa_max)
+qa_max <- visual_qa(working_dat, check_max)
+plot_grid(plotlist = qa_max) 
+# >round 1: cr21x and cr23x tmax vals look bad, flag; max tmins look okay
+# >round 2: cr21x looks bad, others okay
 
-check_min <- crall_long %>%
+flag_max1 <- filter(check_max, met == "airtemp_max" & logger != "cr1000")
+flag_max2 <- filter(check_max, met == "airtemp_max" & logger == "cr21x")
+
+# function for flagging and removing high values in working dataset
+flag_high <- function(flagdat){
+  flagdat <- flagdat
+  for(row in 1:nrow(flagdat)){
+    pos <- with(working_dat, which(met == flagdat$met[row] & logger == flagdat$logger[row] & cr_temp == flagdat$cr_temp[row]))
+    working_dat$qa_flag[pos] <- "high value"
+    working_dat$cr_temp[pos] <- NA 
+  }
+}
+
+working_dat <- flag_high(flag_max1)
+working_dat <- flag_high(flag_max2)
+# re-run max check, if looks okay move on or keep iterating until clean (only did 2 rounds)
+
+check_min <- working_dat %>%
   group_by(logger, met) %>%
   filter(cr_temp == min(cr_temp, na.rm = T))
-qa_min <- visual_qa(crall_long_master, check_min)
+qa_min <- visual_qa(working_dat, check_min)
 plot_grid(plotlist = qa_min)
 
 # monthly max temps of tmin and tmax
@@ -297,7 +402,7 @@ check_monthly_min <- crall_long %>%
 # -- CHECK EXTREMES (GRAND TMIN AND TMAX) VALUES -----
 # look at tails for any obvious bad values
 ## cr 21x
-sapply(cr21x[grepl("temp", colnames(cr21x))], function(x) tail(sort(x))) #31.45.. Jen Morse said she thinks max T shouldn't exceed 30, and is it reasonable max/min temp occured at midnight?
+sapply(cr21x[grepl("temp", colnames(cr21x))], function(x) tail(sort(x))) #31.45.. Jen Morse said she thinks max T shouldn't exceed 30
 sapply(cr21x[grepl("temp", colnames(cr21x))], function(x) tail(sort(x, decreasing = T))) #-75 and -6999 in airtemp_min
 ## cr 23x, 1000 data loggers
 sapply(crlogs[grepl("^airtemp", colnames(crlogs))], function(x) tail(sort(x))) #okay
@@ -434,176 +539,10 @@ ggplot(data = sdl[(which(sdl$airtemp_min == min(sdl$airtemp_min, na.rm =T))-10):
 
 
 
-# -- TIDY CHART COMPARISON DATASETS -----
-# prep chart datasets to join with logger datasets in long-form
-#c1 airtemp
-c1_long <- c1 %>%
-  dplyr::select(-airtemp_avg) %>%
-  gather(met, c1_temp, airtemp_max:ncol(.)) %>%
-  arrange(met, date)
-c1_flags <- c1_long %>%
-  filter(grepl("flag", met)) %>%
-  rename(c1_flag = c1_temp) %>%
-  mutate(met = gsub("flag_", "", met))
-c1_long <- subset(c1_long, !grepl("flag", met)) %>%
-  # add month and year
-  mutate(yr = year(date),
-         mon = month(date)) %>%
-  left_join(c1_flags) %>%
-  # lag and lead temp by min/max temp
-  group_by(met) %>%
-  mutate(lag1_c1temp = lag(c1_temp),
-         lead1_c1temp = lead(c1_temp)) %>%
-  ungroup() %>%
-  # diff temp val from lag and lead
-  mutate(delta_c1lag = c1_temp - lag1_c1temp,
-         delta_c1lead = c1_temp - lead1_c1temp) %>%
-  # flag anomoly as +4sd departure from lag and lead temps
-  group_by(met, mon) %>%
-  mutate(delta_c1thresh_lag = (mean(abs(delta_c1lag), na.rm = T)) + 4*(sd(abs(delta_c1lag), na.rm = T)),
-         delta_c1thresh_lead = mean(abs(delta_c1lead), na.rm = T) + 4*(sd(abs(delta_c1lag), na.rm = T))) %>%
-  ungroup() %>%
-  # flag departures
-  mutate(flag_c1deltalag = ifelse(abs(delta_c1lag)> delta_c1thresh_lag, 1, 0),
-         flag_c1deltalead = ifelse(abs(delta_c1lead)> delta_c1thresh_lead, 1, 0)) %>%
-  dplyr::select(date, yr, mon, met:ncol(.))
-
-# d1 airtemp
-d1_long <- d1 %>%
-  dplyr::select(-airtemp_avg) %>%
-  gather(met, d1_temp, airtemp_max:ncol(.)) %>%
-  arrange(met, date)
-d1_flags <- d1_long %>%
-  filter(grepl("flag", met)) %>%
-  rename(d1_flag = d1_temp) %>%
-  mutate(met = gsub("flag_", "", met))
-d1_long <- subset(d1_long, !grepl("flag", met)) %>%
-  # add month and year
-  mutate(yr = year(date),
-         mon = month(date)) %>%
-  left_join(d1_flags) %>%
-  # lag and lead temp by min/max temp
-  group_by(met) %>%
-  mutate(lag1_d1temp = lag(d1_temp),
-         lead1_d1temp = lead(d1_temp)) %>%
-  ungroup() %>%
-  # diff temp val from lag and lead
-  mutate(delta_d1lag = d1_temp - lag1_d1temp,
-         delta_d1lead = d1_temp - lead1_d1temp) %>%
-  # flag anomoly as +4sd departure from lag and lead temps
-  group_by(met, mon) %>%
-  mutate(delta_d1thresh_lag = (mean(abs(delta_d1lag), na.rm = T)) + 4*(sd(abs(delta_d1lag), na.rm = T)),
-         delta_d1thresh_lead = mean(abs(delta_d1lead), na.rm = T) + 4*(sd(abs(delta_d1lag), na.rm = T))) %>%
-  ungroup() %>%
-  # flag departures
-  mutate(flag_d1deltalag = ifelse(abs(delta_d1lag)> delta_d1thresh_lag, 1, 0),
-         flag_d1deltalead = ifelse(abs(delta_d1lead)> delta_d1thresh_lead, 1, 0)) %>%
-  dplyr::select(date, yr, mon, met:ncol(.))
 
 
-#sdl airtemp
-sdl_long <- sdl %>%
-  dplyr::select(-airtemp_avg) %>%
-  gather(met, sdl_temp, airtemp_max:ncol(.)) %>%
-  arrange(met, date)
-sdl_flags <- sdl_long %>%
-  filter(grepl("flag", met)) %>%
-  rename(sdl_flag = sdl_temp) %>%
-  mutate(met = gsub("flag_", "", met))
-sdl_long <- subset(sdl_long, !grepl("flag", met)) %>%
-  # add month and year
-  mutate(yr = year(date),
-         mon = month(date)) %>%
-  left_join(sdl_flags) %>%
-  # lag and lead temp by min/max temp
-  group_by(met) %>%
-  mutate(lag1_sdltemp = lag(sdl_temp),
-         lead1_sdltemp = lead(sdl_temp)) %>%
-  ungroup() %>%
-  # diff temp val from lag and lead
-  mutate(delta_sdllag = sdl_temp - lag1_sdltemp,
-         delta_sdllead = sdl_temp - lead1_sdltemp) %>%
-  # flag anomoly as +4sd departure from lag and lead temps
-  group_by(met, mon) %>%
-  mutate(delta_sdlthresh_lag = (mean(abs(delta_sdllag), na.rm = T)) + 4*(sd(abs(delta_sdllag), na.rm = T)),
-         delta_sdlthresh_lead = mean(abs(delta_sdllead), na.rm = T) + 4*(sd(abs(delta_sdllag), na.rm = T))) %>%
-  ungroup() %>%
-  # flag departures
-  mutate(flag_sdldeltalag = ifelse(abs(delta_sdllag)> delta_sdlthresh_lag, 1, 0),
-         flag_sdldeltalead = ifelse(abs(delta_sdllead)> delta_sdlthresh_lead, 1, 0)) %>%
-  dplyr::select(date, yr, mon, met:ncol(.))
-
-# clean up
-rm(d1_flags, c1_flags, sdl_flags)
 
 
-# step 1: flag cr21x using d1 and sdl chart AND timestamps (esp. in summer months, not as useful in winter since clock might have frozen/malfunctioned in cold weather)
-cr21x_long <- cr21x %>%
-  # change names to match other logger and chart colnames
-  rename(jday = `Julian day`,
-         airtemp_max = `maximum temperature`,
-         airtemp_min = `minimum temperature`,
-         time_tmax = `time of maximum temperature`,
-         time_tmin = `time of minimum temperature`)
-cr21x_times <- dplyr::select(cr21x_long, date, jday, time_tmax, time_tmin) %>%
-  # rename time cols for joining back in to long-form temp dataset based date and metric
-  rename(airtemp_max = time_tmax, 
-         airtemp_min = time_tmin) %>%
-  # tidy time cols
-  gather(met, time, airtemp_max:airtemp_min)
-# drop time cols from cr21x dataset, tidy temp cols, and join time in 
-cr21x_long <- dplyr::select(cr21x_long, -c(time_tmax, time_tmin)) %>%
-  gather(met, temp, airtemp_max:airtemp_min) %>%
-  left_join(cr21x_times) %>%
-  # add in month and year columns
-  mutate(yr = year(date),
-         mon = month(date)) %>%
-  # rearrange cols
-  dplyr::select(date, yr, mon, jday:ncol(.))
-# clean up
-rm(cr21x_times)
-
-# how many tmax temps occurred between 11pm and 1am?
-nrow(subset(cr21x_long, met == "airtemp_max" & time > 2300 | time < 100)) #711! boo.
-View(subset(cr21x_long, met == "airtemp_max" & time > 2300 | time < 100))
-# what is the breakdown of count tmax where timestamp between 2300 & 0100 by month?
-group_by(subset(cr21x_long, met == "airtemp_max" & time > 2300 | time < 100), mon) %>%
-  summarize(ct = length(time)) # most occur in winter months (e.g. 118 in december), but there are a decent amount in summer months
-
-# time is perhaps not reliable for flagging if clock sometimes malfunctioning. drop and combine cr21x with cr23x and cr1000 logger
-
-# tidy crlogs
-crlogs_long <- crlogs %>%
-  dplyr::select(-airtemp_avg) %>%
-  gather(met, cr_temp, airtemp_max:ncol(.)) %>%
-  arrange(met, date)
-crlogs_flags <- crlogs_long %>%
-  filter(grepl("flag", met)) %>%
-  rename(cr_flag = cr_temp) %>%
-  mutate(met = gsub("flag_", "", met))
-crlogs_long2 <- subset(crlogs_long, !grepl("flag", met)) %>%
-  arrange(met, date) %>%
-  # add month and year
-  mutate(yr = year(date),
-         mon = month(date)) %>%
-  left_join(crlogs_flags) %>%
-  # lag and lead temp by min/max temp
-  group_by(met) %>%
-  mutate(lag1_crtemp = lag(cr_temp),
-         lead1_crtemp = lead(cr_temp)) %>%
-  ungroup() %>%
-  # diff temp val from lag and lead
-  mutate(delta_crlag = cr_temp - lag1_crtemp,
-         delta_crlead = cr_temp - lead1_crtemp) %>%
-  # flag anomoly as +4sd departure from lag and lead temps
-  group_by(met, mon) %>%
-  mutate(delta_crthresh_lag = (mean(abs(delta_crlag), na.rm = T)) + 4*(sd(abs(delta_crlag), na.rm = T)),
-         delta_crthresh_lead = mean(abs(delta_crlead), na.rm = T) + 4*(sd(abs(delta_crlag), na.rm = T))) %>%
-  ungroup() %>%
-  # flag departures
-  mutate(flag_crdeltalag = ifelse(abs(delta_crlag)> delta_crthresh_lag, 1, 0),
-         flag_crdeltalead = ifelse(abs(delta_crlead)> delta_crthresh_lead, 1, 0)) %>%
-  dplyr::select(date, yr, mon, met:ncol(.))  
 
 
 # -- CHECK MONTHLY EXTREMES -----
