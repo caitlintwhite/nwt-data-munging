@@ -110,7 +110,6 @@ sapply(c1[grepl("flag", colnames(c1))], function(x) summary(as.factor(x))) # 2 t
 # 
 
 
-
 # -- TIDY TEMPERATURE DATASETS -----
 # function to tidy temp (this could be made generic for ppt too..)
 tidytemp <- function(dat, datasource = NA, sep = "_", special = "flag", dropcol = NA){
@@ -249,7 +248,10 @@ visual_qa <- function(dat, qadat, sorttime = "date"){
 }
 
 
-# --- QA EXTREMES (TMIN/TMAX) -----
+# -- QA SENSOR FAILS (OBVIOUS OUTLIERS) -----
+
+
+# -- QA EXTREMES (TMIN/TMAX) -----
 # grand max and min
 check_max <- crall_long %>%
   group_by(logger, met) %>%
