@@ -51,6 +51,13 @@ d1 <- getTabular(412) %>% as.data.frame()
 # c1 chart
 c1 <- getTabular(411) %>% as.data.frame()
 
+# d1 cr loggers -- look at d1 logger for delta diff qa
+## d1 cr21x, 1986-2000
+d1cr21 <- getTabular(70)
+## d1 cr23x and cr1000, 2000 - ongoing
+d1cr <- getTabular(402) %>% as.data.frame() 
+
+
 
 # -- REVIEW DATA -----
 # review how dats read in
@@ -59,8 +66,10 @@ glimpse(crlogs) # flag cols present, date is character
 glimpse(sdl) # flags cols present
 glimpse(d1) # flag cols present
 glimpse(c1) # flag cols present
+glimpse(d1cr) #flag cols present
+glimpse(d1cr21) # flag cols present, colnames similar to others -- time cols but no flags
 
-# clean up cr23x and cr1000 data
+# clean up sdl cr23x and cr1000 data
 # drop cols not needed in cr logger dataset (i.e. only need airtemp cols up thru avg airtemp, flag cols not useful since only n or NA)
 crlogs <- crlogs[,1:12]
 # convert date to Date class
@@ -94,6 +103,31 @@ cr21x <- cr21x[grepl("date|Julian|maximum temp|minimum temp|average temp", colna
 # clean up 
 rm(cr21x_names, cr21xeml)
 
+
+# clean up d1 logger datasets
+# cr23x and cr1000 data logger, drop cols not needed (i.e. only need airtemp cols up thru avg airtemp, flag cols not useful since only n or NA)
+d1cr <- d1cr[,1:12]
+# unique values of flags? and frequency of their occurrence?
+sapply(d1cr[grepl("flag", colnames(d1cr))], function(x) summary(as.factor(x))) # only n's, correspond to no flag -- not useful
+# drop flag cols since nothing flagged, add month col, and clean up names
+d1cr <- mutate(d1cr, mon = month(date)) %>%
+  rename(doy = jday,
+         yr = year) %>%
+  dplyr::select(LTER_site:date, yr, mon, doy, airtemp_max, airtemp_min, airtemp_avg)
+# d1 cr21x
+d1cr21 <- d1cr21 %>%
+# drop times cols, add month col, and clean up names
+ mutate(mon = month(date),
+        LTER_site = "NWT",
+        local_site = "d1") %>%
+  rename(doy = jday,
+         yr = year) %>%
+  dplyr::select(LTER_site, local_site, logger, date, yr, mon, doy, airtemp_max, airtemp_min, airtemp_avg)
+# stack d1cr21 and d1cr23 onwards datasets
+d1cr <- rbind(d1cr21, d1cr)
+rm(d1cr21) #not needed anymore
+
+
 # review flags in reference datasets 
 # sdl
 sapply(sdl[grepl("flag", colnames(sdl))], function(x) summary(as.factor(x))) # 2 types of flags, type 1 used most often
@@ -106,13 +140,9 @@ sapply(c1[grepl("flag", colnames(c1))], function(x) summary(as.factor(x))) # 2 t
 # > c1 chart flags: 1 = infilled by regression; 2 = infilled by standard deviation (take sd through that day in all years available)
 # >> conclusion: keep flag cols in chart temp datasets, useful info
 
-# # preface temp and flag names with name of data source (**ctw does this later in script**)
-# colnames(cr21x)[grepl("^air|^flag", colnames(cr21x))] <- paste0("cr_", colnames(cr21x)[grepl("temp", colnames(cr21x))])
-# colnames(crlogs)[grepl("^air|^flag", colnames(crlogs))] <- paste0("cr_", colnames(crlogs)[grepl("temp", colnames(crlogs))])
-# colnames(sdl)[grepl("^air|^flag", colnames(sdl))] <- paste0("sdl_", colnames(sdl)[grepl("temp", colnames(sdl))])
-# colnames(d1)[grepl("^air|^flag", colnames(d1))] <- paste0("d1_", colnames(d1)[grepl("temp", colnames(d1))])
-# colnames(c1)[grepl("^air|^flag", colnames(c1))] <- paste0("c1_", colnames(c1)[grepl("temp", colnames(c1))])
-# 
+
+
+
 
 
 # -- TIDY TEMPERATURE DATASETS -----
@@ -120,7 +150,7 @@ sapply(c1[grepl("flag", colnames(c1))], function(x) summary(as.factor(x))) # 2 t
 tidytemp <- function(dat, datasource = NA, sep = "_", special = "flag", dropcol = NA){
   #if cols to drop, drop
   if(!is.na(dropcol)){
-   dat <- dat[!colnames(dat) %in% dropcol] 
+    dat <- dat[!colnames(dat) %in% dropcol] 
   }
   
   # gather temp and any special cols
@@ -132,25 +162,25 @@ tidytemp <- function(dat, datasource = NA, sep = "_", special = "flag", dropcol 
   
   # if special cols exist, pull out special cols and rejoin wide-form
   if(!is.na(special)){
-  tempspecial <- dat_long %>%
-    filter(grepl(special, met)) %>%
-    mutate(met = gsub(paste0(special,"_"), "", met))
-  # rename temp col as special val
-  colnames(tempspecial)[which(colnames(tempspecial) == "temp")] <- special
-  
-  # drop special vals from long-form dat and join wide to temp vals
-  dat_long <- subset(dat_long, !grepl(special, met)) %>%
-    # add month and year
-    mutate(yr = year(date),
-           mon = month(date),
-           doy = yday(date)) %>%
-    left_join(tempspecial) %>%
-    dplyr::select(LTER_site:date, yr:doy, met:ncol(.)) 
+    tempspecial <- dat_long %>%
+      filter(grepl(special, met)) %>%
+      mutate(met = gsub(paste0(special,"_"), "", met))
+    # rename temp col as special val
+    colnames(tempspecial)[which(colnames(tempspecial) == "temp")] <- special
+    
+    # drop special vals from long-form dat and join wide to temp vals
+    dat_long <- subset(dat_long, !grepl(special, met)) %>%
+      # add month and year
+      mutate(yr = year(date),
+             mon = month(date),
+             doy = yday(date)) %>%
+      left_join(tempspecial) %>%
+      dplyr::select(LTER_site:date, yr:doy, met:ncol(.)) 
   }
   
   # if desired, prefix temp and special col colname with datasource
   if(!is.na(datasource)){
-  colnames(dat_long)[colnames(dat_long) %in% c("temp", special)] <- paste(datasource, colnames(dat_long)[colnames(dat_long) %in% c("temp", special)], sep = sep)
+    colnames(dat_long)[colnames(dat_long) %in% c("temp", special)] <- paste(datasource, colnames(dat_long)[colnames(dat_long) %in% c("temp", special)], sep = sep)
   }
   
   # return tidy dataset and clean up environment
@@ -166,25 +196,41 @@ c1_long <- tidytemp(c1, datasource = "c1", dropcol = "airtemp_avg")
 # tidy logger datasets
 cr21x_long <- tidytemp(cr21x, datasource = "cr", special = "time", dropcol = "airtemp_avg")
 crlogs_long <- tidytemp(crlogs, datasource = "cr", special = NA, dropcol = "airtemp_avg")
+d1cr_long <- tidytemp(d1cr, datasource = "d1cr", special = NA, dropcol = "airtemp_avg")
 
-  # # lag and lead temp by min/max temp
-  # group_by(met) %>%
-  # mutate(lag1_c1temp = lag(c1_temp),
-  #        lead1_c1temp = lead(c1_temp)) %>%
-  # ungroup() %>%
-  # # diff temp val from lag and lead
-  # mutate(delta_c1lag = c1_temp - lag1_c1temp,
-  #        delta_c1lead = c1_temp - lead1_c1temp) %>%
-  # # flag anomoly as +4sd departure from lag and lead temps
-  # group_by(met, mon) %>%
-  # mutate(delta_c1thresh_lag = (mean(abs(delta_c1lag), na.rm = T)) + 4*(sd(abs(delta_c1lag), na.rm = T)),
-  #        delta_c1thresh_lead = mean(abs(delta_c1lead), na.rm = T) + 4*(sd(abs(delta_c1lag), na.rm = T))) %>%
-  # ungroup() %>%
-  # # flag departures
-  # mutate(flag_c1deltalag = ifelse(abs(delta_c1lag)> delta_c1thresh_lag, 1, 0),
-  #        flag_c1deltalead = ifelse(abs(delta_c1lead)> delta_c1thresh_lead, 1, 0)) %>%
-  # dplyr::select(date, yr, mon, met:ncol(.))
+# screen any obvious outliers in chart or d1 logger datasets (i.e. don't use these values to compare with sdl logger data points)
+## d1 chart
+with(d1_long, sapply(split(d1_temp, met), summary))
+with(d1_long, lapply(split(d1_temp[met == "airtemp_max"], mon[met=="airtemp_max"]), summary))
+with(d1_long, sapply(split(d1_temp, met), function(x) tail(sort(x))))
+with(d1_long, sapply(split(d1_temp, met), function(x) head(sort(x)))) # all okay
+## d1 logger
+with(d1cr_long, lapply(split(d1cr_temp[met == "airtemp_max"], logger[met=="airtemp_max"]), summary)) # 90??
+with(d1cr_long, lapply(split(d1cr_temp[met == "airtemp_max"], logger[met=="airtemp_max"]), function(x) tail(sort(x), n = 15))) # 90??
+# it looks like there are still F units in the d1 cr21x dataset.. not fixing because this is only for qualitative plotting info, and don't use d1 logger often
+# metadata says Hope changed d1 cr21x units to C in Apr 2017, but seem like all got converted?
+boxplot(d1cr_temp ~ yr, data = subset(d1cr_long, logger == "cr21x" & met == "airtemp_max")) #1997 & 1999 questionable
+boxplot(d1cr_temp ~ mon, data = subset(d1cr_long, logger == "cr21x" & met == "airtemp_max" & yr == 1997)) #aug - oct 1997
+boxplot(d1cr_temp ~ mon, data = subset(d1cr_long, logger == "cr21x" & met == "airtemp_max" & yr == 1999)) #sep & oct again
+boxplot(d1cr_temp ~ yr, data = subset(d1cr_long, logger == "cr21x" & met == "airtemp_min")) #1997
+boxplot(d1cr_temp ~ mon, data = subset(d1cr_long, logger == "cr21x" & met == "airtemp_min" & yr == 1997)) #sep & oct again
+with(d1cr_long, lapply(split(d1cr_temp[met == "airtemp_min"], logger[met=="airtemp_min"]), function(x) head(sort(x), n = 25))) # -6999, some clear sensor fails in the cr21x logger
+# bc just looking at d1 logger qualitatively with sdl logger, for simplicity NA anything < -50 and > 40 + sep + oct in 1997 and 1999
+# NA temp < -50
+d1cr_long$d1cr_temp[d1cr_long$d1cr_temp < -50 & !is.na(d1cr_long$d1cr_temp)] <- NA
+d1cr_long$d1cr_temp[d1cr_long$d1cr_temp > 40 & !is.na(d1cr_long$d1cr_temp)] <- NA
 
+
+## sdl chart
+with(sdl_long, sapply(split(sdl_temp, met), summary))
+with(sdl_long, lapply(split(sdl_temp[met == "airtemp_max"], mon[met=="airtemp_max"]), summary))
+with(sdl_long, sapply(split(sdl_temp, met), function(x) tail(sort(x))))
+with(sdl_long, sapply(split(sdl_temp, met), function(x) head(sort(x)))) # all okay
+## c1 chart
+with(c1_long, sapply(split(c1_temp, met), summary))
+with(c1_long, sapply(split(c1_temp[met == "airtemp_max"], mon[met=="airtemp_max"]), summary))
+with(c1_long, sapply(split(c1_temp, met), function(x) tail(sort(x))))
+with(c1_long, sapply(split(c1_temp, met), function(x) head(sort(x)))) # all okay              
 
 
 # how many tmax temps occurred between 11pm and 1am?
@@ -240,7 +286,7 @@ plot_grid(crallfig, sdlfig, nrow = 2,
 
 # -- FUNCTION FOR PLOTTING SUSPECT TEMP VALUES -----
 # function to panel plot flagged data
-visual_qa <- function(dat, qadat, sorttime = "date"){
+visual_qa <- function(dat, qadat, sorttime = "date", add_d1cr = FALSE){
   # initiate list for storing ggplots
   plot_list <- list()
   # id temperature cols in reference data frame
@@ -269,6 +315,13 @@ visual_qa <- function(dat, qadat, sorttime = "date"){
         geom_line(aes(date, c1_temp), col = "forestgreen") +
         geom_point(aes(date, c1_temp), col = "darkgreen", pch = 1) +
         theme_bw()
+      
+      if(add_d1cr){
+        tempplot <- tempplot + geom_line(data = subset(d1cr_long, met == m & date %in% seq(as.Date(d)-10, as.Date(d)+10, 1)),
+                                         aes(date, d1cr_temp), col = "goldenrod1") + 
+          geom_point(data = subset(d1cr_long, met == m & date %in% seq(as.Date(d)-10, as.Date(d)+10, 1)),
+                     aes(date, d1cr_temp), col = "goldenrod4", pch = 1)
+      }
       
       # store plot in a list
       plot_list[length(plot_list)+1] <- list(tempplot)
@@ -310,25 +363,25 @@ working_dat$cr_temp[!is.na(working_dat$qa_flag)] <- NA
 # function to difference daily logger temp from comparative chart dataset daily temps
 diff_daily <- function(dat){
   dat %>%
-  mutate(cr_diff_sdl = abs(cr_temp-sdl_temp),
-         cr_diff_d1 = abs(cr_temp-d1_temp),
-         cr_diff_c1 = abs(cr_temp-c1_temp)) %>%
-  group_by(logger, met, mon) %>%
-  # set threshold for sdl logger deviance at 3sd away from the absolute average difference (by logger, metric, and month)
-  mutate(thresh_diff_sdl = mean(cr_diff_sdl, na.rm = T) + (3*sd(cr_diff_sdl, na.rm = T)),
-         thresh_diff_d1 = mean(cr_diff_d1, na.rm = T) + (3*sd(cr_diff_d1, na.rm = T)),
-         thresh_diff_c1 = mean(cr_diff_c1, na.rm = T) + (3*sd(cr_diff_c1, na.rm = T)),
-         sd_diff_sdl = sd(cr_diff_sdl, na.rm = T),
-         sd_diff_d1 = sd(cr_diff_d1, na.rm = T),
-         sd_diff_c1 = sd(cr_diff_c1, na.rm = T)) %>%
-  ungroup() %>%
-  # flag logger value if exceeds daily diff threshold for chart comparative datasets
-  mutate(flag_diffsdl = cr_diff_sdl > thresh_diff_sdl,
-         deviance_sdl = cr_diff_sdl/sd_diff_sdl,
-         flag_diffd1 = cr_diff_d1 > thresh_diff_d1,
-         deviance_d1 = cr_diff_d1/sd_diff_d1,
-         flag_diffc1 = cr_diff_c1 > thresh_diff_c1,
-         deviance_c1 = cr_diff_c1/sd_diff_c1)
+    mutate(cr_diff_sdl = abs(cr_temp-sdl_temp),
+           cr_diff_d1 = abs(cr_temp-d1_temp),
+           cr_diff_c1 = abs(cr_temp-c1_temp)) %>%
+    group_by(logger, met, mon) %>%
+    # set threshold for sdl logger deviance at 3sd away from the absolute average difference (by logger, metric, and month)
+    mutate(thresh_diff_sdl = mean(cr_diff_sdl, na.rm = T) + (3*sd(cr_diff_sdl, na.rm = T)),
+           thresh_diff_d1 = mean(cr_diff_d1, na.rm = T) + (3*sd(cr_diff_d1, na.rm = T)),
+           thresh_diff_c1 = mean(cr_diff_c1, na.rm = T) + (3*sd(cr_diff_c1, na.rm = T)),
+           sd_diff_sdl = sd(cr_diff_sdl, na.rm = T),
+           sd_diff_d1 = sd(cr_diff_d1, na.rm = T),
+           sd_diff_c1 = sd(cr_diff_c1, na.rm = T)) %>%
+    ungroup() %>%
+    # flag logger value if exceeds daily diff threshold for chart comparative datasets
+    mutate(flag_diffsdl = cr_diff_sdl > thresh_diff_sdl,
+           deviance_sdl = cr_diff_sdl/sd_diff_sdl,
+           flag_diffd1 = cr_diff_d1 > thresh_diff_d1,
+           deviance_d1 = cr_diff_d1/sd_diff_d1,
+           flag_diffc1 = cr_diff_c1 > thresh_diff_c1,
+           deviance_c1 = cr_diff_c1/sd_diff_c1)
 }
 
 # round 1 diff daily and flagging
@@ -491,7 +544,7 @@ plot_grid(plotlist = qa_mon_min1[grep("cr1000.*airtemp_min", qa_mon_min1)]) #oka
 # > general observation: seems like deviances from chart data occurs more in tmax vals than tmin vals (even max of tmin not so bad, but lots of problems in max of tmax)
 # flag and remove noted monthly max values from cr21x (sep and nov) and cr23x (dec)
 flag_mon_max1 <- subset(check_monthly_max, met == "airtemp_max" & (logger == "cr21x" & mon %in% c(9,11) |
-                          logger == "cr23x" & mon == 12))
+                                                                     logger == "cr23x" & mon == 12))
 # note the diffs are flagged for sdl and d1 in these observations:
 dplyr::select(flag_mon_max1, date, logger, met, flag_diffsdl:ncol(flag_mon_max1))
 # flag and remove from working copy
@@ -561,19 +614,95 @@ rm(count0, consec0, swing_check1, qa_swings)
 # -- QA DAY-TO-DAY DELTA DEVIANCE -----
 # diff current from lag temp in sdl chart, d1 and c1, then compare daily deltas with logger daily deltas
 # pull out observations where delta deviates more than 3sd of logger-other source diff on day-to-day fluxes
+working_dat_copy <- working_dat
+
+working_dat <- working_dat %>%
+  # lag by metric (already ordered by date above)
+  group_by(met) %>%
+  # lag sdl, d1, and c1 chart
+  mutate(lag1_sdltemp = lag(sdl_temp),
+         lag1_d1temp = lag(d1_temp),
+         lag1_c1temp = lag(c1_temp)) %>%
+  ungroup() %>%
+  # take difference from current day - prior day temp
+  mutate(lag1_diffsdl = abs(sdl_temp - lag1_sdltemp),
+         lag1_diffd1 = abs(d1_temp - lag1_d1temp),
+         lag1_diffc1 = abs(c1_temp - lag1_c1temp),
+         delta_lag_crsdl = lag1_diffcr - lag1_diffsdl,
+         delta_lag_crd1 = lag1_diffcr - lag1_diffd1,
+         delta_lag_crc1 = lag1_diffcr - lag1_diffc1) %>%
+  #diff the lag differences and assess whether data-source differences outside normal range of difference given the month and logger
+  group_by(logger, met) %>%
+  mutate(mean_lagdiff_crsdl = mean(delta_lag_crsdl, na.rm = T),
+         sd_lagdiff_crsdl = sd(delta_lag_crsdl, na.rm = T),
+         thresh_lagdiff_crsdl = (mean_lagdiff_crsdl) + (3 * sd_lagdiff_crsdl),
+         mean_lagdiff_crd1 = mean(delta_lag_crd1, na.rm = T),
+         sd_lagdiff_crd1 = sd(delta_lag_crd1, na.rm = T),
+         thresh_lagdiff_crd1 = (mean_lagdiff_crd1) + (3 * sd_lagdiff_crd1),
+         mean_lagdiff_crc1 = mean(delta_lag_crc1, na.rm = T),
+         sd_lagdiff_crc1 = sd(delta_lag_crc1, na.rm = T),
+         thresh_lagdiff_crc1 = (mean_lagdiff_crc1) + (3 * sd_lagdiff_crc1)) %>%
+  ungroup() %>%
+  mutate(flag_deltadiff_sdl = delta_lag_crsdl > thresh_lagdiff_crsdl,
+         flag_deltadiff_d1 = delta_lag_crd1 > thresh_lagdiff_crd1,
+         flag_deltadiff_c1 = delta_lag_crc1 > thresh_lagdiff_crc1)
+
+check_deltadiff1 <- subset(working_dat, flag_deltadiff_sdl == TRUE & flag_deltadiff_d1 == T )
+#View(subset(working_dat, flag_deltadiff_sdl == TRUE))
+qa_lagdiffs1 <- visual_qa(working_dat, check_deltadiff1, add_d1cr = TRUE)
+plot_grid(plotlist = qa_lagdiffs1[grep("airtemp_min", qa_lagdiffs1)]) #tmin okay.. some drops but leave be until review better info
+plot_grid(plotlist = qa_lagdiffs1[grep("cr21x.*airtemp_max", qa_lagdiffs1)])
+plot_grid(plotlist = qa_lagdiffs1[grep("cr23x.*airtemp_max", qa_lagdiffs1)])
+plot_grid(plotlist = qa_lagdiffs1[grep("cr10.*airtemp_max", qa_lagdiffs1)])
+# differences not compelling enough with d1 logger data added to flag anything.. but perhaps something to come back to
+# for the most part logger data tracks with chart at sdl and d1, but there are some tmax spikes in the sdl logger-- are these real spikes or sensor issues?
+
+
+# -- RUN THROUGH DIFF DAILY ONE MORE TIME AND REVIEW QA'D DATA  ----
+# final check
+working_dat <- diff_daily(working_dat)
+par(mfrow=c(1,2))
+boxplot(working_dat$deviance_sdl, main = "daily deviance from sdl")
+boxplot(working_dat$deviance_d1, main = "daily dev. from d1")
+par(mfrow=c(1,1))
+# look at more extreme deviance in both sdl and d1
+check_diffdaily <- subset(working_dat, deviance_sdl > 6 & deviance_d1 > 6) 
+qa_diffdaily <- visual_qa(working_dat, check_diffdaily, add_d1cr = TRUE)
+plot_grid(plotlist = qa_diffdaily)
+# > conclusion: flag tmax on 2001-03-30 bc high, departure from all trends, and data missing day after (maybe logger malfunction?)
+
+# flag values and clean up environment
+working_dat <- flag_temp(subset(check_diffdaily, date == "2001-03-30" & met == "airtemp_max"))
+rm(check_diffdaily, qa_diffdaily)
+
+# one more check, less restrictive
+check_diffdaily <- subset(working_dat, flag_diffsdl == T & flag_diffd1 == T) 
+qa_diffdaily <- visual_qa(working_dat, check_diffdaily, add_d1cr = TRUE)
+plot_grid(plotlist = qa_diffdaily[grep("cr21", qa_diffdaily)])
+plot_grid(plotlist = qa_diffdaily[grep("cr23", qa_diffdaily)]) 
+# no cr1000 deviances, only in cr21x and cr23x
+# > conclusion: flag 2002-11-04, leave other points as they are
+working_dat <- flag_temp(subset(check_diffdaily, date == "2002-11-04" & met == "airtemp_max"))
+rm(check_diffdaily, qa_diffdaily)
+
+
+# plot qa'd sdl logger data for review
+ggplot(working_dat, aes(date, cr_temp)) + 
+  geom_point() +
+  facet_wrap()
+
+
+
+
+
+# -- COMPILE AND WRITE OUT FLAGGED/QA'D SDL CR DATASET -----
 
 
 
 
 
 
-
-
-
-
-
-
-
+# -- OLD CODE -----
 
 # look at d1 high temp val
 d1[d1$airtemp_max == max(d1$airtemp_max, na.rm =T) & !is.na(d1$airtemp_max),] # a 1956 data point.. idk?
@@ -604,189 +733,3 @@ ggplot(data = sdl[(which(sdl$airtemp_min == min(sdl$airtemp_min, na.rm =T))-10):
   geom_line(data = c1[(which(c1$date == "2011-02-01")-10):(which(c1$date == "2011-02-01")+10),], aes(date, airtemp_max), col = "forestgreen") +
   geom_point(data = c1[(which(c1$date == "2011-02-01")-10):(which(c1$date == "2011-02-01")+10),], aes(date, airtemp_max), col = "darkgreen", pch = 1)
 # conclusion: leave be. saddle chart seems consistently off (wouldn't except sdl that much colder than d1, altho could be? but follows trend)
-
-
-
-
-
-
-
-
-
-
-# -- AUTOMATE QA LOGGER TEMP DATA -----
-# flags:
-# max temp !< min temp
-# min temp !> max temp
-# jen morse said at sdl, tmax shouldn't exceed 25C and tmin shouldn't fall below -40C
-# diurnal temp !> defined allowance (shouldn't swing more than 35C in a day?)
-# jen liked the flag for temp value more than 3sd outside monthly mean, and day-to-day flux more than 3sd outside monthly day-to-day flux
-# need to screen out obvious/unreasonable/improbable values (e.g. -187C) before calculating means and sds (so outliers don't influence those values)
-# perhaps compare delta of logger with sdl chart and d1 chart.. if both differ by more than usual (e.g. +3sd, review data point/perhaps change to NA)
-
-
-# diff logger temp from d1 and sdl chart, if timestamp in unexpected window (e.g. around midnight for tmax, flag it)
-cr21x_long2 <- cr21x_long %>%
-  arrange(met, date) %>% #to be sure sorted by date..
-  # # lag and lead temp vals by 1 day
-  # group_by(met) %>%
-  # mutate(lag1_temp = lag(temp),
-  #        lead1_temp = lead(temp)) %>%
-  # ungroup() %>%
-  # # diff lag and lead
-  # mutate(delta_lag = temp-lag1_temp,
-  #        delta_lead = temp-lead1_temp) %>%
-  # # flag anomoly as +4sd departure from lag and lead temps
-  # group_by(met, mon) %>%
-  # mutate(delta_thresh_lag = (mean(abs(delta_lag), na.rm = T)) + 4*(sd(abs(delta_lag), na.rm = T)),
-#        delta_thresh_lead = mean(abs(delta_lead), na.rm = T) + 4*(sd(abs(delta_lag), na.rm = T))) %>%
-# ungroup() %>%
-# # flag departures
-# mutate(flag_deltalag = ifelse(abs(delta_lag)> delta_thresh_lag, 1, 0),
-#        flag_deltalead = ifelse(abs(delta_lead)> delta_thresh_lead, 1, 0)) %>%
-left_join(dplyr::select(d1_long, date:delta_d1lag)) %>%
-  left_join(dplyr::select(sdl_long, date:delta_sdllag)) %>%
-  left_join(dplyr::select(c1_long, date:delta_c1lag)) %>%
-  mutate(d1_delta = temp-d1_temp,
-         #diff_d1_deltalag = delta_lag - delta_d1lag,
-         sdl_delta = temp-sdl_temp,
-         #diff_sdl_deltalag = delta_lag - delta_sdllag,
-         c1_delta = temp-c1_temp ) %>%
-  #diff_c1_deltalag = delta_lag - delta_c1lag) %>%
-  # group by monthly trends for flags
-  group_by(met, mon) %>%
-  mutate(mean_temp = mean(temp, na.rm = T),
-         sd_temp = sd(temp, na.rm = T),
-         mean_d1delta = mean(d1_delta, na.rm = T),
-         sd_d1delta = sd(d1_delta, na.rm = T),
-         mean_sdldelta = mean(sdl_delta, na.rm = T),
-         sd_sdldelta = sd(sdl_delta, na.rm =T),
-         mean_c1delta = mean(c1_temp, na.rm = T),
-         sd_c1delta = sd(c1_delta, na.rm = T)) %>%
-  # mean_d1deltalag = mean(diff_d1_deltalag, na.rm = T),
-  # sd_d1deltalag = sd(diff_d1_deltalag, na.rm = T),
-  # mean_sdldeltalag = mean(diff_sdl_deltalag, na.rm = T),
-  # sd_sdldeltalag = sd(diff_sdl_deltalag, na.rm = T),
-  # mean_c1deltalag = mean(diff_c1_deltalag, na.rm = T),
-  # sd_c1deltalag = sd(diff_c1_deltalag, na.rm = T)) %>%
-  ungroup() %>%
-  # flags vals 3sd outside normal range; flag time if tmax around midnight or tmin in btwn 10am and 2pm (both unlikely)
-  mutate(flag_temp = ifelse((mean_temp - temp) > (mean_temp + 4*sd_temp) | (mean_temp - temp) < (mean_temp - 4*sd_temp), 1, 0),
-         # make temporary unflagged time flag col
-         flag_time = 0,
-         flag_d1_delta = ifelse((mean_d1delta - d1_delta) > (mean_d1delta + 3*sd_d1delta) | (mean_d1delta - d1_delta) < (mean_d1delta - 3*sd_d1delta), 1, 0),
-         flag_sdl_delta = ifelse((mean_sdldelta - sdl_delta) > (mean_sdldelta + 3*sd_sdldelta) | (mean_sdldelta - sdl_delta) < (mean_sdldelta - 3*sd_sdldelta), 1, 0),
-         flag_c1_delta = ifelse((mean_c1delta - c1_delta) > (mean_c1delta + 3*sd_c1delta) | (mean_c1delta - c1_delta) < (mean_c1delta - 3*sd_c1delta), 1, 0))
-# flag_d1_deltalag = ifelse((mean_d1deltalag - diff_d1_deltalag) > (mean_d1deltalag + 3*sd_d1deltalag) | (mean_d1deltalag - diff_d1_deltalag) < (mean_d1deltalag - 3*sd_d1deltalag), 1, 0),
-# flag_sdl_deltalag = ifelse((mean_sdldeltalag - diff_sdl_deltalag) > (mean_sdldeltalag + 3*sd_sdldeltalag) | (mean_sdldeltalag - diff_sdl_deltalag) < (mean_sdldeltalag - 3*sd_sdldeltalag), 1, 0),
-# flag_c1_deltalag = ifelse((mean_c1deltalag - diff_c1_deltalag) > (mean_c1deltalag + 3*sd_c1deltalag) | (mean_c1deltalag - diff_c1_deltalag) < (mean_c1deltalag - 3*sd_c1deltalag), 1, 0))
-
-# flag time val by temp measurement
-## flag tmax if timestamp at night (after 7pm to before 6am)
-cr21x_long2$flag_time[cr21x_long2$met == "airtemp_max"] <- with(cr21x_long2[cr21x_long2$met == "airtemp_max",],
-                                                                ifelse(time > 1900 | time < 600, 1, 0))
-## flag tmin if timestamp between 10am and 2pm
-cr21x_long2$flag_time[cr21x_long2$met == "airtemp_min"] <- with(cr21x_long2[cr21x_long2$met == "airtemp_min",],
-                                                                ifelse(time > 1000 & time < 1400, 1, 0))  
-
-
-# plot out flagged values
-ggplot(subset(cr21x_long2, flag_d1_delta == 1 & flag_sdl_delta == 1 & flag_c1_delta == 1)) +
-  geom_point(aes(mon, temp)) +
-  geom_point(aes(mon, sdl_temp), col = "purple", alpha = 0.5) +
-  geom_point(aes(mon, d1_temp), col = "steelblue4", alpha = 0.5 ) +
-  geom_point(aes(mon, c1_temp), col = "forestgreen", alpha = 0.5 ) +
-  facet_wrap(~met, scales = "free_y")
-
-test <- subset(cr21x_long2, flag_sdl_delta == 1 & flag_d1_delta == 1 & flag_c1_delta == 1)
-
-# function to panel plot flagged data
-qa_temps <- function(dat){
-  plot_list <- list()
-  for(m in c("airtemp_max", "airtemp_min")){
-    tempdf <- subset(dat, met == m) %>% as.data.frame()
-    
-    for(d in as.character(tempdf$date)){
-      d <- as.Date(d, format = "%Y-%m-%d")
-      tempplot <- ggplot(data = subset(cr21x_long3, met == m & date %in% seq(as.Date(d)-10, as.Date(d)+10, 1)),
-                         aes(date, temp)) +
-        geom_line() +
-        geom_point() +
-        # circle the flagged value in red
-        geom_point(data = subset(cr21x_long, met == m & date == as.Date(d)),
-                   aes(date, temp), col = "red", pch  = 1, size = 3) +
-        labs(y = gsub("airtemp_", "T", m),
-             x = year(d)) +
-        # add sdl chart temp for comparison (purple dots)
-        geom_line(data = subset(sdl_long, met == m & date %in% seq(as.Date(d)-10, as.Date(d)+10, 1)), aes(date, sdl_temp), col = "purple") +
-        geom_point(data = subset(sdl_long, met == m & date %in% seq(as.Date(d)-10, as.Date(d)+10, 1)), aes(date, sdl_temp), col = "purple", pch = 1) +
-        geom_line(data = subset(d1_long, met == m & date %in% seq(as.Date(d)-10, as.Date(d)+10, 1)), aes(date, d1_temp), col = "steelblue2") +
-        geom_point(data = subset(d1_long, met == m & date %in% seq(as.Date(d)-10, as.Date(d)+10, 1)), aes(date, d1_temp), col = "steelblue4", pch = 1) +
-        geom_line(data = subset(c1_long, met == m & date %in% seq(as.Date(d)-10, as.Date(d)+10, 1)), aes(date, c1_temp), col = "forestgreen") +
-        geom_point(data = subset(c1_long, met == m & date %in% seq(as.Date(d)-10, as.Date(d)+10, 1)), aes(date, c1_temp), col = "darkgreen", pch = 1) +
-        theme_bw()
-      
-      # store plot in a list
-      plot_list[length(plot_list)+1] <- list(tempplot)
-    }
-  }
-  return(plot_list)
-}
-
-cr21x_qa <- qa_temps(test)
-plot_grid(plotlist = cr21x_qa) #all points look bad
-
-
-
-# now diff deltas with anomolies removed..
-cr21x_long3 <- cr21x_long2 %>%
-  arrange(met, date) %>% #to be sure sorted by date..
-  # lag and lead temp vals by 1 day
-  group_by(met) %>%
-  mutate(lag1_temp = lag(temp),
-         lead1_temp = lead(temp)) %>%
-  ungroup() %>%
-  # diff lag and lead
-  mutate(delta_lag = temp-lag1_temp,
-         delta_lead = temp-lead1_temp) %>%
-  # flag anomoly as +4sd departure from lag and lead temps
-  group_by(met, mon) %>%
-  mutate(delta_thresh_lag = (mean(abs(delta_lag), na.rm = T)) + 4*(sd(abs(delta_lag), na.rm = T)),
-         delta_thresh_lead = mean(abs(delta_lead), na.rm = T) + 4*(sd(abs(delta_lag), na.rm = T))) %>%
-  ungroup() %>%
-  # flag departures
-  mutate(flag_deltalag = ifelse(abs(delta_lag)> delta_thresh_lag, 1, 0),
-         flag_deltalead = ifelse(abs(delta_lead)> delta_thresh_lead, 1, 0)) %>%
-  mutate(d1_delta = temp-d1_temp,
-         sdl_delta = temp-sdl_temp,
-         c1_delta = temp-c1_temp, 
-         diff_d1_deltalag = delta_lag - delta_d1lag,
-         diff_sdl_deltalag = delta_lag - delta_sdllag,
-         diff_c1_deltalag = delta_lag - delta_c1lag) %>%
-  # group by monthly trends for flags
-  group_by(met, mon) %>%
-  mutate(mean_temp = mean(temp, na.rm = T),
-         sd_temp = sd(temp, na.rm = T),
-         mean_d1delta = mean(d1_delta, na.rm = T),
-         sd_d1delta = sd(d1_delta, na.rm = T),
-         mean_sdldelta = mean(sdl_delta, na.rm = T),
-         sd_sdldelta = sd(sdl_delta, na.rm =T),
-         mean_c1delta = mean(c1_temp, na.rm = T),
-         sd_c1delta = sd(c1_delta, na.rm = T),
-         mean_d1deltalag = mean(diff_d1_deltalag, na.rm = T),
-         sd_d1deltalag = sd(diff_d1_deltalag, na.rm = T),
-         mean_sdldeltalag = mean(diff_sdl_deltalag, na.rm = T),
-         sd_sdldeltalag = sd(diff_sdl_deltalag, na.rm = T),
-         mean_c1deltalag = mean(diff_c1_deltalag, na.rm = T),
-         sd_c1deltalag = sd(diff_c1_deltalag, na.rm = T)) %>%
-  ungroup() %>%
-  # flags vals 3sd outside normal range; flag time if tmax around midnight or tmin in btwn 10am and 2pm (both unlikely)
-  mutate(flag_temp = ifelse((mean_temp - temp) > (mean_temp + 4*sd_temp) | (mean_temp - temp) < (mean_temp - 4*sd_temp), 1, 0),
-         flag_d1_delta = ifelse((mean_d1delta - d1_delta) > (mean_d1delta + 3*sd_d1delta) | (mean_d1delta - d1_delta) < (mean_d1delta - 3*sd_d1delta), 1, 0),
-         flag_sdl_delta = ifelse((mean_sdldelta - sdl_delta) > (mean_sdldelta + 3*sd_sdldelta) | (mean_sdldelta - sdl_delta) < (mean_sdldelta - 3*sd_sdldelta), 1, 0),
-         flag_c1_delta = ifelse((mean_c1delta - c1_delta) > (mean_c1delta + 3*sd_c1delta) | (mean_c1delta - c1_delta) < (mean_c1delta - 3*sd_c1delta), 1, 0),
-         flag_d1_deltalag = ifelse((mean_d1deltalag - diff_d1_deltalag) > (mean_d1deltalag + 3*sd_d1deltalag) | (mean_d1deltalag - diff_d1_deltalag) < (mean_d1deltalag - 3*sd_d1deltalag), 1, 0),
-         flag_sdl_deltalag = ifelse((mean_sdldeltalag - diff_sdl_deltalag) > (mean_sdldeltalag + 3*sd_sdldeltalag) | (mean_sdldeltalag - diff_sdl_deltalag) < (mean_sdldeltalag - 3*sd_sdldeltalag), 1, 0),
-         flag_c1_deltalag = ifelse((mean_c1deltalag - diff_c1_deltalag) > (mean_c1deltalag + 3*sd_c1deltalag) | (mean_c1deltalag - diff_c1_deltalag) < (mean_c1deltalag - 3*sd_c1deltalag), 1, 0),
-         flag_warm = temp > c1_temp & temp > sdl_temp & temp > d1_temp)
-
