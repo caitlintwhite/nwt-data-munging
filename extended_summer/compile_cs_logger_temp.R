@@ -687,15 +687,48 @@ rm(check_diffdaily, qa_diffdaily)
 
 
 # plot qa'd sdl logger data for review
-ggplot(working_dat, aes(date, cr_temp)) + 
-  geom_point() +
-  facet_wrap()
+# logger values with sdl chart values plotted behind in grey as comparison for ranges
+ggplot(working_dat) + 
+  geom_point(aes(date, sdl_temp), alpha = 0.5, col = "grey80") +
+  geom_point(aes(date, cr_temp, col = logger), alpha = 0.6) +
+  geom_smooth(aes(date, cr_temp, group = logger), method = "glm", col = "black") +
+  scale_color_viridis_d() +
+  facet_wrap(~met)
+
+# look at late 80s, early 90s
+#tmax
+ggplot(subset(working_dat, yr < 1995 & met == "airtemp_max")) + 
+  geom_point(aes(doy, sdl_temp), alpha = 0.5, col = "grey80") +
+  geom_point(aes(doy, cr_temp, col = logger), alpha = 0.6) +
+  geom_smooth(aes(doy, sdl_temp), col = "black") +
+  geom_smooth(aes(doy, cr_temp), col = "purple", fill = "orchid") +
+  scale_color_viridis_d() +
+  facet_wrap(~yr)
+#tmin
+ggplot(subset(working_dat, yr < 1995 & met == "airtemp_min")) + 
+  geom_point(aes(doy, sdl_temp), alpha = 0.5, col = "grey80") +
+  geom_point(aes(doy, cr_temp, col = logger), alpha = 0.6) +
+  geom_smooth(aes(doy, sdl_temp), col = "black") +
+  geom_smooth(aes(doy, cr_temp), col = "purple", fill = "orchid") +
+  scale_color_viridis_d() +
+  facet_wrap(~yr)
+# conclusion: okay to use early years of cr21x, just needs to be infilled with sdl chart regression
 
 
+# how many points flagged?
+with(working_dat, sapply(split(qa_flag, met), function(x) summary(!is.na(x)))) #40 points in both tmax and tmin flagged..
+# review
+subset(working_dat, !is.na(qa_flag)) %>%
+  arrange(date) %>% View()  # turns out coincidentally 40 pts in tmax and tmin flagged, but not necessarily on same day. script worked as expected!
 
 
 
 # -- COMPILE AND WRITE OUT FLAGGED/QA'D SDL CR DATASET -----
+# want to write out old data with qa'd data for comparison
+# maybe also write out final working_dat for documentation
+
+
+
 
 
 
@@ -703,7 +736,6 @@ ggplot(working_dat, aes(date, cr_temp)) +
 
 
 # -- OLD CODE -----
-
 # look at d1 high temp val
 d1[d1$airtemp_max == max(d1$airtemp_max, na.rm =T) & !is.na(d1$airtemp_max),] # a 1956 data point.. idk?
 # 10days before and after 31.45
