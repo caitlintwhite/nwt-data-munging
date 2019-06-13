@@ -10,6 +10,11 @@
 # write out QA dataset with flags for next step (infilling)
 
 
+# notes:
+# color scheme in panel figures:
+# blue = d1 chart, purple = sdl chart, green = c1 chart, black = sdl cr loggers
+
+
 
 # -- SETUP ------
 rm(list = ls())
