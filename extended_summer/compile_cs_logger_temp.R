@@ -727,10 +727,25 @@ subset(working_dat, !is.na(qa_flag)) %>%
 # want to write out old data with qa'd data for comparison
 # maybe also write out final working_dat for documentation
 
+crall_old_new <- rename(crall_long,raw_temp = cr_temp) %>%
+  left_join(working_dat) %>%
+  rename(qa_temp = cr_temp,
+         cr_temp = raw_temp) # rename for plotting purposes
+
+# plot what was corrected/modified using visual_qa
+qa_results <- subset(crall_old_new, !is.na(qa_flag))
+qa_show <- visual_qa(crall_old_new, qa_results, add_d1cr = TRUE)
+ex23_fig <- plot_grid(plotlist = qa_show[grep("cr23.*airtemp_max", qa_show)])
+ggdraw(ex23_fig) + draw_label("QA example: SDL CR23x flagged values (red)", x = 0.65, y = 0.1)
+ggsave("extended_summer/figs/qa_example.png", scale = 1.5)
+ggsave("extended_summer/figs/qa_example.pdf", scale = 1.2)
 
 
-
-
+# moving on.. clean up old_new and write out along with final working_dat data frame for reference/documentation
+crall_old_new <- dplyr::select(crall_old_new,
+                               LTER_site:qa_temp, qa_flag)
+write_csv(crall_old_new, "extended_summer/output_data/ctw/qa_sdlcr_temp.csv")
+write_csv(working_dat, "extended_summer/output_data/ctw/qa_sdlcr_temp_workingreference.csv")
 
 
 
