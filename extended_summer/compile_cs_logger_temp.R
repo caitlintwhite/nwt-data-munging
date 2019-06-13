@@ -207,6 +207,31 @@ crall_long_master <- left_join(crall_long, sdl_long) %>%
   left_join(dplyr::select(c1_long, -local_site))
 
 
+# quick visual of all logger data as they are from EDI/SCE
+ggplot(crall_long, aes(date, cr_temp, col = logger)) +
+  geom_point(alpha =0.5) +
+  scale_color_viridis_d() +
+  facet_wrap(~met) # serious tmin outliers present..
+
+# plot without outliers
+# quick visual of all logger data as they are from EDI/SCE - no outliers
+crallfig <- ggplot(subset(crall_long, cr_temp > -50 & date < max(sdl_long$date)), aes(date, cr_temp, col = logger)) +
+  geom_point(alpha =0.5) +
+  scale_color_viridis_d() +
+  scale_x_date(breaks = "5 years", date_labels = "%Y") +
+  theme(legend.position = "top",
+        axis.title.x = element_blank()) + 
+  facet_wrap(~met) # serious tmin outliers present..
+# raw sdl chart
+sdlfig <- ggplot(subset(sdl_long, date > min(crall_long$date)), aes(date, sdl_temp)) +
+  geom_point(alpha =0.5) +
+  scale_x_date(breaks = "5 years", date_labels = "%Y") +
+  facet_wrap(~met)
+# plot together for comparison
+plot_grid(crallfig, sdlfig, nrow = 2,
+          rel_heights = c(1.1,1))
+
+
 
 # -- FUNCTION FOR PLOTTING SUSPECT TEMP VALUES -----
 # function to panel plot flagged data
@@ -276,7 +301,6 @@ working_dat$qa_flag[working_dat$cr_temp < -50 & !is.na(working_dat$cr_temp)] <- 
 working_dat$cr_temp[!is.na(working_dat$qa_flag)] <- NA
 
 
-
 # -- FLAG DAILY DEPARTURES FROM COMPARATIVE DATASETS -----
 # function to difference daily logger temp from comparative chart dataset daily temps
 diff_daily <- function(dat){
@@ -288,12 +312,18 @@ diff_daily <- function(dat){
   # set threshold for sdl logger deviance at 3sd away from the absolute average difference (by logger, metric, and month)
   mutate(thresh_diff_sdl = mean(cr_diff_sdl, na.rm = T) + (3*sd(cr_diff_sdl, na.rm = T)),
          thresh_diff_d1 = mean(cr_diff_d1, na.rm = T) + (3*sd(cr_diff_d1, na.rm = T)),
-         thresh_diff_c1 = mean(cr_diff_c1, na.rm = T) + (3*sd(cr_diff_c1, na.rm = T))) %>%
+         thresh_diff_c1 = mean(cr_diff_c1, na.rm = T) + (3*sd(cr_diff_c1, na.rm = T)),
+         sd_diff_sdl = sd(cr_diff_sdl, na.rm = T),
+         sd_diff_d1 = sd(cr_diff_d1, na.rm = T),
+         sd_diff_c1 = sd(cr_diff_c1, na.rm = T)) %>%
   ungroup() %>%
   # flag logger value if exceeds daily diff threshold for chart comparative datasets
   mutate(flag_diffsdl = cr_diff_sdl > thresh_diff_sdl,
+         deviance_sdl = cr_diff_sdl/sd_diff_sdl,
          flag_diffd1 = cr_diff_d1 > thresh_diff_d1,
-         flag_diffc1 = cr_diff_c1 > thresh_diff_c1)
+         deviance_d1 = cr_diff_d1/sd_diff_d1,
+         flag_diffc1 = cr_diff_c1 > thresh_diff_c1,
+         deviance_c1 = cr_diff_c1/sd_diff_c1)
 }
 
 # round 1 diff daily and flagging
@@ -307,7 +337,7 @@ plot_grid(plotlist = qa_daily_diff1)
 flag_dailydiff1 <- subset(check_daily_diff1, date!= "1996-12-19")
 
 # function for flagging and removing high values in working dataset
-flag_temp <- function(flagdat, error = 1){
+flag_temp <- function(flagdat, error = "comparative deviance"){
   tempdat <- flagdat
   for(row in 1:nrow(tempdat)){
     pos <- with(working_dat, which(met == tempdat$met[row] & logger == tempdat$logger[row] & date == tempdat$date[row]))
@@ -345,6 +375,40 @@ subset(working_dat, date > "1996-12-13" & date < "1997-01-13") %>%
   facet_wrap(~met)
 # > it looks like both tmin and tmax could be shifted back 1 day
 # > select 1996-12-17 through 1997-jan-06 since everything in early jan is NA anyway (i.e. doesn't matter if NA is shifted to an NA)  
+View(subset(working_dat, date %in% seq(as.Date("1996-12-15"), as.Date("1997-01-06"), 1)))
+# looks like start 12/17 to 1/5, shift back 1 day
+shift_dates <- seq(as.Date("1996-12-17"), as.Date("1997-01-05"), 1)
+working_dat$qa_flag[working_dat$date %in% (shift_dates-1)] <- "shifted temp -1 day"
+working_dat$cr_temp[working_dat$met == "airtemp_max" & working_dat$date %in% (shift_dates-1)] <- working_dat$cr_temp[working_dat$met == "airtemp_max" & working_dat$date %in% (shift_dates)]
+working_dat$cr_temp[working_dat$met == "airtemp_min" & working_dat$date %in% (shift_dates-1)] <- working_dat$cr_temp[working_dat$met == "airtemp_min" & working_dat$date %in% (shift_dates)]
+
+# plot again to ensure check temps adjusted as expected
+subset(working_dat, date > "1996-12-13" & date < "1997-01-13") %>%
+  dplyr::select(date, met, cr_temp, sdl_temp) %>%
+  gather(datsource, temp_c, cr_temp:ncol(.)) %>%
+  ggplot(aes(date, temp_c, col = datsource)) +
+  geom_line() +
+  geom_point(alpha = 0.6) +
+  scale_color_viridis_d() +
+  facet_wrap(~met) #yes
+
+
+# round 3: check extreme sdl deviance values
+working_dat <- diff_daily(working_dat)
+# check logger temps that exceed daily deviance more than 5sds for sdl_chart and d1_chart
+check_daily_diff3 <- filter(working_dat, flag_diffsdl == TRUE & flag_diffd1 == T & round(deviance_c1) >= 4)
+# run through visual qa
+qa_daily_diff3 <- visual_qa(working_dat, check_daily_diff3)
+plot_grid(plotlist = qa_daily_diff3)
+# > sdl chart flatlines in tmin so ignore Sep 1990 tmin, leave 1992 tmin be
+# > all tmax vals can be flagged and removed -- are clear spikes or otherwise off
+working_dat <- flag_temp(check_daily_diff3[check_daily_diff3$met == "airtemp_max",], "comparative deviance")
+
+# move on to checking grand and monthly tmax and tmin vals..
+#clean up environment
+rm(check_daily_diff1, flag_dailydiff1, check_daily_diff2, check_daily_diff3,
+   qa_daily_diff1, qa_daily_diff2, qa_daily_diff3)
+
 
 
 # -- QA EXTREMES (TMIN/TMAX) -----
@@ -352,152 +416,100 @@ subset(working_dat, date > "1996-12-13" & date < "1997-01-13") %>%
 ## logger lifecycles: cr21x = 1980s-2000; cr23x = 2000 - 2012; cr1000 = dec 2012 - ongoing
 ## panel arrangement: cr21x = left panel, cr23x = middle, cr1000 = right panel
 
-# grand max and min
-check_max <- working_dat %>%
+# visual qa grand max and min
+# max temps by logger
+check_max1 <- working_dat %>%
   group_by(logger, met) %>%
   filter(cr_temp == max(cr_temp, na.rm = T))
-qa_max <- visual_qa(working_dat, check_max)
-plot_grid(plotlist = qa_max) 
-# >round 1: cr21x and cr23x tmax vals look bad, flag; max tmins look okay
-# >round 2: cr21x looks bad, others okay
+qa_max1 <- visual_qa(working_dat, check_max1)
+plot_grid(plotlist = qa_max1) 
+# >round 1: cr23x tmax 2000-09-06 seems unlikely givven trends in c1, sdl and d1, all else fine 
+flag_max1 <- filter(check_max, met == "airtemp_max" & logger == "cr23x" & date == "2000-09-06")
+working_dat <- flag_temp(flag_max1, error = "high value")
+# run through grand max once more
+check_max2 <- working_dat %>%
+  group_by(logger, met) %>%
+  filter(cr_temp == max(cr_temp, na.rm = T))
+qa_max2 <- visual_qa(working_dat, check_max2)
+plot_grid(plotlist = qa_max2) #looks okay
 
-flag_max1 <- filter(check_max, met == "airtemp_max" & logger != "cr1000")
-flag_max2 <- filter(check_max, met == "airtemp_max" & logger == "cr21x")
-
-# function for flagging and removing high values in working dataset
-flag_high <- function(flagdat){
-  flagdat <- flagdat
-  for(row in 1:nrow(flagdat)){
-    pos <- with(working_dat, which(met == flagdat$met[row] & logger == flagdat$logger[row] & cr_temp == flagdat$cr_temp[row]))
-    working_dat$qa_flag[pos] <- "high value"
-    working_dat$cr_temp[pos] <- NA 
-  }
-}
-
-working_dat <- flag_high(flag_max1)
-working_dat <- flag_high(flag_max2)
-# re-run max check, if looks okay move on or keep iterating until clean (only did 2 rounds)
-
-check_min <- working_dat %>%
+# min temps by logger
+check_min1 <- working_dat %>%
   group_by(logger, met) %>%
   filter(cr_temp == min(cr_temp, na.rm = T))
-qa_min <- visual_qa(working_dat, check_min)
-plot_grid(plotlist = qa_min)
+qa_min1 <- visual_qa(working_dat, check_min1)
+plot_grid(plotlist = qa_min1) #temperature minimums look good
 
+# move on to monthlies...
+#clean up env
+rm(check_max1, check_max2, qa_max1, qa_max2,
+   check_min1, qa_min1)
+
+
+
+# -- QA MONTHLY MIN/MAX -----
 # monthly max temps of tmin and tmax
-check_monthly_max <- crall_long %>%
+check_monthly_max1 <- working_dat %>%
   group_by(logger, met, mon) %>%
   filter(cr_temp == max(cr_temp, na.rm = T))
-
-qa_mon_max <- visual_qa(crall_long_master, check_monthly_max, sorttime = "mon")
+# run through visual qa function
+qa_mon_max1 <- visual_qa(working_dat, check_monthly_max1, sorttime = "mon")
 
 # visualize logger monthly maximums, by logger and metric
 ## max of airtemp_max
-plot_grid(plotlist = qa_mon_max[grep("cr21x.*airtemp_max", qa_mon_max)])
-plot_grid(plotlist = qa_mon_max[grep("cr23x.*airtemp_max", qa_mon_max)])
-plot_grid(plotlist = qa_mon_max[grep("cr1000.*airtemp_max", qa_mon_max)])
+plot_grid(plotlist = qa_mon_max1[grep("cr21x.*airtemp_max", qa_mon_max1)]) #flag sep (1987-09-01) and nov (11-29-1999) 
+plot_grid(plotlist = qa_mon_max1[grep("cr23x.*airtemp_max", qa_mon_max1)]) #flag dec (2001-12-26)
+plot_grid(plotlist = qa_mon_max1[grep("cr1000.*airtemp_max", qa_mon_max1)]) #okay
 ## max of airtemp_min
-plot_grid(plotlist = qa_mon_max[grep("cr21x.*airtemp_min", qa_mon_max)])
-plot_grid(plotlist = qa_mon_max[grep("cr23x.*airtemp_min", qa_mon_max)])
-plot_grid(plotlist = qa_mon_max[grep("cr1000.*airtemp_min", qa_mon_max)])
+plot_grid(plotlist = qa_mon_max1[grep("cr21x.*airtemp_min", qa_mon_max1)]) #okay
+plot_grid(plotlist = qa_mon_max1[grep("cr23x.*airtemp_min", qa_mon_max1)]) #okay
+plot_grid(plotlist = qa_mon_max1[grep("cr1000.*airtemp_min", qa_mon_max1)]) #okay.. dec looks a little different, but since sdl chart missing not taking action
 
 # monthly min temps of tmin and tmax
-check_monthly_min <- crall_long %>%
+check_monthly_min <- working_dat %>%
   group_by(logger, met, mon) %>%
   filter(cr_temp == min(cr_temp, na.rm = T))
+# run through visual qa function
+qa_mon_min1 <- visual_qa(working_dat, check_monthly_min, sorttime = "mon")
+
+# visualize logger monthly minimums, by logger and metric
+## min of airtemp_max
+plot_grid(plotlist = qa_mon_min1[grep("cr21x.*airtemp_max", qa_mon_min1)]) #okay
+plot_grid(plotlist = qa_mon_min1[grep("cr23x.*airtemp_max", qa_mon_min1)]) #okay
+plot_grid(plotlist = qa_mon_min1[grep("cr1000.*airtemp_max", qa_mon_min1)]) #okay
+## min of airtemp_min
+plot_grid(plotlist = qa_mon_min1[grep("cr21x.*airtemp_min", qa_mon_min1)]) #okay
+plot_grid(plotlist = qa_mon_min1[grep("cr23x.*airtemp_min", qa_mon_min1)]) #okay
+plot_grid(plotlist = qa_mon_min1[grep("cr1000.*airtemp_min", qa_mon_min1)]) #okay
+
+
+# > general observation: seems like deviances from chart data occurs more in tmax vals than tmin vals (even max of tmin not so bad, but lots of problems in max of tmax)
+# flag and remove noted monthly max values from cr21x (sep and nov) and cr23x (dec)
+flag_mon_max1 <- subset(check_monthly_max, met == "airtemp_max" & (logger == "cr21x" & mon %in% c(9,11) |
+                          logger == "cr23x" & mon == 12))
+# note the diffs are flagged for sdl and d1 in these observations:
+dplyr::select(flag_mon_max1, date, logger, met, flag_diffsdl:ncol(flag_mon_max1))
+# flag and remove from working copy
+working_dat <- flag_temp(flag_mon_max1, error = "high value")
+
+# check monthly max again to be sure
+check_monthly_max2 <- working_dat %>%
+  group_by(logger, met, mon) %>%
+  filter(cr_temp == max(cr_temp, na.rm = T))
+# run through visual qa function
+qa_mon_max2 <- visual_qa(working_dat, check_monthly_max2, sorttime = "mon")
+# visualize cr21x and cr23x only (what was adjusted)
+plot_grid(plotlist = qa_mon_max2[grep("cr21x.*airtemp_max", qa_mon_max2)]) #okay
+plot_grid(plotlist = qa_mon_max2[grep("cr23x.*airtemp_max", qa_mon_max2)]) #okay
+
+# clean up environment and move on..
+rm(flag_mon_max1, check_monthly_max1, check_monthly_max2, check_monthly_min,
+   qa_mon_max1, qa_mon_max2, qa_mon_min1)
 
 
 
+# -- QA DAY-TO-DAY DELTA DEVIANCE -----
 
-
-
-
-
-# -- CHECK EXTREMES (GRAND TMIN AND TMAX) VALUES -----
-# look at tails for any obvious bad values
-## cr 21x
-sapply(cr21x[grepl("temp", colnames(cr21x))], function(x) tail(sort(x))) #31.45.. Jen Morse said she thinks max T shouldn't exceed 30
-sapply(cr21x[grepl("temp", colnames(cr21x))], function(x) tail(sort(x, decreasing = T))) #-75 and -6999 in airtemp_min
-## cr 23x, 1000 data loggers
-sapply(crlogs[grepl("^airtemp", colnames(crlogs))], function(x) tail(sort(x))) #okay
-sapply(crlogs[grepl("^airtemp", colnames(crlogs))], function(x) tail(sort(x, decreasing = T))) # -187 in min temp
-## sdl chart
-sapply(sdl[grepl("^airtemp", colnames(sdl))], function(x) tail(sort(x))) #okay, high max value agrees with cr logger high value
-sapply(sdl[grepl("^airtemp", colnames(sdl))], function(x) tail(sort(x, decreasing = T))) #-38 is kind of a jump from other tmin
-## d1 chart
-sapply(d1[grepl("^airtemp", colnames(d1))], function(x) tail(sort(x))) #+25C at d1.. seems kinda high for d1?
-sapply(d1[grepl("^airtemp", colnames(d1))], function(x) tail(sort(x, decreasing = T))) #okay
-## c1 chart
-sapply(c1[grepl("^airtemp", colnames(c1))], function(x) tail(sort(x))) #seems alright.. would be warmer at c1 compared to sdl/d1, so 32C possible
-sapply(c1[grepl("^airtemp", colnames(c1))], function(x) tail(sort(x, decreasing = T))) #okay
-
-
-# were mean values affected by bad values in logger dataset?
-na.omit(crlogs[crlogs$airtemp_min == -187, grepl("^airtemp", colnames(crlogs))]) #doesn't look like it
-#       airtemp_max airtemp_min airtemp_avg
-# 6087       0.812        -187    -3.32507
-
-# change bad values to NAs and move on
-cr21x$`minimum temperature`[cr21x$`minimum temperature` < -70 & !is.na(cr21x$`minimum temperature`)] <- NA
-crlogs$airtemp_min[crlogs$airtemp_min == -187 & !is.na(crlogs$airtemp_min)] <- NA
-
-summary(cr21x[grepl("temp", colnames(cr21x))])
-lapply(split(crlogs[grepl("^airtemp", colnames(crlogs))], crlogs$logger), summary) # maxT for cr1000 is 22, 25.4 for cr23x; minT for cr1000 is -29, -36 for cr23x.. 
-summary(sdl[grepl("^airtemp", colnames(sdl))]) # max T is 25, minT -38
-
-# look at maxT in cr21x further..
-cr21x[cr21x$`maximum temperature` == 31.45 & !is.na(cr21x$`maximum temperature`),] # time of maxT seems reasonable (11:47)
-# 10days before and after 31.45
-ggplot(data = cr21x[(which(cr21x$`maximum temperature` == 31.45)-10):(which(cr21x$`maximum temperature` == 31.45)+10),],
-       aes(date, `maximum temperature`)) +
-  geom_line() +
-  geom_point() +
-  # add sdl chart temp for comparison (purple dots)
-  geom_point(data = sdl[(which(sdl$date == "1990-07-09")-10):(which(sdl$date == "1990-07-09")+10),], aes(date, airtemp_max), col = "purple", pch = 1)
-# conclusion: 31.45 looks like a bad value
-
-cr21x[cr21x$`maximum temperature` == 28.41 & !is.na(cr21x$`maximum temperature`),] # time of maxT seems reasonable (11:26), minT missing so suspect
-# 10days before and after 28.41
-ggplot(data = cr21x[(which(cr21x$`maximum temperature` == 28.41)-10):(which(cr21x$`maximum temperature` == 28.41)+10),],
-       aes(date, `maximum temperature`)) +
-  geom_line() +
-  geom_point() +
-  # add sdl chart temp for comparison (purple dots)
-  geom_point(data = sdl[(which(sdl$date == "1997-07-30")-10):(which(sdl$date == "1997-07-30")+10),], aes(date, airtemp_max), col = "purple", pch = 1)
-# conclusion: 28.41 also looks like a bad value
-
-#look at maxT by time of day (i.e. is it ever reasonable maxT occurred at 2359?)
-ggplot(subset(cr21x, year(date)>1991), aes(`time of maximum temperature`, `maximum temperature`, col = year(date))) +
-  geom_point(alpha = 0.5) +
-  facet_wrap(~month(date))
-#minT for comparison
-ggplot(subset(cr21x, year(date)>1991), aes(`time of minimum temperature`, `minimum temperature`, col = year(date))) +
-  geom_point(alpha = 0.5) +
-  facet_wrap(~month(date))
-# thoughts: it could be that the clock failed in the winter months, but tmax and tmin are still good. maxt values and times around midnight in the summer months look bad tho
-ggplot(cr21x, aes(`Julian day`, `maximum temperature`)) +
-  geom_point(alpha = 0.6) +
-  facet_wrap(~year(date))
-
-# convert high cr21x temps that don't track sdl chart to NAs and move on to automatic flagging and data prep
-# 31.45
-cr21x$`maximum temperature`[cr21x$`maximum temperature` == 31.45 & !is.na(cr21x$`maximum temperature`)] <- NA
-cr21x$`maximum temperature`[cr21x$`maximum temperature` == 28.41 & !is.na(cr21x$`maximum temperature`)] <- NA
-
-# spot check hi and low values in cr23x against sdl chart
-# cr23x has warmest and coldest temp so no need to subset logger == cr23x
-crlogs[crlogs$airtemp_max == max(crlogs$airtemp_max, na.rm =T) & !is.na(crlogs$airtemp_max),] # time of maxT seems reasonable (11:47)
-# 10days before and after 31.45
-ggplot(data = crlogs[(which(crlogs$airtemp_max == max(crlogs$airtemp_max, na.rm =T))-10):(which(crlogs$airtemp_max == max(crlogs$airtemp_max, na.rm =T))+10),],
-       aes(date, airtemp_max)) +
-  geom_line() +
-  geom_point() +
-  # add sdl chart temp for comparison (purple dots)
-  geom_line(data = sdl[(which(sdl$date == "2000-09-06")-10):(which(sdl$date == "2000-09-06")+10),], aes(date, airtemp_max), col = "purple") +
-  geom_point(data = sdl[(which(sdl$date == "2000-09-06")-10):(which(sdl$date == "2000-09-06")+10),], aes(date, airtemp_max), col = "purple", pch = 1) +
-  geom_line(data = d1[(which(d1$date == "2000-09-06")-10):(which(d1$date == "2000-09-06")+10),], aes(date, airtemp_max), col = "steelblue2") +
-  geom_point(data = d1[(which(d1$date == "2000-09-06")-10):(which(d1$date == "2000-09-06")+10),], aes(date, airtemp_max), col = "steelblue4", pch = 1)
-# conclusion: +25C looks like a bad value in the CR23x logger, all other data around then fine
 
 crlogs[crlogs$airtemp_min == min(crlogs$airtemp_min, na.rm =T) & !is.na(crlogs$airtemp_min),]
 # 10days before and after 31.45
@@ -558,27 +570,6 @@ ggplot(data = sdl[(which(sdl$airtemp_min == min(sdl$airtemp_min, na.rm =T))-10):
 
 
 
-
-# -- CHECK MONTHLY EXTREMES -----
-with(subset(d1_long, met == "airtemp_min"), lapply(split(d1_temp, mon), function(x) summary(x)))
-with(subset(d1_long, met == "airtemp_max"), lapply(split(d1_temp, mon), function(x) summary(x))) # highest tmax occurs in june.. seems unlikely?
-with(subset(d1_long, met == "airtemp_min"), lapply(split(d1_temp, mon), function(x) head(sort(x)))) # -11 tmin in august? plausible?
-with(subset(d1_long, met == "airtemp_max"), lapply(split(d1_temp, mon), function(x) tail(sort(x)))) # still seems high.. could flag to leave as is but not use in a regression
-
-with(subset(c1_long, met == "airtemp_min"), lapply(split(c1_temp, mon), function(x) summary(x)))
-with(subset(c1_long, met == "airtemp_max"), lapply(split(c1_temp, mon), function(x) summary(x))) # highest tmax occurs in june.. seems unlikely?
-with(subset(c1_long, met == "airtemp_min"), lapply(split(c1_temp, mon), function(x) head(sort(x))))
-with(subset(c1_long, met == "airtemp_max"), lapply(split(c1_temp, mon), function(x) tail(sort(x)))) # check 20 jan, 29 in march is weird, 18tmax in december looks weird.. next highest is 13
-
-with(subset(sdl_long, met == "airtemp_min"), lapply(split(sdl_temp, mon), function(x) summary(x)))
-with(subset(sdl_long, met == "airtemp_max"), lapply(split(sdl_temp, mon), function(x) summary(x))) # highest tmax occurs in june.. seems unlikely?
-with(subset(sdl_long, met == "airtemp_min"), lapply(split(sdl_temp, mon), function(x) head(sort(x))))
-with(subset(sdl_long, met == "airtemp_max"), lapply(split(sdl_temp, mon), function(x) tail(sort(x)))) # check 20 jan, 29 in march is weird, 18tmax in december looks weird.. next highest is 13
-
-with(subset(cr21x_long, met == "airtemp_min"), lapply(split(temp, mon), function(x) summary(x))) # check -36 in aug
-with(subset(cr21x_long, met == "airtemp_max"), lapply(split(temp, mon), function(x) summary(x))) # highest tmax occurs in june.. seems unlikely?
-with(subset(cr21x_long, met == "airtemp_min"), lapply(split(temp, mon), function(x) head(sort(x))))
-with(subset(cr21x_long, met == "airtemp_max"), lapply(split(temp, mon), function(x) tail(sort(x)))) # check 20 jan, 29 in march is weird, 18tmax in december looks weird.. next highest is 13
 
 
 # -- AUTOMATE QA LOGGER TEMP DATA -----
