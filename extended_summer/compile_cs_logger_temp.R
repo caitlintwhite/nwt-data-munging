@@ -508,30 +508,67 @@ rm(flag_mon_max1, check_monthly_max1, check_monthly_max2, check_monthly_min,
 
 
 
+# -- QA LAG SPIKES/FLATLINES WITHIN LOGGER DATASET ----
+# look for consecutive day temp spikes/declines that exceed 40C within the same metric
+# also look for flatlining in temperature (jen morse said try 5-consec days)
+
+# save copy of working dat in case mess up (so don't need to re-run from top)
+working_dat_copy <- working_dat
+
+## add lag temp
+working_dat <- working_dat %>%
+  arrange(met, date) %>%
+  group_by(logger, met) %>%
+  mutate(lag1_crtemp = lag(cr_temp)) %>%
+  ungroup() %>%
+  mutate(lag1_diffcr = abs(cr_temp - lag1_crtemp))
+# check distribution of absolute difference with current day's temp and yesterday's temp
+boxplot(working_dat$lag1_diffcr)  
+sapply(split(working_dat$lag1_diffcr, working_dat$met), function(x) tail(sort(x))) # at most swung 19 degrees.. could happen
+sapply(split(working_dat$lag1_diffcr, working_dat$logger), function(x) tail(sort(x))) # loggers swing similarly
+
+# can visualize swings to be sure
+swing_check1 <- subset(working_dat, lag1_diffcr >= 15) 
+qa_swings <- visual_qa(working_dat, swing_check1)
+plot_grid(plotlist = qa_swings)
+# > conclusion: other sources swung similar amounts too, is fine
+
+# look for 4+ consecutive days of 0 change
+count0 <- rle(working_dat$lag1_diffcr)
+consec0 <- count0$lengths[count0$values == 0]
+consec0[!is.na(consec0)] # 0 change in consec days only ever occurs for runs of 1 day, which is fine
+
+# to be sure, compare lead delta
+working_dat %>%
+  arrange(met, date) %>%
+  group_by(logger, met) %>%
+  mutate(lead1_crtemp = lead(cr_temp)) %>%
+  ungroup() %>%
+  mutate(lead_diffcr = abs(cr_temp - lead1_crtemp)) %>%
+  subset(lead_diffcr == 0 & lag1_diffcr == 0) %>%
+  nrow() # nada, all clear
+
+# clean up environment
+rm(count0, consec0, swing_check1, qa_swings)
+
+
+
 # -- QA DAY-TO-DAY DELTA DEVIANCE -----
+# diff current from lag temp in sdl chart, d1 and c1, then compare daily deltas with logger daily deltas
+# pull out observations where delta deviates more than 3sd of logger-other source diff on day-to-day fluxes
 
 
-crlogs[crlogs$airtemp_min == min(crlogs$airtemp_min, na.rm =T) & !is.na(crlogs$airtemp_min),]
-# 10days before and after 31.45
-ggplot(data = crlogs[(which(crlogs$airtemp_min == min(crlogs$airtemp_min, na.rm =T))-10):(which(crlogs$airtemp_min == min(crlogs$airtemp_min, na.rm =T))+10),],
-       aes(date, airtemp_min)) +
-  geom_line() +
-  geom_point() +
-  # add sdl chart temp for comparison (purple dots)
-  geom_line(data = sdl[(which(sdl$date == "2011-02-01")-10):(which(sdl$date == "2011-02-01")+10),], aes(date, airtemp_min), col = "purple") +
-  geom_point(data = sdl[(which(sdl$date == "2011-02-01")-10):(which(sdl$date == "2011-02-01")+10),], aes(date, airtemp_min), col = "purple", pch = 1) +
-  geom_line(data = d1[(which(d1$date == "2011-02-01")-10):(which(d1$date == "2011-02-01")+10),], aes(date, airtemp_min), col = "steelblue2") +
-  geom_point(data = d1[(which(d1$date == "2011-02-01")-10):(which(d1$date == "2011-02-01")+10),], aes(date, airtemp_min), col = "steelblue4", pch = 1)
-# conclusion: real value. twas cold that day.
 
-# change high value in cr23x to NA
-# 25.46
-crlogs$airtemp_max[crlogs$airtemp_max == max(crlogs$airtemp_max, na.rm =T) & !is.na(crlogs$airtemp_max)] <- NA
 
-# look at cr21x with other loggers one last time:
-summary(cr21x[grepl("temp", colnames(cr21x))])
-lapply(split(crlogs[grepl("^airtemp", colnames(crlogs))], crlogs$logger), summary) # max T is 25
-summary(sdl[grepl("^airtemp", colnames(sdl))]) # max T is 25
+
+
+
+
+
+
+
+
+
 
 # look at d1 high temp val
 d1[d1$airtemp_max == max(d1$airtemp_max, na.rm =T) & !is.na(d1$airtemp_max),] # a 1956 data point.. idk?
@@ -694,11 +731,7 @@ qa_temps <- function(dat){
 cr21x_qa <- qa_temps(test)
 plot_grid(plotlist = cr21x_qa) #all points look bad
 
-# start correcting.. bad values to NA
-for(i in 1:nrow(test)){
-  temp <- test[i,]
-  cr21x_long2$temp[cr21x_long2$date == temp$date & cr21x_long2$met == temp$met] <- NA
-}
+
 
 # now diff deltas with anomolies removed..
 cr21x_long3 <- cr21x_long2 %>%
@@ -751,28 +784,4 @@ cr21x_long3 <- cr21x_long2 %>%
          flag_sdl_deltalag = ifelse((mean_sdldeltalag - diff_sdl_deltalag) > (mean_sdldeltalag + 3*sd_sdldeltalag) | (mean_sdldeltalag - diff_sdl_deltalag) < (mean_sdldeltalag - 3*sd_sdldeltalag), 1, 0),
          flag_c1_deltalag = ifelse((mean_c1deltalag - diff_c1_deltalag) > (mean_c1deltalag + 3*sd_c1deltalag) | (mean_c1deltalag - diff_c1_deltalag) < (mean_c1deltalag - 3*sd_c1deltalag), 1, 0),
          flag_warm = temp > c1_temp & temp > sdl_temp & temp > d1_temp)
-
-# screen same test as above
-test <- subset(cr21x_long3, flag_sdl_delta == 1 & flag_d1_delta == 1 & flag_c1_delta == 1)
-newqa <- qa_temps(test)
-plot_grid(plotlist = newqa) #it's fine
-test <- subset(cr21x_long3, flag_sdl_deltalag == 1 & flag_d1_deltalag == 1 & flag_c1_deltalag == 1)
-plot_grid(plotlist = qa_temps(test))
-test <- subset(cr21x_long3, flag_warm == TRUE)
-test <- test[1:40,]
-warmqa <- qa_temps(test)
-plot_grid(plotlist = warmqa[21:40])
-# test$date[test$met == "airtemp_max"][2]
-# plot second example
-ggplot(data = subset(cr21x, date %in% seq(as.Date(test$date[test$met == "airtemp_max"][2])-10, as.Date(test$date[test$met == "airtemp_max"][2])+10, 1)),
-       aes(date, `maximum temperature`)) +
-  geom_line() +
-  geom_point() +
-  # add sdl chart temp for comparison (purple dots)
-  geom_line(data = sdl[(which(sdl$date == test$date[test$met == "airtemp_max"][2])-10):(which(sdl$date == test$date[test$met == "airtemp_max"][2])+10),], aes(date, airtemp_max), col = "purple") +
-  geom_point(data = sdl[(which(sdl$date == test$date[test$met == "airtemp_max"][2])-10):(which(sdl$date == test$date[test$met == "airtemp_max"][2])+10),], aes(date, airtemp_max), col = "purple", pch = 1) +
-  geom_line(data = d1[(which(d1$date == test$date[test$met == "airtemp_max"][2])-10):(which(d1$date == test$date[test$met == "airtemp_max"][2])+10),], aes(date, airtemp_max), col = "steelblue2") +
-  geom_point(data = d1[(which(d1$date == test$date[test$met == "airtemp_max"][2])-10):(which(d1$date == test$date[test$met == "airtemp_max"][2])+10),], aes(date, airtemp_max), col = "steelblue4", pch = 1) +
-  geom_line(data = c1[(which(c1$date == test$date[test$met == "airtemp_max"][2])-10):(which(c1$date == test$date[test$met == "airtemp_max"][2])+10),], aes(date, airtemp_max), col = "forestgreen") +
-  geom_point(data = c1[(which(c1$date == test$date[test$met == "airtemp_max"][2])-10):(which(c1$date == test$date[test$met == "airtemp_max"][2])+10),], aes(date, airtemp_max), col = "darkgreen", pch = 1)
 
