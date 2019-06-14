@@ -382,8 +382,18 @@ subset(predict_all, !is.na(fit) & met == "airtemp_min") %>%
   facet_wrap(~yr)
 
 
-  
+# what is the difference in summer mean temp by infill method?
+subset(compare80, mon %in% 6:8) %>%
+  group_by(method, met) %>%
+  summarise(meanT = mean(fit),
+          sdT = sd(fit)) # about a 2degree diff using cr1000 vs cr21x, sd is comparable
 
+# what does it look like with raw data? 1981-1991 as example..
+ggplot(compare80, aes(date, fit)) +
+  geom_point(alpha = 0.5, col = "purple") +
+  geom_point(data = predict_all[predict_all$yr < 1990, colnames(predict_all) != "method"], aes(missing_date, fit), col = "seagreen", alpha = 0.5) +
+  geom_point(data = subset(sdlcr_qa, yr <1990), aes(date, qa_temp), alpha = 0.5) +
+  facet_grid(method~met)
 
 
 
