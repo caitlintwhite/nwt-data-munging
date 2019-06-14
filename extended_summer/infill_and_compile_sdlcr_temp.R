@@ -393,7 +393,7 @@ ggplot(compare80, aes(date, fit)) +
   geom_point(alpha = 0.5, col = "purple") +
   geom_point(data = predict_all[predict_all$yr < 1990, colnames(predict_all) != "method"], aes(missing_date, fit), col = "seagreen", alpha = 0.5) +
   geom_point(data = subset(sdlcr_qa, yr <1990), aes(date, qa_temp), alpha = 0.5) +
-  facet_grid(method~met)
+  facet_grid(met~method, scales = "free_y")
 
 
 
