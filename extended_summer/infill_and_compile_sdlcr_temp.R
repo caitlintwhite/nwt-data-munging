@@ -25,10 +25,16 @@
 # adj R^2 > 0.6 (higher better)
 # pval =< 0.05
 
+# metadata methods from sdl chart:
+# A regression was performed using the chart recorder data at the missing site and the adjacent site using a 14 day window prior to and after the missing day, the regression equation was applied to the value at the known site to determine the value for filling the missing site. 
+# A r^2 value above 0.6 were considered acceptable. If the r^2 was below 0.6, or missing, a Standard Deviation Method was used to fill the missing value (see Method Flag 2). 
+
+#sd method:
+# (Known Site Date Value (yyyy-mm-dd) / Std. Dev. of the day (mm-dd) at the known site) : ((x) / Std. Dev. of the day(mm-dd) at the unknown site)
 
 
 # -- SETUP ----
-#rm(list = ls())
+rm(list = ls())
 library(tidyverse)
 library(lubridate)
 #library(cowplot)
@@ -42,7 +48,7 @@ source("edi_functions.R")
 
 # get data
 # qa'd sdl cr logger data, 1986-ongoing
-sdlcr_qa <- read_csv("extended_summer/output_data/ctw/qa_sdlcr_temp.csv", na = na_vals, trim_ws = T)
+sdlcr_qa <- read_csv("extended_summer/output_data/ctw/qa_sdlcr_temp.csv", na = na_vals, trim_ws = T) %>% as.data.frame()
 # sdl chart
 sdl <- getTabular(413) %>% as.data.frame()
 
@@ -93,25 +99,81 @@ tidytemp <- function(dat, datasource = NA, sep = "_", special = "flag", dropcol 
 }
 
 
+
+# 14-day moving window regression
+movingfill <- function(dat, metric, ytemp, xtemp, nmin = 10, days = 14, r2 = 0.6, p = 0.05){
+  
+  require(dplyr)
+  
+  #initialize df for storing infilled temp values
+  infill_df <- data.frame()
+  
+  dat <- as.data.frame(dat)
+  # id missing dates
+  missing_dates <- sort(dat["date"][is.na(dat[ytemp])]) %>% as.Date()
+  
+  # for loop to execute moving window regressions on max T
+  for(i in 1:length(missing_dates)){
+    current_date <- missing_dates[i]
+    # subset data to 2 weeks before and 2 weeks after missing date
+    begin_date <- current_date - days
+    end_date <-  current_date + days
+    temp_df <- subset(dat, date >= begin_date & date <=end_date)
+    # count complete records of chart tmax and logger tmax
+    complete_obs <- sum(complete.cases(temp_df[c(xtemp, ytemp)]))
+    # fill in date and count of complete observations
+    infill_tempdf <- data.frame(missing_date = current_date, 
+                                met = metric,
+                                logger = temp_df$logger[temp_df$date == current_date],
+                                complete_nobs = complete_obs,
+                                mon = month(current_date), yr = year(current_date))
+    
+    ## logic check: at least 10 complete observations (both sources have tmax data on same day)
+    if(complete_obs < nmin) {
+      #NAs for all other cols
+      infill_tempdf <- cbind(infill_tempdf, 
+                             xtemp = temp_df[[xtemp]][temp_df$date == current_date],
+                             fit = NA, upr = NA, lwr = NA, se = NA,
+                             adjr2 = NA, pval = NA, RSE = NA, method = NA)
+      #next # skip to next date
+    } else {
+      # if passes logic check, continue with linear regression .. 
+      temp_model <- lm(as.formula(paste(ytemp, xtemp, sep = "~")), data = temp_df)
+      temp_predict <- predict.lm(temp_model, newdata = temp_df[temp_df$date == current_date,], se.fit = T, interval = "prediction")
+      infill_tempdf <- cbind(infill_tempdf,
+                             xtemp = temp_df[[xtemp]][temp_df$date == current_date],
+                             temp_predict$fit,
+                             se = temp_predict$se.fit,
+                             adjr2 = summary(temp_model)$adj.r.squared,
+                             pval = summary(temp_model)$coefficients[8],
+                             RSE = summary(temp_model)$sigma,
+                             method = paste(xtemp, days, "day lm"))
+    }
+    infill_df <- rbind(infill_df, infill_tempdf)
+  }
+  
+  # clean up
+  infill_df <- infill_df %>%
+    filter(adjr2 > r2 & pval <=p) # keep only infilled values with r2 > 0.6 and pval <= 0.05 (per metadata methods)
+  # correct colnames
+  names(infill_df)[grepl("xtemp", colnames(infill_df))] <- xtemp
+  return(infill_df)
+}
+
+
 # -- REVIEW AND PREP DATA FOR REGRESSIONS -----
+# tidy sdl chart
 sdl_long <- tidytemp(sdl, dropcol = "airtemp_avg")
 glimpse(sdl_long)
 
 
-
-
-###############################################
-### Regression infilling with saddle chart ###
-###############################################
 # combine both sdl logger and sdl chart temp datasets wide-form
 # > don't include mar 2015 - aug 2016 in chart data (tmax vals got truncated)
 sdl_crchart <- sdlcr_qa %>%
-  dplyr::select(-c(cr_temp)) %>% # use qa'd temps
+  #dplyr::select(-c(cr_temp)) %>% # use qa'd temps
   full_join(subset(sdl_long, date < as.Date("2015-03-01") | date > as.Date("2016-08-30)"))) %>%
   arrange(met, `date`) %>%
-  rename(cr_temp = qa_temp,
-         cr_flag = qa_flag,
-         sdl_temp = temp,
+  rename(sdl_temp = temp,
          sdl_flag = flag) %>%
   mutate(mon = as.factor(month(date)))
 
@@ -122,137 +184,24 @@ with(sdl_crchart, lapply(split(cr_temp[date >= min(sdlcr_qa$date)], met[date >= 
 with(sdl_crchart, lapply(split(cr_temp[date >= min(sdlcr_qa$date)], logger[date >= min(sdlcr_qa$date)]), function(x)summary(is.na(x)))) # about half of the data missing over entire record
 #cr21x missing the most data points (about half), then cr23x, cr1000 missing one point (due to tmin sensor fail)
 
-# grab missing dates
-tmax_missing_dates <- sdl_crchart$date[is.na(sdl_crchart$cr_temp) & sdl_crchart$met == "airtemp_max"]
-tmin_missing_dates <- sdl_crchart$date[is.na(sdl_crchart$cr_temp) & sdl_crchart$met == "airtemp_min"]
-# subset to time period of cr logger datasets for 2-week regression
-tmax_missing_dates_cr <- tmax_missing_dates[tmax_missing_dates >= min(sdlcr_qa$date)]
-tmin_missing_dates_cr <- tmin_missing_dates[tmin_missing_dates >= min(sdlcr_qa$date)]
 
 
-
+# -- (1) MOVING WINDOW REGRESSION INFILLING -----
 # ***** Method 1: moving window regression *******
 ## > 2 week before and after date missing
-
-#initialize df for max temp
-max_temp_infill_2wk <- data.frame()
-# for loop to execute moving window regressions on max T
-for(i in 1:length(tmax_missing_dates_cr)){
-  current_date <- tmax_missing_dates_cr[i]
-  # subset data to 2 weeks before and 2 weeks after missing date
-  begin_date <- current_date - 14
-  end_date <-  current_date + 14
-  temp_df <- subset(sdl_crchart, date >= begin_date & date <=end_date & met == "airtemp_max")
-  # count complete records of chart tmax and logger tmax
-  complete_obs <- nrow(temp_df[!is.na(temp_df$sdl_temp & temp_df$cr_temp),])
-  # fill in date and count of complete observations
-  infill_tempdf <- data.frame(missing_date = current_date, 
-                              met = "airtemp_max",
-                              logger = temp_df$logger[temp_df$date == current_date],
-                              complete_nobs = complete_obs,
-                              mon = month(current_date), year = year(current_date))
-  
-  ## logic check: at least 10 complete observations (both sources have tmax data on same day)
-  if(complete_obs < 10) {
-    #NAs for all other cols
-    infill_tempdf <- cbind(infill_tempdf, 
-                           sdl_temp = temp_df$sdl_temp[temp_df$date == current_date],
-                           fit = NA, upr = NA, lwr = NA, se = NA,
-                           adjr2 = NA, pval = NA, RMSE = NA, method = NA)
-    next # skip to next date
-  }
-  
-  # if passes logic check, continue with linear regression ..  
-  else {
-    temp_model <- lm(cr_temp ~ sdl_temp, data=temp_df)
-    temp_predict <- predict.lm(temp_model, newdata = temp_df[temp_df$date == current_date,], se.fit = T, interval = "prediction")
-    infill_tempdf <- cbind(infill_tempdf,
-                           sdl_temp = temp_df$sdl_temp[temp_df$date == current_date],
-                           temp_predict$fit,
-                           se = temp_predict$se.fit,
-                           adjr2 = summary(temp_model)$adj.r.squared,
-                           pval = summary(temp_model)$coefficients[8],
-                           RMSE = summary(temp_model)$sigma,
-                           method = "sdl chart 2wk lm")
-  }
-  max_temp_infill_2wk <- rbind(max_temp_infill_2wk, infill_tempdf)
-}
-
-# clean up
-max_temp_infill_2wk <- max_temp_infill_2wk %>%
-  filter(adjr2 > 0.6 & pval <= 0.05) # keep only infilled values with r2 > 0.6 and pval <= 0.05 (per metadata methods)
-
-# asssess:
-# how many dates missing?
-length(tmax_missing_dates_cr)
-# how many infilled?
-nrow(max_temp_infill_2wk)
-# how many remaining missing value dates?
-tmax_dates_remain <- tmax_missing_dates_cr[!tmax_missing_dates_cr %in% max_temp_infill_2wk$missing_date]
+tmax_2wksdlchart <- movingfill(dat = subset(sdl_crchart, met == "airtemp_max"), 
+                      metric = "airtemp_max", xtemp = "sdl_temp", ytemp = "qa_temp")
+tmin_2wksdlchart <- movingfill(dat = subset(sdl_crchart, met == "airtemp_min"), 
+                               metric = "airtemp_min", xtemp = "sdl_temp", ytemp = "qa_temp")
 
 
-## ****** Repeat above but for minimum temperature
-#initialize df for min temp
-min_temp_infill_2wk <- data.frame()
-# for loop to execute moving window regressions on min T
-for(i in 1:length(tmin_missing_dates)){
-  current_date <- tmin_missing_dates[i]
-  # subset data to 2 weeks before and 2 weeks after missing date
-  begin_date <- current_date - 14
-  end_date <-  current_date + 14
-  temp_df <- subset(sdl_chartlogger_2010,date >= begin_date & date <=end_date)
-  # count complete records of chart tmin and logger tmin
-  complete_obs <- nrow(temp_df[!is.na(temp_df$chartmin & temp_df$loggermin),])
-  # fill in date and count of complete observations
-  infill_tempdf <- data.frame(missing_date = current_date, 
-                              logger = temp_df$logger[temp_df$date == current_date],
-                              complete_nobs = complete_obs,
-                              mon = month(current_date), year = year(current_date))
-  
-  ## logic check: at least 10 complete observations (both sources have tmin data on same day)
-  if(complete_obs < 10) {
-    #NAs for all other cols
-    infill_tempdf <- cbind(infill_tempdf, 
-                           tmin_logger = temp_df$loggermin[temp_df$date == current_date],
-                           fit = NA, upr = NA, lwr = NA, se = NA,
-                           adjr2 = NA, pval = NA, RMSE = NA, method = NA)
-    next # skip to next date
-  }
-  
-  # if passes logic check, continue with linear regression ..  
-  else {
-    temp_model <- lm(chartmin ~ loggermin, data=temp_df)
-    temp_predict <- predict.lm(temp_model, newdata = temp_df[temp_df$date == current_date,], se.fit = T, interval = "prediction")
-    infill_tempdf <- cbind(infill_tempdf,
-                           tmin_logger = temp_df$loggermin[temp_df$date == current_date],
-                           temp_predict$fit,
-                           se = temp_predict$se.fit,
-                           adjr2 = summary(temp_model)$adj.r.squared,
-                           pval = summary(temp_model)$coefficients[8],
-                           RMSE = summary(temp_model)$sigma,
-                           method = paste(temp_df$logger[temp_df$date == current_date], "2wk lm"))
-  }
-  min_temp_infill_2wk <- rbind(min_temp_infill_2wk, infill_tempdf)
-}
-
-# clean up
-min_temp_infill_2wk <- min_temp_infill_2wk %>%
-  filter(adjr2 > 0.6 & pval <= 0.05) # keep only infilled values with r2 > 0.6 and pval <= 0.05 (per metadata methods)
-
-# assess:
-# how many dates missing?
-length(tmin_missing_dates)
-# how many infilled?
-nrow(min_temp_infill_2wk)
-# how many remaining missing value dates have corresponding data in logger dataset?
-tmin_dates_remain <- tmin_missing_dates_cr[!tmin_missing_dates_cr %in% min_temp_infill_2wk$missing_date]
-summary(tmin_dates_remain %in% sdl_loggerdat$date[!is.na(sdl_loggerdat$airtemp_min)]) # apparently all there..
 
 
+# -- (2) MONTHLY LM REGRESSION ------
 # ***** Method 2: monthly lm regression *******
 # linear regression of cr_temp ~ sdl_temp + month + logger; use all data points available
-# notes: 
-
+ 
+# compare model options..
 # regress using all complete pairs available
 summary(lm(cr_temp ~ sdl_temp + logger, data = subset(sdl_crchart, met == "airtemp_max"))) #adj-R2 = 0.9742, RSE 1.524
 summary(lm(cr_temp ~ sdl_temp + mon + logger, data = subset(sdl_crchart, met == "airtemp_max"))) #adj-R2 = 0.9751, RSE 1.497
@@ -263,23 +212,26 @@ anova(lm(cr_temp ~ sdl_temp + mon + logger, data = subset(sdl_crchart, met == "a
       lm(cr_temp ~ sdl_temp + mon + yr * logger, data = subset(sdl_crchart, met == "airtemp_max"))) # model with yr*logger interation is better
 
 # specify lms to predict tmin and tmax (use same for both)
-tmaxlm <- lm(cr_temp ~ sdl_temp + mon + yr * logger, data = subset(sdl_crchart, met == "airtemp_max"))
+tmaxlm <- lm(qa_temp ~ sdl_temp + mon + yr * logger, data = subset(sdl_crchart, met == "airtemp_max"))
+summary(tmaxlm)
 plot(tmaxlm) # 3-4 points influential.. keeping in for now
-tminlm <- lm(cr_temp ~ sdl_temp + mon + yr * logger, data = subset(sdl_crchart, met == "airtemp_min"))
+tminlm <- lm(qa_temp ~ sdl_temp + mon + yr * logger, data = subset(sdl_crchart, met == "airtemp_min"))
 summary(tminlm)
 plot(tminlm)
 
 # create null models to calculate p-vals for predicted vals
-nulltmax <- lm(cr_temp ~ 1, data = subset(sdl_crchart, met == "airtemp_max" & !is.na(cr_temp) & !is.na(sdl_temp)))
-nulltmin <- lm(cr_temp ~ 1, data = subset(sdl_crchart, met == "airtemp_min" & !is.na(cr_temp) & !is.na(sdl_temp)))
+nulltmax <- lm(qa_temp ~ 1, data = subset(sdl_crchart, met == "airtemp_max" & !is.na(qa_temp) & !is.na(sdl_temp)))
+nulltmin <- lm(qa_temp ~ 1, data = subset(sdl_crchart, met == "airtemp_min" & !is.na(qa_temp) & !is.na(sdl_temp)))
 
 
-## ***** Infill missing 2010-2017 values not filled by moving window regression + all 2018 daily tmin and tmax using CR1000 regression (sdl chart stops after 2017-12-31)
-predtmax <- predict.lm(tmaxlm, newdata = subset(sdl_crchart, date %in% tmax_dates_remain), se.fit = T, type = "response", interval = "prediction")
-predtmin <- predict.lm(tminlm, newdata = subset(sdl_crchart, date %in% tmin_dates_remain), se.fit = T, type = "response", interval = "prediction")
+## ***** Infill missing values not filled by moving window regression
+predtmax <- predict.lm(tmaxlm, newdata = subset(sdl_crchart, met == "airtemp_max" & is.na(qa_temp)), #& !date %in% tmax_2wksdlchart$missing_date), 
+                       se.fit = T, type = "response", interval = "prediction")
+predtmin <- predict.lm(tminlm, newdata = subset(sdl_crchart, met == "airtemp_min" & is.na(qa_temp)), #& !date %in% tmin_2wksdlchart$missing_date), 
+                       se.fit = T, type = "response", interval = "prediction")
 
 # compile tmax predictions
-crtmax_monthly_regress <- subset(sdl_crchart, date %in% tmax_dates_remain & met == "airtemp_max") %>%
+tmax_monthly_regress <- subset(sdl_crchart, met == "airtemp_max" & is.na(qa_temp)) %>%
   mutate(complete_nobs = nrow(tmaxlm$model)) %>%
   dplyr::select(date, met, logger, complete_nobs, mon, yr, sdl_temp) %>%
   rename(missing_date = date) %>%
@@ -287,12 +239,11 @@ crtmax_monthly_regress <- subset(sdl_crchart, date %in% tmax_dates_remain & met 
                    se = predtmax$se.fit,
                    adjr2 = summary(tmaxlm)$adj.r.squared,
                    pval = anova(nulltmax, tmaxlm)$'Pr(>F)'[2],
-                   RMSE = sigma(tmaxlm),
+                   RSE = sigma(tmaxlm),
                    method = "sdl chart month lm"))
-rename(tmax_logger = cr1000airtemp_max)
 
 # compile tmin predictions
-crtmin_monthly_regress <- subset(sdl_crchart, date %in% tmin_dates_remain & met == "airtemp_min") %>%
+tmin_monthly_regress <- subset(sdl_crchart, met == "airtemp_min" & is.na(qa_temp)) %>%
   mutate(complete_nobs = nrow(tminlm$model)) %>%
   dplyr::select(date, met, logger, complete_nobs, mon, yr, sdl_temp) %>%
   rename(missing_date = date) %>%
@@ -300,22 +251,142 @@ crtmin_monthly_regress <- subset(sdl_crchart, date %in% tmin_dates_remain & met 
                    se = predtmin$se.fit,
                    adjr2 = summary(tminlm)$adj.r.squared,
                    pval = anova(nulltmin, tminlm)$'Pr(>F)'[2],
-                   RMSE = sigma(tminlm),
+                   RSE = sigma(tminlm),
                    method = "sdl chart month lm"))
 
+
+
+# -- INFILL BY SD METHOD FOR COMPARISON -----
+# don't group by logger to blend whatever differences by logger (also cr1000 would only have 4 pts for std deviation)
+dat <- sdl_crchart %>%
+  group_by(doy) %>%
+  mutate(sdcr = sd(qa_temp, na.rm = T),
+         sdsdl = sd(sdl_temp, na.rm = T)) %>%
+  ungroup() %>%
+  mutate(sdlrat = sdl_temp/sdsdl,
+         proj_cr = sdlrat * sdcr)
+
+ggplot(dat, aes(qa_temp, proj_cr)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(aes(slope = 1, intercept = 0), col = "red") +
+  facet_wrap(~ met)
+
+
+
+# -- PROJECT LOGGER TO 1980s FROM SDL CHART ---
+# use cr1000 since least qa problems and most recent, will fit better when cr21x values start in 1986
+
+cr1000lm <- lm(qa_temp ~ sdl_temp + mon * met, data = subset(sdl_crchart, logger == "cr1000"))
+cr21xlm <- lm(qa_temp ~ sdl_temp + mon * met, data = subset(sdl_crchart, logger == "cr21x"))
+
+cr1000_pred <- predict(cr1000lm, newdata = subset(sdl_crchart, date < min(sdlcr_qa$date)), se.fit = T, interval = "predict") 
+cr21x_pred <- predict(cr21xlm, newdata = subset(sdl_crchart, date < min(sdlcr_qa$date)), se.fit = T, interval = "predict")
+  
+compare80 <- subset(sdl_crchart, date < min(sdlcr_qa$date)) %>%
+  cbind(cr1000_pred$fit, se = cr1000_pred$se.fit, method = "cr1000") %>%
+  rbind(cbind(subset(sdl_crchart, date < min(sdlcr_qa$date)),
+              cr21x_pred$fit, se = cr21x_pred$se.fit, method = "cr21x")) %>%
+  as.data.frame()
+
+# visualize predictions
+ggplot(compare80, aes(date, fit, col = method)) +
+  geom_point(data = subset(dat, date %in% compare80$date), aes(date, proj_cr), col = "purple", alpha = 0.3) +
+  geom_point(alpha = 0.3) +
+  scale_color_grey() +
+  facet_grid(method ~ met)
+
+ggplot(compare80, aes(doy, fit, col = method)) +
+  geom_line(data = subset(dat, date %in% compare80$date), aes(doy, proj_cr), col = "purple", alpha = 0.6) +
+  geom_line(alpha = 0.6) +
+  scale_color_viridis_d(option = "E") +
+  facet_grid(yr ~ met)
+
+# plot logger 1 vs logger 2 predictions
+## tmax
+ggplot(compare80, aes(date, fit, col = method)) +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~ met)
+dplyr::select(compare80, date:met, fit, method) %>%
+  spread(method, fit) %>%
+  ggplot(aes(cr1000, cr21x)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(aes(slope=1, intercept = 0), col = "red") +
+  facet_wrap(~ met, scale = "free")
+dplyr::select(compare80, date:met, fit, method) %>%
+  spread(method, fit) %>%
+  mutate(delta = cr1000 - cr21x) %>%
+  ggplot(aes(date, delta)) +
+  geom_hline(aes(yintercept = 0), col = "red") +
+  geom_point(alpha = 0.5) +
+  labs(y = "cr1000 Tpred - cr21x Tpred") +
+  facet_wrap(~ met)
+dplyr::select(compare80, date:met, fit, method) %>%
+  spread(method, fit) %>%
+  mutate(delta = cr1000 - cr21x) %>%
+  ggplot(aes(mon, delta)) +
+  geom_boxplot(alpha = 0.5) +
+  labs(y = "cr1000 Tpred - cr21x Tpred") +
+  facet_wrap(~ met)
+
+
+# -- COMPARE RESULTS -----
+# in dates that overlap, compare moving window regression against monthly regression
+
 # compile all estimated results and write out for reference
-predicted_cr_all <- rbind(max_temp_infill_2wk, min_temp_infill_2wk) %>%
-  rename(yr = `year`) %>%
-  rbind(crtmax_monthly_regress, crtmin_monthly_regress) %>%
-  distinct() %>%
+predict_all <- rbind(tmax_2wksdlchart, tmin_2wksdlchart) %>%
+  #rearrange cols so match monthly regress cols
+  dplyr::select(colnames(tmax_monthly_regress)) %>%
+  rbind(tmax_monthly_regress, tmin_monthly_regress) %>%
   arrange(met, missing_date) %>%
   # change month back in to numeric for joining with sdl cr full dataset
   mutate(mon = month(missing_date))
 
-test <- subset(predicted_cr_all, met == "airtemp_min") %>%
-  filter(duplicated(missing_date) == T)
 
-View(subset(predicted_cr_all, missing_date %in% test$missing_date))
+# visualize predicted values
+## predicted temps against date, colored by method
+ggplot(predict_all, aes(missing_date, fit, col = method)) +
+  geom_point(data = dat, aes(date, proj_cr), col = "purple", alpha = 0.4) +
+  geom_point(alpha = 0.8, size = 2) +
+  facet_wrap(~met)
+
+## predicted temp vs predicted temp
+dplyr::select(predict_all, missing_date:logger, mon:fit, method) %>%
+  subset(!is.na(logger)) %>%
+  spread(method, fit) %>%
+  ggplot(aes(`sdl chart month lm`, `sdl_temp 14 day lm`)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(aes(slope = 1, intercept = 0), col ="red") +
+  facet_wrap(~met)
+
+## plot with logger data
+ggplot(predict_all, aes(missing_date, fit, col = method)) +
+  geom_point(data = sdl_crchart, aes(date, qa_temp), col = "grey60", alpha = 0.6) +
+  geom_point(alpha = 0.8, size = 2) +
+  facet_wrap(~met)
+
+## plot fitted values with cr logger data 
+### tmax values
+subset(predict_all, !is.na(fit) & met == "airtemp_max") %>%
+  mutate(doy = yday(missing_date)) %>%
+  ggplot(aes(doy, fit, col = method)) +
+  geom_point(data = subset(sdl_crchart, met == "airtemp_max" & yr > 1985), aes(doy, qa_temp), col = "grey60", alpha = 0.4) +
+  geom_point(alpha = 0.8, size = 2) +
+  facet_wrap(~yr)
+
+### tmin values
+subset(predict_all, !is.na(fit) & met == "airtemp_min") %>%
+  mutate(doy = yday(missing_date)) %>%
+  ggplot(aes(doy, fit, col = method)) +
+  geom_point(data = subset(sdl_crchart,met == "airtemp_min" & yr > 1985), aes(doy, qa_temp), col = "grey60", alpha = 0.4) +
+  geom_point(alpha = 0.8, size = 2) +
+  facet_wrap(~yr)
+
+
+  
+
+
+
+
 # -- APPEND PREDICTED TO CR DATASET, PLOT TO ASSESS -----
 sdlcr_fits <- left_join(sdlcr_qa, predicted_cr_all, 
                         by = c("date" = "missing_date", "met", "logger", "yr", "mon")) 
