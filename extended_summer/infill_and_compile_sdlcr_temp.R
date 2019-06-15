@@ -256,47 +256,64 @@ tmin_monthly_regress <- subset(sdl_crchart, met == "airtemp_min" & is.na(qa_temp
 
 
 
-# -- INFILL BY SD METHOD FOR COMPARISON -----
+# -- (3) INFILL BY SD METHOD FOR COMPARISON -----
 # don't group by logger to blend whatever differences by logger (also cr1000 would only have 4 pts for std deviation)
-dat <- sdl_crchart %>%
+sd_temps <- sdl_crchart %>%
   group_by(doy) %>%
   mutate(sdcr = sd(qa_temp, na.rm = T),
          sdsdl = sd(sdl_temp, na.rm = T)) %>%
   ungroup() %>%
   mutate(sdlrat = sdl_temp/sdsdl,
-         proj_cr = sdlrat * sdcr)
+         sdproj_cr = sdlrat * sdcr)
 
-ggplot(dat, aes(qa_temp, proj_cr)) +
+ggplot(sd_temps, aes(qa_temp, sdproj_cr)) +
   geom_point(alpha = 0.5) +
   geom_abline(aes(slope = 1, intercept = 0), col = "red") +
   facet_wrap(~ met)
 
 
 
-# -- PROJECT LOGGER TO 1980s FROM SDL CHART ---
+# -- (4) PROJECT LOGGER TO 1980s FROM SDL CHART -----
 # use cr1000 since least qa problems and most recent, will fit better when cr21x values start in 1986
 
 cr1000lm <- lm(qa_temp ~ sdl_temp + mon * met, data = subset(sdl_crchart, logger == "cr1000"))
 cr21xlm <- lm(qa_temp ~ sdl_temp + mon * met, data = subset(sdl_crchart, logger == "cr21x"))
 
+# create null models for extracting model pvalue
+cr1000_null <- lm(qa_temp ~ 1, data = subset(sdl_crchart, logger == "cr1000" & !is.na(qa_temp) & !is.na(sdl_temp)))
+cr21x_null <- lm(qa_temp ~ 1, data = subset(sdl_crchart, logger == "cr21x" & !is.na(qa_temp) & !is.na(sdl_temp)))
+
+
 cr1000_pred <- predict(cr1000lm, newdata = subset(sdl_crchart, date < min(sdlcr_qa$date)), se.fit = T, interval = "predict") 
 cr21x_pred <- predict(cr21xlm, newdata = subset(sdl_crchart, date < min(sdlcr_qa$date)), se.fit = T, interval = "predict")
-  
+
 compare80 <- subset(sdl_crchart, date < min(sdlcr_qa$date)) %>%
-  cbind(cr1000_pred$fit, se = cr1000_pred$se.fit, method = "cr1000") %>%
+  cbind(data.frame(complete_nobs = nrow(cr1000lm$model),
+                   cr1000_pred$fit,
+                   se = cr1000_pred$se.fit,
+                   adjr2 = summary(cr1000lm)$adj.r.squared,
+                   pval = anova(cr1000_null, cr1000lm)$'Pr(>F)'[2],
+                   RSE = sigma(cr1000lm),
+                   method = "cr1000 month lm")) %>%
   rbind(cbind(subset(sdl_crchart, date < min(sdlcr_qa$date)),
-              cr21x_pred$fit, se = cr21x_pred$se.fit, method = "cr21x")) %>%
+              data.frame(complete_nobs = nrow(cr21xlm$model),
+                         cr21x_pred$fit,
+                         se = cr21x_pred$se.fit,
+                         adjr2 = summary(cr21xlm)$adj.r.squared,
+                         pval = anova(cr21x_null, cr21xlm)$'Pr(>F)'[2],
+                         RSE = sigma(cr21xlm),
+                         method = "cr21x month lm"))) %>%
   as.data.frame()
 
 # visualize predictions
 ggplot(compare80, aes(date, fit, col = method)) +
-  geom_point(data = subset(dat, date %in% compare80$date), aes(date, proj_cr), col = "purple", alpha = 0.3) +
+  geom_point(data = subset(dat, date %in% compare80$date), aes(date, sdproj_cr), col = "purple", alpha = 0.3) +
   geom_point(alpha = 0.3) +
   scale_color_grey() +
   facet_grid(method ~ met)
 
 ggplot(compare80, aes(doy, fit, col = method)) +
-  geom_line(data = subset(dat, date %in% compare80$date), aes(doy, proj_cr), col = "purple", alpha = 0.6) +
+  geom_line(data = subset(dat, date %in% compare80$date), aes(doy, sdproj_cr), col = "purple", alpha = 0.6) +
   geom_line(alpha = 0.6) +
   scale_color_viridis_d(option = "E") +
   facet_grid(yr ~ met)
@@ -345,7 +362,7 @@ predict_all <- rbind(tmax_2wksdlchart, tmin_2wksdlchart) %>%
 # visualize predicted values
 ## predicted temps against date, colored by method
 ggplot(predict_all, aes(missing_date, fit, col = method)) +
-  geom_point(data = dat, aes(date, proj_cr), col = "purple", alpha = 0.4) +
+  geom_point(data = dat, aes(date, sdproj_cr), col = "purple", alpha = 0.4) +
   geom_point(alpha = 0.8, size = 2) +
   facet_wrap(~met)
 
@@ -397,6 +414,59 @@ ggplot(compare80, aes(date, fit)) +
 
 
 
-# -- APPEND PREDICTED TO CR DATASET, PLOT TO ASSESS -----
-sdlcr_fits <- left_join(sdlcr_qa, predicted_cr_all, 
-                        by = c("date" = "missing_date", "met", "logger", "yr", "mon")) 
+# conclusion: write out all options and compare extended summer results.. if similar, talk to sce and kns about justification for using whatever method we decide on
+
+
+# --- COMPILE MASTER INFILLED SADDLE LOGGER TEMP DATASET -----
+# want: 
+## logger qa's data + 
+## each logger periods infilled regression (following infill hierarchy) +
+## 80s projected data using 1) cr1000, 2) cr21x, and 3) sd infill method
+
+# clean up predicted_all so follows infill hierarchy
+predict_all_2export <- rbind(tmax_2wksdlchart, tmin_2wksdlchart,
+                             subset(tmax_monthly_regress, !missing_date %in% tmax_2wksdlchart$missing_date),
+                             subset(tmin_monthly_regress, !missing_date %in% tmin_2wksdlchart$missing_date))
+#make sure no duplicated dates
+with(predict_all_2export, sapply(split(missing_date, met), function(x) summary(duplicated(x)))) # 1 duplicate tmax date (maybe logger overlap)
+with(predict_all_2export, sapply(split(missing_date, met), function(x) which(duplicated(x))))
+predict_all_2export[126:128,] 
+# >cr21x and cr23x overlap on same day, same predicted value and stays
+# view raw data 
+View(sdlcr_qa[sdlcr_qa$date %in% seq.Date(as.Date("2000-06-20"), as.Date("2000-06-30"),1),]) 
+#cr23x and cr21x overlapped from June 24-27 2000; tmax in cr23x about 1C warmer than cr21x
+#cr23x is the logger than has missing a value in tmax, so keep cr23x over cr21x
+predict_all_2export <-subset(predict_all_2export, !(logger == "cr21x" & missing_date == "2000-06-27" & met == "airtemp_max")) %>%
+  # change colnames to match sdlcr_qa dataframe and convert month back to numeric to join
+  rename(date = missing_date) %>%
+  mutate(mon = month(`date`))
+
+# join regression predicted values with qa'd sdl cr temps
+mastertemp <- left_join(sdlcr_qa, predict_all_2export) %>%
+  #drop saddle temp and flags
+  dplyr::select(-c(sdl_temp)) %>%
+  rbind(dplyr::select(compare80, -c(sdl_temp, sdl_flag))) %>%
+  arrange(met, date, logger, method) %>%
+  # join std deviation values
+  left_join(dplyr::select(sd_temps, LTER_site:date, met, sdproj_cr))
+
+# visualize all
+mastertemp %>%
+  dplyr::select(met, date, qa_temp, fit, method, sdproj_cr) %>%
+  gather(infill, val, fit, sdproj_cr) %>%
+  mutate(method = ifelse(is.na(method), "sd ratio", method)) %>%
+  ggplot() +
+  #qa'd temp
+  #geom_point(aes(date, qa_temp), alpha = 0.5) +
+  #regression infilled values
+  geom_point(aes(date, val, col = method), alpha = 0.3) +
+  facet_wrap(~met, scales = "free_y")
+# > sd ratio temps range is a lot wider than other methods, regression methods better
+
+# drop sd ratio
+mastertemp <- dplyr::select(mastertemp, -sdproj_cr)
+
+
+# -- WRITE OUT INFILLED SDL LOGGER DATASET-----
+# write out
+write_csv(mastertemp, "extended_summer/output_data/ctw/predict_sdl_cralltemp_1982-ongoing.csv")
