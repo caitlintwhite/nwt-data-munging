@@ -11,9 +11,9 @@ na_vals <- c("", " ", NA, "NA")
 datpath <- "extended_summer/output_data/"
 
 # read in data
-jennings <- read.csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.168.1&entityid=d4385f9a680c860c9c444e021ea1a35d",
-                     strip.white = T,
-                     na.strings = na_vals)
+jennings <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.168.1&entityid=d4385f9a680c860c9c444e021ea1a35d",
+                     trim_ws = T,
+                     na = na_vals)
 
 # CTW: infilled 1982-2017 precip data (NSF renewal data [HH/EF] + ctw infilling 2015-current)
 suding_ppt <- read.csv("extended_summer/output_data/suding/allyrs/sdl_ppt_infill_19822018_nsfctw.csv",
@@ -31,6 +31,12 @@ ctw_temp <- read.csv("extended_summer/output_data/ctw/sdl_temp_infilled_19822018
 prd_c1000temp <- read.csv("extended_summer/output_data/ctw/predict_cr1000temp_1982-ongoing.csv",
                           strip.white = T,
                           na.strings = na_vals)
+# CTW: infilled sdl logger temp dataset
+prd_cralltemp <- read.csv("extended_summer/output_data/ctw/predict_sdl_cralltemp_1982-ongoing.csv",
+                          strip.white = T,
+                          na.strings = na_vals)
+
+
 
 # -- PREP JENNINGS DATA -----
 # examine jennings et al. data and structure
@@ -102,7 +108,7 @@ temp2 <- ctw_temp %>%
   select(Year, Month, Day, TMIN, TMAX)
 
 
-# -- PREP BACKWARDS INFILLED CR1000 with ppt ----
+# -- PREP INFILLED CR TEMP DATASETS  ----
 # clean up, format column names to match Emily's (Year, Month, Day, TMIN, TMAX)
 cr1000temp_allyrs <- prd_c1000temp %>%
   # prioritize actual saddle logger temp over predicted saddle logger temp
@@ -117,6 +123,41 @@ cr1000temp_allyrs <- prd_c1000temp %>%
                 TMAX = airtemp_max) %>%
   select(Year, Month, Day, TMIN, TMAX)
 
+# all cr loggers -- use cr21x-sdl chart relationship for infilling 1980s
+# > average temp on 4 days in june 2000 cr21x and cr23 x overlap (cr23x is 1 degree warmer than cr21x in tmax and tmin)
+crallT_1980cr21x <- prd_cralltemp %>%
+  # select cr21x for infill method in 1980s
+  filter(method != "cr1000 month lm") %>%
+  # prioritize actual saddle logger temp over predicted saddle logger temp
+  mutate(hcntemp = ifelse(!is.na(qa_temp), qa_temp, fit)) %>%
+  # average temp vals for days where 21x and 23x overlapped
+  group_by(met, date) %>%
+  mutate(hcntemp = mean(hcntemp),
+         check = length(hcntemp)) # check shoudl equal 2 just for 8 obs (4 days x two types airtemp)
+  dplyr::select(date, met, hcntemp) %>%
+  spread(met, hcntemp) %>%
+  #filter(`date` > as.Date("1981-07-31")) %>% # start at Jan 1 1982
+  mutate(Year = year(`date`),
+         Month = month(`date`),
+         Day = day(`date`)) %>%
+  dplyr::rename(TMIN = airtemp_min,
+                TMAX = airtemp_max) %>%
+  select(Year, Month, Day, TMIN, TMAX)
+
+
+# all cr loggers -- use cr1000-sdl chart relationship for infilling 1980s
+crallT_1980cr1000 <- prd_c1000temp %>%
+  # prioritize actual saddle logger temp over predicted saddle logger temp
+  mutate(hcntemp = ifelse(!is.na(cr1000_temp), cr1000_temp, fit)) %>%
+  dplyr::select(date, met, hcntemp) %>%
+  spread(met, hcntemp) %>%
+  #filter(`date` > as.Date("1981-07-31")) %>% # start at Jan 1 1982
+  mutate(Year = year(`date`),
+         Month = month(`date`),
+         Day = day(`date`)) %>%
+  dplyr::rename(TMIN = airtemp_min,
+                TMAX = airtemp_max) %>%
+  select(Year, Month, Day, TMIN, TMAX)
 
 # -- PREP HCN FOR AET -----
 ###   LOAD DATA FILE AND CREATE MATRICES:
