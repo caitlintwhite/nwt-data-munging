@@ -127,14 +127,16 @@ cr1000temp_allyrs <- prd_c1000temp %>%
 # > average temp on 4 days in june 2000 cr21x and cr23 x overlap (cr23x is 1 degree warmer than cr21x in tmax and tmin)
 crallT_1980cr21x <- prd_cralltemp %>%
   # select cr21x for infill method in 1980s
-  filter(method != "cr1000 month lm") %>%
+  filter(!(is.na(logger) & grepl("cr1000-sdl", method))) %>%
   # prioritize actual saddle logger temp over predicted saddle logger temp
   mutate(hcntemp = ifelse(!is.na(qa_temp), qa_temp, fit)) %>%
   # average temp vals for days where 21x and 23x overlapped
   group_by(met, date) %>%
   mutate(hcntemp = mean(hcntemp),
-         check = length(hcntemp)) # check shoudl equal 2 just for 8 obs (4 days x two types airtemp)
+         check = length(hcntemp)) %>% # check should equal 2 just for 8 obs (4 days x two types airtemp)
+  ungroup() %>%
   dplyr::select(date, met, hcntemp) %>%
+  distinct() %>%
   spread(met, hcntemp) %>%
   #filter(`date` > as.Date("1981-07-31")) %>% # start at Jan 1 1982
   mutate(Year = year(`date`),
@@ -146,10 +148,18 @@ crallT_1980cr21x <- prd_cralltemp %>%
 
 
 # all cr loggers -- use cr1000-sdl chart relationship for infilling 1980s
-crallT_1980cr1000 <- prd_c1000temp %>%
+crallT_1980cr1000 <- prd_cralltemp %>%
+  # select cr21x for infill method in 1980s
+  filter(!(is.na(logger) & grepl("cr21x-sdl", method))) %>%
   # prioritize actual saddle logger temp over predicted saddle logger temp
-  mutate(hcntemp = ifelse(!is.na(cr1000_temp), cr1000_temp, fit)) %>%
+  mutate(hcntemp = ifelse(!is.na(qa_temp), qa_temp, fit)) %>%
+  # average temp vals for days where 21x and 23x overlapped
+  group_by(met, date) %>%
+  mutate(hcntemp = mean(hcntemp),
+         check = length(hcntemp)) %>% # check should equal 2 just for 8 obs (4 days x two types airtemp)
+  ungroup() %>%
   dplyr::select(date, met, hcntemp) %>%
+  distinct() %>%
   spread(met, hcntemp) %>%
   #filter(`date` > as.Date("1981-07-31")) %>% # start at Jan 1 1982
   mutate(Year = year(`date`),
@@ -233,6 +243,32 @@ head(cr1000_hcn)
 tail(cr1000_hcn)
 
 
+# cr logger dat using cr21x for 1980s infil
+crall21xclim_allyrs <- left_join(crallT_1980cr21x, pcp)
+# infill from Jan 1 1981 with 0 so AET will run on full year (can use true 1981 fall metrics)
+crall21x_hcn_new <- left_join(dates, crall21xclim_allyrs)
+crall21x_hcn_new$TMIN[is.na(crall21x_hcn_new$TMIN)] <- 0
+crall21x_hcn_new$TMAX[is.na(crall21x_hcn_new$TMAX)] <- 0
+crall21x_hcn_new$PCP[is.na(crall21x_hcn_new$PCP)] <- 0
+crall21x_hcn <- crall21x_hcn_new
+# review
+head(crall21x_hcn)
+tail(crall21x_hcn)
+
+
+# cr logger dat using cr1000 for 1980s infil
+crall1000clim_allyrs <- left_join(crallT_1980cr1000, pcp)
+# infill from Jan 1 1981 with 0 so AET will run on full year (can use true 1981 fall metrics)
+crall1000_hcn_new <- left_join(dates, crall1000clim_allyrs)
+crall1000_hcn_new$TMIN[is.na(crall1000_hcn_new$TMIN)] <- 0
+crall1000_hcn_new$TMAX[is.na(crall1000_hcn_new$TMAX)] <- 0
+crall1000_hcn_new$PCP[is.na(crall1000_hcn_new$PCP)] <- 0
+crall1000_hcn <- crall1000_hcn_new
+# review
+head(crall1000_hcn)
+tail(crall1000_hcn)
+
+
 
 # -- FINISHING -----
 # write out hcn datasets
@@ -241,3 +277,5 @@ write.csv(suding_hcn, paste0(datpath, "suding/allyrs/hcn_suding.csv"), quote = F
 write.csv(suding_hcn_jenningsdates, paste0(datpath, "suding/sensitivity_subset/hcn_suding_19902013.csv"), quote = F, row.names = F)
 write.csv(ctw_hcn, paste0(datpath, "ctw/hcn_ctw.csv"), quote = F, row.names = F)
 write.csv(cr1000_hcn, paste0(datpath, "ctw/cr1000hcn_ctw.csv"), quote = F, row.names = F)
+write.csv(crall21x_hcn, paste0(datpath, "ctw/crall21xhcn_ctw.csv"), quote = F, row.names = F)
+write.csv(crall1000_hcn, paste0(datpath, "ctw/crall1000hcn_ctw.csv"), quote = F, row.names = F)
