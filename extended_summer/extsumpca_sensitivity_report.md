@@ -1,7 +1,7 @@
 Extended summer PCA sensitivity analysis (preliminary)
 ================
 CTW
-2019-06-15
+2019-06-17
 
 ### Sensitivity of extended summer scores and input metrics to source precip/temp dataset
 
@@ -12,6 +12,12 @@ Fig 1. ![Extended Summer PC score over time, by data source](figs/PCAsensitivity
 Fig 3. ![Extended summer year ordination](figs/PCAsensitivity_yrloadings.png) Fig 4. ![Extended summer variable loadings](figs/PCAsensitivity_sploadings.png)
 
 Fig 5. ![Input summer metrics, by data source](figs/PCAsensitivity_summermetrics.png) Fig 6. ![Difference in summer metric derived from NWT NSF data and Jennings et al. infilled data](figs/PCAsensitivity_metricdelta.png)
+
+### Compare PCA input data using Saddle chart vs. Saddle logger temperature
+
+The following figure compares Extended Summer PCA input variables derived from different saddle temperature datasets. The NWT renewal panel shows data used in the NWT NSF renewal (1982-2014), with 2015-2017 saddle chart-derived values appeneded and 2018 saddle-chart projected from cr1000 (the Saddle chart temperature data was discontinued after 2017-12-31.) The CR1000 + CR1000 projected panel shows values derived from the CR1000 dat logger (2013-ongoing) + CR1000 projected backwards to 1982 from the saddle chart. The last two panels show PCA input variables derived from the saddle logger datasets (1986-ongoing), with 1982-1986 logger-projected using two different loggers: the current logger (cr1000) and the logger active closest-in-time the 1980s saddle chart data (cr21x). The grey shaded area denotes the period logger temperature was projected backwards from the saddle chart. The dark blue vertical lines denote years when new saddle data loggers were launched (we estimate the sensor used in the logger was the same since 1995/1996 regardless of logger changes). Although shown, values for 2015 and 2016 in the NWT renewal panel should be ignored because temperature data from Mar 2015-Aug 2016 in the saddle chart are bad (update to dataset not done yet). Because backwards-projected logger values using the saddle chart and cr21x logger are most similar to the values using the saddle chart, I recommend using the cr21x logger to backfill if we decide to use the Saddle logger data.
+
+![](extsumpca_sensitivity_report_files/figure-markdown_github/prep%20and%20plot%20PCA%20input%20data-1.png)
 
 ### Compare raw source data
 
