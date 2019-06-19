@@ -28,6 +28,7 @@ ctw_met <- read.csv("extended_summer/output_data/ctw/hcn_ctw.csv")
 cr1000_met_allyrs <- read.csv("extended_summer/output_data/ctw/cr1000hcn_ctw.csv")
 crall21x_met_allyrs <- read.csv("extended_summer/output_data/ctw/crall21xhcn_ctw.csv")
 crall1000_met_allyrs <- read.csv("extended_summer/output_data/ctw/crall1000hcn_ctw.csv")   
+d1_met <- read.csv("extended_summer/output_data/d1/hcn_kittel.csv")
 snow <- getTabular(31) %>% as.data.frame()
 lakedat <- getTabular(106)
 
@@ -116,6 +117,17 @@ crall1000_allyrs_PCA <- extendedSummer(crall1000_allyrs_climate, "eco_year", out
 
 
 
+# -- D1 COMPARISON (TK INFILLED DATASET FOR NWT RENEWAL) -----
+d1_allyrs <- aet(d1_met, station.elev=3739, site.elev=3739, lapse=lr, fc=75, latitude=40.05, m = "metric")
+d1_allyrs_aet <- AETecoyear(d1_allyrs, "extended_summer/output_data/d1/extsum_pca_input/")
+d1_allyrs_temp <- summarizeTemp(d1_met, date = "date", tmin = "TMIN", tmax = "TMAX", outpath = "extended_summer/output_data/d1/extsum_pca_input/")
+d1_allyrs_ppt <- summarizePrecip(d1_met,date = "date", precip = "PCP", outpath = "extended_summer/output_data/d1/extsum_pca_input/")
+d1_allyrs_climate <- compileClimate(temp = d1_allyrs_temp, precip = d1_allyrs_ppt, AET = d1_allyrs_aet, snowmelt = nwt_allyrs_snowmelt, ice = nwt_allyrs_ice, outpath = "extended_summer/output_data/d1/extsum_pca_input/")
+d1_allyrs_PCA <- extendedSummer(d1_allyrs_climate, "eco_year", outpath = "extended_summer/output_data/d1/")
+
+
+
+
 # -- COMPARE VISUALLY -----
 jennings_subset_PCA$source <- "Jennings et al. 2018"
 nwt_subset_PCA$source <- "NSF renewal"
@@ -124,6 +136,7 @@ nwt_raw_PCA$source <- "Raw + CTW"
 cr1000_allyrs_PCA$source <- "CR1000 NSF predicted"
 crall21x_allyrs_PCA$source <- "SDL logger, cr21x 1980s"
 crall1000_allyrs_PCA$source <- "SDL logger, cr1000 1980s"
+d1_allyrs_PCA$source <- "Kittel D1 infilled"
 
 masterPCA <- rbind(jennings_subset_PCA, nwt_subset_PCA, nwt_allyrs_PCA, nwt_raw_PCA, 
                    cr1000_allyrs_PCA, crall21x_allyrs_PCA, crall1000_allyrs_PCA)

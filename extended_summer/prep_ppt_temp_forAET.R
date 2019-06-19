@@ -36,6 +36,13 @@ prd_cralltemp <- read.csv("extended_summer/output_data/ctw/predict_sdl_cralltemp
                           strip.white = T,
                           na.strings = na_vals)
 
+# TK infilled d1 temp
+d1temp <- read.csv("/Users/serahsierra/Dropbox/NWT_data/d1_infilled_daily_temp.csv") %>%
+  subset(year > 1980)
+
+# TK infilled d1 ppt
+d1ppt <- read.csv("/Users/serahsierra/Dropbox/NWT_data/d1_infilled_daily_ppt.csv") %>%
+  subset(Year > 1980)
 
 
 # -- PREP JENNINGS DATA -----
@@ -74,6 +81,16 @@ plot(sdl_jennings$Year, sdl_jennings$TMIN)
 plot(sdl_jennings$Year, sdl_jennings$TMAX)
 plot(sdl_jennings$Year, sdl_jennings$PCP) #outlier in 1995
 
+
+# -- PREP TIM KITTEL INFILLED D1 FOR ExtSum PCA -----
+d1_met <- left_join(d1ppt[,1:4], d1temp[,1:5],
+                    by = c("Month" = "month", "Day" = "day", "Year" = "year")) %>%
+  rename(PCP = `D1.mm.ppt`,
+         TMAX = Tmax,
+         TMIN = Tmin) %>%
+  mutate(date = as.Date(paste(Year, Month, Day, sep = "-"))) %>%
+  dplyr::select(date, Year, Month, Day, TMIN, TMAX, PCP) 
+  
 
 
 # -- PREP NWT RENEWAL/CTW INFILLED (SUDING) DATA -----
@@ -273,6 +290,7 @@ tail(crall1000_hcn)
 # -- FINISHING -----
 # write out hcn datasets
 write.csv(sdl_jennings, paste0(datpath, "jennings/hcn_jennings.csv"), quote = F, row.names = F)
+write.csv(d1_met, paste0(datpath, "d1/hcn_kittel.csv"), quote = F, row.names = F)
 write.csv(suding_hcn, paste0(datpath, "suding/allyrs/hcn_suding.csv"), quote = F, row.names = F)
 write.csv(suding_hcn_jenningsdates, paste0(datpath, "suding/sensitivity_subset/hcn_suding_19902013.csv"), quote = F, row.names = F)
 write.csv(ctw_hcn, paste0(datpath, "ctw/hcn_ctw.csv"), quote = F, row.names = F)

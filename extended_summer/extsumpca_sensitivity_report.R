@@ -61,18 +61,19 @@ alltog <- rbind(nsf_input, cr21x_input, cr1000_input, cr1000sdl_input) %>%
   gather(met, val, sumallPC1:ncol(.))
 alltog$source <- factor(alltog$source, levels = c("NWT renewal", "cr 1000 + cr1000 projected sdl chart",
                                                   "sdl loggers, cr 1000 backfill", "sdl loggers, cr 21x backfill"))
-ggplot(subset(alltog, !grepl("iceoff|precip|PC2", met)), aes(eco_year, val, group = met, col = source)) +
+
+ggplot(subset(alltog, !grepl("iceoff|precip|PC2", met) & !(eco_year %in% c(2015,2016) & source == "NWT renewal")), aes(eco_year, val, group = met, col = source)) +
   geom_hline(data = subset(alltog, met == "sumallPC1"), aes(yintercept = 0)) +
   geom_ribbon(data = subset(alltog, !grepl("iceoff|precip|PC2", met) & eco_year < 1987), aes(ymin = -Inf, ymax = Inf, group=factor(met)), fill = "grey80", col = "grey80", alpha = 0.5) +
   geom_vline(aes(xintercept= 1986), col = "dodgerblue4", lwd = 1.5, alpha = 0.5) +
   geom_vline(aes(xintercept= 2006), col = "dodgerblue4", lwd = 1.5, alpha = 0.5) +
   geom_vline(aes(xintercept= 2012), col = "dodgerblue4", lwd = 1.5, alpha = 0.5) +
-  geom_line() +
+  geom_line(data = subset(alltog, !grepl("iceoff|precip|PC2", met) & !(eco_year >2014 & source == "NWT renewal")), aes(eco_year, val, group = met, col = source)) +
   geom_point() +
   #scale_color_manual(name = "Infill method", values = c("darkorange4", "blue3", "blueviolet")) +
   labs(y = "Input value", x = "Year") +
   facet_grid(met~source, scales = "free_y") +
-  theme(strip.text.y = element_text(size = 6),
+  theme(strip.text.y = element_text(size = 8),
         legend.position = "none")
 
 
