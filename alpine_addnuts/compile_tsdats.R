@@ -4,9 +4,21 @@
 # read in alpine nutnet and sdl community comp data from ts
 # 
 
+# notes from TS on species codes:
+# TS says "junk1" = nothing (placeholder "species" for nothing hit), and "O" == "ORALA" (Oreoxis alpina)
+# ERS6 = fairly safe to assume that's ERSI3...  Erigeron simplex  (maybe we found two of them stuck together (3+3=)
+# SOL  = Solidago radiata [ctw: multiradiata]
+# PrAu     
+# DEADSE    probably dead sedum but let's call this "litter" [ctw: DEADKO also equals "litter" then]
+# DRBA  =  Draba
+# Fz.Gr = fuzzy graminoid = unknown grama
+# R.J.       unknown Juncus
+# UnCr3 (also 4 and 5 .. unk carex?)  Carex sp. (unk Carex)
+# UnCrWL   Unknown 
 
 
 # -- SETUP -----
+rm(list = ls())
 library(tidyverse)
 library(readxl)
 library(request) # to access USDA plants api
@@ -34,16 +46,43 @@ sdl2016 <- read.csv(datfiles[grep("2016", datfiles)], strip.white = T, na.string
 
 ## NWT datasets on EDI
 # MSpaso sdl spp trait dataset
-sdltraits <- getTabular(500)
+sdltraits <- getTabular(500) %>% data.frame()
 # sdl spp comp (has 6-letter spp codes and USDA codes)
-sdlcomp <- getTabular(93)
+sdlcomp <- getTabular(93) %>% data.frame()
 
 # JGS NWT spp list
-jgslist <- read_excel("/Users/serahsierra/Documents/nwt_lter/unpub_data/pspecies.mw.data_JGS.xlsx", sheet = 1)
+jgslist <- read_excel("/Users/serahsierra/Documents/nwt_lter/unpub_data/pspecies.mw.data_JGS.xlsx", sheet = 1, na = na_vals, trim_ws = T)
 
 #usda unknown codes
 usda_unk <- read.csv("https://plants.usda.gov/Data/unknown_plants.txt")
 
+
+# functions
+getUSDAplants <- function(searchfield){
+  # grab usda plant codes -- 5000 is max number of records retrievable
+  startUSDA <- api("https://plantsdb.xyz") %>%
+    api_path(search) %>% api_query_(fields = eval(searchfield), limit = 5000)
+  # number of times needed to iterate through to scrape all codes
+  runs <- round(startUSDA$count/5000)
+  USDAdf <- startUSDA$data 
+  for(i in 1:runs){
+    print(paste("Retrieving records", (i*5000), "through", (i*5000)+5000))
+    temp_df <- api("https://plantsdb.xyz") %>%
+      api_path(search) %>% api_query_(fields = eval(searchfield), limit = 5000, offset = i*5000)
+    # append next batch of codes to USDA codes string
+    USDAdf <- rbind(USDAdf, temp_df$data)
+  }
+  # once done, clean up scraped data
+  USDAdf <- distinct(USDAdf)
+  print(paste(nrow(USDAdf), "unique USDA records retrieved!"))
+  return(USDAdf)
+}
+
+
+
+
+
+# -- REVIEW/PREP DATA -----
 # review data
 glimpse(nutnet13) #wide-form spp matrix, total plot hits or 0.25 if present but not hit
 glimpse(nutnet17) #long-form community comp, already summarized into rel + abs cov (no hit data)
@@ -64,6 +103,9 @@ sort(unique(sdltraits$USDA.Code)) #137 unique codes.. see what matches in tim's 
 
 
 # -- PREP SPP LIST  -----
+# get USDA plant codes
+USDAcodes <- getUSDAplants("Symbol")
+
 # compare spp codes in ts datasets..
 sort(unique(nutnet17$species)) # looks mostly like USDA codes (except unk1, and UNKF)
 sort(unique(nutnet17raw$species)) # mostly USDA codes, but some misspellings/inconsistencies
@@ -77,12 +119,104 @@ spplist_master <- rbind(data.frame(set = "NutNet 2013", code = sort(colnames(nut
                         data.frame(set = "NutNet 2017 raw", code = sort(unique(nutnet17raw$species))),
                         data.frame(set = "Saddle 1997", code = sort(unique(sdl1997$species))),
                         data.frame(set = "Saddle 2012", code = sort(unique(sdl2012$species))),
-                        data.frame(set = "Saddle 2016", code = sort(unique(sdl2016$species))))
-spplist_master$clean_code <- NA
+                        data.frame(set = "Saddle 2016", code = sort(unique(sdl2016$species)))) %>%
+  # try removing dataset
+  dplyr::select(-set) %>%
+  distinct() %>%
+  arrange(code)
+
+# manual corrections to start
+correctcodes <- c(junk1 = "No hit",
+               O = "ORAL",
+               ERS6 = "ERSI3",
+               SOL = "SOMU", #solidago multiradiata
+               PrAu = "2FORB",
+               DEADKO = "2LTR",
+               DEADSE = "2LTR",
+               DRBA  =  "DRABA", #usda draba sp
+               `Fz.Gr` = "2GRAM",
+               `R.J.` = "JUNCU", #usda juncus sp
+               UkCr3 = "JUNCU", 
+               UkCr4 = "JUNCU",
+               UkCr5 = "JUNCU",
+               UkCrWL = "JUNCU")
+
+spplist_master$clean_code <- NA 
+for(i in names(correctcodes)){
+  spplist_master$clean_code[spplist_master$code == i] <- correctcodes[names(correctcodes) == i]
+}
+
 spplist_master <- left_join(spplist_master, distinct(sdltraits[c("Species", "USDA.Code")]), by = c("code" = "Species")) %>%
   rename(marko_usda = USDA.Code) %>%
   mutate(marko_usda = ifelse(code %in% unique(sdltraits$USDA.Code), code, marko_usda),
-         clean_code = ifelse(!is.na(marko_usda), marko_usda, code))
+         clean_code = ifelse(!is.na(marko_usda) & is.na(clean_code), marko_usda, clean_code)) %>%
+  left_join(distinct(jgslist[c("USDA_code", "corrected_NWT_code")]), by = c("code" = "corrected_NWT_code")) %>%
+  rename(jgs_usda = USDA_code) %>%
+  mutate(clean_code = ifelse((is.na(clean_code) & !is.na(jgs_usda)), jgs_usda, clean_code)) %>%
+  dplyr::select(-jgs_usda) %>%
+  #try rejoining jane's usda codes using her code instead of the corrected_nwt_code
+  left_join(distinct(jgslist[c("USDA_code", "JGS_code")]), by = c("code" = "JGS_code")) %>%
+  rename(jgs_usda = USDA_code) %>%
+  mutate(clean_code = ifelse((is.na(clean_code) & !is.na(jgs_usda)), jgs_usda, clean_code)) %>%
+  #drop marko and jane code cols
+  dplyr::select(-c(marko_usda, jgs_usda)) %>%
+  # try searching usda_unk for accepted code
+  mutate(clean_code = ifelse(code %in% usda_unk$SYMBOL, code, clean_code)) %>%
+  arrange(code)
+
+# check for inconsistent code entries (all same but number, e.g. CASC vs CASC12) 
+spplist_master$code_typo <- NA
+spplist_master$alt_code <- NA
+for(i in unique(spplist_master$code[is.na(spplist_master$clean_code)])){
+  check <- sort(unique(spplist_master$code[!spplist_master$code == i]))
+  if(sum(grepl(casefold(i), casefold(check)))>0){
+    spplist_master$code_typo[spplist_master$code == i] <- TRUE
+    altcodes <- check[grepl(casefold(i), casefold(check))]
+    spplist_master$alt_code[spplist_master$code == i] <- str_flatten(altcodes, collapse = "_")
+  }
+}
+
+# iterate through codes with no usda match so far and search for string matches within code and clean_code
+needsusda <- sort(unique(spplist_master$code[is.na(spplist_master$clean_code)]))
+# create temp col for troubleshooting codes with missing usda match
+spplist_master$trbl_usda <- NA
+for(n in needsusda){
+  nlength <- nchar(n)
+  # subset that matches all chars but last or the string with numbers removed
+  temp_df <- subset(spplist_master, grepl(substr(n,1,nlength-1), code, ignore.case = T) | grepl(gsub("[0-9]+", "", n), code, ignore.case = T))
+  missingcodes <- unique(temp_df$code[is.na(temp_df$clean_code)])
+  replace <- str_flatten(unique(temp_df$clean_code[!is.na(temp_df$clean_code)]), collapse = "_")
+  # if replacement not empty, fill, otherwise, NA
+  spplist_master$trbl_usda[spplist_master$code == n] <- ifelse(length(replace) > 0, replace, NA) 
+}
+
+# if code typo and trbl match, use that for clean code
+spplist_master$clean_code2 <- spplist_master$clean_code
+spplist_master <- mutate(spplist_master, 
+                         clean_code2 = ifelse(is.na(clean_code2) & alt_code == trbl_usda, alt_code, clean_code2))
+                         #clean_code2 = ifelse(is.na(clean_code2) & code %in% USDAcodes$Symbol, code, clean_code2))
+# remove suggested alternate code and trbl_usda codes if more than one
+spplist_master[c("alt_code", "trbl_usda")] <- sapply(spplist_master[c("alt_code", "trbl_usda")],function(x)ifelse(grepl("_", x), NA, x))
+
+# manually check suggested usda codes for anything that doesn't have a clean code yet
+View(subset(spplist_master, is.na(clean_code2) & !is.na(trbl_usda)))
+# usda code of CAHEE is incorrect for code CAREX, make NA
+spplist_master$trbl_usda <- gsub("CAHEE", NA, spplist_master$trbl_usda)
+spplist_master <- mutate(spplist_master,
+                         clean_code2 = ifelse(alt_code %in% c(USDAcodes$Symbol, usda_unk$SYMBOL) & is.na(clean_code2),alt_code, 
+                                              ifelse(trbl_usda %in% c(USDAcodes$Symbol, usda_unk$SYMBOL) & is.na(clean_code2), trbl_usda, clean_code2)),
+                         clean_code2 = ifelse(code %in% clean_code2 & is.na(clean_code2), code, clean_code2))
+# match anything that's already in the clean_code2 col
+
+# check codes that don't have a clean code still against clean_code2 for character match as above
+# first drop clean_code, alt_codes, and trbl_usda since already used 
+spplist_master <- dplyr::select(spplist_master, code, clean_code2)
+
+# some manual corrections..
+needsusda <- sort(unique(spplist_master$code[is.na(spplist_master$clean_code2)]))
+correctdf <- data.frame(code = needsusda, clean_code2 = ifelse(needsusda %in% USDAcodes$Symbol, needsusda, NA))
+
+
 
 
 # -- NUT NET DATA PREP -----
@@ -119,24 +253,8 @@ colnames(store_USDA)[which(colnames(store_USDA) == "X1"):ncol(store_USDA)] <- us
 # run usda plants api query to scrape species info
 # NOTE!!: this will throw an error ["Client error: (400) Bad Request"] if a species is spelled incorrectly in the cover data (a good QA check)
 # loop will issue warnings about cbind command providing more variables to replace than there are in 
-getUSDAplants <- function(spp, joinfield, searchfield){
-  # grab usda plant codes -- 5000 is max number of records retrievable
-  startUSDA <- api("https://plantsdb.xyz") %>%
-    api_path(search) %>% api_query_(fields = eval(searchfield), limit = 5000)
-  # number of times needed to iterate through to scrape all codes
-  runs <- round(startUSDA$count/5000)
-  USDAcodes <- startUSDA$data 
-  for(i in 1:runs){
-    print(paste("Retrieving records", (i*5000), "through", (i*5000)+5000))
-    temp_codes <- api("https://plantsdb.xyz") %>%
-      api_path(search) %>% api_query_(fields = eval(searchfield), limit = 5000, offset = i*5000)
-    # append next batch of codes to USDA codes string
-    USDAcodes <- rbind(USDAcodes, temp_codes$data)
-  }
-  # once done, clean up scraped data
-  USDAcodes <- distinct(USDAcodes)
-  print(paste(nrow(USDAcodes), "unique USDA records retrieved!"))
-  
+
+joinUSDAplants <- function(spp, joinfield, searchfield){  
   for(p in spp){
     print(paste("Checking records for", p))
     # check if code exists in USDA plants database or not
@@ -169,6 +287,7 @@ getUSDAplants <- function(spp, joinfield, searchfield){
     }
   }
   return(store_USDA)
+}
 }
 
 store_USDA <- getUSDAplants(store_USDA$clean_code, joinfield = "clean_code", searchfield = "Symbol")
