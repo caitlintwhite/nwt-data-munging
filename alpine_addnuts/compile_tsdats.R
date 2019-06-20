@@ -28,7 +28,7 @@ na_vals <- c("", " ", NA, "NA", "NaN", NaN, ".")
 source("edi_functions.R")
 
 # set pathway to data folder on your local machine
-datpath <- "../../Documents/nwt_lter/unpub_data/dry_meado_fert"
+datpath <- "../../Documents/nwt_lter/unpub_data/dry_meado_fert/"
 # list data files
 datfiles <- list.files(datpath, full.names = T)
 
@@ -102,7 +102,7 @@ sort(unique(sdltraits$USDA.Code)) #137 unique codes.. see what matches in tim's 
 # also build spp list with spp descriptive info (maybe Marko's trait dataset has that?)
 
 
-# -- PREP SPP LIST  -----
+# -- COMPILE MASTER SPP LIST  -----
 # get USDA plant codes
 USDAcodes <- getUSDAplants("Symbol")
 
@@ -194,7 +194,7 @@ for(n in needsusda){
 spplist_master$clean_code2 <- spplist_master$clean_code
 spplist_master <- mutate(spplist_master, 
                          clean_code2 = ifelse(is.na(clean_code2) & alt_code == trbl_usda, alt_code, clean_code2))
-                         #clean_code2 = ifelse(is.na(clean_code2) & code %in% USDAcodes$Symbol, code, clean_code2))
+                         
 # remove suggested alternate code and trbl_usda codes if more than one
 spplist_master[c("alt_code", "trbl_usda")] <- sapply(spplist_master[c("alt_code", "trbl_usda")],function(x)ifelse(grepl("_", x), NA, x))
 
@@ -212,43 +212,66 @@ spplist_master <- mutate(spplist_master,
 # first drop clean_code, alt_codes, and trbl_usda since already used 
 spplist_master <- dplyr::select(spplist_master, code, clean_code2)
 
-# some manual corrections..
+# finish with manual corrections..
 needsusda <- sort(unique(spplist_master$code[is.na(spplist_master$clean_code2)]))
+# check if code had a match in scraped usda codes list
 correctdf <- data.frame(code = needsusda, clean_code2 = ifelse(needsusda %in% USDAcodes$Symbol, needsusda, NA))
+# manual correct unknowns..
+correctdf$clean_code2[grepl("lich|2lch|chn", correctdf$code, ignore.case = T)] <- usda_unk$SYMBOL[usda_unk$Common.Name == "Lichen"]
+correctdf$clean_code2[grepl("^rf|rock", correctdf$code, ignore.case = T)] <- "2RF" #rock fragment
+correctdf$clean_code2[grepl("unk", correctdf$code, ignore.case = T)] <- "2FORB" #unk forb
+correctdf$clean_code2[grepl("lit", correctdf$code, ignore.case = T)] <- "2LTR" #litter
+correctdf$clean_code2[grepl("grass", correctdf$code, ignore.case = T)] <- "2GRAM" #unk grass
+correctdf$clean_code2[grepl("bare", correctdf$code, ignore.case = T)] <- "2BARE" #unk grass
+correctdf$clean_code2[grepl("moss", correctdf$code, ignore.case = T)] <- "2MOSS" #unk grass
+correctdf$clean_code2[grepl("DW|WOOD", correctdf$code)] <- usda_unk$SYMBOL[grepl("woody, <2.5", usda_unk$Common.Name)]
+correctdf$clean_code2[correctdf$code == "elk.P"] <- "2SCAT" # there's no usda code for scat.. if want code can either be 2BARE or 2LTR?
+
+                                                          
+# check codes that pattern match codes in master list even tho have match in USDA codes (could differ by numeric characters)
+correctdf$flag <- sapply(correctdf$code, function(x) sum(grepl(x, spplist_master$code, ignore.case = T))>1)
+View(subset(correctdf, flag == TRUE)) #ARFE, CASC, and CEAR need to be adjusted
+correctdf$clean_code2[correctdf$code == "ARFE"] <- unique(spplist_master$clean_code2[grepl("ARFE", spplist_master$code) & !is.na(spplist_master$clean_code2)])
+correctdf$clean_code2[correctdf$code == "CASC"] <- unique(spplist_master$clean_code2[grepl("CASC", spplist_master$code) & !is.na(spplist_master$clean_code2)])
+correctdf$clean_code2[correctdf$code == "CEAR"] <- unique(spplist_master$clean_code2[grepl("CEAR", spplist_master$code) & !is.na(spplist_master$clean_code2)])
+
+# typo corrections
+correctdf$clean_code2[correctdf$code == "BIOB2"] <- "2FORB"
+correctdf$clean_code2[correctdf$code == "CAR02"] <- unique(spplist_master$clean_code2[spplist_master$code == "CARO2"])
+correctdf$clean_code2[correctdf$code == "TEAGR"] <- unique(spplist_master$clean_code2[spplist_master$code == "TEGR"])
+
+# partial matches in USDA
+correctdf$clean_code2[correctdf$code == "ELYMUS"] <- USDAcodes$Symbol[grepl("^ELYM", USDAcodes$Symbol)]
+correctdf$clean_code2[correctdf$code == "VIOLET"] <- USDAcodes$Symbol[grepl("^VIOL", USDAcodes$Symbol)]
+
+# until tim says otherwise, make everything else an unk forb
+correctdf$clean_code2[is.na(correctdf$clean_code2)] <- "2FORB"
+
+# fill in spplist_master with manually corrected codes
+for(i in correctdf$code){
+  spplist_master$clean_code2[spplist_master$code == i] <- correctdf$clean_code2[correctdf$code == i]
+}
+
+# check to make sure no missing usda codes
+summary(is.na(spplist_master$clean_code2)) # none. huzzah!
+# clean up environment
+rm(correctdf,temp_df, altcodes, check, correctcodes, i, missingcodes, n, needsusda, nlength, replace)
 
 
 
-
-# -- NUT NET DATA PREP -----
-# build and compile rel cov, all years; create all yrs spp lookup table
-# create nutnet plot lookup table
-nutnet_sites <- dplyr::select(nutnet13, Block:trt) %>% distinct %>%
-  rename(K = `K.`) # remove period from K col
-
-# tidy nutnet 2013 dataset and convert to rel_cov
-nn13_long <- nutnet13 %>%
-  gather(species, hits, LTR:ncol(.)) %>%
-  rename(K = `K.`) %>%
-  # add sampling year
-  mutate(yr = 2013)
-
-# how many nut net spp in mspaso spp?
-nutnet_spp <- sort(unique(c(unique(nn13_long$species), unique(nutnet17$species))))
-summary(nutnet_spp %in% traitspp$USDA.Code) #44 yes, 41 no...
-# what's missing?
-nutnet_spp[!nutnet_spp %in% traitspp$USDA.Code] # some unknowns or non-plant codes, but run USDA plants database scrape script..
-
-
-# -- COMPILE SPP LIST, APPEND USDA PLANTS DATA -----
+# --APPEND USDA PLANTS DATA -----
 # specify vars desired from usda plants database (there are 134)
 usda_plantvars <- c("Symbol","Accepted_Symbol_x","Scientific_Name_x","Common_Name",
                     "Category","Family","Family_Common_Name","Duration","Growth_Habit","Native_Status")
 
 # pull distinct codes with empty USDA colnames
-store_USDA <- distinct(dplyr::select(spplist_master, code:clean_code)) %>%
-  arrange(code) %>%
+store_USDA <- spplist_master %>%
+  # flag unknowns to ignore when scraping usda database
+  mutate(unknown = ifelse(clean_code2 %in% usda_unk$SYMBOL | grepl("^2", clean_code2),
+                          TRUE,FALSE)) %>%
+  # add in cols for usda database data
   cbind(data.frame(matrix(nrow = nrow(.), ncol=length(usda_plantvars)))) %>%
-  as.data.frame()
+  data.frame()
 colnames(store_USDA)[which(colnames(store_USDA) == "X1"):ncol(store_USDA)] <- usda_plantvars
 # run usda plants api query to scrape species info
 # NOTE!!: this will throw an error ["Client error: (400) Bad Request"] if a species is spelled incorrectly in the cover data (a good QA check)
@@ -288,9 +311,40 @@ joinUSDAplants <- function(spp, joinfield, searchfield){
   }
   return(store_USDA)
 }
-}
 
-store_USDA <- getUSDAplants(store_USDA$clean_code, joinfield = "clean_code", searchfield = "Symbol")
+
+spplist_master <- joinUSDAplants(spp = unique(store_USDA$clean_code2[store_USDA$unknown==FALSE]), joinfield = "clean_code2", searchfield = "Symbol")
+rm(store_USDA)
+
+# spplist compiled! write out for reference
+write_csv(spplist_master, paste0(datpath, "sdl_nutnet_spplookup.csv"))
+
+
+
+
+
+
+
+# -- NUT NET DATA PREP -----
+# build and compile rel cov, all years; create all yrs spp lookup table
+# create nutnet plot lookup table
+nutnet_sites <- dplyr::select(nutnet13, Block:trt) %>% distinct %>%
+  rename(K = `K.`) # remove period from K col
+
+# tidy nutnet 2013 dataset and convert to rel_cov
+nn13_long <- nutnet13 %>%
+  gather(species, hits, LTR:ncol(.)) %>%
+  rename(K = `K.`) %>%
+  # add sampling year
+  mutate(yr = 2013)
+
+# how many nut net spp in mspaso spp?
+nutnet_spp <- sort(unique(c(unique(nn13_long$species), unique(nutnet17$species))))
+summary(nutnet_spp %in% traitspp$USDA.Code) #44 yes, 41 no...
+# what's missing?
+nutnet_spp[!nutnet_spp %in% traitspp$USDA.Code] # some unknowns or non-plant codes, but run USDA plants database scrape script..
+
+
 
 #how many still missing?
 summary(is.na(store_USDA$Symbol)) #77...
