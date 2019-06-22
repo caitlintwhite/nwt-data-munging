@@ -15,6 +15,11 @@
 # R.J.       unknown Juncus
 # UnCr3 (also 4 and 5 .. unk carex?)  Carex sp. (unk Carex)
 # UnCrWL   Unknown 
+# BIOB2   = probalbly MIOB2 = Minuartia obtusiloba
+# DW (wood?)  = probably dead wood = litter (ctw: there is a usda code for small wood)
+# ERTC =  probably ERSI3 = Erigeron simplex
+# GRDAZ = I'm clueless = unknown
+# LATER =  my guess is that's "litter"
 
 
 # -- SETUP -----
@@ -127,19 +132,22 @@ spplist_master <- rbind(data.frame(set = "NutNet 2013", code = sort(colnames(nut
 
 # manual corrections to start
 correctcodes <- c(junk1 = "No hit",
-               O = "ORAL",
-               ERS6 = "ERSI3",
-               SOL = "SOMU", #solidago multiradiata
-               PrAu = "2FORB",
-               DEADKO = "2LTR",
-               DEADSE = "2LTR",
-               DRBA  =  "DRABA", #usda draba sp
-               `Fz.Gr` = "2GRAM",
-               `R.J.` = "JUNCU", #usda juncus sp
-               UkCr3 = "JUNCU", 
-               UkCr4 = "JUNCU",
-               UkCr5 = "JUNCU",
-               UkCrWL = "JUNCU")
+                  BIOB2 = "MIOB2",
+                  O = "ORAL",
+                  ERS6 = "ERSI3",
+                  ERTC = "ERSI3",
+                  SOL = "SOMU", #solidago multiradiata
+                  PrAu = "2FORB",
+                  DEADKO = "2LTR",
+                  DEADSE = "2LTR",
+                  LATER = "2LTR",
+                  DRBA  =  "DRABA", #usda draba sp
+                  `Fz.Gr` = "2GRAM",
+                  `R.J.` = "JUNCU", #usda juncus sp
+                  UkCr3 = "JUNCU", 
+                  UkCr4 = "JUNCU",
+                  UkCr5 = "JUNCU",
+                  UkCrWL = "JUNCU")
 
 spplist_master$clean_code <- NA 
 for(i in names(correctcodes)){
@@ -236,7 +244,6 @@ correctdf$clean_code2[correctdf$code == "CASC"] <- unique(spplist_master$clean_c
 correctdf$clean_code2[correctdf$code == "CEAR"] <- unique(spplist_master$clean_code2[grepl("CEAR", spplist_master$code) & !is.na(spplist_master$clean_code2)])
 
 # typo corrections
-correctdf$clean_code2[correctdf$code == "BIOB2"] <- "2FORB"
 correctdf$clean_code2[correctdf$code == "CAR02"] <- unique(spplist_master$clean_code2[spplist_master$code == "CARO2"])
 correctdf$clean_code2[correctdf$code == "TEAGR"] <- unique(spplist_master$clean_code2[spplist_master$code == "TEGR"])
 
@@ -244,7 +251,7 @@ correctdf$clean_code2[correctdf$code == "TEAGR"] <- unique(spplist_master$clean_
 correctdf$clean_code2[correctdf$code == "ELYMUS"] <- USDAcodes$Symbol[grepl("^ELYM", USDAcodes$Symbol)]
 correctdf$clean_code2[correctdf$code == "VIOLET"] <- USDAcodes$Symbol[grepl("^VIOL", USDAcodes$Symbol)]
 
-# until tim says otherwise, make everything else an unk forb
+# make everything else an unk forb (only GRDAZ left, which TS says is unknown)
 correctdf$clean_code2[is.na(correctdf$clean_code2)] <- "2FORB"
 
 # fill in spplist_master with manually corrected codes
