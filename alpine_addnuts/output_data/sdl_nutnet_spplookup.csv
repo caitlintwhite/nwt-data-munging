@@ -1,0 +1,217 @@
+code,clean_code2,unknown,Symbol,Accepted_Symbol_x,Scientific_Name_x,Common_Name,Category,Family,Family_Common_Name,Duration,Growth_Habit,Native_Status
+2BAR,2BARE,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2BARE,2BARE,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2FORB,2FORB,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2LCHN,2LICHN,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2LIC,2LICHN,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2LICH,2LICHN,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2Lichen,2LICHN,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2LICHN,2LICHN,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2LTR,2LTR,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2MOSS,2MOSS,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2RF,2RF,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+2Rock,2RF,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+ACMIA,ACMIA,FALSE,ACMIA,ACMIA,Achillea millefolium L. var. alpicola (Rydb.) Garrett,common yarrow,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,"L48 (N), AK (N)"
+ACOROS,GEROT,FALSE,GEROT,GEROT,Geum rossii (R. Br.) Ser. var. turbinatum (Rydb.) C.L. Hitchc.,Ross' avens,Dicot,Rosaceae,Rose family,Perennial,Forb/herb,L48 (N)
+AGME3,AGME3,FALSE,AGME3,AGME3,Agrostis mertensii Trin.,northern bentgrass,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N)"
+AGRBOR,AGME3,FALSE,AGME3,AGME3,Agrostis mertensii Trin.,northern bentgrass,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N)"
+ALGE,ALGE,FALSE,ALGE,ALGE,Allium geyeri S. Watson,Geyer's onion,Monocot,Liliaceae,Lily family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+ALLGEY,ALGE,FALSE,ALGE,ALGE,Allium geyeri S. Watson,Geyer's onion,Monocot,Liliaceae,Lily family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+ANAL,ANAL4,FALSE,ANAL4,ANAL4,Antennaria alpina (L.) Gaertn.,alpine pussytoes,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+ANAL4,ANAL4,FALSE,ANAL4,ANAL4,Antennaria alpina (L.) Gaertn.,alpine pussytoes,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+ANME2,ANME2,FALSE,ANME2,ANME2,Antennaria media Greene,Rocky Mountain pussytoes,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+ANSE4,ANSE4,FALSE,ANSE4,ANSE4,Androsace septentrionalis L.,pygmyflower rockjasmine,Dicot,Primulaceae,Primrose family,"Annual, Perennial",Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+AREFEN,ARFE3,FALSE,ARFE3,ARFE3,Arenaria fendleri A. Gray,Fendler's sandwort,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,L48 (N)
+ARFE,ARFEF3,FALSE,ARFEF3,ARFEF3,Arenaria fendleri A. Gray var. fendleri,Fendler's sandwort,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,L48 (N)
+ARFEF,ARFEF3,FALSE,ARFEF3,ARFEF3,Arenaria fendleri A. Gray var. fendleri,Fendler's sandwort,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,L48 (N)
+ARFEF3,ARFEF3,FALSE,ARFEF3,ARFEF3,Arenaria fendleri A. Gray var. fendleri,Fendler's sandwort,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,L48 (N)
+ARSC,ARSC,FALSE,ARSC,ARSC,Artemisia scopulorum A. Gray,alpine sagebrush,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,L48 (N)
+ARTSCO,ARSC,FALSE,ARSC,ARSC,Artemisia scopulorum A. Gray,alpine sagebrush,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,L48 (N)
+BARE,2BARE,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+BAREEE,2BARE,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+bareS,2BARE,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+BIOB2,MIOB2,FALSE,MIOB2,MIOB2,Minuartia obtusiloba (Rydb.) House,twinflower sandwort,Dicot,Caryophyllaceae,Pink family,Perennial,"Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
+BISBIS,POBI6,FALSE,POBI6,POBI6,Polygonum bistortoides Pursh,American bistort,Dicot,Polygonaceae,Buckwheat family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+BISVIV,POVI3,FALSE,POVI3,POVI3,Polygonum viviparum L.,alpine bistort,Dicot,Polygonaceae,Buckwheat family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+CALE4,CALE4,FALSE,CALE4,CALE4,Caltha leptosepala DC.,white marsh marigold,Dicot,Ranunculaceae,Buttercup family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+CALPUR,CAPU,FALSE,CAPU,CAPU,Calamagrostis purpurascens R. Br.,purple reedgrass,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N)"
+CAMROT,CARO2,FALSE,CARO2,CARO2,Campanula rotundifolia L.,bluebell bellflower,Dicot,Campanulaceae,Bellflower family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+CANI2,CANI2,FALSE,CANI2,CANI2,Carex nigricans C.A. Mey.,black alpine sedge,Monocot,Cyperaceae,Sedge family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N)"
+CAOC,CAOC4,FALSE,CAOC4,CAOC4,Castilleja occidentalis Torr.,western Indian paintbrush,Dicot,Scrophulariaceae,Figwort family,Perennial,"Subshrub, Forb/herb","L48 (N), CAN (N)"
+CAOC4,CAOC4,FALSE,CAOC4,CAOC4,Castilleja occidentalis Torr.,western Indian paintbrush,Dicot,Scrophulariaceae,Figwort family,Perennial,"Subshrub, Forb/herb","L48 (N), CAN (N)"
+CAPU,CAPU,FALSE,CAPU,CAPU,Calamagrostis purpurascens R. Br.,purple reedgrass,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N)"
+CAR02,CARO2,FALSE,CARO2,CARO2,Campanula rotundifolia L.,bluebell bellflower,Dicot,Campanulaceae,Bellflower family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+CARAQU,CAAQ,FALSE,CAAQ,CAAQ,Carex aquatilis Wahlenb.,water sedge,Monocot,Cyperaceae,Sedge family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+CAREPA,CAHEE,FALSE,CAHEE,CAHEE,Carex heteroneura W. Boott var. epapillosa (Mack.) F.J. Herm.,different-nerve sedge,Monocot,Cyperaceae,Sedge family,Perennial,Graminoid,"L48 (N), CAN (N)"
+CAREX,CAREX,FALSE,CAREX,CAREX,Carex L.,sedge,Monocot,Cyperaceae,Sedge family,NA,NA,NA
+CARNOV,CANO3,FALSE,CANO3,CANO3,Carex nova L.H. Bailey,black sedge,Monocot,Cyperaceae,Sedge family,Perennial,Graminoid,L48 (N)
+CARO,CARO2,FALSE,CARO2,CARO2,Campanula rotundifolia L.,bluebell bellflower,Dicot,Campanulaceae,Bellflower family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+CARO2,CARO2,FALSE,CARO2,CARO2,Campanula rotundifolia L.,bluebell bellflower,Dicot,Campanulaceae,Bellflower family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+CARRUP,CARU3,FALSE,CARU3,CARU3,Carex rupestris All.,curly sedge,Monocot,Cyperaceae,Sedge family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N)"
+CARSC,CASC12,FALSE,CASC12,CASC12,Carex scopulorum T. Holm,mountain sedge,Monocot,Cyperaceae,Sedge family,Perennial,Graminoid,"L48 (N), CAN (N)"
+CARSCO,CASC12,FALSE,CASC12,CASC12,Carex scopulorum T. Holm,mountain sedge,Monocot,Cyperaceae,Sedge family,Perennial,Graminoid,"L48 (N), CAN (N)"
+CARU,CARUD,FALSE,CARUD,CARUD,Carex rupestris All. var. drummondiana (Dewey) L.H. Bailey,Drummond's sedge,Monocot,Cyperaceae,Sedge family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N)"
+CARUD,CARUD,FALSE,CARUD,CARUD,Carex rupestris All. var. drummondiana (Dewey) L.H. Bailey,Drummond's sedge,Monocot,Cyperaceae,Sedge family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N)"
+CASC,CASC12,FALSE,CASC12,CASC12,Carex scopulorum T. Holm,mountain sedge,Monocot,Cyperaceae,Sedge family,Perennial,Graminoid,"L48 (N), CAN (N)"
+CASC12,CASC12,FALSE,CASC12,CASC12,Carex scopulorum T. Holm,mountain sedge,Monocot,Cyperaceae,Sedge family,Perennial,Graminoid,"L48 (N), CAN (N)"
+CASCS,CASC12,FALSE,CASC12,CASC12,Carex scopulorum T. Holm,mountain sedge,Monocot,Cyperaceae,Sedge family,Perennial,Graminoid,"L48 (N), CAN (N)"
+CASOCC,CAOC4,FALSE,CAOC4,CAOC4,Castilleja occidentalis Torr.,western Indian paintbrush,Dicot,Scrophulariaceae,Figwort family,Perennial,"Subshrub, Forb/herb","L48 (N), CAN (N)"
+CAUN,CAUN2,FALSE,CAUN2,CAUN2,Campanula uniflora L.,arctic bellflower,Dicot,Campanulaceae,Bellflower family,Perennial,"Subshrub, Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
+CAUN2,CAUN2,FALSE,CAUN2,CAUN2,Campanula uniflora L.,arctic bellflower,Dicot,Campanulaceae,Bellflower family,Perennial,"Subshrub, Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
+CEAR,CEARS2,FALSE,CEARS2,CEARS2,Cerastium arvense L. ssp. strictum (L.) Ugborogho,field chickweed,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+CEARS,CEARS2,FALSE,CEARS2,CEARS2,Cerastium arvense L. ssp. strictum (L.) Ugborogho,field chickweed,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+CEARS2,CEARS2,FALSE,CEARS2,CEARS2,Cerastium arvense L. ssp. strictum (L.) Ugborogho,field chickweed,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+CERARV,CEAR4,FALSE,CEAR4,CEAR4,Cerastium arvense L.,field chickweed,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,"L48 (NI), AK (N), CAN (NI), GL (N), SPM (N)"
+CHJA,CHJA,FALSE,CHJA,CHJA,Chionophila jamesii Benth.,Rocky Mountain snowlover,Dicot,Scrophulariaceae,Figwort family,Perennial,Forb/herb,L48 (N)
+DAIN,DAIN,FALSE,DAIN,DAIN,Danthonia intermedia Vasey,timber oatgrass,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N)"
+DEADKO,2LTR,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+DEADSE,2LTR,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+DECE,DECE,FALSE,DECE,DECE,Deschampsia cespitosa (L.) P. Beauv.,tufted hairgrass,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+DESCAE,DECE,FALSE,DECE,DECE,Deschampsia cespitosa (L.) P. Beauv.,tufted hairgrass,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+DRAAUR,DRAU,FALSE,DRAU,DRAU,Draba aurea Vahl ex Hornem.,golden draba,Dicot,Brassicaceae,Mustard family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+DRACAN,DRBRC,FALSE,DRBRC,DRBRC,Draba breweri S. Watson var. cana (Rydb.) Rollins,cushion draba,Dicot,Brassicaceae,Mustard family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+DRAU,DRAU,FALSE,DRAU,DRAU,Draba aurea Vahl ex Hornem.,golden draba,Dicot,Brassicaceae,Mustard family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+DRBA,DRABA,FALSE,DRABA,DRABA,Draba L.,draba,Dicot,Brassicaceae,Mustard family,NA,NA,NA
+DROC,DROC,FALSE,DROC,DROC,Dryas octopetala L.,eightpetal mountain-avens,Dicot,Rosaceae,Rose family,Perennial,"Subshrub, Shrub, Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
+DRST,DRST4,FALSE,DRST4,DRST4,Draba streptocarpa A. Gray,pretty draba,Dicot,Brassicaceae,Mustard family,Perennial,Forb/herb,L48 (N)
+DRST4,DRST4,FALSE,DRST4,DRST4,Draba streptocarpa A. Gray,pretty draba,Dicot,Brassicaceae,Mustard family,Perennial,Forb/herb,L48 (N)
+DW,2LTRWS,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+elk.P,2SCAT,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+ELYMUS,ELYMU,FALSE,ELYMU,ELYMU,Elymus L.,wildrye,Monocot,Poaceae,Grass family,NA,NA,NA
+ERCA14,ERCA14,FALSE,ERCA14,ERCA14,Erysimum capitatum (Douglas ex Hook.) Greene,sanddune wallflower,Dicot,Brassicaceae,Mustard family,"Biennial, Perennial","Forb/herb, Subshrub","L48 (N), AK (N)"
+ERIARE,ERNA,FALSE,ERNA,ERNA,Eritrichium nanum (Vill.) Schrad. ex Gaudin,arctic alpine forget-me-not,Dicot,Boraginaceae,Borage family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+ERIPIN,ERPI6,FALSE,ERPI6,ERPI6,Erigeron pinnatisectus (A. Gray) A. Nelson,featherleaf fleabane,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,L48 (N)
+ERISIM,ERSI3,FALSE,ERSI3,ERSI3,Erigeron simplex Greene,onestem fleabane,Dicot,Asteraceae,Aster family,Perennial,"Subshrub, Forb/herb",L48 (N)
+ERME2,ERME2,FALSE,ERME2,ERME2,Erigeron melanocephalus (A. Nelson) A. Nelson,blackhead fleabane,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,L48 (N)
+ERNA,ERNA,FALSE,ERNA,ERNA,Eritrichium nanum (Vill.) Schrad. ex Gaudin,arctic alpine forget-me-not,Dicot,Boraginaceae,Borage family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+ERPI6,ERPI6,FALSE,ERPI6,ERPI6,Erigeron pinnatisectus (A. Gray) A. Nelson,featherleaf fleabane,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,L48 (N)
+ERS6,ERSI3,FALSE,ERSI3,ERSI3,Erigeron simplex Greene,onestem fleabane,Dicot,Asteraceae,Aster family,Perennial,"Subshrub, Forb/herb",L48 (N)
+ERSE3,ERSE3,FALSE,ERSE3,CRSE11,Eremocarpus setigerus (Hook.) Benth.,dove weed,Dicot,Euphorbiaceae,Spurge family,Annual,Forb/herb,L48 (N)
+ERSI3,ERSI3,FALSE,ERSI3,ERSI3,Erigeron simplex Greene,onestem fleabane,Dicot,Asteraceae,Aster family,Perennial,"Subshrub, Forb/herb",L48 (N)
+ERTC,ERSI3,FALSE,ERSI3,ERSI3,Erigeron simplex Greene,onestem fleabane,Dicot,Asteraceae,Aster family,Perennial,"Subshrub, Forb/herb",L48 (N)
+ERYNIV,ERCAP3,FALSE,ERCAP3,ERCAP3,Erysimum capitatum (Douglas ex Hook.) Greene var. purshii (Durand) Rollins,Pursh's wallflower,Dicot,Brassicaceae,Mustard family,"Biennial, Perennial",Forb/herb,L48 (N)
+FEBR,FEBR,FALSE,FEBR,FEBR,Festuca brachyphylla Schult. ex Schult. & Schult. f.,alpine fescue,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N)"
+FESBRA,FEBR,FALSE,FEBR,FEBR,Festuca brachyphylla Schult. ex Schult. & Schult. f.,alpine fescue,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N)"
+FORB1,2FORB,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+FORB2,2FORB,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+Fz.Gr,2GRAM,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+GEAL,GEAL2,FALSE,GEAL2,GEAL2,Gentiana algida Pall.,whitish gentian,Dicot,Gentianaceae,Gentian family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+GEAL2,GEAL2,FALSE,GEAL2,GEAL2,Gentiana algida Pall.,whitish gentian,Dicot,Gentianaceae,Gentian family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+GERO,GERO2,FALSE,GERO2,GERO2,Geum rossii (R. Br.) Ser.,Ross' avens,Dicot,Rosaceae,Rose family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+GERO2,GERO2,FALSE,GERO2,GERO2,Geum rossii (R. Br.) Ser.,Ross' avens,Dicot,Rosaceae,Rose family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+GEROT,GERO2,FALSE,GERO2,GERO2,Geum rossii (R. Br.) Ser.,Ross' avens,Dicot,Rosaceae,Rose family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+GRASS1,2GRAM,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+GRASS2,2GRAM,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+GRDAZ,2FORB,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+HEMO3,HEMO3,FALSE,HEMO3,HEMO3,Helictotrichon mortonianum (Scribn.) Henr.,Morton's alpine oatgrass,Monocot,Poaceae,Grass family,Perennial,Graminoid,L48 (N)
+HYMACA,TEACC,FALSE,TEACC,TEACC,Tetraneuris acaulis (Pursh) Greene var. caespitosa A. Nelson,caespitose four-nerve daisy,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,L48 (N)
+HYMGRA,TEGR3,FALSE,TEGR3,TEGR3,Tetraneuris grandiflora (Torr. & A. Gray ex A. Gray) K.F. Parker,graylocks four-nerve daisy,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,L48 (N)
+junk1,No hit,FALSE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+KOBMYO,KOMY,FALSE,KOMY,KOMY,Kobresia myosuroides (Vill.) Fiori,Bellardi bog sedge,Monocot,Cyperaceae,Sedge family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N)"
+KOMY,KOMY,FALSE,KOMY,KOMY,Kobresia myosuroides (Vill.) Fiori,Bellardi bog sedge,Monocot,Cyperaceae,Sedge family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N)"
+LATER,2LTR,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+LEPY,LEPY2,FALSE,LEPY2,LEPY2,Lewisia pygmaea (A. Gray) B.L. Rob.,alpine lewisia,Dicot,Portulacaceae,Purslane family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+LEPY2,LEPY2,FALSE,LEPY2,LEPY2,Lewisia pygmaea (A. Gray) B.L. Rob.,alpine lewisia,Dicot,Portulacaceae,Purslane family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+LICHEN,2LICHN,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+LICHN,2LICHN,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+liter,2LTR,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+Liter,2LTR,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+LITTER,2LTR,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+LLOSER,LLSE,FALSE,LLSE,LLSE,Lloydia serotina (L.) Salisb. ex Rchb.,common alplily,Monocot,Liliaceae,Lily family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+LLSE,LLSE,FALSE,LLSE,LLSE,Lloydia serotina (L.) Salisb. ex Rchb.,common alplily,Monocot,Liliaceae,Lily family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+LTR,2LTR,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+LUSP,LUSP4,FALSE,LUSP4,LUSP4,Luzula spicata (L.) DC.,spiked woodrush,Monocot,Juncaceae,Rush family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+LUSP4,LUSP4,FALSE,LUSP4,LUSP4,Luzula spicata (L.) DC.,spiked woodrush,Monocot,Juncaceae,Rush family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+MELA,MELA3,FALSE,MELA3,MELA3,Mertensia lanceolata (Pursh) DC.,prairie bluebells,Dicot,Boraginaceae,Borage family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+MELA3,MELA3,FALSE,MELA3,MELA3,Mertensia lanceolata (Pursh) DC.,prairie bluebells,Dicot,Boraginaceae,Borage family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+MERLAN,MELA3,FALSE,MELA3,MELA3,Mertensia lanceolata (Pursh) DC.,prairie bluebells,Dicot,Boraginaceae,Borage family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+MINBIF,MIBI9,FALSE,MIBI9,MIBI9,Minuartia biflora (L.) Schinz & Thell.,mountain stitchwort,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+MINOBT,MIOB2,FALSE,MIOB2,MIOB2,Minuartia obtusiloba (Rydb.) House,twinflower sandwort,Dicot,Caryophyllaceae,Pink family,Perennial,"Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
+MIOB,MIOB2,FALSE,MIOB2,MIOB2,Minuartia obtusiloba (Rydb.) House,twinflower sandwort,Dicot,Caryophyllaceae,Pink family,Perennial,"Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
+MIOB2,MIOB2,FALSE,MIOB2,MIOB2,Minuartia obtusiloba (Rydb.) House,twinflower sandwort,Dicot,Caryophyllaceae,Pink family,Perennial,"Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
+MOSS,2MOSS,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+MOSSSS,2MOSS,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+NOMO2,NOMO2,FALSE,NOMO2,NOMO2,Noccaea montana (L.) F.K. Mey. [excluded],alpine pennycress,Dicot,Brassicaceae,Mustard family,Perennial,Forb/herb,NA
+NOMOM,NOFEG,FALSE,NOFEG,NOFEG,Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch,alpine pennycress,Dicot,Brassicaceae,Mustard family,Perennial,Forb/herb,L48 (N)
+O,ORAL,FALSE,ORAL,ORAL,Oreoxis alpina (A. Gray) J.M. Coult. & Rose,alpine oreoxis,Dicot,Apiaceae,Carrot family,Perennial,Forb/herb,L48 (N)
+ORAL,ORAL,FALSE,ORAL,ORAL,Oreoxis alpina (A. Gray) J.M. Coult. & Rose,alpine oreoxis,Dicot,Apiaceae,Carrot family,Perennial,Forb/herb,L48 (N)
+ORALA,ORAL,FALSE,ORAL,ORAL,Oreoxis alpina (A. Gray) J.M. Coult. & Rose,alpine oreoxis,Dicot,Apiaceae,Carrot family,Perennial,Forb/herb,L48 (N)
+OREALP,ORAL,FALSE,ORAL,ORAL,Oreoxis alpina (A. Gray) J.M. Coult. & Rose,alpine oreoxis,Dicot,Apiaceae,Carrot family,Perennial,Forb/herb,L48 (N)
+PACA15,PACA15,FALSE,PACA15,PACA15,Packera cana (Hook.) W.A. Weber & Á. Löve,woolly groundsel,Dicot,Asteraceae,Aster family,Perennial,"Forb/herb, Subshrub","L48 (N), CAN (N)"
+PAPU2,PAPU2,FALSE,PAPU2,PAPU2,Paronychia pulvinata A. Gray,Rocky Mountain nailwort,Dicot,Caryophyllaceae,Pink family,Perennial,"Subshrub, Forb/herb",L48 (N)
+PEPA,PEPA3,FALSE,PEPA3,PEPA3,Pedicularis parryi A. Gray,Parry's lousewort,Dicot,Scrophulariaceae,Figwort family,Perennial,Forb/herb,L48 (N)
+PEPA3,PEPA3,FALSE,PEPA3,PEPA3,Pedicularis parryi A. Gray,Parry's lousewort,Dicot,Scrophulariaceae,Figwort family,Perennial,Forb/herb,L48 (N)
+PHLSIB,PHPU5,FALSE,PHPU5,PHPU5,Phlox pulvinata (Wherry) Cronquist,cushion phlox,Dicot,Polemoniaceae,Phlox family,Perennial,Forb/herb,L48 (N)
+PHPU,PHPU5,FALSE,PHPU5,PHPU5,Phlox pulvinata (Wherry) Cronquist,cushion phlox,Dicot,Polemoniaceae,Phlox family,Perennial,Forb/herb,L48 (N)
+PHPU5,PHPU5,FALSE,PHPU5,PHPU5,Phlox pulvinata (Wherry) Cronquist,cushion phlox,Dicot,Polemoniaceae,Phlox family,Perennial,Forb/herb,L48 (N)
+POA,POA,FALSE,POA,POA,Poa L.,bluegrass,Monocot,Poaceae,Grass family,NA,NA,NA
+POAALP,POAL2,FALSE,POAL2,POAL2,Poa alpina L.,alpine bluegrass,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N)"
+POAARC,POARG,FALSE,POARG,POARG,Poa arctica R. Br. ssp. grayana (Vasey) Á. Löve & D. Löve & Kapoor,arctic bluegrass,Monocot,Poaceae,Grass family,Perennial,Graminoid,L48 (N)
+POAGLA,POGL,FALSE,POGL,POGL,Poa glauca Vahl,glaucous bluegrass,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N)"
+POAL,POAL2,FALSE,POAL2,POAL2,Poa alpina L.,alpine bluegrass,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N)"
+POAL2,POAL2,FALSE,POAL2,POAL2,Poa alpina L.,alpine bluegrass,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N)"
+POARG,POARG,FALSE,POARG,POARG,Poa arctica R. Br. ssp. grayana (Vasey) Á. Löve & D. Löve & Kapoor,arctic bluegrass,Monocot,Poaceae,Grass family,Perennial,Graminoid,L48 (N)
+POBI,POBI6,FALSE,POBI6,POBI6,Polygonum bistortoides Pursh,American bistort,Dicot,Polygonaceae,Buckwheat family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+POBI6,POBI6,FALSE,POBI6,POBI6,Polygonum bistortoides Pursh,American bistort,Dicot,Polygonaceae,Buckwheat family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+POD12,PODI2,FALSE,PODI2,PODI2,Potentilla diversifolia Lehm.,varileaf cinquefoil,Dicot,Rosaceae,Rose family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+PODI,PODI2,FALSE,PODI2,PODI2,Potentilla diversifolia Lehm.,varileaf cinquefoil,Dicot,Rosaceae,Rose family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+PODI2,PODI2,FALSE,PODI2,PODI2,Potentilla diversifolia Lehm.,varileaf cinquefoil,Dicot,Rosaceae,Rose family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+POPU3,POPU3,FALSE,POPU3,POPU3,Polemonium pulcherrimum Hook.,Jacob's-ladder,Dicot,Polemoniaceae,Phlox family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+POT,POTEN,FALSE,POTEN,POTEN,Potentilla L.,cinquefoil,Dicot,Rosaceae,Rose family,NA,NA,NA
+POTEN,POTEN,FALSE,POTEN,POTEN,Potentilla L.,cinquefoil,Dicot,Rosaceae,Rose family,NA,NA,NA
+POVI,POVI,FALSE,POVI,POVI,Polemonium viscosum Nutt.,sticky polemonium,Dicot,Polemoniaceae,Phlox family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+POVI3,POVI3,FALSE,POVI3,POVI3,Polygonum viviparum L.,alpine bistort,Dicot,Polygonaceae,Buckwheat family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+PRAN,PRAN,FALSE,PRAN,PRAN,Primula angustifolia Torr.,alpine primrose,Dicot,Primulaceae,Primrose family,Perennial,Forb/herb,L48 (N)
+PrAu,2FORB,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+R.J.,JUNCU,FALSE,JUNCU,JUNCU,Juncus L.,rush,Monocot,Juncaceae,Rush family,NA,NA,NA
+RF,2RF,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+RHIN11,RHIN11,FALSE,RHIN11,RHIN11,Rhodiola integrifolia Raf.,ledge stonecrop,Dicot,Crassulaceae,Stonecrop family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+ROCKKK,2RF,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+SAGL,SAGL,FALSE,SAGL,SAGL,Salix glauca L.,grayleaf willow,Dicot,Salicaceae,Willow family,Perennial,"Tree, Shrub","L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+SAIC,SAIC,FALSE,SAIC,PLIC,Saccomorpha icmalea (Ach.) Clauzade & Roux,placynthiella lichen,Lichen,Trapeliaceae,NA,NA,Lichenous,NA (N)
+SANI8,SANI8,FALSE,SANI8,SANI8,Salix nivalis Hook.,snow willow,Dicot,Salicaceae,Willow family,Perennial,"Subshrub, Shrub","L48 (N), CAN (N)"
+SAPL2,SAPL2,FALSE,SAPL2,SAPL2,Salix planifolia Pursh,diamondleaf willow,Dicot,Salicaceae,Willow family,Perennial,"Tree, Subshrub, Shrub","L48 (N), AK (N), CAN (N), SPM (N)"
+SARH,SARH2,FALSE,SARH2,SARH2,Saxifraga rhomboidea Greene,diamondleaf saxifrage,Dicot,Saxifragaceae,Saxifrage family,Perennial,Forb/herb,L48 (N)
+SARH2,SARH2,FALSE,SARH2,SARH2,Saxifraga rhomboidea Greene,diamondleaf saxifrage,Dicot,Saxifragaceae,Saxifrage family,Perennial,Forb/herb,L48 (N)
+SEDE,SEDES,FALSE,SEDES,SEDES,Selaginella densa Rydb. var. scopulorum (Maxon) R. Tryon,Rocky Mountain spikemoss,Lycopod,Selaginellaceae,Spike-moss family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+SEDES,SEDES,FALSE,SEDES,SEDES,Selaginella densa Rydb. var. scopulorum (Maxon) R. Tryon,Rocky Mountain spikemoss,Lycopod,Selaginellaceae,Spike-moss family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+SEDLAN,SELA,FALSE,SELA,SELA,Sedum lanceolatum Torr.,spearleaf stonecrop,Dicot,Crassulaceae,Stonecrop family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+SELA,SELA,FALSE,SELA,SELA,Sedum lanceolatum Torr.,spearleaf stonecrop,Dicot,Crassulaceae,Stonecrop family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+SELDEN,SEDES,FALSE,SEDES,SEDES,Selaginella densa Rydb. var. scopulorum (Maxon) R. Tryon,Rocky Mountain spikemoss,Lycopod,Selaginellaceae,Spike-moss family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+SIAC,SIAC,FALSE,SIAC,SIAC,Silene acaulis (L.) Jacq.,moss campion,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+SIACS,SIACS2,FALSE,SIACS2,SIACS2,Silene acaulis (L.) Jacq. var. subacaulescens (F.N. Williams) Fernald & H. St. John,moss campion,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+SIACS2,SIACS2,FALSE,SIACS2,SIACS2,Silene acaulis (L.) Jacq. var. subacaulescens (F.N. Williams) Fernald & H. St. John,moss campion,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+SILACA,SIAC,FALSE,SIAC,SIAC,Silene acaulis (L.) Jacq.,moss campion,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+SIPR,SIPR,FALSE,SIPR,SIPR,Sibbaldia procumbens L.,creeping sibbaldia,Dicot,Rosaceae,Rose family,Perennial,"Subshrub, Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
+SOL,SOMU,FALSE,SOMU,SOMU,Solidago multiradiata Aiton,Rocky Mountain goldenrod,Dicot,Asteraceae,Aster family,Perennial,"Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
+SOMU,SOMU,FALSE,SOMU,SOMU,Solidago multiradiata Aiton,Rocky Mountain goldenrod,Dicot,Asteraceae,Aster family,Perennial,"Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
+SOSIN,SOSIN,FALSE,SOSIN,SOSIN,Solidago simplex Kunth ssp. simplex var. nana (A. Gray) Ringius,dwarf goldenrod,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+STELAE,STLOL7,FALSE,STLOL7,STLOL7,Stellaria longipes Goldie ssp. longipes,longstalk starwort,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+STLO2,STLO2,FALSE,STLO2,STLO2,Stellaria longipes Goldie,longstalk starwort,Dicot,Caryophyllaceae,Pink family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N), GL (N)"
+TEAC,TEAC,FALSE,TEAC,TEAC,Tetraneuris acaulis (Pursh) Greene,stemless four-nerve daisy,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+TEACC,TEAC,FALSE,TEAC,TEAC,Tetraneuris acaulis (Pursh) Greene,stemless four-nerve daisy,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,"L48 (N), CAN (N)"
+TEAGR,TEGR3,FALSE,TEGR3,TEGR3,Tetraneuris grandiflora (Torr. & A. Gray ex A. Gray) K.F. Parker,graylocks four-nerve daisy,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,L48 (N)
+TEGR,TEGR3,FALSE,TEGR3,TEGR3,Tetraneuris grandiflora (Torr. & A. Gray ex A. Gray) K.F. Parker,graylocks four-nerve daisy,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,L48 (N)
+TEGR3,TEGR3,FALSE,TEGR3,TEGR3,Tetraneuris grandiflora (Torr. & A. Gray ex A. Gray) K.F. Parker,graylocks four-nerve daisy,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,L48 (N)
+THLMON,NOFEG,FALSE,NOFEG,NOFEG,Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch,alpine pennycress,Dicot,Brassicaceae,Mustard family,Perennial,Forb/herb,L48 (N)
+TOPY,TOPY,FALSE,TOPY,TOPY,Tonestus pygmaeus (Torr. & A. Gray) A. Nelson,pygmy goldenweed,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,L48 (N)
+TRDA2,TRDA2,FALSE,TRDA2,TRDA2,Trifolium dasyphyllum Torr. & A. Gray,alpine clover,Dicot,Fabaceae,Pea family,Perennial,Forb/herb,L48 (N)
+TRIDAS,TRDA2,FALSE,TRDA2,TRDA2,Trifolium dasyphyllum Torr. & A. Gray,alpine clover,Dicot,Fabaceae,Pea family,Perennial,Forb/herb,L48 (N)
+TRIPAR,TRPA5,FALSE,TRPA5,TRPA5,Trifolium parryi A. Gray,Parry's clover,Dicot,Fabaceae,Pea family,Perennial,"Subshrub, Forb/herb",L48 (N)
+TRISPI,TRSP2,FALSE,TRSP2,TRSP2,Trisetum spicatum (L.) K. Richt.,spike trisetum,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+TRPAP,TRPAP,FALSE,TRPAP,TRPAP,Trifolium parryi A. Gray ssp. parryi,Parry's clover,Dicot,Fabaceae,Pea family,Perennial,"Subshrub, Forb/herb",L48 (N)
+TRSC,TRSP2,FALSE,TRSP2,TRSP2,Trisetum spicatum (L.) K. Richt.,spike trisetum,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+TRSP,TRSP2,FALSE,TRSP2,TRSP2,Trisetum spicatum (L.) K. Richt.,spike trisetum,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+TRSP2,TRSP2,FALSE,TRSP2,TRSP2,Trisetum spicatum (L.) K. Richt.,spike trisetum,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+TRSPI,TRSP2,FALSE,TRSP2,TRSP2,Trisetum spicatum (L.) K. Richt.,spike trisetum,Monocot,Poaceae,Grass family,Perennial,Graminoid,"L48 (N), AK (N), CAN (N), GL (N), SPM (N)"
+UkCr3,JUNCU,FALSE,JUNCU,JUNCU,Juncus L.,rush,Monocot,Juncaceae,Rush family,NA,NA,NA
+UkCr4,JUNCU,FALSE,JUNCU,JUNCU,Juncus L.,rush,Monocot,Juncaceae,Rush family,NA,NA,NA
+UkCr5,JUNCU,FALSE,JUNCU,JUNCU,Juncus L.,rush,Monocot,Juncaceae,Rush family,NA,NA,NA
+UkCrWL,JUNCU,FALSE,JUNCU,JUNCU,Juncus L.,rush,Monocot,Juncaceae,Rush family,NA,NA,NA
+unk1,2FORB,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+UNKF,2FORB,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+UNKLIC,2LICHN,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+VILA10,VILA10,FALSE,VILA10,VILA10,Viola labradorica Schrank,alpine violet,Dicot,Violaceae,Violet family,Perennial,Forb/herb,"L48 (N), CAN (N), GL (N), SPM (N)"
+VIOADU,VIAD,FALSE,VIAD,VIAD,Viola adunca Sm.,hookedspur violet,Dicot,Violaceae,Violet family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
+VIOLET,VIOLA,FALSE,VIOLA,VIOLA,Viola L.,violet,Dicot,Violaceae,Violet family,NA,NA,NA
+WOOD,2LTRWS,TRUE,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
