@@ -2,7 +2,12 @@
 
 # script purpose:
 # read in alpine nutnet and sdl community comp data from ts
-# 
+# make spp lookup table for standardizing codes across all plant cover datasets (write out spp lookup)
+# run the following in nmds:
+# (1)
+# (2)
+
+
 
 # notes from TS on species codes:
 # TS says "junk1" = nothing (placeholder "species" for nothing hit), and "O" == "ORALA" (Oreoxis alpina)
@@ -324,44 +329,4 @@ spplist_master <- joinUSDAplants(spp = unique(store_USDA$clean_code2[store_USDA$
 rm(store_USDA)
 
 # spplist compiled! write out for reference
-write_csv(spplist_master, paste0(datpath, "sdl_nutnet_spplookup.csv"))
-
-
-
-
-
-
-
-# -- NUT NET DATA PREP -----
-# build and compile rel cov, all years; create all yrs spp lookup table
-# create nutnet plot lookup table
-nutnet_sites <- dplyr::select(nutnet13, Block:trt) %>% distinct %>%
-  rename(K = `K.`) # remove period from K col
-
-# tidy nutnet 2013 dataset and convert to rel_cov
-nn13_long <- nutnet13 %>%
-  gather(species, hits, LTR:ncol(.)) %>%
-  rename(K = `K.`) %>%
-  # add sampling year
-  mutate(yr = 2013)
-
-# how many nut net spp in mspaso spp?
-nutnet_spp <- sort(unique(c(unique(nn13_long$species), unique(nutnet17$species))))
-summary(nutnet_spp %in% traitspp$USDA.Code) #44 yes, 41 no...
-# what's missing?
-nutnet_spp[!nutnet_spp %in% traitspp$USDA.Code] # some unknowns or non-plant codes, but run USDA plants database scrape script..
-
-
-
-#how many still missing?
-summary(is.na(store_USDA$Symbol)) #77...
-nomatchcodes <- store_USDA$clean_code[is.na(store_USDA$Symbol)] 
-nomatchcodes
-sapply(jgslist, function(x) summary(nomatchcodes %in% x)) # present in 3 cols.. what are they?
-nomatchcodes[nomatchcodes %in% jgslist$USDA_code]
-nomatchcodes[nomatchcodes %in% jgslist$corrected_NWT_code]   
-nomatchcodes[nomatchcodes %in% jgslist$JGS_code] 
-
-# -- SDL DATA PREP -----
-#
-
+write_csv(spplist_master, "alpine_addnuts/output_data/sdl_nutnet_spplookup.csv")
