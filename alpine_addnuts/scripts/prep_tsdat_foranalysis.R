@@ -304,7 +304,9 @@ nutnet_plots <- mutate(nutnet_plots, site = "nutnet") %>%
 # select plot and treatment from sdl (choose sdl 16 bc that has the most)
 sdl_plots2 <- sdl_plots %>%
   mutate(trt = ifelse(is.na(trt16), trt97, trt16),
-         trt = recode(trt, "NN" = "N", "CC" = "control",
+         trt = ifelse(is.na(trt), fert12, trt),
+         trt = casefold(trt, upper = T),
+         trt = recode(trt, "NN" = "N", "CC" = "C", "CONTROL" = "C",
                       "PP" = "P", "NP" = "N+P")) %>%
   rename(old_plot = old_plot97) %>%
   dplyr::select(plot, old_plot, trt) %>%
