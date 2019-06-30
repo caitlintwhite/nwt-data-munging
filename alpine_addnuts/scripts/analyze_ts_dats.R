@@ -203,3 +203,92 @@ with(sitematrix4, ordihull(nmds4, yr, col="blue", label = TRUE))
 with(sitematrix4, ordiellipse(nmds4, trt, kind = "se", conf = 0.95, col="red", lwd=2,
                               label=TRUE))
 orditorp (nmds2, display="species", col="black", air=0.02)
+
+
+
+# -- TRY SITES IN TS STUDY ONLY ----
+nnplots1317 <- subset(plantcom, site == "nutnet") %>%
+  dplyr::select(plotid, yr) %>%
+  distinct() %>%
+  group_by(plotid) %>%
+  mutate(nobs = length(yr))
+
+# plots 1-16 for sdl, 28 plots common in nutnet in 2013 and 2017
+matrix5 <-  subset(plantcom, (site == "sdl" & plotid %in% c(1:16)) |
+                                (site == "nutnet" & plotid %in% nnplots1317$plotid[nnplots1317$plotid %in% keep_nnplots])) %>%
+  #remove unknowns and non-veg
+  subset(!grepl("^2", clean_code2)) %>%
+  mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
+  spread(clean_code2, hits, fill = 0) %>%
+  dplyr::select(rowid, site:ncol(.)) %>%
+  as.data.frame()
+
+sitematrix5 <- matrix5[,1:4]
+# add trtment info
+sitematrix5 <- left_join(sitematrix5, nnplots[c("plotid", "trt")])
+for(i in sitematrix5$plotid[sitematrix5$site == "sdl"]){
+  sitematrix5$trt[sitematrix5$plotid == i] <- sdlplots$trt[sdlplots$plot == i & !is.na(sdlplots$plot)]
+}
+
+row.names(matrix5) <- matrix5$rowid
+matrix5 <- matrix5[!colnames(matrix5) %in% c("rowid", "site", "yr", "plotid")]
+
+# relativize data
+matrix5_rel <- vegan::decostand(matrix5, method = "total")
+
+# run nmds
+nmds5 <- metaMDS(matrix5_rel, k = 2, trymax = 50)
+plot(nmds5, type = "t")
+
+
+ordiplot(nmds5, type="n", main = "all sites, all yrs, common plots")
+with (sitematrix5, ordiellipse(nmds5, yr, kind="se", conf=0.95, col="blue", lwd=2,
+                               label=TRUE))
+with (sitematrix5, ordiellipse(nmds5, trt, kind="se", conf=0.95, col="red", lwd=2,
+                               label=TRUE))
+orditorp (nmds5, display="species", col="black", air=0.01)
+
+
+ordiplot(nmds5, type="n", main = "all sites, all yrs, common plots")
+with (sitematrix5, ordihull(nmds5, yr, col="blue", lwd=2,
+                               label=TRUE))
+with (sitematrix5, ordihull(nmds5, trt, col="red", lwd=2,
+                               label=TRUE))
+orditorp (nmds5, display="species", col="black", air=0.01)
+
+
+
+# -- CONTROL PLOTS ONLY FOR COMPARISON -----
+controlplots <- sort(c(sdlplots$plot[sdlplots$trt == "C"],
+                  nnplots$plotid[nnplots$trt == "C"]))
+matrix6 <- subset(plantcom, plotid %in% controlplots) %>%
+  #remove unknowns and non-veg
+  subset(!grepl("^2", clean_code2)) %>%
+  mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
+  spread(clean_code2, hits, fill = 0) %>%
+  dplyr::select(rowid, site:ncol(.)) %>%
+  as.data.frame()
+
+sitematrix6 <- matrix6[,1:4]
+row.names(matrix6) <- matrix6$rowid
+matrix6 <- matrix6[!colnames(matrix6) %in% c("rowid", "site", "yr", "plotid")]
+
+# relativize data
+matrix6_rel <- vegan::decostand(matrix6, method = "total")
+
+# run nmds
+nmds6 <- metaMDS(matrix6_rel, k = 2, trymax = 50)
+plot(nmds6, type = "t")
+
+
+ordiplot(nmds6, type="n", main = "all sites, all yrs, control plots only")
+with (sitematrix6, ordiellipse(nmds6, yr, kind="se", conf=0.95, col="blue", lwd=2,
+                               label=TRUE))
+orditorp (nmds6, display="species", col="black", air=0.01)
+
+ordiplot(nmds6, type="n", main = "all sites, all yrs, control plots only")
+with (sitematrix6, ordihull(nmds6, yr, col="blue", lwd=2,
+                               label=TRUE))
+orditorp (nmds6, display="species", col="black", air=0.01)
+
+
