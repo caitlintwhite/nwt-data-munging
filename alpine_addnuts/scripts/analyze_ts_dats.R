@@ -19,6 +19,7 @@
 rm(list = ls())
 library(tidyverse)
 library(vegan)
+library(ggvegan) # devtools::install_github("gavinsimpson/ggvegan")
 options(stringsAsFactors = F)
 theme_set(theme_bw())
 na_vals <- c("", " ", NA, "NA", "NaN", NaN, ".")
@@ -244,7 +245,7 @@ ordiplot(nmds4, type="n", main = "sdl sites, all yrs, common plots")
 with(sitematrix4, ordihull(nmds4, yr, col="blue", label = TRUE))
 with(sitematrix4, ordiellipse(nmds4, trt, kind = "se", conf = 0.95, col="red", lwd=2,
                               label=TRUE))
-orditorp (nmds2, display="species", col="black", air=0.02)
+orditorp (nmds4, display="species", col="black", air=0.02)
 
 
 
@@ -301,7 +302,7 @@ orditorp (nmds5, display="species", col="black", air=0.01)
 
 
 # -- CONTROL PLOTS ONLY FOR COMPARISON -----
-controlplots <- sort(c(sdlplots$plot[sdlplots$trt == "C"],
+controlplots <- sort(c(sdlplots_alt$plot[sdlplots_alt$trt == "C" & sdlplots_alt$meadow == "Dry" & sdlplots_alt$snow == "No snow"],
                        nnplots$plotid[nnplots$trt == "C"]))
 matrix6 <- subset(plantcom, plotid %in% controlplots) %>%
   #remove unknowns and non-veg
@@ -334,6 +335,43 @@ with (sitematrix6, ordihull(nmds6, yr, col="blue", lwd=2,
 orditorp (nmds6, display="species", col="black", air=0.01)
 
 
+
+# -- LAST TIME-POINT PLOTS -----
+matrix7_sdl <- subset(plantcom, yr %in% c(2016, 2017) & site == "sdl") %>%
+  #remove unknowns and non-veg
+  subset(!grepl("^2", clean_code2)) %>%
+  mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
+  spread(clean_code2, hits, fill = 0) %>%
+  dplyr::select(rowid, site:ncol(.)) %>%
+  as.data.frame()
+
+sitematrix7_sdl <- matrix7_sdl[,1:4] %>%
+  mutate(plotid = as.numeric(plotid)) %>%
+  left_join(sdlplots_alt, by = c("plotid" = "plot"))
+
+row.names(matrix7_sdl) <- matrix7_sdl$rowid
+matrix7_sdl <- matrix7_sdl[!colnames(matrix7_sdl) %in% c("rowid", "site", "yr", "plotid")]
+
+# relativize data
+matrix7_sdl_rel <- vegan::decostand(matrix7_sdl, method = "total")
+
+# run nmds
+nmds7 <- metaMDS(matrix7_sdl_rel, k = 2, trymax = 50)
+plot(nmds7, type = "t")
+
+
+ordiplot(nmds7, type="n", main = "sdl only, last year, all treatments")
+with (sitematrix7_sdl, ordiellipse(nmds7, trt, kind="se", conf=0.95, col="blue", lwd=2,
+                               label=TRUE))
+with (sitematrix7_sdl, ordiellipse(nmds7, meadow, kind="se", conf=0.95, col="green", lwd=2,
+                                   label=TRUE))
+with (sitematrix7_sdl, ordiellipse(nmds7, snow, kind="se", conf=0.95, col="purple", lwd=2,
+                                   label=TRUE))
+orditorp (nmds7, display="species", col="black", air=0.01)
+
+
+gg
+
 # -- REPLOT IN GGPLOT ----
 plot_df <- data.frame(nmds4$points) %>%
   mutate(rowid = row.names(.)) %>%
@@ -344,5 +382,8 @@ spp_df <- data.frame(nmds4$species) %>%
 
 ggplot(spp_df, aes(MDS1, MDS2)) + 
   geom_text(aes(color = Growth_Habit, label = clean_code2)) +
-  geom_text(data = subset(plot_df, trt == "N+P"), aes(MDS1, MDS2, label = plotid))
+  geom_text(data = subset(plot_df, trt == "N+P"), aes(MDS1, MDS2, label = plotid)) +
+  geom_text(data = subset(plot_df, trt == "N"), aes(MDS1, MDS2, label = plotid), col = "blue") +
+  geom_text(data = subset(plot_df, trt == "C"), aes(MDS1, MDS2, label = plotid), col = "purple") +
+  geom_text(data = subset(plot_df, trt == "P"), aes(MDS1, MDS2, label = plotid), col = "brown")
   
