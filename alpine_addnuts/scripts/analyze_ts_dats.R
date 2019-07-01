@@ -427,7 +427,7 @@ trtcols <- viridis::viridis(n = length(alltrts))
 names(trtcols) <- alltrts
 
 # specify species text size
-plottext <- 2
+plottext <- 3
 
 # last time point, sdl
 # grab ordihull
