@@ -10,7 +10,8 @@
 
 
 # notes from TS on species codes:
-# TS says "junk1" = nothing (placeholder "species" for nothing hit), and "O" == "ORALA" (Oreoxis alpina)
+# TS says "junk1" = nothing (placeholder "species" for nothing hit), and
+# "O" also = nothing hit (placeholder)
 # ERS6 = fairly safe to assume that's ERSI3...  Erigeron simplex  (maybe we found two of them stuck together (3+3=)
 # SOL  = Solidago radiata [ctw: multiradiata]
 # PrAu     
@@ -138,7 +139,7 @@ spplist_master <- rbind(data.frame(set = "NutNet 2013", code = sort(colnames(nut
 # manual corrections to start
 correctcodes <- c(junk1 = "No hit",
                   BIOB2 = "MIOB2",
-                  O = "ORAL",
+                  O = "No hit",
                   ERS6 = "ERSI3",
                   ERTC = "ERSI3",
                   SOL = "SOMU", #solidago multiradiata
@@ -328,5 +329,75 @@ joinUSDAplants <- function(spp, joinfield, searchfield){
 spplist_master <- joinUSDAplants(spp = unique(store_USDA$clean_code2[store_USDA$unknown==FALSE]), joinfield = "clean_code2", searchfield = "Symbol")
 rm(store_USDA)
 
+
+# -- CHECK FOR MULTIPLE CODES FOR ONE SPECIES -----
+# go through species appended by scientific name and check for redundant species with different USDA codes
+spplist_master2 <- spplist_master %>%
+  dplyr::select(Symbol:Native_Status) %>%
+  distinct() %>%
+  subset(!is.na(Symbol)) %>%
+  arrange(Scientific_Name_x) %>%
+  # extract just genus and species epithet
+  mutate(simple_name = str_extract(Scientific_Name_x, "[A-Za-z]+ [A-Za-z]+")) %>%
+  group_by(simple_name) %>%
+  mutate(code_ct = length(unique(Symbol))) %>%
+  ungroup() %>%
+  # keep only those redundant species that have different codes
+  subset(code_ct > 1) %>%
+  # mark if exists in various datasets
+  mutate(in_jgs = Symbol %in% jgslist$USDA_code,
+         in_ts = Symbol %in% spplist_master$code,
+         # create empty col for storing spp number
+         spnum = NA,
+         # create empty col for storing which code to kick out
+         spexclude = NA) %>%
+  # reorganize
+  dplyr::select(spnum, spexclude, simple_name:in_ts, Symbol:ncol(.))
+
+# number species to keep track of pairs
+for(i in unique(spplist_master2$simple_name)){
+  spplist_master2$spnum[spplist_master2$simple_name == i] <- which(unique(spplist_master2$simple_name) == i)
+}
+  
+spplist_master2$spexclude <- !(spplist_master2$in_jgs & spplist_master2$in_ts)
+# manually correct geum rossii (should only have 1 code, even tho in both datasets)
+# > choose GERO2 (used in Marko's trait dataset, is most general)
+spplist_master2$spexclude[spplist_master2$Symbol == "GEROT"] <- TRUE
+
+# replace codes and descriptive info in spp_master with codes to keep in spplist_master2
+for(i in spplist_master2$Symbol[spplist_master2$spexclude == TRUE]){
+  # pull correct data
+  simple_name <- spplist_master2$simple_name[spplist_master2$Symbol == i]
+  temp_df <- spplist_master2[spplist_master2$simple_name == simple_name & !spplist_master2$spexclude, 7:ncol(spplist_master2)]
+  
+  # replace usda info
+  spplist_master[spplist_master$clean_code2 == i,4:ncol(spplist_master)] <- temp_df
+  # correct usda code
+  spplist_master$clean_code2[spplist_master$clean_code2 == i] <- temp_df$Symbol
+}
+
+
+# manual checks: correct codes that were misspelled in ts entered data or otherwise got paired incorrectly
+#SIAC v SAIC -- SAIL is a misspell (ids as lichen in USDA database. should be SIAC2)
+spplist_master[spplist_master$clean_code2 == "SAIC",4:ncol(spplist_master)] <- spplist_master[spplist_master$code == "SIACS2",4:ncol(spplist_master)]
+spplist_master$clean_code2[spplist_master$clean_code2 == "SAIC"] <- "SIACS2"
+
+#NOMO2 v. NOMOM -- jgs notes noccaea montana is old, should be noccaea fendleri. marko's dataset uses noccaea fendleri, but is older than jane's list
+# > go with NOFEN
+spplist_master[spplist_master$clean_code2 == "NOMO2",4:ncol(spplist_master)] <- spplist_master[spplist_master$code == "NOMOM",4:ncol(spplist_master)] 
+spplist_master$clean_code2[spplist_master$clean_code2 == "NOMO2"] <- "NOFEG"
+
+# add a simple latin name
+spplist_master$simple_name <- str_extract(spplist_master$Scientific_Name_x, "[A-Za-z]+ [A-Za-z]+") 
+# switch "L." to sp. for plants IDd to genus only
+spplist_master$simple_name <- gsub(" L$", " sp.", spplist_master$simple_name) 
+
+#reorganize cols
+spplist_master <- dplyr::select(spplist_master, code:unknown, simple_name, Symbol:ncol(spplist_master))
+
+
+
+# -- FINISHING -----
+# note which spp
 # spplist compiled! write out for reference
 write_csv(spplist_master, "alpine_addnuts/output_data/sdl_nutnet_spplookup.csv")
