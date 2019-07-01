@@ -17,7 +17,6 @@
 # -- SETUP ----
 rm(list = ls())
 library(tidyverse)
-library(vegan)
 options(stringsAsFactors = F)
 theme_set(theme_bw())
 na_vals <- c("", " ", NA, "NA", "NaN", NaN, ".")
