@@ -397,6 +397,45 @@ spplist_master <- dplyr::select(spplist_master, code:unknown, simple_name, Symbo
 
 
 
+# -- INFILL MISSING DESCRIPTIVE INFO ----
+# infill missing species descriptive info for plants only IDd to genus (e.g. Juncus L., Viola L.)
+# all plants in Tim's dataset should be native and probably perennial
+# will match to whatever species are in same genera and IDd to spp level
+# also cross-check with jane's spp list
+
+# which codes have missing descriptive info -- ignore unknowns and no hit codes
+needsinfill <- sort(unique(spplist_master$clean_code2[is.na(spplist_master$Growth_Habit) & !grepl("^2|No hit", spplist_master$clean_code2)]))
+# check which cols have missing info
+with(spplist_master, spplist_master[clean_code2 %in% needsinfill, ])
+# > just Duration, Growth_Habit, and Native_Satus are NA
+
+# > notws: 
+# TS says Juncus should only be perennial at NWT
+# all violets in jgs spp list are perennial (looked up codes that don't have info on usda plants db)
+# all Poa in jgs spp list are perennial
+# all potentilla in jgs perennial
+# elymus is perennial in usda plants db
+# .. going to infill all as perennial, native and then whatever is most common growth_habit for that genus in ts spplist
+
+# infill duration
+spplist_master$Duration[spplist_master$clean_code2 %in% needsinfill] <- "Perennial"
+# infill native status
+spplist_master$Native_Status[spplist_master$clean_code2 %in% needsinfill] <- "L48 (N)" #most conservative
+# infill poa, rush and carex sp. as graminoid (follows usda plants db convention for poa, rush or carex ID'd to spp level)
+spplist_master$Growth_Habit[spplist_master$clean_code2 %in% needsinfill & grepl("Cyper|Poac|Junca", spplist_master$Family)] <- "Graminoid"
+# infill forb growth habitat
+spplist_master$Growth_Habit[spplist_master$clean_code2 == "POTEN"] <- unique(spplist_master$Growth_Habit[grepl("Potenti", spplist_master$simple_name) & !is.na(spplist_master$Growth_Habit)])
+spplist_master$Growth_Habit[spplist_master$clean_code2 == "DRABA"] <- unique(spplist_master$Growth_Habit[grepl("Draba", spplist_master$simple_name) & !is.na(spplist_master$Growth_Habit)])
+spplist_master$Growth_Habit[spplist_master$clean_code2 == "VIOLA"] <- unique(spplist_master$Growth_Habit[grepl("Viola", spplist_master$simple_name) & !is.na(spplist_master$Growth_Habit)])
+
+# review infilling
+spplist_master[spplist_master$clean_code2 %in% needsinfill,] # looks good
+
+# change unknown for no-hit to NA since not applicable
+spplist_master$unknown[spplist_master$clean_code2 == "No hit"] <- NA
+
+
+
 # -- FINISHING -----
 # note which spp
 # spplist compiled! write out for reference
