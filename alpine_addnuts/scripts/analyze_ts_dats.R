@@ -19,7 +19,8 @@
 rm(list = ls())
 library(tidyverse)
 library(vegan)
-library(ggvegan) # devtools::install_github("gavinsimpson/ggvegan")
+#library(ggvegan) # devtools::install_github("gavinsimpson/ggvegan")
+library(cowplot)
 options(stringsAsFactors = F)
 theme_set(theme_bw())
 na_vals <- c("", " ", NA, "NA", "NaN", NaN, ".")
@@ -370,7 +371,37 @@ with (sitematrix7_sdl, ordiellipse(nmds7, snow, kind="se", conf=0.95, col="purpl
 orditorp (nmds7, display="species", col="black", air=0.01)
 
 
-gg
+
+# -- NutNet last time point only ---
+matrix8 <- subset(plantcom, yr %in% c(2016, 2017) & site == "nutnet") %>%
+  #remove unknowns and non-veg
+  subset(!grepl("^2", clean_code2)) %>%
+  mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
+  spread(clean_code2, hits, fill = 0) %>%
+  dplyr::select(rowid, site:ncol(.)) %>%
+  as.data.frame()
+
+sitematrix8 <- matrix8[,1:4] %>%
+  left_join(nnplots)
+
+row.names(matrix8) <- matrix8$rowid
+matrix8 <- matrix8[!colnames(matrix8) %in% c("rowid", "site", "yr", "plotid")]
+
+# relativize data
+matrix8_rel <- vegan::decostand(matrix8, method = "total")
+
+# run nmds
+nmds8 <- metaMDS(matrix8_rel, k = 2, trymax = 50)
+plot(nmds8, type = "t")
+
+
+ordiplot(nmds8, type="n", main = "nutnet only, last year, all treatments")
+with (sitematrix8, ordiellipse(nmds8, trt, kind="se", conf=0.95, col="blue", lwd=2,
+                                   label=TRUE))
+orditorp (nmds8, display="species", col="black", air=0.01)
+
+
+
 
 # -- REPLOT IN GGPLOT ----
 plot_df <- data.frame(nmds4$points) %>%
@@ -387,3 +418,104 @@ ggplot(spp_df, aes(MDS1, MDS2)) +
   geom_text(data = subset(plot_df, trt == "C"), aes(MDS1, MDS2, label = plotid), col = "purple") +
   geom_text(data = subset(plot_df, trt == "P"), aes(MDS1, MDS2, label = plotid), col = "brown")
   
+
+
+
+# specify plotting colors for all treatments
+alltrts <- sort(unique(c(sitematrix8$trt, sitematrix7_sdl$trt)))
+trtcols <- viridis::viridis(n = length(alltrts))
+names(trtcols) <- alltrts
+
+# specify species text size
+plottext <- 2
+
+# last time point, sdl
+# grab ordihull
+data.scores7 <- as.data.frame(scores(nmds7))
+grp7.np <- data.scores[data.scores$trt == "N+P", ][chull(data.scores[data.scores$grp == 
+                                                                   "A", c("NMDS1", "NMDS2")]), ]  # hull values for grp A
+grp7.n <- data.scores[data.scores$grp == "B", ][chull(data.scores[data.scores$grp == 
+                                                                   "B", c("NMDS1", "NMDS2")]), ]  # hull values for grp B
+
+plot_df7 <- data.frame(nmds7$points) %>%
+  mutate(rowid = row.names(.)) %>%
+  left_join(sitematrix7_sdl)
+spp_df7 <- data.frame(nmds7$species) %>%
+  mutate(clean_code2 = row.names(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)])) %>%
+  #make simple lifeform grp
+  mutate(simple_lifeform = ifelse(Family == "Fabaceae", "N-fixer",
+                                  ifelse(grepl("Shrub", Growth_Habit), "Shrub",
+                                         ifelse(Growth_Habit == "Graminoid", "Grass", "Forb"))))
+
+grp7.np <- plot_df7[plot_df7$trt == "N+P", ][chull(plot_df7[plot_df7$trt == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp7.dry <- plot_df7[plot_df7$meadow == "Dry", ][chull(plot_df7[plot_df7$meadow == "Dry", c("MDS1", "MDS2")]), ]  # hull values for dry meadow plots
+grp7.other <- plot_df7[plot_df7$meadow != "Dry", ][chull(plot_df7[plot_df7$meadow != "Dry", c("MDS1", "MDS2")]), ]  # hull values for non-dry plots
+
+
+sdlfig <- ggplot(spp_df7, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grp7.np, aes(MDS1, MDS2), alpha = 0.5, fill = "aquamarine") +
+  geom_polygon(data = grp7.dry, aes(MDS1, MDS2), alpha = 0.5, fill = NA, col = "black", lty = 2) +
+  geom_polygon(data = grp7.other, aes(MDS1, MDS2), alpha = 0.5, fill = NA, col = "black", lty = 3) +
+  #geom_text(aes(color = simple_lifeform, label = clean_code2)) +
+  geom_text(data = subset(spp_df7, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
+  geom_text(data = subset(spp_df7, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
+  geom_text(data = subset(spp_df7, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
+  geom_text(data = subset(spp_df7, simple_lifeform == "Shrub"), aes(label = clean_code2), col = "orchid", fontface = "bold", size = plottext) +
+  geom_point(data = plot_df7, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  scale_color_discrete(name = "Lifeform") +
+  scale_fill_manual(name = "Plot\ntreatment", values = trtcols) +
+  #guides(guide_legend(override.aes = list(pch =21))) +
+  #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
+  ggtitle("Saddle plots 2016") +
+  theme_bw() +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        legend.position = "none")
+
+
+
+# last time point, nutnet
+plot_df8 <- data.frame(nmds8$points) %>%
+  mutate(rowid = row.names(.)) %>%
+  left_join(sitematrix8)
+spp_df8 <- data.frame(nmds8$species) %>%
+  mutate(clean_code2 = row.names(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)])) %>%
+  #make simple lifeform grp
+  mutate(simple_lifeform = ifelse(Family == "Fabaceae", "N-fixer",
+                                  ifelse(grepl("Shrub", Growth_Habit), "Shrub",
+                                         ifelse(Growth_Habit == "Graminoid", "Grass", "Forb"))))
+
+plot_df8$trt <- factor(plot_df8$trt, levels = alltrts)
+
+grp8.np <- plot_df8[plot_df8$trt == "N+P", ][chull(plot_df8[plot_df8$trt == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp8.npk <- plot_df8[plot_df8$trt == "N+P+K", ][chull(plot_df8[plot_df8$trt == "N+P+K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp8.nk <- plot_df8[plot_df8$trt == "N+K", ][chull(plot_df8[plot_df8$trt == "N+K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp8.c <- plot_df8[plot_df8$trt == "C", ][chull(plot_df8[plot_df8$trt == "C", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp8.n <- plot_df8[plot_df8$trt == "N", ][chull(plot_df8[plot_df8$trt == "N", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp8.k <- plot_df8[plot_df8$trt == "K", ][chull(plot_df8[plot_df8$trt == "K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+
+
+nnfig <- ggplot(spp_df8, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grp8.np, aes(MDS1, MDS2), alpha = 0.5, fill = "aquamarine") +
+  geom_polygon(data = grp8.npk, aes(MDS1, MDS2), alpha = 0.5, fill = "lightgreen") +
+  geom_polygon(data = grp8.c, aes(MDS1, MDS2), alpha = 0.5, fill = "purple") +
+  geom_polygon(data = grp8.n, aes(MDS1, MDS2), alpha = 0.5, fill = "dodgerblue3") +
+  geom_polygon(data = grp8.k, aes(MDS1, MDS2), alpha = 0.5, fill = "darkslateblue") +
+  geom_text(data = subset(spp_df8, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
+  geom_text(data = subset(spp_df8, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
+  geom_text(data = subset(spp_df8, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
+  geom_point(data = plot_df8, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  scale_fill_manual(name = "Plot\ntreatment", values = trtcols, drop = F) +
+  ggtitle("NutNet plots 2017") +
+  theme_bw() +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank())
+
+
+lasttime_fig <- plot_grid(sdlfig, nnfig, nrow = 1,
+          align = "h", rel_widths = c(1,1.3))
+
+ggsave(plot = lasttime_fig, 
+       filename = "alpine_addnuts/figures/lasttime_nmds.pdf", scale = 1.3)
