@@ -87,6 +87,7 @@ sdlplots_alt <- sdlplots %>%
   dplyr::select(plot, old_plot, meadow, snow, trt)
 
 
+
 # -- PREP DATA FOR NMSD -----
 # (1) all sites, all yrs -- keep only C, N, P, and N+P plots
 keep_nnplots <- nnplots$plotid[nnplots$trt %in% c("C", "N", "P", "N+P")]
@@ -118,7 +119,6 @@ for(i in sitematrix1$plotid[sitematrix1$site == "sdl"]){
   sitematrix1$trt[sitematrix1$plotid == i] <- sdlplots$trt[sdlplots$plot == i & !is.na(sdlplots$plot)]
 }
 
-sitematrix1 <- left_join()
 row.names(matrix1_overlap) <- matrix1_overlap$rowid
 matrix1_overlap <- matrix1_overlap[!colnames(matrix1_overlap) %in% c("rowid", "site", "yr", "plotid")]
 
@@ -223,7 +223,8 @@ matrix4 <- subset(plantcom, site == "sdl" & plotid %in% common1216$plotid) %>%
 
 sitematrix4 <- matrix4[,1:4] %>%
   mutate(plotid = as.numeric(plotid)) %>%
-  left_join(sdlplots, by = c("plotid" = "plot"))
+  #left_join(sdlplots, by = c("plotid" = "plot")) %>%
+  left_join(sdlplots_alt, by = c("plotid" = "plot"))
 
 row.names(matrix4) <- matrix4$rowid
 matrix4 <- matrix4[!colnames(matrix4) %in% c("rowid", "site", "yr", "plotid")]
@@ -237,9 +238,9 @@ with (sitematrix4, ordiellipse(nmds4, yr, kind="se", conf=0.95, col="blue", lwd=
                                label=TRUE))
 with (sitematrix4, ordiellipse(nmds4, trt, kind="se", conf=0.95, col="red", lwd=2,
                                label=TRUE))
-orditorp (nmds2, display="species", col="black", air=0.02)
+orditorp (nmds4, display="species", col="black", air=0.02)
 
-ordiplot(nmds4, type="n", main = "sdl sites, 2012 and 2016 only, all spp")
+ordiplot(nmds4, type="n", main = "sdl sites, all yrs, common plots")
 with(sitematrix4, ordihull(nmds4, yr, col="blue", label = TRUE))
 with(sitematrix4, ordiellipse(nmds4, trt, kind = "se", conf = 0.95, col="red", lwd=2,
                               label=TRUE))
@@ -333,3 +334,15 @@ with (sitematrix6, ordihull(nmds6, yr, col="blue", lwd=2,
 orditorp (nmds6, display="species", col="black", air=0.01)
 
 
+# -- REPLOT IN GGPLOT ----
+plot_df <- data.frame(nmds4$points) %>%
+  mutate(rowid = row.names(.)) %>%
+  left_join(sitematrix4)
+spp_df <- data.frame(nmds4$species) %>%
+  mutate(clean_code2 = row.names(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)]))
+
+ggplot(spp_df, aes(MDS1, MDS2)) + 
+  geom_text(aes(color = Growth_Habit, label = clean_code2)) +
+  geom_text(data = subset(plot_df, trt == "N+P"), aes(MDS1, MDS2, label = plotid))
+  
