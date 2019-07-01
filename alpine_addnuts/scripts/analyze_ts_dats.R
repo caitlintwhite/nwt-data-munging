@@ -34,6 +34,9 @@ spplist <- read.csv("alpine_addnuts/output_data/sdl_nutnet_spplookup.csv")
 sdlplots <- read.csv("alpine_addnuts/output_data/sdl_plot_lookup.csv") 
 nnplots <- read.csv("alpine_addnuts/output_data/nutnet_plot_lookup.csv")
 
+# full sdl site info table (troublshooting discrpancies, but good to use for plots 1-16 sampled in 1997-2016 in sdl)
+sdlplots_full <- read.csv("alpine_addnuts/output_data/sdl_plots_lookup_trblshoot.csv")
+
 
 
 # -- REVIEW DATA -----
@@ -44,6 +47,44 @@ glimpse(nnplots)
 # all looks fine.. "control" in sdl site info not coded similarly as "C" in nutnet site info
 
 
+# -- PREP SDL SITE INFO FULL (i.e. get snow and meadow info) ----
+# specify dry meadow codes used across datasets
+drycodes <- c("d", "Dry", "dry")
+wetcodes <- c("w")
+mescodes <- c("m", "mesic")
+snowcodes <- c("snow", "s", "SD")
+nosnow <- c("n", "none", "recovery", "NONE", "ND")
+
+sdlplots_alt <- sdlplots %>%
+  left_join(subset(sdlplots_full, !is.na(plot))) %>%
+  #temp create rowid for grouping by row
+  mutate(rowid = row.names(.)) %>%
+  group_by(rowid) %>%
+  mutate(meadow = ifelse(meadowLT %in% c(drycodes, NA) &
+                           meadow12 %in% c(drycodes, NA) &
+                           meadow16 %in% c(drycodes, NA), "Dry", "Unknown"),
+         meadow = ifelse(meadowLT %in% c(wetcodes, NA) &
+                           meadow12 %in% c(wetcodes, NA) &
+                           meadow16 %in% c(wetcodes, NA), "Wet", meadow),
+         meadow = ifelse(meadowLT %in% c(mescodes, NA) &
+                           meadow12 %in% c(mescodes, NA) &
+                           meadow16 %in% c(mescodes, NA), "Mesic", meadow),
+         #correct for NAs in all
+         meadow = ifelse(is.na(meadowLT) & is.na(meadow12) & is.na(meadow16), "Unknown", meadow),
+         # specify snow col
+         snow = ifelse(snowLT %in% c(snowcodes, NA) &
+                         site97 %in% c(snowcodes, NA) &
+                         snow12 %in% c(snowcodes, NA) &
+                         sfcode16 %in% c(snowcodes, NA), "Snow", "Unknown"),
+         snow = ifelse(snowLT %in% c(nosnow, NA) &
+                          site97 %in% c(nosnow, NA) &
+                          snow12 %in% c(nosnow, NA) &
+                          sfcode16 %in% c(nosnow, NA), "No snow", snow),
+         #correct for NAs in all
+         snow = ifelse(is.na(snowLT) & is.na(site97) & is.na(snow12) & is.na(sfcode16), "Unknown", snow)) %>%
+  ungroup() %>%
+  #retain reference cols for analysis only
+  dplyr::select(plot, old_plot, meadow, snow, trt)
 
 
 # -- PREP DATA FOR NMSD -----
@@ -92,7 +133,7 @@ ordiplot()
 
 ordiplot(nmds1, type="n", main = "all sites, all yrs, common spp")
 with (sitematrix1, ordiellipse(nmds1, yr, kind="se", conf=0.95, col="blue", lwd=2,
-                            label=TRUE))
+                               label=TRUE))
 with (sitematrix1, ordiellipse(nmds1, trt, kind="se", conf=0.95, col="red", lwd=2,
                                label=TRUE))
 orditorp (nmds1, display="species", col="black", air=0.01)
@@ -158,7 +199,7 @@ orditorp (nmds2, display="species", col="black", air=0.02)
 ordiplot(nmds3, type="n", main = "sdl sites, 2012 and 2016 only, all spp")
 with(sitematrix3, ordisurf(nmds3, yr, col="blue", add = TRUE))
 with(sitematrix3, ordiellipse(nmds3, trt, kind = "se", conf = 0.95, col="red", lwd=2,
-                               label=TRUE))
+                              label=TRUE))
 orditorp (nmds2, display="species", col="black", air=0.02)
 
 
@@ -215,7 +256,7 @@ nnplots1317 <- subset(plantcom, site == "nutnet") %>%
 
 # plots 1-16 for sdl, 28 plots common in nutnet in 2013 and 2017
 matrix5 <-  subset(plantcom, (site == "sdl" & plotid %in% c(1:16)) |
-                                (site == "nutnet" & plotid %in% nnplots1317$plotid[nnplots1317$plotid %in% keep_nnplots])) %>%
+                     (site == "nutnet" & plotid %in% nnplots1317$plotid[nnplots1317$plotid %in% keep_nnplots])) %>%
   #remove unknowns and non-veg
   subset(!grepl("^2", clean_code2)) %>%
   mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
@@ -251,16 +292,16 @@ orditorp (nmds5, display="species", col="black", air=0.01)
 
 ordiplot(nmds5, type="n", main = "all sites, all yrs, common plots")
 with (sitematrix5, ordihull(nmds5, yr, col="blue", lwd=2,
-                               label=TRUE))
+                            label=TRUE))
 with (sitematrix5, ordihull(nmds5, trt, col="red", lwd=2,
-                               label=TRUE))
+                            label=TRUE))
 orditorp (nmds5, display="species", col="black", air=0.01)
 
 
 
 # -- CONTROL PLOTS ONLY FOR COMPARISON -----
 controlplots <- sort(c(sdlplots$plot[sdlplots$trt == "C"],
-                  nnplots$plotid[nnplots$trt == "C"]))
+                       nnplots$plotid[nnplots$trt == "C"]))
 matrix6 <- subset(plantcom, plotid %in% controlplots) %>%
   #remove unknowns and non-veg
   subset(!grepl("^2", clean_code2)) %>%
@@ -288,7 +329,7 @@ orditorp (nmds6, display="species", col="black", air=0.01)
 
 ordiplot(nmds6, type="n", main = "all sites, all yrs, control plots only")
 with (sitematrix6, ordihull(nmds6, yr, col="blue", lwd=2,
-                               label=TRUE))
+                            label=TRUE))
 orditorp (nmds6, display="species", col="black", air=0.01)
 
 
