@@ -89,6 +89,12 @@ sdlplots_alt <- sdlplots %>%
   dplyr::select(plot, old_plot, meadow, snow, trt)
 
 
+# -- ADD SIMPLE LIFEFORM TO SPPLIST ----
+#make simple lifeform grp
+spplist <- spplist %>%
+  mutate(simple_lifeform = ifelse(Family == "Fabaceae", "N-fixer",
+                                ifelse(grepl("Shrub", Growth_Habit), "Shrub",
+                                       ifelse(Growth_Habit == "Graminoid", "Grass", "Forb"))))
 
 # -- PREP DATA FOR NMSD -----
 # (1) all sites, all yrs -- keep only C, N, P, and N+P plots
@@ -346,9 +352,35 @@ matrix7_sdl <- subset(plantcom, yr %in% c(2016, 2017) & site == "sdl") %>%
   dplyr::select(rowid, site:ncol(.)) %>%
   as.data.frame()
 
+# calculate forb to grass ratio
+gfrat7 <- matrix7_sdl %>%
+  ungroup() %>%
+  gather(clean_code2, hits, 5:ncol(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)]), by = "clean_code2") %>%
+  filter(!is.na(simple_lifeform)) %>%
+  filter(hits > 0) %>%
+  # calculate total veg hits by plot
+  # group(rowid, site, yr, plotid) %>%
+  # mutate(plothits = sum(hits)) %>%
+  # ungroup() %>%
+  group_by(rowid, site, yr, plotid, simple_lifeform) %>%
+  summarise(hits = sum(hits)) %>%
+  ungroup() %>%
+  #spread out total hits by lifeform to calculate ratios
+  spread(simple_lifeform, hits, fill = 0) %>%
+  #calculate g:f ratio
+  group_by(rowid) %>%
+  mutate(g2f = Grass/Forb) %>%
+  # coerce plotid to number to joins with sitematrix
+  mutate(plotid = as.numeric(plotid))
+  
+
 sitematrix7_sdl <- matrix7_sdl[,1:4] %>%
   mutate(plotid = as.numeric(plotid)) %>%
-  left_join(sdlplots_alt, by = c("plotid" = "plot"))
+  left_join(sdlplots_alt, by = c("plotid" = "plot")) %>%
+  # join grass forb ratio
+  left_join(gfrat7[c("rowid", "site", "yr", "plotid", "g2f")])
+sitematrix7_sdl$trt <- as.factor(sitematrix7_sdl$trt)
 
 row.names(matrix7_sdl) <- matrix7_sdl$rowid
 matrix7_sdl <- matrix7_sdl[!colnames(matrix7_sdl) %in% c("rowid", "site", "yr", "plotid")]
@@ -360,15 +392,28 @@ matrix7_sdl_rel <- vegan::decostand(matrix7_sdl, method = "total")
 nmds7 <- metaMDS(matrix7_sdl_rel, k = 2, trymax = 50)
 plot(nmds7, type = "t")
 
+fit7 <- envfit(nmds7, sitematrix7_sdl[c("trt", "g2f")], strata = sitematrix7_sdl$trt, perm = 999)
 
-ordiplot(nmds7, type="n", main = "sdl only, last year, all treatments")
-with (sitematrix7_sdl, ordiellipse(nmds7, trt, kind="se", conf=0.95, col="blue", lwd=2,
-                               label=TRUE))
+ordiplot(nmds7, type="n", main = "Saddle 2016, all treatments")
+with (sitematrix7_sdl, ordiellipse(nmds7, trt, kind="se", conf=0.95, col="dodgerblue3"
+                               ))
 with (sitematrix7_sdl, ordiellipse(nmds7, meadow, kind="se", conf=0.95, col="green", lwd=2,
                                    label=TRUE))
 with (sitematrix7_sdl, ordiellipse(nmds7, snow, kind="se", conf=0.95, col="purple", lwd=2,
                                    label=TRUE))
+plot(fit7)
 orditorp (nmds7, display="species", col="black", air=0.01)
+
+sdlboxplot <- sitematrix7_sdl %>%
+  mutate(pointgrp = paste(meadow, trt)) %>%
+  ggplot(aes(trt, g2f, col = meadow)) +
+  geom_boxplot() +
+  #geom_jitter(aes(group = pointgrp), alpha = 0.5, width = 0.1) +
+  labs(y = "Grass hits/Forb hits") +
+  ggtitle("Saddle 2016")+
+  theme(legend.position = c(0.8,0.8),
+        legend.background = element_blank())
+
 
 
 
@@ -381,8 +426,30 @@ matrix8 <- subset(plantcom, yr %in% c(2016, 2017) & site == "nutnet") %>%
   dplyr::select(rowid, site:ncol(.)) %>%
   as.data.frame()
 
+# calculate forb to grass ratio
+gfrat8 <- matrix8 %>%
+  ungroup() %>%
+  gather(clean_code2, hits, 5:ncol(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)]), by = "clean_code2") %>%
+  filter(!is.na(simple_lifeform)) %>%
+  filter(hits > 0) %>%
+  # calculate total veg hits by plot
+  # group(rowid, site, yr, plotid) %>%
+  # mutate(plothits = sum(hits)) %>%
+  # ungroup() %>%
+  group_by(rowid, site, yr, plotid, simple_lifeform) %>%
+  summarise(hits = sum(hits)) %>%
+  ungroup() %>%
+  #spread out total hits by lifeform to calculate ratios
+  spread(simple_lifeform, hits, fill = 0) %>%
+  #calculate g:f ratio
+  group_by(rowid) %>%
+  mutate(g2f = Grass/Forb)
+
 sitematrix8 <- matrix8[,1:4] %>%
-  left_join(nnplots)
+  left_join(nnplots) %>%
+  mutate(trt = as.factor(trt)) %>%
+  left_join(gfrat8)
 
 row.names(matrix8) <- matrix8$rowid
 matrix8 <- matrix8[!colnames(matrix8) %in% c("rowid", "site", "yr", "plotid")]
@@ -394,14 +461,24 @@ matrix8_rel <- vegan::decostand(matrix8, method = "total")
 nmds8 <- metaMDS(matrix8_rel, k = 2, trymax = 50)
 plot(nmds8, type = "t")
 
+# environmental fit grass to forb
+fit8 <- envfit(nmds8, sitematrix8[c("trt", "g2f")], strata = sitematrix8$block, perm = 999)
 
-ordiplot(nmds8, type="n", main = "nutnet only, last year, all treatments")
-with (sitematrix8, ordiellipse(nmds8, trt, kind="se", conf=0.95, col="blue", lwd=2,
-                                   label=TRUE))
+
+ordiplot(nmds8, type="n", main = "NutNet 2017, all treatments")
+with (sitematrix8, ordiellipse(nmds8, trt, kind="se", conf=0.95, col="dodgerblue3"))
+plot(fit8)
 orditorp (nmds8, display="species", col="black", air=0.01)
 
+nnboxplot <- ggplot(sitematrix8, aes(trt, g2f)) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.5, width = 0.1) +
+  labs(y = NULL) +
+  ggtitle("Nutnet 2017")
 
-
+# plot boxplots together for kns
+plot_grid(sdlboxplot, nnboxplot,
+         nrow = 1)
 
 # -- REPLOT IN GGPLOT ----
 plot_df <- data.frame(nmds4$points) %>%
