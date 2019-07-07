@@ -1,92 +1,92 @@
-plot,old_plot,trt
-1,710,C
-2,712,C
-3,709,C
-4,711,C
-5,262,N
-6,291,N
-7,292,N
-8,99,N
-9,263,N+P
-10,290,N+P
-11,300,N+P
-12,261,N+P
-13,285,P
-14,287,P
-15,289,P
-16,296,P
-17,NA,C
-18,NA,C
-19,NA,C
-20,NA,C
-21,NA,N
-22,NA,N
-23,NA,N
-24,NA,N
-25,NA,N+P
-26,NA,N+P
-27,NA,N+P
-28,NA,N+P
-29,NA,P
-30,NA,P
-31,NA,P
-32,NA,P
-33,NA,C
-34,NA,C
-35,NA,C
-36,NA,C
-37,NA,N
-38,NA,N
-39,NA,N
-40,NA,N
-41,NA,N+P
-42,NA,N+P
-43,NA,N+P
-44,NA,N+P
-45,NA,P
-46,NA,P
-47,NA,P
-48,NA,P
-49,NA,C
-50,NA,C
-51,NA,C
-52,NA,C
-53,NA,N
-54,NA,N
-55,NA,N
-56,NA,N
-57,NA,N+P
-58,NA,N+P
-59,NA,N+P
-60,NA,N+P
-61,NA,P
-62,NA,P
-63,NA,P
-64,NA,P
-65,NA,C
-66,NA,C
-67,NA,C
-68,NA,C
-69,NA,N
-70,NA,N
-71,NA,N
-72,NA,N
-73,NA,N+P
-74,NA,N+P
-75,NA,N+P
-76,NA,N+P
-77,NA,P
-78,NA,P
-79,NA,P
-80,NA,P
-81,NA,C
-82,NA,C
-83,NA,C
-84,NA,C
-85,NA,C
-86,NA,C
-NA,286,N
-NA,96,P
-NA,0,C
-NA,0,N
-NA,0,N+P
+plot,old_plot,trt,meadow,meadow_alt,snow,snow_alt,sfcode2016,notes2016
+1,710,C,Dry,Dry,No snow,No snow,1,never affected
+2,712,C,Dry,Dry,No snow,No snow,1,never affected
+3,709,C,Dry,Dry,No snow,No snow,1,never affected
+4,711,C,Dry,Dry,No snow,No snow,1,never affected
+5,262,N,Dry,Dry,No snow,No snow,1,never affected
+6,291,N,Dry,Dry,No snow,No snow,1,never affected
+7,292,N,Dry,Dry,No snow,No snow,1,never affected
+8,99,N,Dry,Dry,No snow,No snow,1,never affected
+9,263,N+P,Dry,Dry,No snow,No snow,1,never affected
+10,290,N+P,Dry,Dry,No snow,No snow,1,never affected
+11,300,N+P,Dry,Dry,No snow,No snow,1,never affected
+12,261,N+P,Dry,Dry,No snow,No snow,1,never affected
+13,285,P,Dry,Dry,No snow,No snow,1,never affected
+14,287,P,Dry,Dry,No snow,No snow,1,never affected
+15,289,P,Dry,Dry,No snow,No snow,1,never affected
+16,296,P,Dry,Dry,No snow,No snow,1,never affected
+17,NA,C,Unknown,Mesic,Unknown,No snow,1,never affected
+18,NA,C,Unknown,Mesic,Unknown,No snow,1,never affected
+19,NA,C,Unknown,Mesic,Unknown,No snow,1,never affected
+20,NA,C,Unknown,Mesic,Unknown,No snow,1,never affected
+21,NA,N,Unknown,Mesic,Unknown,No snow,1,never affected
+22,NA,N,Unknown,Mesic,Unknown,No snow,1,never affected
+23,NA,N,Unknown,Mesic,Unknown,No snow,1,never affected
+24,NA,N,Unknown,Mesic,Unknown,No snow,1,never affected
+25,NA,N+P,Unknown,Mesic,Unknown,No snow,1,never affected
+26,NA,N+P,Unknown,Mesic,Unknown,No snow,1,never affected
+27,NA,N+P,Unknown,Mesic,Unknown,No snow,1,never affected
+28,NA,N+P,Unknown,Mesic,Unknown,No snow,1,never affected
+29,NA,P,Unknown,Mesic,Unknown,No snow,1,never affected
+30,NA,P,Unknown,Mesic,Unknown,No snow,1,never affected
+31,NA,P,Unknown,Mesic,Unknown,No snow,1,never affected
+32,NA,P,Unknown,Mesic,Unknown,No snow,1,never affected
+33,NA,C,Wet,Wet,No snow,No snow,1,never affected
+34,NA,C,Wet,Wet,No snow,No snow,1,never affected
+35,NA,C,Wet,Wet,No snow,No snow,1,never affected
+36,NA,C,Wet,Wet,No snow,No snow,1,never affected
+37,NA,N,Wet,Wet,No snow,No snow,1,never affected
+38,NA,N,Wet,Wet,No snow,No snow,1,never affected
+39,NA,N,Wet,Wet,No snow,No snow,1,never affected
+40,NA,N,Wet,Wet,No snow,No snow,1,never affected
+41,NA,N+P,Wet,Wet,No snow,No snow,1,never affected
+42,NA,N+P,Wet,Wet,No snow,No snow,1,never affected
+43,NA,N+P,Wet,Wet,No snow,No snow,1,never affected
+44,NA,N+P,Wet,Wet,No snow,No snow,1,never affected
+45,NA,P,Wet,Wet,No snow,No snow,1,never affected
+46,NA,P,Wet,Wet,No snow,No snow,1,never affected
+47,NA,P,Wet,Wet,No snow,No snow,1,never affected
+48,NA,P,Wet,Wet,No snow,No snow,1,never affected
+49,NA,C,Unknown,Dry,Unknown,Snow,3,in snowfence area
+50,NA,C,Unknown,Dry,Unknown,Snow,3,in snowfence area
+51,NA,C,Unknown,Dry,Unknown,Snow,3,in snowfence area
+52,NA,C,Unknown,Dry,Unknown,Snow,3,in snowfence area
+53,NA,N,Unknown,Dry,Unknown,Snow,3,in snowfence area
+54,NA,N,Unknown,Dry,Unknown,Snow,3,in snowfence area
+55,NA,N,Unknown,Dry,Unknown,Snow,3,in snowfence area
+56,NA,N,Unknown,Dry,Unknown,Snow,3,in snowfence area
+57,NA,N+P,Unknown,Dry,Unknown,Snow,3,in snowfence area
+58,NA,N+P,Unknown,Dry,Unknown,Snow,3,in snowfence area
+59,NA,N+P,Unknown,Dry,Unknown,Snow,3,in snowfence area
+60,NA,N+P,Unknown,Dry,Unknown,Snow,3,in snowfence area
+61,NA,P,Unknown,Dry,Unknown,Snow,3,in snowfence area
+62,NA,P,Unknown,Dry,Unknown,Snow,2,snowfence recovery
+63,NA,P,Unknown,Dry,Unknown,Snow,2,snowfence recovery
+64,NA,P,Unknown,Dry,Unknown,Snow,2,snowfence recovery
+65,NA,C,Mesic,Mesic,Snow,Snow,3,in snowfence area
+66,NA,C,Mesic,Mesic,Snow,Snow,3,in snowfence area
+67,NA,C,Mesic,Mesic,Snow,Snow,3,in snowfence area
+68,NA,C,Mesic,Mesic,Snow,Snow,3,in snowfence area
+69,NA,N,Mesic,Mesic,Snow,Snow,2,snowfence recovery
+70,NA,N,Mesic,Mesic,Snow,Snow,3,in snowfence area
+71,NA,N,Mesic,Mesic,Snow,Snow,3,in snowfence area
+72,NA,N,Mesic,Mesic,Snow,Snow,3,in snowfence area
+73,NA,N+P,Mesic,Mesic,Snow,Snow,3,in snowfence area
+74,NA,N+P,Mesic,Mesic,Snow,Snow,2,snowfence recovery
+75,NA,N+P,Mesic,Mesic,Snow,Snow,2,snowfence recovery
+76,NA,N+P,Mesic,Mesic,Snow,Snow,3,snowfence recovery
+77,NA,P,Mesic,Mesic,Snow,Snow,2,snowfence recovery
+78,NA,P,Mesic,Mesic,Snow,Snow,2,snowfence recovery
+79,NA,P,Mesic,Mesic,Snow,Snow,2,snowfence recovery
+80,NA,P,Mesic,Mesic,Snow,Snow,3,in snowfence area
+81,NA,C,Mesic,Mesic,Snow,Snow,2,snowfence recovery
+82,NA,C,Mesic,Mesic,Snow,Snow,2,snowfence recovery
+83,NA,C,Mesic,Mesic,Snow,Snow,2,snowfence recovery
+84,NA,C,Dry,Dry,Snow,Snow,2,snowfence recovery
+85,NA,C,Dry,Dry,Snow,Snow,2,snowfence recovery
+86,NA,C,Dry,Dry,Snow,Snow,2,snowfence recovery
+NA,286,N,Unknown,Unknown,Snow,Snow,Unknown,Unknown
+16,96,P,Dry,Dry,No snow,No snow,1,never affected
+NA,0,C,Unknown,Unknown,No snow,No snow,Unknown,Unknown
+NA,0,N,Unknown,Unknown,No snow,No snow,Unknown,Unknown
+NA,0,N+P,Unknown,Unknown,No snow,No snow,Unknown,Unknown
