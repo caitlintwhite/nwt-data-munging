@@ -9,17 +9,48 @@
 # > looking for shift to forb dominance in dry meadow plots with +n+p additions
 # > also geom rossii dominance in +n+p plots in sdl
 
+# specific plots/analyses to do:
+# per KNS--
+## 1) NMDS: last time point, all trts, all plots, with natural log forb:grass ration env vector
+## > a) Saddle
+## > b) NutNet
+# per TS--
+## 2) NMDS: dry meadow plots commonly samples in all yrs
+## > a) Saddle (16 plots)
+## > b) NutNet (28 plots)
+## ? can add arrow to show movement over time
+# ctw ideas --
+## betadisper on N+P plots (does N+P expand more than other treatments? i.e. shift more? but if richness declines maybe it wouldn't)
+## indicator spp analysis on all trts (is geum rossii an indicator spp for n+p? camp rotund in NutNet N+P?)
+
+
 # notes:
 # ts only looked at plots 1-16 in saddle because those are the only plots that were sampled in all yrs
+# kns says nutnet dry meadow plots super different from saddle dry meadow plots, not appropriate to compare
 
-# NOTE: recheck SIAC vs SAIC (typo?)
+# email from ts:
+# Ok…the complication is that there are 16 ‘dry’, 16 ‘mesic’ and 16 wet plots.  
+# In addition, however, there also are 16 dry plots in the snow fence and 16 historically mesic sites in the snowfence.
+# What’s missing is 16 wet plots in the snowfence (we couldn’t do that one given where the snow fence was placed…)
+# So…a dry meadow plot in the snowfence area is a different animal than a dry meadow plot in a dry meadow.
+# For the current paper, I’ve stayed out of the snowfence with all dry plots.
+# 
+
+
+# for indicator analysis...
+# (from indicspecies vignettes by Caceres)
+# A = prob. that site belongs to that target site given species x found there (i.e. specificity or positive predictive value of species as indicator to that site group)
+# B = prob. of finding the species in sites belonging to that site group (i.e. fidelity or sensitivity of the species to that site group)
+
+
 
 
 # -- SETUP -----
 rm(list = ls())
 library(tidyverse)
 library(vegan)
-#library(ggvegan) # devtools::install_github("gavinsimpson/ggvegan")
+library(indicspecies)
+#library(ggvegan)# devtools::install_github("gavinsimpson/ggvegan")
 library(cowplot)
 options(stringsAsFactors = F)
 theme_set(theme_bw())
@@ -41,52 +72,15 @@ sdlplots_full <- read.csv("alpine_addnuts/output_data/sdl_plots_lookup_trblshoot
 
 
 
+
 # -- REVIEW DATA -----
 glimpse(plantcom)
 glimpse(spplist)
 glimpse(sdlplots)
 glimpse(nnplots)
+glimpse(sdlplots_full)
 # all looks fine.. "control" in sdl site info not coded similarly as "C" in nutnet site info
 
-
-# -- PREP SDL SITE INFO FULL (i.e. get snow and meadow info) ----
-# specify dry meadow codes used across datasets
-drycodes <- c("d", "Dry", "dry")
-wetcodes <- c("w")
-mescodes <- c("m", "mesic")
-snowcodes <- c("snow", "s", "SD")
-nosnow <- c("n", "none", "recovery", "NONE", "ND")
-
-sdlplots_alt <- sdlplots %>%
-  left_join(subset(sdlplots_full, !is.na(plot))) %>%
-  #temp create rowid for grouping by row
-  mutate(rowid = row.names(.)) %>%
-  group_by(rowid) %>%
-  mutate(meadow = ifelse(meadowLT %in% c(drycodes, NA) &
-                           meadow12 %in% c(drycodes, NA) &
-                           meadow16 %in% c(drycodes, NA), "Dry", "Unknown"),
-         meadow = ifelse(meadowLT %in% c(wetcodes, NA) &
-                           meadow12 %in% c(wetcodes, NA) &
-                           meadow16 %in% c(wetcodes, NA), "Wet", meadow),
-         meadow = ifelse(meadowLT %in% c(mescodes, NA) &
-                           meadow12 %in% c(mescodes, NA) &
-                           meadow16 %in% c(mescodes, NA), "Mesic", meadow),
-         #correct for NAs in all
-         meadow = ifelse(is.na(meadowLT) & is.na(meadow12) & is.na(meadow16), "Unknown", meadow),
-         # specify snow col
-         snow = ifelse(snowLT %in% c(snowcodes, NA) &
-                         site97 %in% c(snowcodes, NA) &
-                         snow12 %in% c(snowcodes, NA) &
-                         sfcode16 %in% c(snowcodes, NA), "Snow", "Unknown"),
-         snow = ifelse(snowLT %in% c(nosnow, NA) &
-                          site97 %in% c(nosnow, NA) &
-                          snow12 %in% c(nosnow, NA) &
-                          sfcode16 %in% c(nosnow, NA), "No snow", snow),
-         #correct for NAs in all
-         snow = ifelse(is.na(snowLT) & is.na(site97) & is.na(snow12) & is.na(sfcode16), "Unknown", snow)) %>%
-  ungroup() %>%
-  #retain reference cols for analysis only
-  dplyr::select(plot, old_plot, meadow, snow, trt)
 
 
 # -- ADD SIMPLE LIFEFORM TO SPPLIST ----
@@ -99,6 +93,278 @@ spplist <- spplist %>%
 
 
 # -- EXPLORE DIFFERENT NMDS VARIATIONS -----
+# KNS: Last point in time plots (2016 sdl, 2017 nutnet)
+
+# -- Matrix 1: 2016 Saddle plots, last time point sampled -----
+matrix1 <- subset(plantcom, yr == 2016 & site == "sdl") %>%
+  # keep only plots that were never in snowfence area
+  filter(plotid %in% unique(sdlplots$plot[sdlplots$notes2016 == "never affected"])) %>%
+  # remove unknowns and non-veg
+  subset(!grepl("^2", clean_code2)) %>%
+  mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
+  spread(clean_code2, hits, fill = 0) %>%
+  dplyr::select(rowid, site:ncol(.)) %>%
+  as.data.frame()
+
+# calculate forb to grass ratio
+fgrat1 <- matrix1 %>%
+  ungroup() %>%
+  gather(clean_code2, hits, 5:ncol(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)]), by = "clean_code2") %>%
+  filter(!is.na(simple_lifeform)) %>%
+  filter(hits >= 1) %>%
+  # calculate total veg hits by plot
+  # group(rowid, site, yr, plotid) %>%
+  # mutate(plothits = sum(hits)) %>%
+  # ungroup() %>%
+  group_by(rowid, site, yr, plotid, simple_lifeform) %>%
+  summarise(hits = sum(hits)) %>%
+  ungroup() %>%
+  #spread out total hits by lifeform to calculate ratios
+  spread(simple_lifeform, hits, fill = 0) %>%
+  #calculate g:f ratio
+  group_by(rowid) %>%
+  mutate(f2g = Forb/Grass,
+         lnf2g = log(f2g)) %>%
+  # coerce plotid to number to joins with sitematrix
+  mutate(plotid = as.numeric(plotid))
+
+
+sitematrix1 <- matrix1[,1:4] %>%
+  mutate(plotid = as.numeric(plotid)) %>%
+  left_join(distinct(sdlplots[colnames(sdlplots) != "old_plot"]), by = c("plotid" = "plot")) %>%
+  # join grass forb ratio
+  left_join(fgrat1[c("rowid", "site", "yr", "plotid", "f2g", "lnf2g")])
+sitematrix1$trt <- factor(sitematrix1$trt, levels = c("C", "N", "P", "N+P"))
+sitematrix1$meadow_alt <- as.factor(sitematrix1$meadow_alt) #dry = 1, mesic = 2
+
+row.names(matrix1) <- matrix1$rowid
+matrix1 <- matrix1[!colnames(matrix1) %in% c("rowid", "site", "yr", "plotid")]
+
+# relativize data
+matrix1_rel <- decostand(matrix1, method = "total")
+
+# run nmds
+nmds1 <- metaMDS(matrix1_rel, k = 2, trymax = 50)
+nmds1
+plot(nmds1, type = "t")
+
+# add environmental fit of forb to grass ratio
+fit1 <- envfit(nmds1, sitematrix1[c("trt", "meadow_alt", "lnf2g")], strata = sitematrix1$trt, perm = 999)
+fit1 # trt not signif, meadow is
+
+ordiplot(nmds1, type="n", main = "Saddle 2016, all treatments, no snowfence influence")
+with (sitematrix1, ordiellipse(nmds1, trt, kind="se", conf=0.95, col="dodgerblue3"))
+with (sitematrix1, ordiellipse(nmds1, meadow_alt, kind="se", conf=0.95, col="dodgerblue4", lwd=2))
+plot(fit1)
+orditorp (nmds1, display="species", col="black", air=0.01)
+
+# plot forb:grass by trtment
+sdlboxplot <- ggplot(sitematrix1, aes(trt, lnf2g, col = meadow_alt)) +
+  geom_boxplot() +
+  geom_point(data = subset(sitematrix1, meadow_alt =="Dry"), aes(trt, lnf2g), 
+             alpha = 0.5, col = "#F8766D", position = position_nudge(x = -0.19)) +
+  geom_point(data = subset(sitematrix1, meadow_alt =="Mesic"), aes(trt, lnf2g), 
+             alpha = 0.5, col = "#00BFC4", position = position_nudge(x = 0.19)) +
+  labs(y = "ln Forb hits/Grass hits") +
+  ggtitle("Saddle 2016")+
+  theme(legend.position = c(0.8,0.8),
+        legend.background = element_blank())
+
+
+# try indicator species analysis to look for geum rossii in n+p plots
+sdl_ind = multipatt(matrix1_rel, sitematrix1$trt, func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
+summary(sdl_ind, alpha = 0.1, indvalcomp = TRUE)
+# are any significant?
+subset(sdl_ind$sign, p.adjust(sdl_ind$sign$p.value, method = "holm") < 0.1) #only CASC12 in N+P
+# try combining trt and meadow to make more explicit
+sitematrix1$group = paste(sitematrix1$meadow_alt, sitematrix1$trt)
+sdl_ind_comb = multipatt(matrix1_rel, sitematrix1$group, func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
+summary(sdl_ind_comb, alpha = 0.1, indvalcomp = TRUE)
+# are any significant with p-vals corrected for multiple testing?
+subset(sdl_ind_comb$sign, p.adjust(sdl_ind_comb$sign$p.value, method = "holm") < 0.1) # only CASC12 in Mesic N+P
+
+# test species associations (correlations) with certain habitats
+# transform abundance to PA
+matrix1_pa = as.data.frame(ifelse(matrix1>0,1,0))
+# trt only
+matrix1_phi = multipatt(matrix1_pa, sitematrix1$trt, func = "r.g", duleg = T, control = how(nperm=999))
+summary(matrix1_phi, alpha = 0.1, indvalcomp = T)
+summary(p.adjust(matrix1_phi$sign$p.value, method = "holm") < 0.1) #nothing signif, 1 spp is a generalist/no site pref (NA val)
+# trt x meadow
+matrix1_phi_comb = multipatt(matrix1_pa, sitematrix1$group, func = "r.g", duleg = T, control = how(nperm=999))
+summary(matrix1_phi_comb, alpha = 0.1, indvalcomp = T)
+summary(p.adjust(matrix1_phi_comb$sign$p.value, method = "holm") < 0.1) #nothing signif, 1 spp is a generalist/no site pref (NA val)
+# who is the generalist?
+rownames(matrix1_phi_comb$sign)[is.na(p.adjust(matrix1_phi_comb$sign$p.value, method = "holm"))] # Geum rossii! (!!)
+# > acoros has no site preference despite increase in dry meadow n+p
+# > maybe n+p in dry allowed it to move in when was previously limited there by enviro factors??
+
+
+# analysis of similiarities/mrpp/permanova
+## calculate CB distance
+matrix1_rel_bray <- vegdist(matrix1_rel)
+summary(anosim(matrix1_rel_bray, grouping = sitematrix1$trt, strata = sitematrix1$meadow_alt, permutations = 999))
+mrpp(matrix1_rel,  grouping = sitematrix1$trt, strata = sitematrix1$meadow_alt, distance = "bray")
+adonis(matrix1_rel ~ trt * meadow_alt * lnf2g, data = sitematrix1, permutations = 999, method = "bray")
+# change order of variables
+adonis(matrix1_rel ~ trt * lnf2g * meadow_alt, data = sitematrix1, permutations = 999, method = "bray")
+adonis(matrix1_rel ~ lnf2g * trt * meadow_alt, data = sitematrix1, permutations = 999, method = "bray")
+
+
+# last yr, dry meadow plots only
+matrix1_dry_rel <- matrix1_rel[which(sitematrix1$meadow_alt == "Dry"),]
+# remove any spp that aren't present in any plot
+matrix1_dry_rel <- matrix1_dry_rel[,apply(matrix1_dry_rel, 2, sum) > 0]
+nmds1_dry <- metaMDS(matrix1_dry_rel, k = 2, trymax = 50)
+plot(nmds1_dry, type = "t")
+
+fit1_dry <- envfit(nmds1_dry, sitematrix1[which(sitematrix1$meadow_alt == "Dry"),c("trt","lnf2g")], strata = sitematrix1$trt[which(sitematrix1$meadow_alt == "Dry")], perm = 999)
+fit1_dry #trt not signif
+
+ordiplot(nmds1_dry, type="n", main = "Saddle 2016, dry meadow only, no snowfence, all treatments")
+with (sitematrix1[which(sitematrix1$meadow_alt == "Dry"),], 
+      ordiellipse(nmds1_dry, trt, kind="se", conf=0.95, col="dodgerblue3"))
+with(sitematrix1[which(sitematrix1$meadow_alt == "Dry"),], 
+      ordisurf(nmds1_dry, lnf2g, col="dodgerblue1", add = TRUE))
+plot(fit1_dry)
+orditorp (nmds1_dry, display="species", col="black", air=0.01)
+
+# indicator species analysis on dry meadow plots only
+sdl_ind_dry = multipatt(matrix1_dry_rel, sitematrix1$trt[sitematrix1$meadow_alt == "Dry"], 
+                        func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
+summary(sdl_ind_dry, indvalcomp = T)
+# any significant with adjusted p vals?
+summary(p.adjust(sdl_ind_dry$sign$p.value, method = "holm")< 0.1) #nothing significant
+
+# same results with spp associations?
+matrix1_rel_dry_pa <- as.data.frame(ifelse(matrix1_dry_rel>0, 1,0))
+matrix1_phi_dry = multipatt(matrix1_rel_dry_pa, sitematrix1$trt[sitematrix1$meadow_alt == "Dry"], 
+                        func = "r.g", control = how(nperm = 999))
+summary(matrix1_phi_dry, indvalcomp = T) # nothing prefers any treatment, but there are species that occur in a combination of treatments
+# any significant with adjusted p vals?
+summary(p.adjust(matrix1_phi_dry$sign$p.value, method = "holm") <= 0.1) #CARUD signficant marginally (0.1, but not at 0.05 )
+# who is the generalist?
+subset(matrix1_phi_dry$sign, is.na(matrix1_phi_dry$sign$p.value))
+# Carex rupestris is the only signif species, prefers dry meadow Control or +N (doesn't like +P?)
+subset(matrix1_phi_dry$sign, p.adjust(matrix1_phi_dry$sign$p.value, method = "holm") < 0.1)
+
+
+#last year, all non-dry meadow
+matrix1_wet_rel <- matrix1_rel[which(sitematrix1$meadow_alt != "Dry"),]
+# remove any spp that don't occur in the wet sites
+matrix1_wet_rel <- matrix1_wet_rel[,apply(matrix1_wet_rel, 2, sum)>0]
+nmds1_wet <- metaMDS(matrix1_wet_rel, k = 2, trymax = 50)
+plot(nmds1_wet, type = "t")
+
+fit1_wet <- envfit(nmds1_wet, sitematrix1[which(sitematrix1$meadow_alt != "Dry"),c("trt","lnf2g")], strata = sitematrix1$trt[which(sitematrix1$meadow_alt != "Dry")], perm = 999)
+fit1_wet #trt not signif
+
+ordiplot(nmds1_wet, type="n", main = "Saddle 2016, mesic only, no snowfence plots, all treatments")
+with (sitematrix1[which(sitematrix1$meadow_alt != "Dry"),], 
+      ordiellipse(nmds1_wet, trt, kind="se", conf=0.95, col="dodgerblue3"))
+with(sitematrix1[which(sitematrix1$meadow_alt != "Dry"),], 
+     ordisurf(nmds1_wet, lnf2g, col="dodgerblue1", add = TRUE))
+plot(fit1_wet)
+orditorp (nmds1_wet, display="species", col="black", air=0.01)
+
+# indicator species
+sdl_ind_wet = multipatt(matrix1_wet_rel, sitematrix1$trt[sitematrix1$meadow_alt == "Mesic"], 
+                        func = "IndVal.g", duleg = T, control = how(nperm = 999))
+summary(sdl_ind_wet, alpha = 0.1)
+summary(p.adjust(sdl_ind_wet$sign$p.value, method = "holm")<0.1)
+#Carex scopulorum indicates n+p in mesic
+subset(sdl_ind_wet$sign, p.adjust(sdl_ind_wet$sign$p.value, method = "holm")<0.1)
+
+
+
+# -- Matrix 2: NutNet last time point only -----
+matrix2 <- subset(plantcom, yr == 2017 & site == "nutnet") %>%
+  #remove unknowns and non-veg
+  subset(!grepl("^2", clean_code2)) %>%
+  mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
+  spread(clean_code2, hits, fill = 0) %>%
+  dplyr::select(rowid, site:ncol(.)) %>%
+  as.data.frame()
+
+# calculate forb to grass ratio
+fgrat2 <- matrix2 %>%
+  ungroup() %>%
+  gather(clean_code2, hits, 5:ncol(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)]), by = "clean_code2") %>%
+  filter(!is.na(simple_lifeform)) %>%
+  filter(hits > 0) %>%
+  # calculate total veg hits by plot
+  # group(rowid, site, yr, plotid) %>%
+  # mutate(plothits = sum(hits)) %>%
+  # ungroup() %>%
+  group_by(rowid, site, yr, plotid, simple_lifeform) %>%
+  summarise(hits = sum(hits)) %>%
+  ungroup() %>%
+  #spread out total hits by lifeform to calculate ratios
+  spread(simple_lifeform, hits, fill = 0) %>%
+  #calculate g:f ratio
+  group_by(rowid) %>%
+  mutate(f2g = Forb/Grass,
+         lnf2g = log(f2g))
+
+sitematrix2 <- matrix2[,1:4] %>%
+  left_join(nnplots) %>%
+  mutate(trt = as.factor(trt)) %>%
+  left_join(fgrat2)
+
+row.names(matrix2) <- matrix2$rowid
+matrix2 <- matrix2[!colnames(matrix2) %in% c("rowid", "site", "yr", "plotid")]
+
+# relativize data
+matrix2_rel <- vegan::decostand(matrix2, method = "total")
+
+# run nmds
+nmds2 <- metaMDS(matrix2_rel, k = 2, trymax = 50)
+nmds2
+plot(nmds2, type = "t")
+
+# environmental fit grass to forb
+fit2 <- envfit(nmds2, sitematrix2[c("trt", "lnf2g")], strata = sitematrix2$block, perm = 999)
+fit2 #trt is signif
+
+ordiplot(nmds2, type="n", main = "NutNet 2017, all treatments")
+with (sitematrix2, ordiellipse(nmds2, trt, kind="se", conf=0.95, col="dodgerblue3"))
+with (sitematrix2, ordisurf(nmds2, lnf2g, col="dodgerblue4", add = T))
+plot(fit2)
+orditorp (nmds2, display="species", col="black", air=0.01)
+
+nnboxplot <- ggplot(sitematrix2, aes(trt, lnf2g)) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.5, width = 0.1) +
+  labs(y = NULL) +
+  ggtitle("Nutnet 2017")
+
+# plot boxplots together for kns
+plot_grid(sdlboxplot, nnboxplot,
+          nrow = 1)
+
+
+# indicator species for nutnet plots
+# indicator species
+nn2_ind = multipatt(matrix2_rel, sitematrix2$trt, func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
+summary(nn2_ind, alpha = 0.1)
+# check signif of adjust pvals (for multiple spp comparisons)
+summary(p.adjust(nn2_ind$sign$p.value, method = "holm") < 0.1) #nothing signif
+
+# does any spp associate with a particular treatment?
+matrix2_rel_pa <- as.data.frame(ifelse(matrix2_rel>0,1,0))
+nn2_phi <- multipatt(matrix2_rel_pa, sitematrix2$trt, duleg = T, func = "r.g", control = how(nperm = 999))
+summary(nn2_phi)
+# check signif for multiple spp comparisons
+summary(p.adjust(nn2_phi$sign$p.value, method = "holm")<0.1) #nada
+#check with combos allowed
+nn2_phi_comb <- multipatt(matrix2_rel_pa, sitematrix2$trt, func = "r.g", control = how(nperm = 999))
+summary(nn2_phi_comb)
+# check signif for multiple spp comparisons
+subset(nn2_phi_comb$sign, p.adjust(nn2_phi_comb$sign$p.value, method = "holm")<0.1) # trispi marginally signif for +n+k+p, but not at 0.05
+
+
 
 # -- Matrix 1: nutnet and sdl; C, N, P and N+P only; all together -----
 # (1) all sites, all yrs -- keep only C, N, P, and N+P plots
@@ -152,6 +418,7 @@ orditorp (nmds1, display="species", col="black", air=0.01)
 
 
 # -- Matix 2: NutNet only, all treatments, all years -----
+# check for no effect of +K and micro relative to N+P, N, P, C..
 # all trts, nutnet only plots..
 matrix2 <- subset(plantcom, site == "nutnet") %>%
   #remove unknowns and non-veg
@@ -178,6 +445,7 @@ with (sitematrix2, ordiellipse(nmds2, trt, kind="se", conf=0.95, col="red", lwd=
                                label=TRUE))
 orditorp (nmds2, display="species", col="black", air=0.02)
 
+#N+P and N+P+K separate out from the rest. 2017 community has shifted from 2013 but still close
 
 
 # -- Matrix 3: TRY SDL 2012 and 2016 ONLY (since 1997 sticks out) -----
@@ -215,19 +483,17 @@ with(sitematrix3, ordiellipse(nmds3, trt, kind = "se", conf = 0.95, col="red", l
 orditorp (nmds2, display="species", col="black", air=0.02)
 
 
+# -- Matrix 4: saddle only, only plots sampled in 1997, 2012 and 2016 -----
 # try just sites common in both 2012 and 2016
-common1216 <- with(plantcom, plantcom[site == "sdl", c("plotid", "yr")]) %>% 
+common_sdl <- with(plantcom, plantcom[site == "sdl", c("plotid", "yr")]) %>% 
   distinct() %>%
   group_by(plotid) %>%
   mutate(nobs = length(yr)) %>%
   subset(nobs == 3) %>%
   dplyr::select(plotid) %>% distinct()
 
-
-
-# -- Matrix 4: nutnet only, only plots sampled in 2012 *AND* 2016 -----
 # all trts, nutnet only plots..
-matrix4 <- subset(plantcom, site == "sdl" & plotid %in% common1216$plotid) %>%
+matrix4 <- subset(plantcom, site == "sdl" & plotid %in% common_sdl$plotid) %>%
   #remove unknowns and non-veg
   subset(!grepl("^2", clean_code2)) %>%
   mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
@@ -267,11 +533,13 @@ nnplots1317 <- subset(plantcom, site == "nutnet") %>%
   dplyr::select(plotid, yr) %>%
   distinct() %>%
   group_by(plotid) %>%
-  mutate(nobs = length(yr))
+  summarise(nobs = length(yr)) %>%
+  ungroup() %>%
+  subset(nobs == 2)
 
 # plots 1-16 for sdl, 28 plots common in nutnet in 2013 and 2017
 matrix5 <-  subset(plantcom, (site == "sdl" & plotid %in% c(1:16)) |
-                     (site == "nutnet" & plotid %in% nnplots1317$plotid[nnplots1317$plotid %in% keep_nnplots])) %>%
+                     (site == "nutnet" & plotid %in% nnplots1317$plotid)) %>%
   #remove unknowns and non-veg
   subset(!grepl("^2", clean_code2)) %>%
   mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
@@ -349,201 +617,6 @@ orditorp (nmds6, display="species", col="black", air=0.01)
 
 
 
-# -- Matrix 7: Saddle plots, last time point sampled -----
-matrix7_sdl <- subset(plantcom, yr %in% c(2016, 2017) & site == "sdl") %>%
-  #remove unknowns and non-veg
-  subset(!grepl("^2", clean_code2)) %>%
-  mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
-  spread(clean_code2, hits, fill = 0) %>%
-  dplyr::select(rowid, site:ncol(.)) %>%
-  as.data.frame()
-
-# calculate forb to grass ratio
-gfrat7 <- matrix7_sdl %>%
-  ungroup() %>%
-  gather(clean_code2, hits, 5:ncol(.)) %>%
-  left_join(distinct(spplist[,2:ncol(spplist)]), by = "clean_code2") %>%
-  filter(!is.na(simple_lifeform)) %>%
-  filter(hits > 0) %>%
-  # calculate total veg hits by plot
-  # group(rowid, site, yr, plotid) %>%
-  # mutate(plothits = sum(hits)) %>%
-  # ungroup() %>%
-  group_by(rowid, site, yr, plotid, simple_lifeform) %>%
-  summarise(hits = sum(hits)) %>%
-  ungroup() %>%
-  #spread out total hits by lifeform to calculate ratios
-  spread(simple_lifeform, hits, fill = 0) %>%
-  #calculate g:f ratio
-  group_by(rowid) %>%
-  mutate(g2f = Grass/Forb,
-         lng2f = log(g2f)) %>%
-  # coerce plotid to number to joins with sitematrix
-  mutate(plotid = as.numeric(plotid))
-  
-
-sitematrix7_sdl <- matrix7_sdl[,1:4] %>%
-  mutate(plotid = as.numeric(plotid)) %>%
-  left_join(sdlplots_alt, by = c("plotid" = "plot")) %>%
-  # join grass forb ratio
-  left_join(gfrat7[c("rowid", "site", "yr", "plotid", "g2f", "lng2f")])
-sitematrix7_sdl$trt <- as.factor(sitematrix7_sdl$trt)
-
-row.names(matrix7_sdl) <- matrix7_sdl$rowid
-matrix7_sdl <- matrix7_sdl[!colnames(matrix7_sdl) %in% c("rowid", "site", "yr", "plotid")]
-
-# relativize data
-matrix7_sdl_rel <- vegan::decostand(matrix7_sdl, method = "total")
-
-# run nmds
-nmds7 <- metaMDS(matrix7_sdl_rel, k = 2, trymax = 50)
-plot(nmds7, type = "t")
-
-fit7 <- envfit(nmds7, sitematrix7_sdl[c("trt","g2f", "lng2f")], strata = sitematrix7_sdl$trt, perm = 999)
-fit7
-
-ordiplot(nmds7, type="n", main = "Saddle 2016, all treatments")
-with (sitematrix7_sdl, ordiellipse(nmds7, trt, kind="se", conf=0.95, col="dodgerblue3"))
-with (sitematrix7_sdl, ordiellipse(nmds7, meadow, kind="se", conf=0.95, col="green", lwd=2,
-                                   label=TRUE))
-with (sitematrix7_sdl, ordiellipse(nmds7, snow, kind="se", conf=0.95, col="purple", lwd=2,
-                                   label=TRUE))
-plot(fit7)
-orditorp (nmds7, display="species", col="black", air=0.01)
-
-sdlboxplot <- sitematrix7_sdl %>%
-  mutate(pointgrp = paste(meadow, trt)) %>%
-  ggplot(aes(trt, lng2f, col = meadow)) +
-  geom_boxplot() +
-  #geom_jitter(aes(group = pointgrp), alpha = 0.5, width = 0.1) +
-  labs(y = "ln Grass hits/Forb hits") +
-  ggtitle("Saddle 2016")+
-  theme(legend.position = c(0.8,0.8),
-        legend.background = element_blank())
-
-
-# try indicator species analysis to look for geum rossii in n+p plots
-sdl_ind = multipatt(matrix7_sdl_rel, sitematrix7_sdl$trt, func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
-summary(sdl_ind)
-
-
-# last yr, dry meadow plots only
-matrix7_dry_rel <- matrix7_sdl_rel[which(sitematrix7_sdl$meadow == "Dry"),]
-nmds7_dry <- metaMDS(matrix7_dry_rel, k = 2, trymax = 50)
-plot(nmds7_dry, type = "t")
-
-fit7_dry <- envfit(nmds7_dry, sitematrix7_sdl[which(sitematrix7_sdl$meadow == "Dry"),c("trt","g2f", "lng2f")], strata = sitematrix7_sdl$trt[which(sitematrix7_sdl$meadow == "Dry")], perm = 999)
-fit7_dry
-
-ordiplot(nmds7_dry, type="n", main = "Saddle 2016, dry meadow only, all treatments")
-with (sitematrix7_sdl[which(sitematrix7_sdl$meadow == "Dry"),], ordiellipse(nmds7_dry, trt, kind="se", conf=0.95, col="dodgerblue3"
-))
-with (sitematrix7_sdl, ordiellipse(nmds7, meadow, kind="se", conf=0.95, col="green", lwd=2,
-                                   label=TRUE))
-with (sitematrix7_sdl, ordiellipse(nmds7, snow, kind="se", conf=0.95, col="purple", lwd=2,
-                                   label=TRUE))
-plot(fit7_dry)
-orditorp (nmds7_dry, display="species", col="black", air=0.01)
-
-sdl_ind_dry = multipatt(matrix7_sdl_rel[which(sitematrix7_sdl$meadow == "Dry"),], sitematrix7_sdl$trt[sitematrix7_sdl$meadow == "Dry"], func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
-summary(sdl_ind_dry)
-
-#last year, all non-dry meadow
-# last yr, dry meadow plots only
-matrix7_wet_rel <- matrix7_sdl_rel[which(sitematrix7_sdl$meadow != "Dry"),]
-nmds7_wet <- metaMDS(matrix7_wet_rel, k = 2, trymax = 50)
-plot(nmds7_wet, type = "t")
-
-fit7_wet <- envfit(nmds7_wet, sitematrix7_sdl[which(sitematrix7_sdl$meadow != "Dry"),c("trt","g2f", "lng2f")], strata = sitematrix7_sdl$trt[which(sitematrix7_sdl$meadow != "Dry")], perm = 999)
-fit7_wet
-
-ordiplot(nmds7_wet, type="n", main = "Saddle 2016, dry meadow excluded, all treatments")
-with (sitematrix7_sdl[which(sitematrix7_sdl$meadow != "Dry"),], ordiellipse(nmds7_wet, trt, kind="se", conf=0.95, col="dodgerblue3"
-))
-with (sitematrix7_sdl[which(sitematrix7_sdl$meadow != "Dry"),], ordiellipse(nmds7_wet, meadow, kind="se", conf=0.95, col="green", lwd=2,
-                                   label=TRUE))
-with (sitematrix7_sdl, ordiellipse(nmds7, snow, kind="se", conf=0.95, col="purple", lwd=2,
-                                   label=TRUE))
-plot(fit7_wet)
-orditorp (nmds7_wet, display="species", col="black", air=0.01)
-
-# indicator species
-sdl_ind_wet = multipatt(matrix7_sdl_rel[which(sitematrix7_sdl$meadow == "Mesic"),], sitematrix7_sdl$trt[sitematrix7_sdl$meadow == "Mesic"], func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
-summary(sdl_ind_wet, alpha = 0.05)
-
-
-
-
-# -- Matrix 8: NutNet last time point only -----
-matrix8 <- subset(plantcom, yr %in% c(2016, 2017) & site == "nutnet") %>%
-  #remove unknowns and non-veg
-  subset(!grepl("^2", clean_code2)) %>%
-  mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
-  spread(clean_code2, hits, fill = 0) %>%
-  dplyr::select(rowid, site:ncol(.)) %>%
-  as.data.frame()
-
-# calculate forb to grass ratio
-gfrat8 <- matrix8 %>%
-  ungroup() %>%
-  gather(clean_code2, hits, 5:ncol(.)) %>%
-  left_join(distinct(spplist[,2:ncol(spplist)]), by = "clean_code2") %>%
-  filter(!is.na(simple_lifeform)) %>%
-  filter(hits > 0) %>%
-  # calculate total veg hits by plot
-  # group(rowid, site, yr, plotid) %>%
-  # mutate(plothits = sum(hits)) %>%
-  # ungroup() %>%
-  group_by(rowid, site, yr, plotid, simple_lifeform) %>%
-  summarise(hits = sum(hits)) %>%
-  ungroup() %>%
-  #spread out total hits by lifeform to calculate ratios
-  spread(simple_lifeform, hits, fill = 0) %>%
-  #calculate g:f ratio
-  group_by(rowid) %>%
-  mutate(g2f = Grass/Forb,
-         lng2f = log(g2f))
-
-sitematrix8 <- matrix8[,1:4] %>%
-  left_join(nnplots) %>%
-  mutate(trt = as.factor(trt)) %>%
-  left_join(gfrat8)
-
-row.names(matrix8) <- matrix8$rowid
-matrix8 <- matrix8[!colnames(matrix8) %in% c("rowid", "site", "yr", "plotid")]
-
-# relativize data
-matrix8_rel <- vegan::decostand(matrix8, method = "total")
-
-# run nmds
-nmds8 <- metaMDS(matrix8_rel, k = 2, trymax = 50)
-plot(nmds8, type = "t")
-
-# environmental fit grass to forb
-fit8 <- envfit(nmds8, sitematrix8[c("trt", "g2f", "lng2f")], strata = sitematrix8$block, perm = 999)
-fit8
-
-ordiplot(nmds8, type="n", main = "NutNet 2017, all treatments")
-with (sitematrix8, ordiellipse(nmds8, trt, kind="se", conf=0.95, col="dodgerblue3"))
-plot(fit8)
-orditorp (nmds8, display="species", col="black", air=0.01)
-
-nnboxplot <- ggplot(sitematrix8, aes(trt, lng2f)) +
-  geom_boxplot() +
-  geom_jitter(alpha = 0.5, width = 0.1) +
-  labs(y = NULL) +
-  ggtitle("Nutnet 2017")
-
-# plot boxplots together for kns
-plot_grid(sdlboxplot, nnboxplot,
-         nrow = 1)
-
-
-# indicator species for nutnet plots
-# indicator species
-nn8_ind = multipatt(matrix8_rel, sitematrix8$trt, func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
-summary(nn8_ind, alpha = 0.1)
-
 
 
 # -- REPLOT IN GGPLOT ----
@@ -565,7 +638,7 @@ ggplot(spp_df, aes(MDS1, MDS2)) +
 
 
 # specify plotting colors for all treatments
-alltrts <- sort(unique(c(as.character(sitematrix8$trt), as.character(sitematrix7_sdl$trt))))
+alltrts <- sort(unique(c(as.character(sitematrix2$trt), as.character(sitematrix1$trt))))
 trtcols <- viridis::viridis(n = length(alltrts))
 names(trtcols) <- alltrts
 
@@ -574,11 +647,11 @@ plottext <- 3
 
 # last time point, sdl
 
-plot_df7 <- data.frame(nmds7$points) %>%
+plot_df1 <- data.frame(nmds1$points) %>%
   mutate(rowid = row.names(.)) %>%
-  left_join(sitematrix7_sdl) %>%
-  left_join(sdlplots_full[c("plot", "meadow12", "meadow16")], by = c("plotid" = "plot"))
-spp_df7 <- data.frame(nmds7$species) %>%
+  left_join(sitematrix1)
+
+spp_df1 <- data.frame(nmds1$species) %>%
   mutate(clean_code2 = row.names(.)) %>%
   left_join(distinct(spplist[,2:ncol(spplist)])) %>%
   #make simple lifeform grp
@@ -586,23 +659,29 @@ spp_df7 <- data.frame(nmds7$species) %>%
                                   ifelse(grepl("Shrub", Growth_Habit), "Shrub",
                                          ifelse(Growth_Habit == "Graminoid", "Grass", "Forb"))))
 
-grp7.np <- plot_df7[plot_df7$trt == "N+P", ][chull(plot_df7[plot_df7$trt == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-grp7.dry <- plot_df7[plot_df7$meadow == "Dry", ][chull(plot_df7[plot_df7$meadow == "Dry", c("MDS1", "MDS2")]), ]  # hull values for dry meadow plots
-grp7.other <- plot_df7[plot_df7$meadow != "Dry", ][chull(plot_df7[plot_df7$meadow != "Dry", c("MDS1", "MDS2")]), ]  # hull values for non-dry plots
+grp1.np <- plot_df1[plot_df1$trt == "N+P", ][chull(plot_df1[plot_df1$trt == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp1.n <- plot_df1[plot_df1$trt == "N", ][chull(plot_df1[plot_df1$trt == "N", c("MDS1", "MDS2")]), ]  # hull values for grp n
+grp1.p <- plot_df1[plot_df1$trt == "P", ][chull(plot_df1[plot_df1$trt == "P", c("MDS1", "MDS2")]), ]  # hull values for grp p
+grp1.c <- plot_df1[plot_df1$trt == "C", ][chull(plot_df1[plot_df1$trt == "C", c("MDS1", "MDS2")]), ]  # hull values for grp control
+grp1.dry <- plot_df1[plot_df1$meadow_alt == "Dry", ][chull(plot_df1[plot_df1$meadow_alt == "Dry", c("MDS1", "MDS2")]), ]  # hull values for dry meadow plots
+grp1.other <- plot_df1[plot_df1$meadow_alt != "Dry", ][chull(plot_df1[plot_df1$meadow_alt != "Dry", c("MDS1", "MDS2")]), ]  # hull values for non-dry plots
 
 
 #sdlfig <- 
-ggplot(spp_df7, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grp7.np, aes(MDS1, MDS2), alpha = 0.5, fill = "aquamarine") +
-  geom_polygon(data = grp7.dry, aes(MDS1, MDS2), alpha = 0.5, fill = NA, col = "black", lty = 2) +
-  geom_polygon(data = grp7.other, aes(MDS1, MDS2), alpha = 0.5, fill = NA, col = "black", lty = 3) +
+ggplot(spp_df1, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grp1.np, aes(MDS1, MDS2), alpha = 0.5, fill = "aquamarine") +
+  geom_polygon(data = grp1.n, aes(MDS1, MDS2), alpha = 0.5, fill = "steelblue2") +
+  geom_polygon(data = grp1.p, aes(MDS1, MDS2), alpha = 0.5, fill = "goldenrod") +
+  geom_polygon(data = grp1.c, aes(MDS1, MDS2), alpha = 0.5, fill = "orchid") +
+  geom_polygon(data = grp1.dry, aes(MDS1, MDS2), alpha = 0.5, fill = NA, col = "black", lty = 2) +
+  geom_polygon(data = grp1.other, aes(MDS1, MDS2), alpha = 0.5, fill = NA, col = "black", lty = 3) +
   #geom_text(aes(color = simple_lifeform, label = clean_code2)) +
-  #geom_text(data = subset(spp_df7, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
-  #geom_text(data = subset(spp_df7, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
-  #geom_text(data = subset(spp_df7, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
-  #geom_text(data = subset(spp_df7, simple_lifeform == "Shrub"), aes(label = clean_code2), col = "orchid", fontface = "bold", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Shrub"), aes(label = clean_code2), col = "orchid", fontface = "bold", size = plottext) +
   geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
-  geom_point(data = plot_df7, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  geom_point(data = plot_df1, aes(MDS1, MDS2,fill = trt), pch = 21) +
   #scale_color_discrete(name = "Lifeform") +
   scale_color_manual(name = "Lifeform", values = c("N-fixer" = "chocolate4", "Forb" = "grey30", "Grass" = "seagreen4", "Shrub" = "orchid")) +
   scale_fill_manual(name = "Plot\ntreatment", values = trtcols) +
@@ -664,10 +743,10 @@ ggplot(spp_df7, aes(MDS1, MDS2)) +
 
 
 # last time point, nutnet
-plot_df8 <- data.frame(nmds8$points) %>%
+plot_df2 <- data.frame(nmds2$points) %>%
   mutate(rowid = row.names(.)) %>%
-  left_join(sitematrix8)
-spp_df8 <- data.frame(nmds8$species) %>%
+  left_join(sitematrix2)
+spp_df2 <- data.frame(nmds2$species) %>%
   mutate(clean_code2 = row.names(.)) %>%
   left_join(distinct(spplist[,2:ncol(spplist)])) %>%
   #make simple lifeform grp
@@ -675,26 +754,26 @@ spp_df8 <- data.frame(nmds8$species) %>%
                                   ifelse(grepl("Shrub", Growth_Habit), "Shrub",
                                          ifelse(Growth_Habit == "Graminoid", "Grass", "Forb"))))
 
-plot_df8$trt <- factor(plot_df8$trt, levels = alltrts)
+plot_df2$trt <- factor(plot_df2$trt, levels = alltrts)
 
-grp8.np <- plot_df8[plot_df8$trt == "N+P", ][chull(plot_df8[plot_df8$trt == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-grp8.npk <- plot_df8[plot_df8$trt == "N+P+K", ][chull(plot_df8[plot_df8$trt == "N+P+K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-grp8.nk <- plot_df8[plot_df8$trt == "N+K", ][chull(plot_df8[plot_df8$trt == "N+K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-grp8.c <- plot_df8[plot_df8$trt == "C", ][chull(plot_df8[plot_df8$trt == "C", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-grp8.n <- plot_df8[plot_df8$trt == "N", ][chull(plot_df8[plot_df8$trt == "N", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-grp8.k <- plot_df8[plot_df8$trt == "K", ][chull(plot_df8[plot_df8$trt == "K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp2.np <- plot_df2[plot_df2$trt == "N+P", ][chull(plot_df2[plot_df2$trt == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp2.npk <- plot_df2[plot_df2$trt == "N+P+K", ][chull(plot_df2[plot_df2$trt == "N+P+K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp2.nk <- plot_df2[plot_df2$trt == "N+K", ][chull(plot_df2[plot_df2$trt == "N+K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp2.c <- plot_df2[plot_df2$trt == "C", ][chull(plot_df2[plot_df2$trt == "C", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp2.n <- plot_df2[plot_df2$trt == "N", ][chull(plot_df2[plot_df2$trt == "N", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp2.k <- plot_df2[plot_df2$trt == "K", ][chull(plot_df2[plot_df2$trt == "K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
 
 
-nnfig <- ggplot(spp_df8, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grp8.np, aes(MDS1, MDS2), alpha = 0.5, fill = "aquamarine") +
-  geom_polygon(data = grp8.npk, aes(MDS1, MDS2), alpha = 0.5, fill = "lightgreen") +
-  geom_polygon(data = grp8.c, aes(MDS1, MDS2), alpha = 0.5, fill = "purple") +
-  geom_polygon(data = grp8.n, aes(MDS1, MDS2), alpha = 0.5, fill = "dodgerblue3") +
-  geom_polygon(data = grp8.k, aes(MDS1, MDS2), alpha = 0.5, fill = "darkslateblue") +
-  geom_text(data = subset(spp_df8, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
-  geom_text(data = subset(spp_df8, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
-  geom_text(data = subset(spp_df8, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
-  geom_point(data = plot_df8, aes(MDS1, MDS2,fill = trt), pch = 21) +
+nnfig <- ggplot(spp_df2, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grp2.np, aes(MDS1, MDS2), alpha = 0.5, fill = "aquamarine") +
+  geom_polygon(data = grp2.npk, aes(MDS1, MDS2), alpha = 0.5, fill = "lightgreen") +
+  geom_polygon(data = grp2.c, aes(MDS1, MDS2), alpha = 0.5, fill = "orchid") +
+  geom_polygon(data = grp2.n, aes(MDS1, MDS2), alpha = 0.5, fill = "steelblue2") +
+  geom_polygon(data = grp2.k, aes(MDS1, MDS2), alpha = 0.5, fill = "darkslateblue") +
+  geom_text(data = subset(spp_df2, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
+  geom_text(data = subset(spp_df2, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
+  geom_text(data = subset(spp_df2, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
+  geom_point(data = plot_df2, aes(MDS1, MDS2,fill = trt), pch = 21) +
   scale_fill_manual(name = "Plot\ntreatment", values = trtcols, drop = F) +
   ggtitle("NutNet plots 2017") +
   theme_bw() +
