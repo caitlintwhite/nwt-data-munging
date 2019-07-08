@@ -71,6 +71,9 @@ nnplots <- read.csv("alpine_addnuts/output_data/nutnet_plot_lookup.csv")
 sdlplots_full <- read.csv("alpine_addnuts/output_data/sdl_plots_lookup_trblshoot.csv")
 
 
+# bring in ts relative abundance for nutnet17 bc raw nutnet17 data is missing B3 plot 7 data
+nn17sum <- read.csv("~/Documents/nwt_lter/unpub_data/dry_meado_fert/edited_nutnet17.csv", na.strings = na_vals, strip.white = T)
+
 
 
 # -- REVIEW DATA -----
@@ -88,7 +91,10 @@ glimpse(sdlplots_full)
 spplist <- spplist %>%
   mutate(simple_lifeform = ifelse(Family == "Fabaceae", "N-fixer",
                                 ifelse(grepl("Shrub", Growth_Habit), "Shrub",
-                                       ifelse(Growth_Habit == "Graminoid", "Grass", "Forb"))))
+                                       ifelse(Growth_Habit == "Graminoid", "Grass", "Forb")))) %>%
+  # fill in simple lifeform for 2FORB and 2GRAM
+  mutate(simple_lifeform = ifelse(clean_code2 == "2FORB", "Forb",
+                                  ifelse(clean_code2 == "2GRAM", "Grass", simple_lifeform)))
 
 
 
@@ -96,9 +102,6 @@ spplist <- spplist %>%
 plantcom_fg <- plantcom %>%
   #join spp info
   left_join(distinct(spplist[,2:ncol(spplist)])) %>%
-  # fill in simple lifeform for 2FORB and 2GRAM
-  mutate(simple_lifeform = ifelse(clean_code2 == "2FORB", "Forb",
-                                  ifelse(clean_code2 == "2GRAM", "Grass", simple_lifeform))) %>%
   #drop non-veg
   filter(!is.na(simple_lifeform)) %>%
   filter(hits >= 1) %>%
@@ -114,6 +117,39 @@ plantcom_fg$f2g <- plantcom_fg$Forb/plantcom_fg$Grass
 plantcom_fg$lnf2g <- log(plantcom_fg$f2g)
 
   
+# -- SUBSET TS SUMMARIZED NN 2017 DATA FOR MISSING PLOT ----
+# just need block 3 plot 7 from 2017
+b3p7 <- subset(nn17sum, block == 3 & plot == 7) %>%
+  #trim any whitespace in spp codes
+  mutate(species = trimws(species)) %>%
+  # append correct code names
+  left_join(spplist, by = c("species" = "code")) %>%
+  # add site and yr cols to be consistent with other datasets
+  mutate(site = "nutnet",
+         yr = 2017) %>%
+  # retain same cols as in main plantcom dataset + simple_lifeform and sum rel cov by species codes to be sure
+  group_by(site, yr, clean_code2, simple_lifeform) %>%
+  summarise(rel_cov = sum(rel_cov),
+            abs_cov = sum(abs_cov)) %>%
+  ungroup() %>%
+  # remove any spp not present
+  filter(abs_cov > 0)
+
+# check relcov sums to 100..
+sapply(b3p7[c("rel_cov", "abs_cov")], sum) #rel cov > 100.. need to re-relativize
+b3p7$rel_cov <- (b3p7$abs_cov/(sum(b3p7$abs_cov))) *100
+sum(b3p7$rel_cov) #good
+
+# summarize by functional group & append to fg dataset
+b3p7_fg <- b3p7 %>%
+  group_by(site, yr, simple_lifeform) %>%
+  summarise(rel_cov = sum(rel_cov),
+            abs_cov = sum(abs_cov)) %>%
+  ungroup() %>%
+  #gather cover types
+  
+# calculate forb:grass ratio
+b3p7_fg$f2g <- b3p7_fg$rel_cov[b3p7_fg$simple_lifeform == "Forb"]/b3p7_fg$rel_cov[b3p7_fg$simple_lifeform == "Forb"]
   
 
 # -- EXPLORE DIFFERENT NMDS VARIATIONS -----
@@ -912,6 +948,7 @@ sdl_common_fig <- plot_grid(sdl1997_fig, sdl2012_fig, sdl2016_fig, nrow = 1,
 sdl_common_fig
 ggsave(plot = sdl_common_fig, 
        filename = "alpine_addnuts/figures/sdlcommon_nmds.pdf", scale = 1.3)
+
 
 # ----- old code below -----
 
