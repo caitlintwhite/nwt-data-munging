@@ -666,8 +666,7 @@ grp1.dry <- plot_df1[plot_df1$meadow_alt == "Dry", ][chull(plot_df1[plot_df1$mea
 grp1.other <- plot_df1[plot_df1$meadow_alt != "Dry", ][chull(plot_df1[plot_df1$meadow_alt != "Dry", c("MDS1", "MDS2")]), ]  # hull values for non-dry plots
 
 
-#sdlfig <- 
-ggplot(spp_df1, aes(MDS1, MDS2)) + 
+sdlfig <- ggplot(spp_df1, aes(MDS1, MDS2)) + 
   geom_polygon(data = grpdf1, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
   # geom_polygon(data = grp1.np, aes(MDS1, MDS2), alpha = 0.5, fill = "aquamarine") +
   # geom_polygon(data = grp1.n, aes(MDS1, MDS2), alpha = 0.5, fill = "steelblue2") +
@@ -690,7 +689,8 @@ ggplot(spp_df1, aes(MDS1, MDS2)) +
   ggtitle("Saddle plots 2016") +
   theme_bw() +
   theme(axis.title = element_blank(),
-        axis.text = element_blank())
+        axis.text = element_blank(),
+        legend.position = "none")
 
 
 
@@ -712,8 +712,7 @@ grp2.k <- plot_df2[plot_df2$trt == "K", ][chull(plot_df2[plot_df2$trt == "K", c(
 # stack treatments
 grpdf2 <- rbind(grp2.c, grp2.n, grp2.k, grp2.nk, grp2.np, grp2.npk)
 
-#nnfig <- 
-ggplot(spp_df2, aes(MDS1, MDS2)) + 
+nn2017_fig <- ggplot(spp_df2, aes(MDS1, MDS2)) + 
   geom_polygon(data = grpdf2, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
   # geom_polygon(data = grp2.np, aes(MDS1, MDS2), alpha = 0.5, fill = "aquamarine") +
   # geom_polygon(data = grp2.npk, aes(MDS1, MDS2), alpha = 0.5, fill = "lightgreen") +
@@ -733,13 +732,6 @@ ggplot(spp_df2, aes(MDS1, MDS2)) +
         axis.text = element_blank())
 
 
-lasttime_fig <- plot_grid(sdlfig, nnfig, nrow = 1,
-                          align = "h", rel_widths = c(1,1.3))
-
-ggsave(plot = lasttime_fig, 
-       filename = "alpine_addnuts/figures/lasttime_nmds.pdf", scale = 1.3)
-
-
 
 # -- sdl 2016, dry meadow only -----
 plot_df1_dry <- data.frame(nmds1_dry$points) %>%
@@ -755,10 +747,10 @@ grpdf1_dry <- rbind(data.frame(plot_df1_dry[plot_df1$trt == "N+P", ][chull(plot_
   data.frame(plot_df1_dry[plot_df1_dry$trt == "N", ][chull(plot_df1_dry[plot_df1_dry$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
   data.frame(plot_df1_dry[plot_df1_dry$trt == "P", ][chull(plot_df1_dry[plot_df1_dry$trt == "P", c("MDS1", "MDS2")]), ]),  # hull values for grp p
   data.frame(plot_df1_dry[plot_df1_dry$trt == "C", ][chull(plot_df1_dry[plot_df1_dry$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
-grpdf1_dry <- na.omit(grpdf1_dry)    
+#fix NA row for N+P
+grpdf1_dry[is.na(grpdf1_dry$MDS1),]  <- plot_df1_dry[plot_df1_dry$plotid ==9,]
 
-#sdlfig16dry <- 
-ggplot(spp_df1_dry, aes(MDS1, MDS2)) + 
+sdl2016_fig <- ggplot(spp_df1_dry, aes(MDS1, MDS2)) + 
   geom_polygon(data = grpdf1_dry, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
   #geom_text(aes(color = simple_lifeform, label = clean_code2)) +
   #geom_text(data = subset(spp_df1, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
@@ -795,8 +787,7 @@ grpdf3 <- rbind(data.frame(plot_df3[plot_df3$trt == "N+P", ][chull(plot_df3[plot
                     data.frame(plot_df3[plot_df3$trt == "C", ][chull(plot_df3[plot_df3$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
 grpdf3 <- na.omit(grpdf3)    
 
-#sdlfig16dry <- 
-ggplot(spp_df3, aes(MDS1, MDS2)) + 
+sdl1997_fig <- ggplot(spp_df3, aes(MDS1, MDS2)) + 
   geom_polygon(data = grpdf3, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
   #geom_text(aes(color = simple_lifeform, label = clean_code2)) +
   #geom_text(data = subset(spp_df1, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
@@ -813,91 +804,114 @@ ggplot(spp_df3, aes(MDS1, MDS2)) +
   ggtitle("Saddle plots 1997, dry meadow") +
   theme_bw() +
   theme(axis.title = element_blank(),
-        axis.text = element_blank())
+        axis.text = element_blank(),
+        legend.position = "none")
 
 
 
 
-# sdl 1997, dry meadow only
-plot_df1_dry <- data.frame(nmds1_dry$points) %>%
+# ---- sdl 2012, dry meadow only ----
+plot_df4 <- data.frame(nmds4$points) %>%
   mutate(rowid = row.names(.)) %>%
-  left_join(sitematrix1)
+  left_join(sitematrix4)
 
-spp_df1_dry <- data.frame(nmds1_dry$species) %>%
+spp_df4 <- data.frame(nmds4$species) %>%
   mutate(clean_code2 = row.names(.)) %>%
   left_join(distinct(spplist[,2:ncol(spplist)]))
 
 # capture hulls
-grpdf1_dry <- rbind(data.frame(plot_df1_dry[plot_df1$trt == "N+P", ][chull(plot_df1_dry[plot_df1_dry$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
-                    data.frame(plot_df1_dry[plot_df1_dry$trt == "N", ][chull(plot_df1_dry[plot_df1_dry$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
-                    data.frame(plot_df1_dry[plot_df1_dry$trt == "P", ][chull(plot_df1_dry[plot_df1_dry$trt == "P", c("MDS1", "MDS2")]), ]),  # hull values for grp p
-                    data.frame(plot_df1_dry[plot_df1_dry$trt == "C", ][chull(plot_df1_dry[plot_df1_dry$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
-grpdf1_dry <- na.omit(grpdf1_dry)    
+grpdf4 <- rbind(data.frame(plot_df4[plot_df4$trt == "N+P", ][chull(plot_df4[plot_df4$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+                data.frame(plot_df4[plot_df4$trt == "N", ][chull(plot_df4[plot_df4$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
+                data.frame(plot_df4[plot_df4$trt == "P", ][chull(plot_df4[plot_df4$trt == "P", c("MDS1", "MDS2")]), ]),  # hull values for grp p
+                data.frame(plot_df4[plot_df4$trt == "C", ][chull(plot_df4[plot_df4$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
+grpdf4 <- na.omit(grpdf4)    
 
-#sdlfig16dry <- 
-ggplot(spp_df1_dry, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grpdf1_dry, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+sdl2012_fig <- ggplot(spp_df4, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf4, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
   #geom_text(aes(color = simple_lifeform, label = clean_code2)) +
   #geom_text(data = subset(spp_df1, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
   #geom_text(data = subset(spp_df1, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
   #geom_text(data = subset(spp_df1, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
   #geom_text(data = subset(spp_df1, simple_lifeform == "Shrub"), aes(label = clean_code2), col = "orchid", fontface = "bold", size = plottext) +
   geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
-  geom_point(data = plot_df1_dry, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  geom_point(data = plot_df4, aes(MDS1, MDS2,fill = trt), pch = 21) +
   #scale_color_discrete(name = "Lifeform") +
   scale_color_manual(name = "Lifeform", values = plantcols) +
   scale_fill_manual(name = "Plot\ntreatment", values = trtcols) +
   #guides(guide_legend(override.aes = list(pch =21))) +
   #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
-  ggtitle("Saddle plots 2016, dry meadow") +
+  ggtitle("Saddle plots 2012, dry meadow") +
   theme_bw() +
   theme(axis.title = element_blank(),
-        axis.text = element_blank())
+        axis.text = element_blank(), 
+        legend.position = "none")
 
 
 
 
-# nutnet 2013, common plots only
-plot_df1_dry <- data.frame(nmds1_dry$points) %>%
+# ---- nutnet 2013, common plots only -----
+plot_df6 <- data.frame(nmds6$points) %>%
   mutate(rowid = row.names(.)) %>%
-  left_join(sitematrix1)
+  left_join(sitematrix6)
 
-spp_df1_dry <- data.frame(nmds1_dry$species) %>%
+spp_df6 <- data.frame(nmds6$species) %>%
   mutate(clean_code2 = row.names(.)) %>%
   left_join(distinct(spplist[,2:ncol(spplist)]))
 
 # capture hulls
-grpdf1_dry <- rbind(data.frame(plot_df1_dry[plot_df1$trt == "N+P", ][chull(plot_df1_dry[plot_df1_dry$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
-                    data.frame(plot_df1_dry[plot_df1_dry$trt == "N", ][chull(plot_df1_dry[plot_df1_dry$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
-                    data.frame(plot_df1_dry[plot_df1_dry$trt == "P", ][chull(plot_df1_dry[plot_df1_dry$trt == "P", c("MDS1", "MDS2")]), ]),  # hull values for grp p
-                    data.frame(plot_df1_dry[plot_df1_dry$trt == "C", ][chull(plot_df1_dry[plot_df1_dry$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
-grpdf1_dry <- na.omit(grpdf1_dry)    
+grpdf6 <- rbind(data.frame(plot_df6[plot_df6$trt == "N+P", ][chull(plot_df6[plot_df6$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+                data.frame(plot_df6[plot_df6$trt == "N+P+K", ][chull(plot_df6[plot_df6$trt == "N+P+K", c("MDS1", "MDS2")]),]), # hull values for grp n+p+k
+                data.frame(plot_df6[plot_df6$trt == "N+K", ][chull(plot_df6[plot_df6$trt == "N+K", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+                data.frame(plot_df6[plot_df6$trt == "N", ][chull(plot_df6[plot_df6$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
+                data.frame(plot_df6[plot_df6$trt == "K", ][chull(plot_df6[plot_df6$trt == "K", c("MDS1", "MDS2")]), ]),  # hull values for grp k
+                data.frame(plot_df6[plot_df6$trt == "C", ][chull(plot_df6[plot_df6$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
+grpdf6 <- na.omit(grpdf6)
 
-#sdlfig16dry <- 
-ggplot(spp_df1_dry, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grpdf1_dry, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+
+nn2013_fig <- ggplot(spp_df6, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf6, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
   #geom_text(aes(color = simple_lifeform, label = clean_code2)) +
   #geom_text(data = subset(spp_df1, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
   #geom_text(data = subset(spp_df1, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
   #geom_text(data = subset(spp_df1, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
   #geom_text(data = subset(spp_df1, simple_lifeform == "Shrub"), aes(label = clean_code2), col = "orchid", fontface = "bold", size = plottext) +
   geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
-  geom_point(data = plot_df1_dry, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  geom_point(data = plot_df6, aes(MDS1, MDS2,fill = trt), pch = 21) +
   #scale_color_discrete(name = "Lifeform") +
   scale_color_manual(name = "Lifeform", values = plantcols) +
   scale_fill_manual(name = "Plot\ntreatment", values = trtcols) +
   #guides(guide_legend(override.aes = list(pch =21))) +
   #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
-  ggtitle("Saddle plots 2016, dry meadow") +
+  ggtitle("NutNet 2013, common plots") +
   theme_bw() +
   theme(axis.title = element_blank(),
-        axis.text = element_blank())
+        axis.text = element_blank(),
+        legend.position = "none")
 
 
 
+# -- make panel plots ----
+# (1) last time point: sdl 2016 non snowfence, nutnet 2017
+lasttime_fig <- plot_grid(sdlfig, nn2017_fig, nrow = 1,
+                          align = "h", rel_widths = c(1,1.3))
+lasttime_fig
+ggsave(plot = lasttime_fig, 
+       filename = "alpine_addnuts/figures/lasttime_nmds.pdf", scale = 1.3)
 
 
+# (2) nutnet2013, 2017, common sampled only
+nn_common_fig <- plot_grid(nn2013_fig, nn2017_fig, nrow = 1,
+                           align = "h", rel_widths = c(1,1.3))
+nn_common_fig
+ggsave(plot = nn_common_fig, 
+       filename = "alpine_addnuts/figures/nncommon_nmds.pdf", scale = 1.3)
 
+# (3) sdl 1997, 2012, 2016, common sampled dry meadow plots only
+sdl_common_fig <- plot_grid(sdl1997_fig, sdl2012_fig, sdl2016_fig, nrow = 1,
+                            align = "h", rel_widths = c(1,1, 1.3))
+sdl_common_fig
+ggsave(plot = sdl_common_fig, 
+       filename = "alpine_addnuts/figures/sdlcommon_nmds.pdf", scale = 1.3)
 
 # ----- old code below -----
 
