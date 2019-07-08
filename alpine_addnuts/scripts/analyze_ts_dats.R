@@ -562,12 +562,8 @@ subset(matrix4_phi_comb$sign, p.adjust(matrix4_phi_comb$sign$p.value, method = "
 
 
 
-
-# -- Matrix 5: Sites in Tim's study only (16 plots in Saddle + NutNet plots commonly sampled) ----
-
-# plots 1-16 for sdl, 28 plots common in nutnet in 2013 and 2017
-matrix5 <-  subset(plantcom, (site == "sdl" & plotid %in% c(1:16)) |
-                     (site == "nutnet" & plotid %in% nnplots1317$plotid)) %>%
+# -- Matrix 6: NutNet 2013, plots from 2016 only -----
+matrix6 <- subset(plantcom, yr == 2013 & plotid %in% nncommon$plotid) %>%
   #remove unknowns and non-veg
   subset(!grepl("^2", clean_code2)) %>%
   mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
@@ -575,176 +571,15 @@ matrix5 <-  subset(plantcom, (site == "sdl" & plotid %in% c(1:16)) |
   dplyr::select(rowid, site:ncol(.)) %>%
   as.data.frame()
 
-sitematrix5 <- matrix5[,1:4]
-# add trtment info
-sitematrix5 <- left_join(sitematrix5, nnplots[c("plotid", "trt")])
-for(i in sitematrix5$plotid[sitematrix5$site == "sdl"]){
-  sitematrix5$trt[sitematrix5$plotid == i] <- sdlplots$trt[sdlplots$plot == i & !is.na(sdlplots$plot)]
-}
+# calculate forb to grass ratio
+fgrat6 <- subset(plantcom_fg, plotid %in% matrix6$plotid & yr == 2013)
 
-row.names(matrix5) <- matrix5$rowid
-matrix5 <- matrix5[!colnames(matrix5) %in% c("rowid", "site", "yr", "plotid")]
+sitematrix6 <- matrix6[,1:4] %>%
+  left_join(nnplots) %>%
+  # make trtment factor
+  mutate(trt = factor(trt, levels = c("C", "K", "N", "N+K", "N+P", "N+P+K"))) %>%
+  left_join(fgrat6)
 
-# relativize data
-matrix5_rel <- vegan::decostand(matrix5, method = "total")
-
-# run nmds
-nmds5 <- metaMDS(matrix5_rel, k = 2, trymax = 50)
-plot(nmds5, type = "t")
-
-
-ordiplot(nmds5, type="n", main = "all sites, all yrs, common plots")
-with (sitematrix5, ordiellipse(nmds5, yr, kind="se", conf=0.95, col="blue", lwd=2,
-                               label=TRUE))
-with (sitematrix5, ordiellipse(nmds5, trt, kind="se", conf=0.95, col="red", lwd=2,
-                               label=TRUE))
-orditorp (nmds5, display="species", col="black", air=0.01)
-
-
-ordiplot(nmds5, type="n", main = "all sites, all yrs, common plots")
-with (sitematrix5, ordihull(nmds5, yr, col="blue", lwd=2,
-                            label=TRUE))
-with (sitematrix5, ordihull(nmds5, trt, col="red", lwd=2,
-                            label=TRUE))
-orditorp (nmds5, display="species", col="black", air=0.01)
-
-
-
-
-
-
-
-
-# -- Matrix 1: nutnet and sdl; C, N, P and N+P only; all together -----
-# (1) all sites, all yrs -- keep only C, N, P, and N+P plots
-keep_nnplots <- nnplots$plotid[nnplots$trt %in% c("C", "N", "P", "N+P")]
-matrix1 <- subset(plantcom, plotid %in% c(keep_nnplots, sdlplots$plot)) %>%
-  #remove unknowns and non-veg
-  subset(!grepl("^2", clean_code2))
-
-# check to see how many spp in nutnet sites overlap with spp in sdl sites
-summary(unique(matrix1$clean_code2[plantcom$site == "nutnet"]) %in%
-          unique(matrix1$clean_code2[plantcom$site == "sdl"]))
-summary(unique(matrix1$clean_code2[plantcom$site == "sdl"]) %in%
-          unique(matrix1$clean_code2[plantcom$site == "nutnet"]))
-# pull out spp that overlap
-nnspp <- sort(unique(matrix1$clean_code2[plantcom$site == "nutnet"]))
-sdlspp <- sort(unique(matrix1$clean_code2[plantcom$site == "sdl"]))
-overlapspp <- nnspp[nnspp %in% sdlspp]
-
-# keep overlapping spp only
-matrix1_overlap <- subset(matrix1, clean_code2 %in% overlapspp) %>%
-  mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
-  spread(clean_code2, hits, fill = 0) %>%
-  dplyr::select(rowid, site:ncol(.)) %>%
-  as.data.frame()
-
-sitematrix1 <- matrix1_overlap[,1:4]
-# add trtment info
-sitematrix1 <- left_join(sitematrix1, nnplots[c("plotid", "trt")])
-for(i in sitematrix1$plotid[sitematrix1$site == "sdl"]){
-  sitematrix1$trt[sitematrix1$plotid == i] <- sdlplots$trt[sdlplots$plot == i & !is.na(sdlplots$plot)]
-}
-
-row.names(matrix1_overlap) <- matrix1_overlap$rowid
-matrix1_overlap <- matrix1_overlap[!colnames(matrix1_overlap) %in% c("rowid", "site", "yr", "plotid")]
-
-# relativize data
-matrix1_overlap_rel <- vegan::decostand(matrix1_overlap, method = "total")
-
-# run nmds
-nmds1 <- metaMDS(matrix1_overlap_rel, k = 3, trymax = 50)
-plot(nmds1, type = "t")
-ordiplot()
-
-ordiplot(nmds1, type="n", main = "all sites, all yrs, common spp")
-with (sitematrix1, ordiellipse(nmds1, yr, kind="se", conf=0.95, col="blue", lwd=2,
-                               label=TRUE))
-with (sitematrix1, ordiellipse(nmds1, trt, kind="se", conf=0.95, col="red", lwd=2,
-                               label=TRUE))
-orditorp (nmds1, display="species", col="black", air=0.01)
-
-
-
-# -- Matix 2: NutNet only, all treatments, all years -----
-# check for no effect of +K and micro relative to N+P, N, P, C..
-# all trts, nutnet only plots..
-matrix2 <- subset(plantcom, site == "nutnet") %>%
-  #remove unknowns and non-veg
-  subset(!grepl("^2", clean_code2)) %>%
-  mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
-  spread(clean_code2, hits, fill = 0) %>%
-  dplyr::select(rowid, site:ncol(.)) %>%
-  as.data.frame()
-
-sitematrix2 <- matrix2[,1:4] %>%
-  left_join(nnplots)
-
-row.names(matrix2) <- matrix2$rowid
-matrix2 <- matrix2[!colnames(matrix2) %in% c("rowid", "site", "yr", "plotid")]
-matrix2_rel <- decostand(matrix2, method = "total")
-
-nmds2 <- metaMDS(matrix2_rel, k = 2, trymax = 50)
-plot(nmds2, type = "t")
-
-ordiplot(nmds2, type="n", main = "nutnet sites, all yrs, all spp")
-with (sitematrix2, ordiellipse(nmds2, yr, kind="se", conf=0.95, col="blue", lwd=2,
-                               label=TRUE))
-with (sitematrix2, ordiellipse(nmds2, trt, kind="se", conf=0.95, col="red", lwd=2,
-                               label=TRUE))
-orditorp (nmds2, display="species", col="black", air=0.02)
-
-#N+P and N+P+K separate out from the rest. 2017 community has shifted from 2013 but still close
-
-
-# -- Matrix 3: TRY SDL 2012 and 2016 ONLY (since 1997 sticks out) -----
-# all trts, nutnet only plots..
-matrix3 <- subset(plantcom, site == "sdl" & yr > 1997) %>%
-  #remove unknowns and non-veg
-  subset(!grepl("^2", clean_code2)) %>%
-  mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
-  spread(clean_code2, hits, fill = 0) %>%
-  dplyr::select(rowid, site:ncol(.)) %>%
-  as.data.frame()
-
-sitematrix3 <- matrix3[,1:4] %>%
-  mutate(plotid = as.numeric(plotid)) %>%
-  left_join(sdlplots, by = c("plotid" = "plot"))
-
-row.names(matrix3) <- matrix3$rowid
-matrix3 <- matrix3[!colnames(matrix3) %in% c("rowid", "site", "yr", "plotid")]
-matrix3_rel <- decostand(matrix3, method = "total")
-
-nmds3 <- metaMDS(matrix3_rel, k = 2, trymax = 50)
-plot(nmds3, type = "t")
-
-ordiplot(nmds3, type="n", main = "sdl sites, 2012 and 2016 only, all spp")
-with (sitematrix3, ordiellipse(nmds3, yr, kind="se", conf=0.95, col="blue", lwd=2,
-                               label=TRUE))
-with (sitematrix3, ordiellipse(nmds3, trt, kind="se", conf=0.95, col="red", lwd=2,
-                               label=TRUE))
-orditorp (nmds2, display="species", col="black", air=0.02)
-
-ordiplot(nmds3, type="n", main = "sdl sites, 2012 and 2016 only, all spp")
-with(sitematrix3, ordisurf(nmds3, yr, col="blue", add = TRUE))
-with(sitematrix3, ordiellipse(nmds3, trt, kind = "se", conf = 0.95, col="red", lwd=2,
-                              label=TRUE))
-orditorp (nmds2, display="species", col="black", air=0.02)
-
-
-
-# -- Matrix 6: Control plots only -----
-controlplots <- sort(c(sdlplots_alt$plot[sdlplots_alt$trt == "C" & sdlplots_alt$meadow == "Dry" & sdlplots_alt$snow == "No snow"],
-                       nnplots$plotid[nnplots$trt == "C"]))
-matrix6 <- subset(plantcom, plotid %in% controlplots) %>%
-  #remove unknowns and non-veg
-  subset(!grepl("^2", clean_code2)) %>%
-  mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
-  spread(clean_code2, hits, fill = 0) %>%
-  dplyr::select(rowid, site:ncol(.)) %>%
-  as.data.frame()
-
-sitematrix6 <- matrix6[,1:4]
 row.names(matrix6) <- matrix6$rowid
 matrix6 <- matrix6[!colnames(matrix6) %in% c("rowid", "site", "yr", "plotid")]
 
@@ -753,41 +588,55 @@ matrix6_rel <- vegan::decostand(matrix6, method = "total")
 
 # run nmds
 nmds6 <- metaMDS(matrix6_rel, k = 2, trymax = 50)
+nmds6
 plot(nmds6, type = "t")
 
+# environmental fit grass to forb
+fit6 <- envfit(nmds6, sitematrix6[c("trt", "lnf2g")], strata = sitematrix6$block, perm = 999)
+fit6 #trt is signif, forb:grass signif
 
-ordiplot(nmds6, type="n", main = "all sites, all yrs, control plots only")
-with (sitematrix6, ordiellipse(nmds6, yr, kind="se", conf=0.95, col="blue", lwd=2,
-                               label=TRUE))
-orditorp (nmds6, display="species", col="black", air=0.01)
-
-ordiplot(nmds6, type="n", main = "all sites, all yrs, control plots only")
-with (sitematrix6, ordihull(nmds6, yr, col="blue", lwd=2,
-                            label=TRUE))
-orditorp (nmds6, display="species", col="black", air=0.01)
-
+ordiplot(nmds6, type="n", main = "NutNet 2013, all treatments")
+with (sitematrix6, ordiellipse(nmds6, trt, kind="se", conf=0.95, col=1:6))
+with (sitematrix6, ordisurf(nmds6, lnf2g, col="grey50", add = T))
+plot(fit2, col = 1:7)
+orditorp (nmds6, display="species", col="grey30", air=0.01)
 
 
+# analysis of similiarities/mrpp/permanova
+## calculate CB distance
+matrix6_rel_bray <- vegdist(matrix6_rel)
+summary(anosim(matrix6_rel_bray, grouping = sitematrix6$trt, strata = sitematrix6$block, permutations = 999))
+mrpp(matrix6_rel,  grouping = sitematrix6$trt, strata = sitematrix6$block, distance = "bray")
+adonis(matrix6_rel ~ trt * lnf2g, data = sitematrix6, strata = sitematrix6$block, permutations = 999, method = "bray")
+# change order of variables
+adonis(matrix6_rel ~ lnf2g * trt, data = sitematrix6, strata = sitematrix6$block, permutations = 999, method = "bray")
+# either order of explanatory vars, forb:grass ration and trtment is distinct, but there is no interaction
 
 
-# -- REPLOT IN GGPLOT ----
-plot_df <- data.frame(nmds4$points) %>%
-  mutate(rowid = row.names(.)) %>%
-  left_join(sitematrix4)
-spp_df <- data.frame(nmds4$species) %>%
-  mutate(clean_code2 = row.names(.)) %>%
-  left_join(distinct(spplist[,2:ncol(spplist)]))
+# indicator species for nutnet plots
+# indicator species
+nn6_ind = multipatt(matrix6_rel, sitematrix6$trt, func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
+summary(nn6_ind, alpha = 0.1)
+# check signif of adjust pvals (for multiple spp comparisons)
+summary(p.adjust(nn6_ind$sign$p.value, method = "holm") < 0.1) #nothing signif
 
-ggplot(spp_df, aes(MDS1, MDS2)) + 
-  geom_text(aes(color = Growth_Habit, label = clean_code2)) +
-  geom_text(data = subset(plot_df, trt == "N+P"), aes(MDS1, MDS2, label = plotid)) +
-  geom_text(data = subset(plot_df, trt == "N"), aes(MDS1, MDS2, label = plotid), col = "blue") +
-  geom_text(data = subset(plot_df, trt == "C"), aes(MDS1, MDS2, label = plotid), col = "purple") +
-  geom_text(data = subset(plot_df, trt == "P"), aes(MDS1, MDS2, label = plotid), col = "brown")
-  
+# does any spp associate with a particular treatment?
+matrix6_rel_pa <- as.data.frame(ifelse(matrix6_rel>0,1,0))
+nn6_phi <- multipatt(matrix6_rel_pa, sitematrix6$trt, duleg = T, func = "r.g", control = how(nperm = 999))
+summary(nn6_phi)
+# check signif for multiple spp comparisons
+summary(p.adjust(nn6_phi$sign$p.value, method = "holm")<0.1) #nothing signig, 2 NAs
+# who are the generalists?
+subset(nn6_phi$sign, is.na(nn6_phi$sign$p.value)) # carex rupestris and kobresia...
+#check with combos allowed
+nn6_phi_comb <- multipatt(matrix6_rel_pa, sitematrix6$trt, func = "r.g", control = how(nperm = 999))
+summary(nn6_phi_comb)
+# check signif for multiple spp comparisons
+subset(nn6_phi_comb$sign, p.adjust(nn6_phi_comb$sign$p.value, method = "holm")<0.1) # nothing signif
 
 
 
+# -- Visualize results -----
 # specify plotting colors for all treatments
 alltrts <- sort(unique(c(as.character(sitematrix2$trt), as.character(sitematrix1$trt))))
 trtcols <- viridis::viridis(n = length(alltrts))
@@ -933,7 +782,249 @@ nnfig <- ggplot(spp_df2, aes(MDS1, MDS2)) +
 
 
 lasttime_fig <- plot_grid(sdlfig, nnfig, nrow = 1,
-          align = "h", rel_widths = c(1,1.3))
+                          align = "h", rel_widths = c(1,1.3))
 
 ggsave(plot = lasttime_fig, 
        filename = "alpine_addnuts/figures/lasttime_nmds.pdf", scale = 1.3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ----- old code below -----
+
+
+# # -- Matrix 5: Sites in Tim's study only (16 plots in Saddle + NutNet plots commonly sampled) ----
+# 
+# # plots 1-16 for sdl, 28 plots common in nutnet in 2013 and 2017
+# matrix5 <-  subset(plantcom, (site == "sdl" & plotid %in% c(1:16)) |
+#                      (site == "nutnet" & plotid %in% nnplots1317$plotid)) %>%
+#   #remove unknowns and non-veg
+#   subset(!grepl("^2", clean_code2)) %>%
+#   mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
+#   spread(clean_code2, hits, fill = 0) %>%
+#   dplyr::select(rowid, site:ncol(.)) %>%
+#   as.data.frame()
+# 
+# sitematrix5 <- matrix5[,1:4]
+# # add trtment info
+# sitematrix5 <- left_join(sitematrix5, nnplots[c("plotid", "trt")])
+# for(i in sitematrix5$plotid[sitematrix5$site == "sdl"]){
+#   sitematrix5$trt[sitematrix5$plotid == i] <- sdlplots$trt[sdlplots$plot == i & !is.na(sdlplots$plot)]
+# }
+# 
+# row.names(matrix5) <- matrix5$rowid
+# matrix5 <- matrix5[!colnames(matrix5) %in% c("rowid", "site", "yr", "plotid")]
+# 
+# # relativize data
+# matrix5_rel <- vegan::decostand(matrix5, method = "total")
+# 
+# # run nmds
+# nmds5 <- metaMDS(matrix5_rel, k = 2, trymax = 50)
+# plot(nmds5, type = "t")
+# 
+# 
+# ordiplot(nmds5, type="n", main = "all sites, all yrs, common plots")
+# with (sitematrix5, ordiellipse(nmds5, yr, kind="se", conf=0.95, col="blue", lwd=2,
+#                                label=TRUE))
+# with (sitematrix5, ordiellipse(nmds5, trt, kind="se", conf=0.95, col="red", lwd=2,
+#                                label=TRUE))
+# orditorp (nmds5, display="species", col="black", air=0.01)
+# 
+# 
+# ordiplot(nmds5, type="n", main = "all sites, all yrs, common plots")
+# with (sitematrix5, ordihull(nmds5, yr, col="blue", lwd=2,
+#                             label=TRUE))
+# with (sitematrix5, ordihull(nmds5, trt, col="red", lwd=2,
+#                             label=TRUE))
+# orditorp (nmds5, display="species", col="black", air=0.01)
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# # -- Matrix 1: nutnet and sdl; C, N, P and N+P only; all together -----
+# # (1) all sites, all yrs -- keep only C, N, P, and N+P plots
+# keep_nnplots <- nnplots$plotid[nnplots$trt %in% c("C", "N", "P", "N+P")]
+# matrix1 <- subset(plantcom, plotid %in% c(keep_nnplots, sdlplots$plot)) %>%
+#   #remove unknowns and non-veg
+#   subset(!grepl("^2", clean_code2))
+# 
+# # check to see how many spp in nutnet sites overlap with spp in sdl sites
+# summary(unique(matrix1$clean_code2[plantcom$site == "nutnet"]) %in%
+#           unique(matrix1$clean_code2[plantcom$site == "sdl"]))
+# summary(unique(matrix1$clean_code2[plantcom$site == "sdl"]) %in%
+#           unique(matrix1$clean_code2[plantcom$site == "nutnet"]))
+# # pull out spp that overlap
+# nnspp <- sort(unique(matrix1$clean_code2[plantcom$site == "nutnet"]))
+# sdlspp <- sort(unique(matrix1$clean_code2[plantcom$site == "sdl"]))
+# overlapspp <- nnspp[nnspp %in% sdlspp]
+# 
+# # keep overlapping spp only
+# matrix1_overlap <- subset(matrix1, clean_code2 %in% overlapspp) %>%
+#   mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
+#   spread(clean_code2, hits, fill = 0) %>%
+#   dplyr::select(rowid, site:ncol(.)) %>%
+#   as.data.frame()
+# 
+# sitematrix1 <- matrix1_overlap[,1:4]
+# # add trtment info
+# sitematrix1 <- left_join(sitematrix1, nnplots[c("plotid", "trt")])
+# for(i in sitematrix1$plotid[sitematrix1$site == "sdl"]){
+#   sitematrix1$trt[sitematrix1$plotid == i] <- sdlplots$trt[sdlplots$plot == i & !is.na(sdlplots$plot)]
+# }
+# 
+# row.names(matrix1_overlap) <- matrix1_overlap$rowid
+# matrix1_overlap <- matrix1_overlap[!colnames(matrix1_overlap) %in% c("rowid", "site", "yr", "plotid")]
+# 
+# # relativize data
+# matrix1_overlap_rel <- vegan::decostand(matrix1_overlap, method = "total")
+# 
+# # run nmds
+# nmds1 <- metaMDS(matrix1_overlap_rel, k = 3, trymax = 50)
+# plot(nmds1, type = "t")
+# ordiplot()
+# 
+# ordiplot(nmds1, type="n", main = "all sites, all yrs, common spp")
+# with (sitematrix1, ordiellipse(nmds1, yr, kind="se", conf=0.95, col="blue", lwd=2,
+#                                label=TRUE))
+# with (sitematrix1, ordiellipse(nmds1, trt, kind="se", conf=0.95, col="red", lwd=2,
+#                                label=TRUE))
+# orditorp (nmds1, display="species", col="black", air=0.01)
+# 
+# 
+# 
+# # -- Matix 2: NutNet only, all treatments, all years -----
+# # check for no effect of +K and micro relative to N+P, N, P, C..
+# # all trts, nutnet only plots..
+# matrix2 <- subset(plantcom, site == "nutnet") %>%
+#   #remove unknowns and non-veg
+#   subset(!grepl("^2", clean_code2)) %>%
+#   mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
+#   spread(clean_code2, hits, fill = 0) %>%
+#   dplyr::select(rowid, site:ncol(.)) %>%
+#   as.data.frame()
+# 
+# sitematrix2 <- matrix2[,1:4] %>%
+#   left_join(nnplots)
+# 
+# row.names(matrix2) <- matrix2$rowid
+# matrix2 <- matrix2[!colnames(matrix2) %in% c("rowid", "site", "yr", "plotid")]
+# matrix2_rel <- decostand(matrix2, method = "total")
+# 
+# nmds2 <- metaMDS(matrix2_rel, k = 2, trymax = 50)
+# plot(nmds2, type = "t")
+# 
+# ordiplot(nmds2, type="n", main = "nutnet sites, all yrs, all spp")
+# with (sitematrix2, ordiellipse(nmds2, yr, kind="se", conf=0.95, col="blue", lwd=2,
+#                                label=TRUE))
+# with (sitematrix2, ordiellipse(nmds2, trt, kind="se", conf=0.95, col="red", lwd=2,
+#                                label=TRUE))
+# orditorp (nmds2, display="species", col="black", air=0.02)
+# 
+# #N+P and N+P+K separate out from the rest. 2017 community has shifted from 2013 but still close
+# 
+# 
+# # -- Matrix 3: TRY SDL 2012 and 2016 ONLY (since 1997 sticks out) -----
+# # all trts, nutnet only plots..
+# matrix3 <- subset(plantcom, site == "sdl" & yr > 1997) %>%
+#   #remove unknowns and non-veg
+#   subset(!grepl("^2", clean_code2)) %>%
+#   mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
+#   spread(clean_code2, hits, fill = 0) %>%
+#   dplyr::select(rowid, site:ncol(.)) %>%
+#   as.data.frame()
+# 
+# sitematrix3 <- matrix3[,1:4] %>%
+#   mutate(plotid = as.numeric(plotid)) %>%
+#   left_join(sdlplots, by = c("plotid" = "plot"))
+# 
+# row.names(matrix3) <- matrix3$rowid
+# matrix3 <- matrix3[!colnames(matrix3) %in% c("rowid", "site", "yr", "plotid")]
+# matrix3_rel <- decostand(matrix3, method = "total")
+# 
+# nmds3 <- metaMDS(matrix3_rel, k = 2, trymax = 50)
+# plot(nmds3, type = "t")
+# 
+# ordiplot(nmds3, type="n", main = "sdl sites, 2012 and 2016 only, all spp")
+# with (sitematrix3, ordiellipse(nmds3, yr, kind="se", conf=0.95, col="blue", lwd=2,
+#                                label=TRUE))
+# with (sitematrix3, ordiellipse(nmds3, trt, kind="se", conf=0.95, col="red", lwd=2,
+#                                label=TRUE))
+# orditorp (nmds2, display="species", col="black", air=0.02)
+# 
+# ordiplot(nmds3, type="n", main = "sdl sites, 2012 and 2016 only, all spp")
+# with(sitematrix3, ordisurf(nmds3, yr, col="blue", add = TRUE))
+# with(sitematrix3, ordiellipse(nmds3, trt, kind = "se", conf = 0.95, col="red", lwd=2,
+#                               label=TRUE))
+# orditorp (nmds2, display="species", col="black", air=0.02)
+# 
+# 
+# 
+# # -- Matrix 6: Control plots only -----
+# controlplots <- sort(c(sdlplots_alt$plot[sdlplots_alt$trt == "C" & sdlplots_alt$meadow == "Dry" & sdlplots_alt$snow == "No snow"],
+#                        nnplots$plotid[nnplots$trt == "C"]))
+# matrix6 <- subset(plantcom, plotid %in% controlplots) %>%
+#   #remove unknowns and non-veg
+#   subset(!grepl("^2", clean_code2)) %>%
+#   mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
+#   spread(clean_code2, hits, fill = 0) %>%
+#   dplyr::select(rowid, site:ncol(.)) %>%
+#   as.data.frame()
+# 
+# sitematrix6 <- matrix6[,1:4]
+# row.names(matrix6) <- matrix6$rowid
+# matrix6 <- matrix6[!colnames(matrix6) %in% c("rowid", "site", "yr", "plotid")]
+# 
+# # relativize data
+# matrix6_rel <- vegan::decostand(matrix6, method = "total")
+# 
+# # run nmds
+# nmds6 <- metaMDS(matrix6_rel, k = 2, trymax = 50)
+# plot(nmds6, type = "t")
+# 
+# 
+# ordiplot(nmds6, type="n", main = "all sites, all yrs, control plots only")
+# with (sitematrix6, ordiellipse(nmds6, yr, kind="se", conf=0.95, col="blue", lwd=2,
+#                                label=TRUE))
+# orditorp (nmds6, display="species", col="black", air=0.01)
+# 
+# ordiplot(nmds6, type="n", main = "all sites, all yrs, control plots only")
+# with (sitematrix6, ordihull(nmds6, yr, col="blue", lwd=2,
+#                             label=TRUE))
+# orditorp (nmds6, display="species", col="black", air=0.01)
+# 
+# 
+# 
+# 
+# 
+# # -- REPLOT IN GGPLOT ----
+# plot_df <- data.frame(nmds4$points) %>%
+#   mutate(rowid = row.names(.)) %>%
+#   left_join(sitematrix4)
+# spp_df <- data.frame(nmds4$species) %>%
+#   mutate(clean_code2 = row.names(.)) %>%
+#   left_join(distinct(spplist[,2:ncol(spplist)]))
+# 
+# ggplot(spp_df, aes(MDS1, MDS2)) + 
+#   geom_text(aes(color = Growth_Habit, label = clean_code2)) +
+#   geom_text(data = subset(plot_df, trt == "N+P"), aes(MDS1, MDS2, label = plotid)) +
+#   geom_text(data = subset(plot_df, trt == "N"), aes(MDS1, MDS2, label = plotid), col = "blue") +
+#   geom_text(data = subset(plot_df, trt == "C"), aes(MDS1, MDS2, label = plotid), col = "purple") +
+#   geom_text(data = subset(plot_df, trt == "P"), aes(MDS1, MDS2, label = plotid), col = "brown")
+#   
+# 
+# 
+# 
