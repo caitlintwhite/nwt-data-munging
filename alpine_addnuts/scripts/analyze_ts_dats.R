@@ -554,12 +554,8 @@ summary(matrix4_phi_comb)
 # check signif for multiple spp comparisons
 subset(matrix4_phi_comb$sign, p.adjust(matrix4_phi_comb$sign$p.value, method = "holm")<0.1) # nothing signif
 
-
-
 # no species align with any particular treatment, as a predictor or associatively 
 # no spp are generalists tho (no NAs in any of the indic analysis)
-
-
 
 
 # -- Matrix 6: NutNet 2013, plots from 2016 only -----
@@ -642,37 +638,41 @@ alltrts <- sort(unique(c(as.character(sitematrix2$trt), as.character(sitematrix1
 trtcols <- viridis::viridis(n = length(alltrts))
 names(trtcols) <- alltrts
 
+# specify plotting cols for lifeform
+plantcols <- c("N-fixer" = "chocolate4", "Forb" = "grey30", "Grass" = "seagreen4", "Shrub" = "orchid")
+
 # specify species text size
 plottext <- 3
 
-# last time point, sdl
 
+
+# last time point, sdl (2016)
 plot_df1 <- data.frame(nmds1$points) %>%
   mutate(rowid = row.names(.)) %>%
   left_join(sitematrix1)
 
 spp_df1 <- data.frame(nmds1$species) %>%
   mutate(clean_code2 = row.names(.)) %>%
-  left_join(distinct(spplist[,2:ncol(spplist)])) %>%
-  #make simple lifeform grp
-  mutate(simple_lifeform = ifelse(Family == "Fabaceae", "N-fixer",
-                                  ifelse(grepl("Shrub", Growth_Habit), "Shrub",
-                                         ifelse(Growth_Habit == "Graminoid", "Grass", "Forb"))))
+  left_join(distinct(spplist[,2:ncol(spplist)]))
 
+# capture hulls
 grp1.np <- plot_df1[plot_df1$trt == "N+P", ][chull(plot_df1[plot_df1$trt == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
 grp1.n <- plot_df1[plot_df1$trt == "N", ][chull(plot_df1[plot_df1$trt == "N", c("MDS1", "MDS2")]), ]  # hull values for grp n
 grp1.p <- plot_df1[plot_df1$trt == "P", ][chull(plot_df1[plot_df1$trt == "P", c("MDS1", "MDS2")]), ]  # hull values for grp p
 grp1.c <- plot_df1[plot_df1$trt == "C", ][chull(plot_df1[plot_df1$trt == "C", c("MDS1", "MDS2")]), ]  # hull values for grp control
+# stack grp dfs
+grpdf1 <- rbind(grp1.np, grp1.n, grp1.p, grp1.c)
 grp1.dry <- plot_df1[plot_df1$meadow_alt == "Dry", ][chull(plot_df1[plot_df1$meadow_alt == "Dry", c("MDS1", "MDS2")]), ]  # hull values for dry meadow plots
 grp1.other <- plot_df1[plot_df1$meadow_alt != "Dry", ][chull(plot_df1[plot_df1$meadow_alt != "Dry", c("MDS1", "MDS2")]), ]  # hull values for non-dry plots
 
 
 #sdlfig <- 
 ggplot(spp_df1, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grp1.np, aes(MDS1, MDS2), alpha = 0.5, fill = "aquamarine") +
-  geom_polygon(data = grp1.n, aes(MDS1, MDS2), alpha = 0.5, fill = "steelblue2") +
-  geom_polygon(data = grp1.p, aes(MDS1, MDS2), alpha = 0.5, fill = "goldenrod") +
-  geom_polygon(data = grp1.c, aes(MDS1, MDS2), alpha = 0.5, fill = "orchid") +
+  geom_polygon(data = grpdf1, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+  # geom_polygon(data = grp1.np, aes(MDS1, MDS2), alpha = 0.5, fill = "aquamarine") +
+  # geom_polygon(data = grp1.n, aes(MDS1, MDS2), alpha = 0.5, fill = "steelblue2") +
+  # geom_polygon(data = grp1.p, aes(MDS1, MDS2), alpha = 0.5, fill = "goldenrod") +
+  # geom_polygon(data = grp1.c, aes(MDS1, MDS2), alpha = 0.5, fill = "orchid") +
   geom_polygon(data = grp1.dry, aes(MDS1, MDS2), alpha = 0.5, fill = NA, col = "black", lty = 2) +
   geom_polygon(data = grp1.other, aes(MDS1, MDS2), alpha = 0.5, fill = NA, col = "black", lty = 3) +
   #geom_text(aes(color = simple_lifeform, label = clean_code2)) +
@@ -683,77 +683,24 @@ ggplot(spp_df1, aes(MDS1, MDS2)) +
   geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
   geom_point(data = plot_df1, aes(MDS1, MDS2,fill = trt), pch = 21) +
   #scale_color_discrete(name = "Lifeform") +
-  scale_color_manual(name = "Lifeform", values = c("N-fixer" = "chocolate4", "Forb" = "grey30", "Grass" = "seagreen4", "Shrub" = "orchid")) +
+  scale_color_manual(name = "Lifeform", values = plantcols) +
   scale_fill_manual(name = "Plot\ntreatment", values = trtcols) +
   #guides(guide_legend(override.aes = list(pch =21))) +
   #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
   ggtitle("Saddle plots 2016") +
   theme_bw() +
   theme(axis.title = element_blank(),
-        axis.text = element_blank(),
-        legend.position = "none")
-
-# color in sites by 2016 meadow designation
-ggplot(spp_df7, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grp7.np, aes(MDS1, MDS2), alpha = 0.5, fill = "aquamarine") +
-  geom_polygon(data = grp7.dry, aes(MDS1, MDS2), alpha = 0.5, fill = NA, col = "black", lty = 2) +
-  geom_polygon(data = grp7.other, aes(MDS1, MDS2), alpha = 0.5, fill = NA, col = "black", lty = 3) +
-  #geom_text(aes(color = simple_lifeform, label = clean_code2)) +
-  #geom_text(data = subset(spp_df7, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
-  #geom_text(data = subset(spp_df7, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
-  #geom_text(data = subset(spp_df7, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
-  #geom_text(data = subset(spp_df7, simple_lifeform == "Shrub"), aes(label = clean_code2), col = "orchid", fontface = "bold", size = plottext) +
-  #geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
-  geom_point(data = plot_df7, aes(MDS1, MDS2,col = meadow12), pch = 1, size =3) +
-  geom_point(data = plot_df7, aes(MDS1, MDS2,fill = meadow16), pch = 21) +
-  #scale_color_discrete(name = "Lifeform") +
-  #scale_color_manual(name = "Lifeform", values = c("N-fixer" = "chocolate4", "Forb" = "grey30", "Grass" = "seagreen4", "Shrub" = "orchid")) +
-  #scale_fill_manual(name = "Plot\ntreatment", values = trtcols) +
-  #guides(guide_legend(override.aes = list(pch =21))) +
-  #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
-  ggtitle("Saddle plots 2016") +
-  theme_bw() +
-  theme(axis.title = element_blank(),
-        axis.text = element_blank())
-
-# color in my g2f to see if can figure out dry or wet that way
-ggplot(spp_df7, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grp7.np, aes(MDS1, MDS2), alpha = 0.5, fill = "aquamarine") +
-  geom_polygon(data = grp7.dry, aes(MDS1, MDS2), alpha = 0.5, fill = NA, col = "black", lty = 2) +
-  geom_polygon(data = grp7.other, aes(MDS1, MDS2), alpha = 0.5, fill = NA, col = "black", lty = 3) +
-  #geom_text(aes(color = simple_lifeform, label = clean_code2)) +
-  #geom_text(data = subset(spp_df7, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
-  #geom_text(data = subset(spp_df7, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
-  #geom_text(data = subset(spp_df7, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
-  #geom_text(data = subset(spp_df7, simple_lifeform == "Shrub"), aes(label = clean_code2), col = "orchid", fontface = "bold", size = plottext) +
-  #geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
-  geom_point(data = subset(plot_df7, substr(meadow16,1,1) != substr(meadow12,1,1)), aes(MDS1, MDS2,col = meadow16), pch = 1, size =3) +
-  geom_point(data = subset(plot_df7, substr(meadow16,1,1) != substr(meadow12, 1,1)), aes(MDS1, MDS2,fill = lng2f), pch = 21) +
-  #scale_color_discrete(name = "Lifeform") +
-  #scale_color_manual(name = "Lifeform", values = c("N-fixer" = "chocolate4", "Forb" = "grey30", "Grass" = "seagreen4", "Shrub" = "orchid")) +
-  #scale_fill_manual(name = "Plot\ntreatment", values = trtcols) +
-  #guides(guide_legend(override.aes = list(pch =21))) +
-  #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
-  scale_fill_viridis_c() +
-  ggtitle("Saddle plots 2016") +
-  theme_bw() +
-  theme(axis.title = element_blank(),
         axis.text = element_blank())
 
 
 
-# last time point, nutnet
+# -- last time point, nutnet (2017) -------
 plot_df2 <- data.frame(nmds2$points) %>%
   mutate(rowid = row.names(.)) %>%
   left_join(sitematrix2)
 spp_df2 <- data.frame(nmds2$species) %>%
   mutate(clean_code2 = row.names(.)) %>%
-  left_join(distinct(spplist[,2:ncol(spplist)])) %>%
-  #make simple lifeform grp
-  mutate(simple_lifeform = ifelse(Family == "Fabaceae", "N-fixer",
-                                  ifelse(grepl("Shrub", Growth_Habit), "Shrub",
-                                         ifelse(Growth_Habit == "Graminoid", "Grass", "Forb"))))
-
+  left_join(distinct(spplist[,2:ncol(spplist)]))
 plot_df2$trt <- factor(plot_df2$trt, levels = alltrts)
 
 grp2.np <- plot_df2[plot_df2$trt == "N+P", ][chull(plot_df2[plot_df2$trt == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
@@ -762,18 +709,23 @@ grp2.nk <- plot_df2[plot_df2$trt == "N+K", ][chull(plot_df2[plot_df2$trt == "N+K
 grp2.c <- plot_df2[plot_df2$trt == "C", ][chull(plot_df2[plot_df2$trt == "C", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
 grp2.n <- plot_df2[plot_df2$trt == "N", ][chull(plot_df2[plot_df2$trt == "N", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
 grp2.k <- plot_df2[plot_df2$trt == "K", ][chull(plot_df2[plot_df2$trt == "K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+# stack treatments
+grpdf2 <- rbind(grp2.c, grp2.n, grp2.k, grp2.nk, grp2.np, grp2.npk)
 
-
-nnfig <- ggplot(spp_df2, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grp2.np, aes(MDS1, MDS2), alpha = 0.5, fill = "aquamarine") +
-  geom_polygon(data = grp2.npk, aes(MDS1, MDS2), alpha = 0.5, fill = "lightgreen") +
-  geom_polygon(data = grp2.c, aes(MDS1, MDS2), alpha = 0.5, fill = "orchid") +
-  geom_polygon(data = grp2.n, aes(MDS1, MDS2), alpha = 0.5, fill = "steelblue2") +
-  geom_polygon(data = grp2.k, aes(MDS1, MDS2), alpha = 0.5, fill = "darkslateblue") +
-  geom_text(data = subset(spp_df2, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
-  geom_text(data = subset(spp_df2, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
-  geom_text(data = subset(spp_df2, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
+#nnfig <- 
+ggplot(spp_df2, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf2, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+  # geom_polygon(data = grp2.np, aes(MDS1, MDS2), alpha = 0.5, fill = "aquamarine") +
+  # geom_polygon(data = grp2.npk, aes(MDS1, MDS2), alpha = 0.5, fill = "lightgreen") +
+  # geom_polygon(data = grp2.c, aes(MDS1, MDS2), alpha = 0.5, fill = "orchid") +
+  # geom_polygon(data = grp2.n, aes(MDS1, MDS2), alpha = 0.5, fill = "steelblue2") +
+  # geom_polygon(data = grp2.k, aes(MDS1, MDS2), alpha = 0.5, fill = "darkslateblue") +
+  # geom_text(data = subset(spp_df2, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
+  # geom_text(data = subset(spp_df2, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
+  # geom_text(data = subset(spp_df2, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
+  geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
   geom_point(data = plot_df2, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  scale_color_manual(name = "Lifeform", values = plantcols) +
   scale_fill_manual(name = "Plot\ntreatment", values = trtcols, drop = F) +
   ggtitle("NutNet plots 2017") +
   theme_bw() +
@@ -789,10 +741,157 @@ ggsave(plot = lasttime_fig,
 
 
 
+# -- sdl 2016, dry meadow only -----
+plot_df1_dry <- data.frame(nmds1_dry$points) %>%
+  mutate(rowid = row.names(.)) %>%
+  left_join(sitematrix1)
+
+spp_df1_dry <- data.frame(nmds1_dry$species) %>%
+  mutate(clean_code2 = row.names(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)]))
+
+# capture hulls
+grpdf1_dry <- rbind(data.frame(plot_df1_dry[plot_df1$trt == "N+P", ][chull(plot_df1_dry[plot_df1_dry$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+  data.frame(plot_df1_dry[plot_df1_dry$trt == "N", ][chull(plot_df1_dry[plot_df1_dry$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
+  data.frame(plot_df1_dry[plot_df1_dry$trt == "P", ][chull(plot_df1_dry[plot_df1_dry$trt == "P", c("MDS1", "MDS2")]), ]),  # hull values for grp p
+  data.frame(plot_df1_dry[plot_df1_dry$trt == "C", ][chull(plot_df1_dry[plot_df1_dry$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
+grpdf1_dry <- na.omit(grpdf1_dry)    
+
+#sdlfig16dry <- 
+ggplot(spp_df1_dry, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf1_dry, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+  #geom_text(aes(color = simple_lifeform, label = clean_code2)) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Shrub"), aes(label = clean_code2), col = "orchid", fontface = "bold", size = plottext) +
+  geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
+  geom_point(data = plot_df1_dry, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  #scale_color_discrete(name = "Lifeform") +
+  scale_color_manual(name = "Lifeform", values = plantcols) +
+  scale_fill_manual(name = "Plot\ntreatment", values = trtcols) +
+  #guides(guide_legend(override.aes = list(pch =21))) +
+  #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
+  ggtitle("Saddle plots 2016, dry meadow") +
+  theme_bw() +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank())
+
+
+
+# -- sdl 1997, dry meadow only ----
+plot_df3 <- data.frame(nmds3$points) %>%
+  mutate(rowid = row.names(.)) %>%
+  left_join(sitematrix3)
+
+spp_df3 <- data.frame(nmds3$species) %>%
+  mutate(clean_code2 = row.names(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)]))
+
+# capture hulls
+grpdf3 <- rbind(data.frame(plot_df3[plot_df3$trt == "N+P", ][chull(plot_df3[plot_df3$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+                    data.frame(plot_df3[plot_df3$trt == "N", ][chull(plot_df3[plot_df3$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
+                    data.frame(plot_df3[plot_df3$trt == "P", ][chull(plot_df3[plot_df3$trt == "P", c("MDS1", "MDS2")]), ]),  # hull values for grp p
+                    data.frame(plot_df3[plot_df3$trt == "C", ][chull(plot_df3[plot_df3$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
+grpdf3 <- na.omit(grpdf3)    
+
+#sdlfig16dry <- 
+ggplot(spp_df3, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf3, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+  #geom_text(aes(color = simple_lifeform, label = clean_code2)) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Shrub"), aes(label = clean_code2), col = "orchid", fontface = "bold", size = plottext) +
+  geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
+  geom_point(data = plot_df3, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  #scale_color_discrete(name = "Lifeform") +
+  scale_color_manual(name = "Lifeform", values = plantcols) +
+  scale_fill_manual(name = "Plot\ntreatment", values = trtcols) +
+  #guides(guide_legend(override.aes = list(pch =21))) +
+  #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
+  ggtitle("Saddle plots 1997, dry meadow") +
+  theme_bw() +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank())
 
 
 
 
+# sdl 1997, dry meadow only
+plot_df1_dry <- data.frame(nmds1_dry$points) %>%
+  mutate(rowid = row.names(.)) %>%
+  left_join(sitematrix1)
+
+spp_df1_dry <- data.frame(nmds1_dry$species) %>%
+  mutate(clean_code2 = row.names(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)]))
+
+# capture hulls
+grpdf1_dry <- rbind(data.frame(plot_df1_dry[plot_df1$trt == "N+P", ][chull(plot_df1_dry[plot_df1_dry$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+                    data.frame(plot_df1_dry[plot_df1_dry$trt == "N", ][chull(plot_df1_dry[plot_df1_dry$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
+                    data.frame(plot_df1_dry[plot_df1_dry$trt == "P", ][chull(plot_df1_dry[plot_df1_dry$trt == "P", c("MDS1", "MDS2")]), ]),  # hull values for grp p
+                    data.frame(plot_df1_dry[plot_df1_dry$trt == "C", ][chull(plot_df1_dry[plot_df1_dry$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
+grpdf1_dry <- na.omit(grpdf1_dry)    
+
+#sdlfig16dry <- 
+ggplot(spp_df1_dry, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf1_dry, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+  #geom_text(aes(color = simple_lifeform, label = clean_code2)) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Shrub"), aes(label = clean_code2), col = "orchid", fontface = "bold", size = plottext) +
+  geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
+  geom_point(data = plot_df1_dry, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  #scale_color_discrete(name = "Lifeform") +
+  scale_color_manual(name = "Lifeform", values = plantcols) +
+  scale_fill_manual(name = "Plot\ntreatment", values = trtcols) +
+  #guides(guide_legend(override.aes = list(pch =21))) +
+  #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
+  ggtitle("Saddle plots 2016, dry meadow") +
+  theme_bw() +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank())
+
+
+
+
+# nutnet 2013, common plots only
+plot_df1_dry <- data.frame(nmds1_dry$points) %>%
+  mutate(rowid = row.names(.)) %>%
+  left_join(sitematrix1)
+
+spp_df1_dry <- data.frame(nmds1_dry$species) %>%
+  mutate(clean_code2 = row.names(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)]))
+
+# capture hulls
+grpdf1_dry <- rbind(data.frame(plot_df1_dry[plot_df1$trt == "N+P", ][chull(plot_df1_dry[plot_df1_dry$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+                    data.frame(plot_df1_dry[plot_df1_dry$trt == "N", ][chull(plot_df1_dry[plot_df1_dry$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
+                    data.frame(plot_df1_dry[plot_df1_dry$trt == "P", ][chull(plot_df1_dry[plot_df1_dry$trt == "P", c("MDS1", "MDS2")]), ]),  # hull values for grp p
+                    data.frame(plot_df1_dry[plot_df1_dry$trt == "C", ][chull(plot_df1_dry[plot_df1_dry$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
+grpdf1_dry <- na.omit(grpdf1_dry)    
+
+#sdlfig16dry <- 
+ggplot(spp_df1_dry, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf1_dry, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+  #geom_text(aes(color = simple_lifeform, label = clean_code2)) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "N-fixer"), aes(label = clean_code2), col = "chocolate4", fontface = "bold", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Forb"), aes(label = clean_code2), col = "grey30", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Grass"), aes(label = clean_code2), col = "seagreen4", fontface = "bold", size = plottext) +
+  #geom_text(data = subset(spp_df1, simple_lifeform == "Shrub"), aes(label = clean_code2), col = "orchid", fontface = "bold", size = plottext) +
+  geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
+  geom_point(data = plot_df1_dry, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  #scale_color_discrete(name = "Lifeform") +
+  scale_color_manual(name = "Lifeform", values = plantcols) +
+  scale_fill_manual(name = "Plot\ntreatment", values = trtcols) +
+  #guides(guide_legend(override.aes = list(pch =21))) +
+  #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
+  ggtitle("Saddle plots 2016, dry meadow") +
+  theme_bw() +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank())
 
 
 
