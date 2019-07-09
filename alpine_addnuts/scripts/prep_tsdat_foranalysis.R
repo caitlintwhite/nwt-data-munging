@@ -33,6 +33,8 @@ datfiles <- list.files(datpath, full.names = T)
 nutnet13 <- read.csv(datfiles[grep("net13", datfiles)], strip.white = T, na.strings = na_vals)
 nutnet17 <- read.csv(datfiles[grep("net17[.]", datfiles)], strip.white = T, na.strings = na_vals)
 nutnet17raw <- read.csv(datfiles[grep("net17r", datfiles)], strip.white = T, na.strings = na_vals)
+# read in block 3 plot 7 2017 (missing from above raw file), ts sent to ctw 7/9/19
+nn17_b3p7 <- read.csv(datfiles[grep("b3", datfiles)], strip.white = T, na.strings = na_vals)
 
 ## Sdl 
 plot_codes <- read.csv(datfiles[grep("codes_99", datfiles)], strip.white = T, na.strings = na_vals)
@@ -53,6 +55,7 @@ spplt <- read.csv("alpine_addnuts/output_data/sdl_nutnet_spplookup.csv", na.stri
 glimpse(nutnet13) # wide form, hits
 glimpse(nutnet17) # long-form, summarized (rel and abs cov)
 glimpse(nutnet17raw) # long form, raw hits at each grid pt (need to be summed to plot level)
+glimpse(nn17_b3p7) # same as nutnet17_raw
 # sdl
 glimpse(sdl1997) # date read in as integer, long form total hits
 glimpse(sdl2012) # no date, total hits, long form
@@ -120,7 +123,12 @@ nn13_tidy <- nutnet13 %>%
 nutnet_plots <- distinct(dplyr::select(nn13_tidy,plotid:trt))
 
 # 2017
+# append nn17_b3p7 to nutnet17raw
+## K colname same as nutnet17raw colname
+colnames(nn17_b3p7) <- gsub("[.]", "", colnames(nn17_b3p7))
+
 nn17_tidy <- nutnet17raw %>%
+  rbind(nn17_b3p7) %>%
   # capitalize all colnames to match 2013
   rename_all(~casefold(.)) %>%
   #drop O (nothing hit)
@@ -135,7 +143,9 @@ nn17_tidy <- nutnet17raw %>%
   left_join(spplt[c("code", "clean_code2")], by = c("species" = "code")) %>%
   # join trt col from nn2013
   left_join(distinct(dplyr::select(nn13_tidy, plotid:p, trt))) %>%
-  data.frame()
+  data.frame() %>%
+  # arrange by block, plot then spp code
+  arrange(block, plot, clean_code2)
 
 # where does 2017 differ in treatments?
 trtcheck <- left_join(nutnet_plots, 
