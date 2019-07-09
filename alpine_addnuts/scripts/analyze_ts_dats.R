@@ -1021,8 +1021,9 @@ scaletraits <- scale(meantraits[,2:ncol(meantraits)])
 traitpc <- rda(scaletraits)
 summary(traitpc)
 biplot(traitpc, scaling = 2)
-# run pca with princomp
-traitpc2 <- princomp(scaletraits, )
+
+# kns suggests rotating axes 1 and 2
+varimax(traitpc$CA$)
 # extra pc scores to plot with sdl2016 nmds above
 sppscores <- data.frame(scores(traitpc)$sites) %>%
   mutate(USDA.Code = rownames(.)) %>%
