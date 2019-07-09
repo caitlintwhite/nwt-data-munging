@@ -71,8 +71,8 @@ nnplots <- read.csv("alpine_addnuts/output_data/nutnet_plot_lookup.csv")
 sdlplots_full <- read.csv("alpine_addnuts/output_data/sdl_plots_lookup_trblshoot.csv")
 
 
-# bring in ts relative abundance for nutnet17 bc raw nutnet17 data is missing B3 plot 7 data
-nn17sum <- read.csv("~/Documents/nwt_lter/unpub_data/dry_meado_fert/edited_nutnet17.csv", na.strings = na_vals, strip.white = T)
+# marko and soren's trait dataset -- will just consider saddle spp
+traitdat <- getTabular(500) %>% data.frame()
 
 
 
@@ -83,6 +83,9 @@ glimpse(sdlplots)
 glimpse(nnplots)
 glimpse(sdlplots_full)
 # all looks fine.. "control" in sdl site info not coded similarly as "C" in nutnet site info
+
+# trait data
+glimpse(traitdat)
 
 
 
@@ -119,21 +122,22 @@ plantcom_fg$lnf2g <- log(plantcom_fg$f2g)
   
 # -- SUBSET TS SUMMARIZED NN 2017 DATA FOR MISSING PLOT ----
 # just need block 3 plot 7 from 2017
+# treat abs_cov as tothits
 b3p7 <- subset(nn17sum, block == 3 & plot == 7) %>%
   #trim any whitespace in spp codes
   mutate(species = trimws(species)) %>%
   # append correct code names
   left_join(spplist, by = c("species" = "code")) %>%
-  # add site and yr cols to be consistent with other datasets
+  # add site, yr, and plotid cols to be consistent with other datasets
   mutate(site = "nutnet",
-         yr = 2017) %>%
+         yr = 2017,
+         plotid = paste0("B", block, "_", plot)) %>%
   # retain same cols as in main plantcom dataset + simple_lifeform and sum rel cov by species codes to be sure
-  group_by(site, yr, clean_code2, simple_lifeform) %>%
-  summarise(rel_cov = sum(rel_cov),
-            abs_cov = sum(abs_cov)) %>%
+  group_by(site, yr, plotid, clean_code2, simple_lifeform) %>%
+  summarise(hits = sum(abs_cov)) %>%
   ungroup() %>%
   # remove any spp not present
-  filter(abs_cov > 0)
+  filter(hits > 0) 
 
 # check relcov sums to 100..
 sapply(b3p7[c("rel_cov", "abs_cov")], sum) #rel cov > 100.. need to re-relativize
@@ -142,11 +146,9 @@ sum(b3p7$rel_cov) #good
 
 # summarize by functional group & append to fg dataset
 b3p7_fg <- b3p7 %>%
-  group_by(site, yr, simple_lifeform) %>%
-  summarise(rel_cov = sum(rel_cov),
-            abs_cov = sum(abs_cov)) %>%
-  ungroup() %>%
-  #gather cover types
+  group_by(site, yr, plotid, simple_lifeform) %>%
+  summarise(hits = sum(hits)) %>%
+  ungroup()
   
 # calculate forb:grass ratio
 b3p7_fg$f2g <- b3p7_fg$rel_cov[b3p7_fg$simple_lifeform == "Forb"]/b3p7_fg$rel_cov[b3p7_fg$simple_lifeform == "Forb"]
@@ -491,7 +493,7 @@ adonis(matrix3_rel ~ lnf2g * trt, data = sitematrix3, permutations = 999, method
 matrix3_ind = multipatt(matrix3_rel, sitematrix3$trt, func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
 summary(matrix3_ind, alpha = 0.1)
 # check signif of adjust pvals (for multiple spp comparisons)
-summary(p.adjust(matrix3_ind$sign$p.value, method = "holm") < 0.1) #nothing signif
+subset(matrix3_ind$sign, p.adjust(matrix3_ind$sign$p.value, method = "holm") < 0.1) #CARUD in control sometimes signif depending on permutations
 
 # does any spp associate with a particular treatment?
 matrix3_rel_pa <- as.data.frame(ifelse(matrix3_rel>0,1,0))
@@ -630,7 +632,7 @@ fit6 #trt is signif, forb:grass signif
 ordiplot(nmds6, type="n", main = "NutNet 2013, all treatments")
 with (sitematrix6, ordiellipse(nmds6, trt, kind="se", conf=0.95, col=1:6))
 with (sitematrix6, ordisurf(nmds6, lnf2g, col="grey50", add = T))
-plot(fit2, col = 1:7)
+plot(fit6, col = 1:7)
 orditorp (nmds6, display="species", col="grey30", air=0.01)
 
 
@@ -821,7 +823,7 @@ grpdf3 <- rbind(data.frame(plot_df3[plot_df3$trt == "N+P", ][chull(plot_df3[plot
                     data.frame(plot_df3[plot_df3$trt == "N", ][chull(plot_df3[plot_df3$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
                     data.frame(plot_df3[plot_df3$trt == "P", ][chull(plot_df3[plot_df3$trt == "P", c("MDS1", "MDS2")]), ]),  # hull values for grp p
                     data.frame(plot_df3[plot_df3$trt == "C", ][chull(plot_df3[plot_df3$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
-grpdf3 <- na.omit(grpdf3)    
+   
 
 sdl1997_fig <- ggplot(spp_df3, aes(MDS1, MDS2)) + 
   geom_polygon(data = grpdf3, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
@@ -860,7 +862,7 @@ grpdf4 <- rbind(data.frame(plot_df4[plot_df4$trt == "N+P", ][chull(plot_df4[plot
                 data.frame(plot_df4[plot_df4$trt == "N", ][chull(plot_df4[plot_df4$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
                 data.frame(plot_df4[plot_df4$trt == "P", ][chull(plot_df4[plot_df4$trt == "P", c("MDS1", "MDS2")]), ]),  # hull values for grp p
                 data.frame(plot_df4[plot_df4$trt == "C", ][chull(plot_df4[plot_df4$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
-grpdf4 <- na.omit(grpdf4)    
+
 
 sdl2012_fig <- ggplot(spp_df4, aes(MDS1, MDS2)) + 
   geom_polygon(data = grpdf4, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
@@ -901,7 +903,7 @@ grpdf6 <- rbind(data.frame(plot_df6[plot_df6$trt == "N+P", ][chull(plot_df6[plot
                 data.frame(plot_df6[plot_df6$trt == "N", ][chull(plot_df6[plot_df6$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
                 data.frame(plot_df6[plot_df6$trt == "K", ][chull(plot_df6[plot_df6$trt == "K", c("MDS1", "MDS2")]), ]),  # hull values for grp k
                 data.frame(plot_df6[plot_df6$trt == "C", ][chull(plot_df6[plot_df6$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
-grpdf6 <- na.omit(grpdf6)
+
 
 
 nn2013_fig <- ggplot(spp_df6, aes(MDS1, MDS2)) + 
@@ -950,7 +952,131 @@ ggsave(plot = sdl_common_fig,
        filename = "alpine_addnuts/figures/sdlcommon_nmds.pdf", scale = 1.3)
 
 
+
+
+
+
+# -- TRAIT PCA -----
+# review unique vals
+sapply(dplyr::select(traitdat, Latin.name:Year_Collected), function(x) sort(unique(x)))
+
+# subset dry meadow spp
+traits_dm <- subset(traitdat, Exp == "SAD" & TRT == "DRY") %>%
+  arrange(Year_Collected, USDA.Code, Rep)
+# what are the unique spp in this dataset?
+sapply(dplyr::select(traits_dm, Latin.name:Year_Collected), function(x) print(sort(unique(x))))
+summary(traits_dm)
+
+# how do traits vary inter- and intraspecifically?
+# boxplots
+traits_dm %>%
+  dplyr::select(-c(Year_Collected:Time)) %>%
+  gather(met, val, VegHeight:ncol(.)) %>%
+  filter(!is.na(val)) %>%
+  ggplot(aes(USDA.Code, val, fill = Life.Form)) +
+  geom_boxplot() +
+  facet_wrap(~met, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 90))
+
+# mean and sd
+traits_dm %>%
+  dplyr::select(-c(Year_Collected:Time)) %>%
+  gather(met, val, VegHeight:ncol(.)) %>%
+  filter(!is.na(val)) %>%
+  group_by(USDA.Code, Life.Form, met) %>%
+  summarise(meanval = mean(val),
+            sd = sd(val)) %>%
+  ggplot(aes(USDA.Code, meanval, fill = Life.Form)) +
+  geom_errorbar(aes(ymax = meanval + sd, ymin = meanval - sd), width = 0) +
+  geom_point(pch = 21) +
+  facet_wrap(~met, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 90))
+
+# what is the distribution of each variable?
+traits_dm %>%
+  dplyr::select(-c(Year_Collected:Time)) %>%
+  gather(met, val, VegHeight:ncol(.)) %>%
+  filter(!is.na(val)) %>%
+  ggplot() +
+  geom_histogram(aes(val)) +
+  facet_wrap(~met, scales = "free")
+
+# average dm trait vals and run through pca just to see..
+meantraits <- traits_dm %>%
+  dplyr::select(-c(Year_Collected:Time)) %>%
+  gather(met, val, VegHeight:ncol(.)) %>%
+  filter(!is.na(val)) %>%
+  group_by(USDA.Code, met) %>%
+  summarise(meanval = mean(val)) %>%
+  # drop CC1, CC2 and CC3 since CCAvg present
+  filter(!met %in% c("CC1", "CC2", "CC3")) %>%
+  spread(met, meanval) %>%
+  as.data.frame()
+
+# specify spp as rownames
+rownames(meantraits) <- meantraits$USDA.Code
+# center and standardize trait vals
+scaletraits <- scale(meantraits[,2:ncol(meantraits)])
+# run pca
+traitpc <- rda(scaletraits)
+summary(traitpc)
+biplot(traitpc, scaling = 2)
+# run pca with princomp
+traitpc2 <- princomp(scaletraits, )
+# extra pc scores to plot with sdl2016 nmds above
+sppscores <- data.frame(scores(traitpc)$sites) %>%
+  mutate(USDA.Code = rownames(.)) %>%
+  #bring in latin names from marko and soren's dataset
+  left_join(distinct(traits_dm[c("USDA.Code", "Latin.name")])) %>%
+  #join spp list data
+  left_join(distinct(spplist[,2:ncol(spplist)]), by = c("Latin.name" = "simple_name")) %>%
+  #clarify USDA Code
+  rename(Marko.Code = USDA.Code)
+
+
+# replot sdl2016_dry nmds with pc scores for spp where exists
+spp_df1_dry %>%
+  left_join(sppscores[c("clean_code2", "Marko.Code", "Latin.name", "PC1", "PC2")]) %>%
+  left_join(meantraits, by = c("Marko.Code" = "USDA.Code")) %>%
+  # drop any spp without a score
+  filter(!is.na(PC1)) %>%# tetraneuris grandifolia not in sdl 2016 dataset, other 13 spp are
+  ggplot(aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf1_dry, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+  geom_text(aes(MDS1, MDS2, col = (PC1>=0), label = `Latin.name`), size = 3) +
+  geom_point(data = plot_df1_dry, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  #scale_color_discrete(name = "Lifeform") +
+  #scale_color_viridis_c(option = "B") +
+  scale_fill_manual(name = "Plot\ntreatment", values = trtcols) +
+  #guides(guide_legend(override.aes = list(pch =21))) +
+  #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
+  ggtitle("Saddle plots 2016, dry meadow") +
+  theme_bw() +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank())
+
+
+# replot nutnet2017 with PC1 scores for species that overlap
+spp_df2 %>%
+  left_join(sppscores[c("clean_code2", "Marko.Code", "Latin.name", "PC1", "PC2")]) %>%
+  left_join(meantraits, by = c("Marko.Code" = "USDA.Code")) %>%
+  # drop any spp without a score
+  filter(!is.na(PC1)) %>% # deschampsia not in nutnet 2017 dataset
+  ggplot(aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf2, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+  geom_text(aes(MDS1, MDS2, col = PC1>= 0, label = Latin.name)) +
+  geom_point(data = plot_df2, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  #scale_color_manual(name = "Lifeform", values = plantcols) +
+  scale_fill_manual(name = "Plot\ntreatment", values = trtcols, drop = F) +
+  ggtitle("NutNet plots 2017") +
+  theme_bw() +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank())
+
+
+
+
 # ----- old code below -----
+
 
 
 # # -- Matrix 5: Sites in Tim's study only (16 plots in Saddle + NutNet plots commonly sampled) ----
