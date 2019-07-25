@@ -1022,9 +1022,8 @@ traitpc <- rda(scaletraits)
 summary(traitpc)
 biplot(traitpc, scaling = 2)
 
-# kns suggests rotating axes 1 and 2
-varimax(traitpc$CA$)
-# extra pc scores to plot with sdl2016 nmds above
+
+# extract pc scores to plot with sdl2016 nmds above
 sppscores <- data.frame(scores(traitpc)$sites) %>%
   mutate(USDA.Code = rownames(.)) %>%
   #bring in latin names from marko and soren's dataset
@@ -1035,6 +1034,7 @@ sppscores <- data.frame(scores(traitpc)$sites) %>%
   rename(Marko.Code = USDA.Code)
 
 
+
 # replot sdl2016_dry nmds with pc scores for spp where exists
 spp_df1_dry %>%
   left_join(sppscores[c("clean_code2", "Marko.Code", "Latin.name", "PC1", "PC2")]) %>%
@@ -1043,7 +1043,7 @@ spp_df1_dry %>%
   filter(!is.na(PC1)) %>%# tetraneuris grandifolia not in sdl 2016 dataset, other 13 spp are
   ggplot(aes(MDS1, MDS2)) + 
   geom_polygon(data = grpdf1_dry, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
-  geom_text(aes(MDS1, MDS2, col = (PC1>=0), label = `Latin.name`), size = 3) +
+  geom_text(aes(MDS1, MDS2, col = (PC1>=0), label = `Latin.name`)) +
   geom_point(data = plot_df1_dry, aes(MDS1, MDS2,fill = trt), pch = 21) +
   #scale_color_discrete(name = "Lifeform") +
   #scale_color_viridis_c(option = "B") +
@@ -1073,6 +1073,47 @@ spp_df2 %>%
   theme(axis.title = element_blank(),
         axis.text = element_blank())
 
+
+
+# try pca with all spp rep traits (raw data) and see if traits still load in similar way as when using average values
+trait_matrix <- traits_dm %>%
+  dplyr::select(-c("SoilMoisture", "Time", "Stomatal.Conductance")) %>%
+  # remove any rep missing info
+  na.omit() %>%
+  as.data.frame()
+# assign rownames (concat spp code and rep no)
+rownames(trait_matrix) <- trait_matrix$Code
+
+# mean center and scale trait vars
+scaletraits_raw <- scale(trait_matrix[,13:ncol(trait_matrix)])
+
+# run pca on centered and scaled trait vars
+traitpc_raw <- rda(scaletraits_raw)
+summary(traitpc_raw)
+biplot(traitpc_raw, display = "species") # traits still loads similarly, just flipped on PC 1
+
+# extra raw scores and color points by species to see how everything clusters
+sppscores_raw <- data.frame(scores(traitpc_raw)$sites) %>%
+  mutate(Code = rownames(.)) %>%
+  #bring in latin names from marko and soren's dataset
+  left_join(distinct(traits_dm[c("Code", "Rep", "USDA.Code", "Latin.name")])) %>%
+  #join spp list data
+  left_join(distinct(spplist[,2:ncol(spplist)]), by = c("Latin.name" = "simple_name")) %>%
+  #clarify USDA Code
+  rename(Marko.Code = USDA.Code)
+
+ggplot(sppscores_raw, aes(PC1, PC2, col = clean_code2)) +
+  geom_text(aes(label = clean_code2)) # spp generally cluster in their own space
+
+
+# how do mean of PC scores compare to PC scores using averaged trait data?
+meanscores_raw <- sppscores_raw %>%
+  grouped_df(c(colnames(sppscores_raw)[5:ncol(sppscores_raw)])) %>%
+  summarise(meanPC1 = mean(PC1),
+            meanPC2 = mean(PC2))
+
+ggplot(meanscores_raw, aes(meanPC1, meanPC2, col = clean_code2)) +
+  geom_text(aes(label = clean_code2)) # pretty similar
 
 
 
