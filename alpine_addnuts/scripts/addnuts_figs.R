@@ -45,6 +45,17 @@ sdlplots_full <- read.csv("alpine_addnuts/output_data/sdl_plots_lookup_trblshoot
 traitdat <- getTabular(500) %>% data.frame()
 
 
+# -- RECODE TRTMENTS FOR NUTNET (SIMPLIFY) -----
+#ts found no effect of +k
+nnplots$trt2 <- gsub("[+]K", "", nnplots$trt)
+nnplots$trt2 <- gsub("K", "C", nnplots$trt2)
+
+# make trts factor in each site
+nnplots$trt <- factor(nnplots$trt, levels = c(c("C", "K", "N", "N+K", "N+P", "N+P+K")))
+nnplots$trt2 <- factor(nnplots$trt2, levels = c("C", "N", "N+P"))
+sdlplots$trt <- factor(sdlplots$trt, levels = c("C", "N", "P", "N+P"))
+
+
 
 # -- ADD SIMPLE LIFEFORM TO SPPLIST ----
 #make simple lifeform grp
@@ -220,6 +231,7 @@ nncommon <- subset(plantcom, site == "nutnet") %>%
 matrix_nn2013 <- subset(plantcom, yr == 2013 & plotid %in% nncommon$plotid) %>%
   #remove unknowns and non-veg
   subset(!grepl("^2", clean_code2)) %>%
+  # create unique row id
   mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
   spread(clean_code2, hits, fill = 0) %>%
   dplyr::select(rowid, site:ncol(.)) %>%
@@ -230,8 +242,6 @@ fgrat_nn2013 <- subset(plantcom_fg, plotid %in% matrix_nn2013$plotid & yr == 201
 
 sitematrix_nn2013 <- matrix_nn2013[,1:4] %>%
   left_join(nnplots) %>%
-  # make trtment factor
-  mutate(trt = factor(trt, levels = c("C", "K", "N", "N+K", "N+P", "N+P+K"))) %>%
   left_join(fgrat_nn2013)
 
 row.names(matrix_nn2013) <- matrix_nn2013$rowid
@@ -246,13 +256,25 @@ nmds_nn2013
 plot(nmds_nn2013, type = "t")
 
 # environmental fit grass to forb
+# original trts
 fitnn2013 <- envfit(nmds_nn2013, sitematrix_nn2013[c("trt", "lnf2gFNF")], strata = sitematrix_nn2013$block, perm = 999)
 fitnn2013 #trt is signif, forb:grass signif
+# simplified trts
+fitnn2013.simple <- envfit(nmds_nn2013, sitematrix_nn2013[c("trt2", "lnf2gFNF")], strata = sitematrix_nn2013$block, perm = 999)
+fitnn2013.simple
 
+#original trts
 ordiplot(nmds_nn2013, type="n", main = "NutNet 2013, all treatments")
 with (sitematrix_nn2013, ordiellipse(nmds_nn2013, trt, kind="se", conf=0.95, col=1:6))
 with (sitematrix_nn2013, ordisurf(nmds_nn2013, lnf2gFNF, col="grey50", add = T))
 plot(fitnn2013, col = 1:7)
+orditorp (nmds_nn2013, display="species", col="grey30", air=0.01)
+
+#simplified trts
+ordiplot(nmds_nn2013, type="n", main = "NutNet 2013, collapsed treatments")
+with (sitematrix_nn2013, ordiellipse(nmds_nn2013, trt2, kind="se", conf=0.95, col=1:6))
+with (sitematrix_nn2013, ordisurf(nmds_nn2013, lnf2gFNF, col="grey50", add = T))
+plot(fitnn2013.simple, col = 1:7)
 orditorp (nmds_nn2013, display="species", col="grey30", air=0.01)
 
 
@@ -304,8 +326,6 @@ fgrat_nn2017 <- subset(plantcom_fg, plotid %in% matrix_nn2017$plotid & yr == 201
 
 sitematrix_nn2017 <- matrix_nn2017[,1:4] %>%
   left_join(nnplots) %>%
-  # make trtment factor
-  mutate(trt = factor(trt, levels = c("C", "K", "N", "N+K", "N+P", "N+P+K"))) %>%
   left_join(fgrat_nn2017)
 
 row.names(matrix_nn2017) <- matrix_nn2017$rowid
@@ -323,13 +343,25 @@ plot(nmds_nn2017, type = "t")
 fitnn2017 <- envfit(nmds_nn2017, sitematrix_nn2017[c("trt", "lnf2gFNF")], strata = sitematrix_nn2017$block, perm = 999)
 fitnn2017 #trt is signif, forb:grass signif
 
+# simplified trts
+fitnn2017.simple <- envfit(nmds_nn2017, sitematrix_nn2017[c("trt2", "lnf2gFNF")], strata = sitematrix_nn2017$block, perm = 999)
+fitnn2017.simple
+
+#original trts
 ordiplot(nmds_nn2017, type="n", main = "NutNet 2017, all treatments")
 with (sitematrix_nn2017, ordiellipse(nmds_nn2017, trt, kind="se", conf=0.95, col=1:6))
 with (sitematrix_nn2017, ordisurf(nmds_nn2017, lnf2gFNF, col="grey50", add = T))
 plot(fitnn2017, col = 1:7)
 orditorp (nmds_nn2017, display="species", col="grey30", air=0.01)
 
-nn2017boxplot <- ggplot(sitematrix_nn2017, aes(trt, lnf2gFNF)) +
+# collapsed trts
+ordiplot(nmds_nn2017, type="n", main = "NutNet 2017, collapsed treatments")
+with (sitematrix_nn2017, ordiellipse(nmds_nn2017, trt2, kind="se", conf=0.95, col=1:6))
+with (sitematrix_nn2017, ordisurf(nmds_nn2017, lnf2gFNF, col="grey50", add = T))
+plot(fitnn2017.simple, col = 1:7)
+orditorp (nmds_nn2017, display="species", col="grey30", air=0.01)
+
+nn2017boxplot <- ggplot(sitematrix_nn2017, aes(trt2, lnf2gFNF)) +
   geom_boxplot() +
   geom_jitter(alpha = 0.5, width = 0.1) +
   labs(y = NULL) +
@@ -371,6 +403,17 @@ summary(nn2017_phi_comb)
 subset(nn2017_phi_comb$sign, p.adjust(nn2017_phi_comb$sign$p.value, method = "holm")<0.1) # trispi marginally signif for +n+k+p, but not at 0.05
 
 
+# try PCoA just to see..
+nn2017.b.pcoa<-cmdscale(nn2017_rel_bray, eig=TRUE)
+nn2017.b.pcoa
+testdf <- data.frame(scores(nn2017.b.pcoa))
+testdf$rowid <- rownames(testdf)
+testdf <- left_join(testdf, sitematrix_nn2017)
+ggplot(testdf, aes(Dim1, Dim2, col = trt2)) +
+  geom_point() +
+  ggtitle("NutNet 2017 PCoA")
+# > N+P and N+P+K separate out from the others, as in the NMDS
+
 
 
 ########################
@@ -400,7 +443,6 @@ sitematrix_sdl1997 <- matrix_sdl1997[,1:4] %>%
   left_join(distinct(sdlplots[colnames(sdlplots) != "old_plot"]), by = c("plotid" = "plot")) %>%
   # join grass forb ratio
   left_join(fgrat_sdl1997)
-sitematrix_sdl1997$trt <- factor(sitematrix_sdl1997$trt, levels = c("C", "N", "P", "N+P"))
 
 
 row.names(matrix_sdl1997) <- matrix_sdl1997$rowid
@@ -566,7 +608,6 @@ sitematrix_sdl2016 <- matrix_sdl2016[,1:4] %>%
   left_join(distinct(sdlplots[colnames(sdlplots) != "old_plot"]), by = c("plotid" = "plot")) %>%
   # join grass forb ratio
   left_join(fgrat_sdl2016)
-sitematrix_sdl2016$trt <- factor(sitematrix_sdl2016$trt, levels = c("C", "N", "P", "N+P"))
 
 row.names(matrix_sdl2016) <- matrix_sdl2016$rowid
 matrix_sdl2016 <- matrix_sdl2016[!colnames(matrix_sdl2016) %in% c("rowid", "site", "yr", "plotid")]
@@ -608,6 +649,18 @@ subset(sdl2016_phi_dry$sign, is.na(sdl2016_phi_dry$sign$p.value)) #geum rossii
 # Carex rupestris is the only signif species, prefers dry meadow Control or +N (doesn't like +P?)
 subset(sdl2016_phi_dry$sign, p.adjust(sdl2016_phi_dry$sign$p.value, method = "holm") < 0.1)
 
+# try PCoA just to see..
+sdl2016.bray<-as.matrix(vegdist(matrix_sdl2016_rel)) 
+sdl2016.b.pcoa<-cmdscale(sdl2016.bray, eig=TRUE)
+sdl2016.b.pcoa
+testdf <- data.frame(scores(sdl2016.b.pcoa))
+testdf$rowid <- rownames(testdf)
+testdf <- left_join(testdf, sitematrix_sdl2016)
+ggplot(testdf, aes(Dim1, Dim2, col = trt)) +
+  geom_point() +
+  ggtitle("sdl 2016 PCoA")
+# shows the same thing but no pts for species bc based on community diss matrix
+
 
 
 # -- FIGURES -----
@@ -643,9 +696,16 @@ ggsave(plot = pcfig,
 
 # 2) time series NMDS plots
 # specify plotting colors for all treatments
+# original treatments
 alltrts <- sort(unique(c(as.character(sitematrix_nn2017$trt), as.character(sitematrix_sdl2016$trt))))
 trtcols <- viridis::viridis(n = length(alltrts))
 names(trtcols) <- alltrts
+
+# simplified treatments
+simpletrts <- sort(unique(c(as.character(sitematrix_nn2017$trt2), as.character(sitematrix_sdl2016$trt))))
+simplecols <- viridis::viridis(n = length(simpletrts))
+names(simplecols) <- simpletrts
+
 
 # specify plotting cols for lifeform
 plantcols <- c("N-fixer" = "chocolate4", "Forb" = "grey30", "Grass" = "seagreen4", "Shrub" = "orchid")
@@ -703,6 +763,7 @@ sdl2016_fig <- ggplot(spp_df1, aes(MDS1, MDS2)) +
 
 
 # -- nutnet 2017, common plots -------
+# original treatments
 plot_df2 <- data.frame(nmds_nn2017$points) %>%
   mutate(rowid = row.names(.)) %>%
   left_join(sitematrix_nn2017)
@@ -712,8 +773,9 @@ spp_df2 <- data.frame(nmds_nn2017$species) %>%
   # join trait PC scores
   left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")])
 
-plot_df2$trt <- factor(plot_df2$trt, levels = alltrts)
 
+
+# original treatment overlays..
 grp2.np <- plot_df2[plot_df2$trt == "N+P", ][chull(plot_df2[plot_df2$trt == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
 grp2.npk <- plot_df2[plot_df2$trt == "N+P+K", ][chull(plot_df2[plot_df2$trt == "N+P+K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
 grp2.nk <- plot_df2[plot_df2$trt == "N+K", ][chull(plot_df2[plot_df2$trt == "N+K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
@@ -723,11 +785,12 @@ grp2.k <- plot_df2[plot_df2$trt == "K", ][chull(plot_df2[plot_df2$trt == "K", c(
 # stack treatments
 grpdf2 <- rbind(grp2.c, grp2.n, grp2.k, grp2.nk, grp2.np, grp2.npk)
 
-
 # capture envfit
 vec.nn2017<-as.data.frame(scores(fitnn2017, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
 vec.nn2017$species<-rownames(vec.nn2017)
 
+
+# original treatment figure
 nn2017_fig <- ggplot(spp_df2, aes(MDS1, MDS2)) + 
   geom_polygon(data = grpdf2, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
   geom_segment(data=vec.nn2017,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
@@ -748,6 +811,41 @@ nn2017_fig <- ggplot(spp_df2, aes(MDS1, MDS2)) +
         axis.text = element_blank(),
         legend.position = "none")
 
+
+# simplified treatment
+# simplified treatment overlays
+grp2sim.np <- plot_df2[plot_df2$trt2 == "N+P", ][chull(plot_df2[plot_df2$trt2 == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp2sim.c <- plot_df2[plot_df2$trt2 == "C", ][chull(plot_df2[plot_df2$trt2 == "C", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp2sim.n <- plot_df2[plot_df2$trt2 == "N", ][chull(plot_df2[plot_df2$trt2 == "N", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+# stack treatments
+grpdf2sim <- rbind(grp2sim.c, grp2sim.n,grp2sim.np)
+
+# capture envfit
+vec.nn2017.sim<-as.data.frame(scores(fitnn2017.simple, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
+vec.nn2017.sim$species<-rownames(vec.nn2017.sim)
+
+ggplot(spp_df2, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf2sim, aes(MDS1, MDS2, fill = trt2), alpha = 0.5) +
+  geom_segment(data=vec.nn2017.sim,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
+               arrow = arrow(length = unit(0.25, "cm")),colour="black", lwd = 1) + 
+  # add label to envfit arrow
+  geom_text(data=vec.nn2017.sim,aes(x=NMDS1-0.02,y=NMDS2, label = "Forb/\nGrass"), col = "black", size = plottext, fontface = "italic", hjust = 1) +
+  #geom_point(data = subset(spp_df2, is.na(resource_grp)), aes(MDS1, MDS2), col = "grey30", alpha = 0.6, size = 3, pch = 1) +
+  #geom_point(data = subset(spp_df2, resource_grp == "Acquisitive"), aes(MDS1, MDS2), color = "deeppink2", size = 3) +
+  #geom_point(data = subset(spp_df2, resource_grp == "Conservative"), aes(MDS1, MDS2), color = "darkred", size = 3) +
+  geom_text(data = subset(spp_df2, is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1)), color = "grey30", size = plottext) +
+   geom_text(data = subset(spp_df2, !is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1), col = resource_grp), fontface = "bold", size = plottext) +
+  #geom_point(data = plot_df2, aes(MDS1, MDS2, col = trt2), pch = 3, inherit.aes = FALSE) +
+  scale_color_manual(name = "Resource", values = traitcols) +
+  scale_fill_manual(name = "Plot\ntreatment", values = simplecols, drop = F) +
+  #scale_color_manual(name = "Plot\ntreatment", values = simplecols, drop = F) +
+  coord_fixed() +
+  # add figure label
+  geom_text(aes(min(MDS1), max(MDS2), label = "NutNet 2017"), hjust = 0, vjust = 1, col = "black") +
+  theme_bw() +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        legend.position = "none")
 
 
 
@@ -847,7 +945,7 @@ plot_df6 <- data.frame(nmds_nn2013$points) %>%
   mutate(rowid = row.names(.)) %>%
   left_join(sitematrix_nn2013)
 plot_df6$trt <- factor(plot_df6$trt, levels = alltrts)
-
+plot_df6$trt2 <- factor(plot_df6$trt2, levels = )
 spp_df6 <- data.frame(nmds_nn2013$species) %>%
   mutate(clean_code2 = row.names(.)) %>%
   left_join(distinct(spplist[,2:ncol(spplist)])) %>%
@@ -867,6 +965,21 @@ grpdf6 <- rbind(data.frame(plot_df6[plot_df6$trt == "N+P", ][chull(plot_df6[plot
 vec.nn2013<-as.data.frame(scores(fitnn2013, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
 vec.nn2013$species<-rownames(vec.nn2013)
 
+
+# simplified treatments
+grpdf6.simple <- rbind(data.frame(plot_df6[plot_df6$trt2 == "N+P", ][chull(plot_df6[plot_df6$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+                data.frame(plot_df6[plot_df6$trt == "N+P+K", ][chull(plot_df6[plot_df6$trt == "N+P+K", c("MDS1", "MDS2")]),]), # hull values for grp n+p+k
+                data.frame(plot_df6[plot_df6$trt == "N+K", ][chull(plot_df6[plot_df6$trt == "N+K", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+                data.frame(plot_df6[plot_df6$trt == "N", ][chull(plot_df6[plot_df6$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
+                data.frame(plot_df6[plot_df6$trt == "K", ][chull(plot_df6[plot_df6$trt == "K", c("MDS1", "MDS2")]), ]),  # hull values for grp k
+                data.frame(plot_df6[plot_df6$trt == "C", ][chull(plot_df6[plot_df6$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
+
+# capture envfit
+vec.nn2013.simple <-as.data.frame(scores(fitnn2013.simple, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
+vec.nn2013$species<-rownames(vec.nn2013.simple)
+
+
+# original figure
 nn2013_fig <- ggplot(spp_df6, aes(MDS1, MDS2)) + 
   geom_polygon(data = grpdf6, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
   #geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
