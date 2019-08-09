@@ -820,7 +820,7 @@ ggplot(testdf, aes(Dim1, Dim2, col = trt)) +
 # -- FIGURES -----
 # 1) trait pca
 # choose color scheme here to color in spp in nmds points with..
-traitcols <- c("Acquisitive" = "deeppink2", "Conservative" = "darkred") #springgreen3, slateblue3
+traitcols <- c("Acquisitive" = "deeppink2", "Conservative" = "darkred", "Unknown" = NA) #springgreen3, slateblue3
 
 pcfig <- ggplot() +
   geom_vline(aes(xintercept = 0), lty = 2, col = "grey") +
@@ -898,7 +898,7 @@ vec.sdl2016$species<-rownames(vec.sdl2016)
 #sdl2016_fig <- 
 spp_df1$resource_grp[is.na(spp_df1$resource_grp)] <- "Unknown"
   ggplot(spp_df1, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grpdf1, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+  geom_polygon(data = grpdf1, aes(MDS1, MDS2, col = trt), fill = NA, alpha = 0.5) +
   geom_segment(data=vec.sdl2016,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
                arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
   # add label to envfit arrow
@@ -908,12 +908,15 @@ spp_df1$resource_grp[is.na(spp_df1$resource_grp)] <- "Unknown"
   # manually add in trait data species so can specify color
   #geom_point(data = subset(spp_df6, resource_grp == "Acquisitive"), aes(MDS1, MDS2), col = aqcol, size = 3, alpha  = 0.8) +
   #geom_point(data = subset(spp_df6, resource_grp == "Conservative"), aes(MDS1, MDS2), col = concol, size = 3, alpha  = 0.8) +
-  geom_point(data = subset(spp_df1, !is.na(resource_grp)), aes(MDS1, MDS2, shape = resource_grp)) +
+  geom_point(data = subset(spp_df1, !is.na(resource_grp)), aes(MDS1, MDS2, fill = resource_grp), pch = 21, size = 3) +
   #geom_point(data = plot_df1, aes(MDS1, MDS2,fill = trt), pch = 21) +
-  geom_point(data = plot_df1, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  geom_point(data = plot_df1, aes(MDS1, MDS2, col = trt), pch = 4) +
+    # annotate any species that is a significant indicator
+    geom_text(data = subset(spp_df1, holm.pval <= 0.15), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+              fontface = "bold.italic", family = "Times New Roman", size = 4, lineheight = 0.5, nudge_y = 0.05) +
   #scale_color_discrete(name = "Lifeform") +
-  scale_color_manual(name = "Resource group", values = traitcols) +
-  scale_fill_manual(name = "Plot\ntreatment", values = trtcols) +
+  scale_color_manual(name = "Resource group", values = trtcols) +
+  scale_fill_manual(name = "Plot\ntreatment", values = traitcols) +
   scale_shape_discrete(solid = FALSE) +
   # add figure label in top corner
   geom_text(aes(min(MDS1), max(MDS2), label = "SDL 2016"), hjust = 0, vjust = 1, col = "black") +
@@ -922,8 +925,8 @@ spp_df1$resource_grp[is.na(spp_df1$resource_grp)] <- "Unknown"
   coord_fixed() +
   theme_bw() +
   theme(axis.title = element_blank(),
-        axis.text = element_blank(),
-        legend.position = "none")
+        axis.text = element_blank())
+        #legend.position = "none")
 
 
 # -- nutnet 2017, common plots -------
