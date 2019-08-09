@@ -259,22 +259,12 @@ plot(nmds_nn2013, type = "t")
 # original trts
 fitnn2013 <- envfit(nmds_nn2013, sitematrix_nn2013[c("trt", "lnf2gFNF")], strata = sitematrix_nn2013$block, perm = 999)
 fitnn2013 #trt is signif, forb:grass signif
-# simplified trts
-fitnn2013.simple <- envfit(nmds_nn2013, sitematrix_nn2013[c("trt2", "lnf2gFNF")], strata = sitematrix_nn2013$block, perm = 999)
-fitnn2013.simple
 
 #original trts
 ordiplot(nmds_nn2013, type="n", main = "NutNet 2013, all treatments")
 with (sitematrix_nn2013, ordiellipse(nmds_nn2013, trt, kind="se", conf=0.95, col=1:6))
 with (sitematrix_nn2013, ordisurf(nmds_nn2013, lnf2gFNF, col="grey50", add = T))
 plot(fitnn2013, col = 1:7)
-orditorp (nmds_nn2013, display="species", col="grey30", air=0.01)
-
-#simplified trts
-ordiplot(nmds_nn2013, type="n", main = "NutNet 2013, collapsed treatments")
-with (sitematrix_nn2013, ordiellipse(nmds_nn2013, trt2, kind="se", conf=0.95, col=1:6))
-with (sitematrix_nn2013, ordisurf(nmds_nn2013, lnf2gFNF, col="grey50", add = T))
-plot(fitnn2013.simple, col = 1:7)
 orditorp (nmds_nn2013, display="species", col="grey30", air=0.01)
 
 
@@ -288,6 +278,12 @@ adonis(matrix_nn2013_rel ~ trt * lnf2gFNF, data = sitematrix_nn2013, strata = si
 adonis(matrix_nn2013_rel ~ lnf2gFNF * trt, data = sitematrix_nn2013, strata = sitematrix_nn2013$block, permutations = 999, method = "bray")
 # either order of explanatory vars, forb:grass ration and trtment is distinct, but there is no interaction
 
+# test for homogeneity of variances
+nn2013_disper <- betadisper(matrix_nn2013_rel_bray, sitematrix_nn2013$trt)
+nn2013_disper
+anova(nn2013_disper) 
+permutest(nn2013_disper) 
+TukeyHSD(nn2013_disper)
 
 # indicator species for nutnet plots
 # indicator species
@@ -309,6 +305,75 @@ nn2013_phi_comb <- multipatt(matrix_nn2013_rel_pa, sitematrix_nn2013$trt, func =
 summary(nn2013_phi_comb)
 # check signif for multiple spp comparisons
 subset(nn2013_phi_comb$sign, p.adjust(nn2013_phi_comb$sign$p.value, method = "holm")<0.1) # nothing signif
+
+
+summary(anosim(matrix_nn2013_rel_bray, grouping = sitematrix_nn2013$trt, strata = sitematrix_nn2013$block, permutations = 999))
+mrpp(matrix_nn2013_rel,  grouping = sitematrix_nn2013$trt, strata = sitematrix_nn2013$block, distance = "bray")
+adonis(matrix_nn2013_rel ~ trt * lnf2gFNF, data = sitematrix_nn2013, strata = sitematrix_nn2013$block, permutations = 999, method = "bray")
+# change order of variables
+adonis(matrix_nn2013_rel ~ lnf2gFNF * trt, data = sitematrix_nn2013, strata = sitematrix_nn2013$block, permutations = 999, method = "bray")
+# either order of explanatory vars, forb:grass ration and trtment is distinct, but there is no interaction
+
+
+
+# -- NUTNET 2013, SIMPLIFIED TREATMENTS -----
+# simplified trts
+fitnn2013.simple <- envfit(nmds_nn2013, sitematrix_nn2013[c("trt2", "lnf2gFNF")], 
+                           strata = sitematrix_nn2013$block, perm = 999)
+fitnn2013.simple
+
+#simplified trts
+ordiplot(nmds_nn2013, type="n", main = "NutNet 2013, collapsed treatments")
+with (sitematrix_nn2013, ordiellipse(nmds_nn2013, trt2, kind="se", conf=0.95, col=1:6))
+with (sitematrix_nn2013, ordisurf(nmds_nn2013, lnf2gFNF, col="grey50", add = T))
+plot(fitnn2013.simple, col = 1:7)
+orditorp (nmds_nn2013, display="species", col="grey30", air=0.01)
+
+# indicator species analysis
+nn2013_ind.simple = multipatt(matrix_nn2013_rel, sitematrix_nn2013$trt2, func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
+summary(nn2013_ind.simple, alpha = 0.1)
+# check signif of adjust pvals (for multiple spp comparisons)
+summary(p.adjust(nn2013_ind.simple$sign$p.value, method = "holm") < 0.1) #2 true
+nn2013_ind.simple$sign[(p.adjust(nn2013_ind.simple$sign$p.value, method = "holm") < 0.1),]
+
+# gather results
+nn2013_ind.simple_df <- cbind(nn2013_ind.simple$A, nn2013_ind.simple$B, nn2013_ind.simple$sign,
+                              holm.pval = p.adjust(nn2013_ind.simple$sign$p.value, method = "holm")) 
+colnames(nn2013_ind.simple_df)[1:3] <- paste0("a.",colnames(nn2013_ind.simple_df)[1:3])
+colnames(nn2013_ind.simple_df)[4:6] <- paste0("b.",colnames(nn2013_ind.simple_df)[4:6])
+nn2013_ind.simple_df$clean_code2 <- rownames(nn2013_ind.simple_df)
+nn2013_ind.simple_df <- arrange(nn2013_ind.simple_df, p.value) %>%
+  # recode index
+  mutate(index = ifelse(index == 1, "C",
+                        ifelse(index == 2, "N", "N+P"))) %>%
+  # join latin name
+  left_join(distinct(spplist[c("clean_code2","simple_name")]))
+
+# does any spp associate with a particular treatment?
+matrix_nn2013_rel_pa <- as.data.frame(ifelse(matrix_nn2013_rel>0,1,0))
+nn2013_phi.simple <- multipatt(matrix_nn2013_rel_pa, sitematrix_nn2013$trt2, duleg = T, func = "r.g", control = how(nperm = 999))
+summary(nn2013_phi.simple)
+# check signif for multiple spp comparisons
+summary(p.adjust(nn2013_phi.simple$sign$p.value, method = "holm")<0.1) #nothing signig, 2 NAs
+# who are the generalists?
+subset(nn2013_phi.simple$sign, is.na(nn2013_phi.simple$sign$p.value)) # carex rupestris and kobresia...
+
+# analysis of similarity and permanovas
+summary(anosim(matrix_nn2013_rel_bray, grouping = sitematrix_nn2013$trt2, strata = sitematrix_nn2013$block, permutations = 999))
+mrpp(matrix_nn2013_rel,  grouping = sitematrix_nn2013$trt2, strata = sitematrix_nn2013$block, distance = "bray")
+adonis(matrix_nn2013_rel ~ trt2 * lnf2gFNF, data = sitematrix_nn2013, strata = sitematrix_nn2013$block, permutations = 999, method = "bray")
+# change order of variables
+adonis(matrix_nn2013_rel ~ lnf2gFNF * trt2, data = sitematrix_nn2013, strata = sitematrix_nn2013$block, permutations = 999, method = "bray")
+# either order of explanatory vars, forb:grass ration and trtment is distinct, but there is no interaction
+
+
+# test for homogeneity of variances
+nn2013_disper.simple <- betadisper(matrix_nn2013_rel_bray, sitematrix_nn2013$trt2)
+nn2013_disper.simple
+anova(nn2013_disper.simple) # no difference in homogeneity of dispersion
+TukeyHSD(nn2013_disper.simple)
+boxplot(nn2013_disper.simple)
+
 
 
 
@@ -356,7 +421,7 @@ orditorp (nmds_nn2017, display="species", col="grey30", air=0.01)
 
 # collapsed trts
 ordiplot(nmds_nn2017, type="n", main = "NutNet 2017, collapsed treatments")
-with (sitematrix_nn2017, ordiellipse(nmds_nn2017, trt2, kind="se", conf=0.95, col=1:6))
+with (sitematrix_nn2017, ordiellipse(nmds_nn2017, trt2, kind="ehull", conf=0.95, col=1:6))
 with (sitematrix_nn2017, ordisurf(nmds_nn2017, lnf2gFNF, col="grey50", add = T))
 plot(fitnn2017.simple, col = 1:7)
 orditorp (nmds_nn2017, display="species", col="grey30", air=0.01)
@@ -372,7 +437,7 @@ nn2017boxplot
 plot_grid(sdlboxplot, nn2017boxplot,
           nrow = 1)
 
-# analysis of similiarities/mrpp/permanova
+# analysis of similiarities/mrpp/permanova -- ORIGINAL TREATMENTS
 ## calculate CB distance
 nn2017_rel_bray <- vegdist(nn2017_rel)
 summary(anosim(nn2017_rel_bray, grouping = sitematrix_nn2017$trt, strata = sitematrix_nn2017$block, permutations = 999))
@@ -402,6 +467,49 @@ summary(nn2017_phi_comb)
 # check signif for multiple spp comparisons
 subset(nn2017_phi_comb$sign, p.adjust(nn2017_phi_comb$sign$p.value, method = "holm")<0.1) # trispi marginally signif for +n+k+p, but not at 0.05
 
+
+summary(anosim(nn2017_rel_bray, grouping = sitematrix_nn2017$trt, strata = sitematrix_nn2017$block, permutations = 999))
+mrpp(nn2017_rel,  grouping = sitematrix_nn2017$trt, strata = sitematrix_nn2017$block, distance = "bray")
+adonis(nn2017_rel ~ trt * lnf2gFNF, data = sitematrix_nn2017, strata = sitenmatrix_n2017$block, permutations = 999, method = "bray")
+# change order of variables
+adonis(nn2017_rel ~ lnf2gFNF * trt, data = sitematrix_nn2017, strata = sitematrix_nn2017$block, permutations = 999, method = "bray")
+# either order of explanatory vars, forb:grass ration and trtment is distinct, but there is no interaction
+
+# with collapsed treatment
+# indicator species for nutnet plots
+# indicator species
+nn2017_ind.simple <- multipatt(nn2017_rel, sitematrix_nn2017$trt2, func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
+summary(nn2017_ind.simple, alpha = 0.1)
+# check signif of adjust pvals (for multiple spp comparisons)
+summary(p.adjust(nn2017_ind.simple$sign$p.value, method = "holm") < 0.1) #4 true!
+nn2017_ind.simple$sign[(p.adjust(nn2017_ind.simple$sign$p.value, method = "holm") < 0.1),]
+
+# gather results
+nn2017_ind.simple_df <- cbind(nn2017_ind.simple$A, nn2017_ind.simple$B, nn2017_ind.simple$sign,
+                              holm.pval = p.adjust(nn2017_ind.simple$sign$p.value, method = "holm"))
+colnames(nn2017_ind.simple_df)[1:3] <- paste0("a.",colnames(nn2017_ind.simple_df)[1:3])
+colnames(nn2017_ind.simple_df)[4:6] <- paste0("b.",colnames(nn2017_ind.simple_df)[4:6])
+nn2017_ind.simple_df$clean_code2 <- rownames(nn2017_ind.simple_df)
+nn2017_ind.simple_df <- arrange(nn2017_ind.simple_df, p.value) %>%
+  # recode index
+  mutate(index = ifelse(index == 1, "C",
+                        ifelse(index == 2, "N", "N+P"))) %>%
+  # join latin name
+  left_join(distinct(spplist[c("clean_code2","simple_name")]))
+
+# does any spp associate with a particular treatment?
+nn2017_phi.simple <- multipatt(nn2017_rel_pa, sitematrix_nn2017$trt2, duleg = T, func = "r.g", control = how(nperm = 999))
+summary(nn2017_phi.simple)
+# check signif for multiple spp comparisons
+summary(p.adjust(nn2017_phi.simple$sign$p.value, method = "holm")<0.1) #1 true
+nn2017_phi.simple$sign[(p.adjust(nn2017_phi.simple$sign$p.value, method = "holm") < 0.1),]
+
+# test for homogeneity of variances
+nn2017_disper.simple <- betadisper(nn2017_rel_bray, sitematrix_nn2017$trt2)
+nn2017_disper.simple
+anova(nn2017_disper.simple) # no difference in homogeneity of dispersion
+TukeyHSD(nn2017_disper.simple)
+boxplot(nn2017_disper.simple)
 
 # try PCoA just to see..
 nn2017.b.pcoa<-cmdscale(nn2017_rel_bray, eig=TRUE)
@@ -487,6 +595,22 @@ summary(sdl1997_ind, alpha = 0.1)
 # check signif of adjust pvals (for multiple spp comparisons)
 subset(sdl1997_ind$sign, p.adjust(sdl1997_ind$sign$p.value, method = "holm") < 0.1) #CARUD in control sometimes signif depending on permutations
 
+# specify index groups from ind spp analysis
+sdl_ind_grps <- c(`1` ="C", `2`="N", `3` = "P", `4` = "N+P") 
+# gather results
+sdl1997_ind_df <- cbind(sdl1997_ind$A, sdl1997_ind$B, sdl1997_ind$sign,
+                              holm.pval = p.adjust(sdl1997_ind$sign$p.value, method = "holm")) 
+colnames(sdl1997_ind_df)[1:3] <- paste0("a.",colnames(sdl1997_ind_df)[1:3])
+colnames(sdl1997_ind_df)[4:6] <- paste0("b.",colnames(sdl1997_ind_df)[4:6])
+sdl1997_ind_df$clean_code2 <- rownames(sdl1997_ind_df)
+sdl1997_ind_df <- arrange(sdl1997_ind_df, p.value) %>%
+  mutate(index = ifelse(index == 1, "C", 
+                        ifelse(index == 2, "N",
+                        ifelse(index == 3, "P", "N+P")))) %>%
+  # join latin name
+  left_join(distinct(spplist[c("clean_code2","simple_name")]))
+
+
 # does any spp associate with a particular treatment?
 sdl1997_rel_pa <- as.data.frame(ifelse(sdl1997_rel>0,1,0))
 sdl1997_phi <- multipatt(sdl1997_rel_pa, sitematrix_sdl1997$trt, duleg = T, func = "r.g", control = how(nperm = 999))
@@ -566,6 +690,22 @@ summary(matrix_sdl2012_ind, alpha = 0.1, indvalcomp = T)
 # check signif of adjust pvals (for multiple spp comparisons)
 summary(p.adjust(matrix_sdl2012_ind$sign$p.value, method = "holm") < 0.1) #nothing signif
 
+# gather results
+sdl2012_ind_df <- cbind(matrix_sdl2012_ind$A, matrix_sdl2012_ind$B, matrix_sdl2012_ind$sign,
+                        holm.pval = p.adjust(matrix_sdl2012_ind$sign$p.value, method = "holm")) 
+colnames(sdl2012_ind_df)[1:3] <- paste0("a.",colnames(sdl2012_ind_df)[1:3])
+colnames(sdl2012_ind_df)[4:6] <- paste0("b.",colnames(sdl2012_ind_df)[4:6])
+sdl2012_ind_df$clean_code2 <- rownames(sdl2012_ind_df)
+sdl2012_ind_df <- arrange(sdl2012_ind_df, p.value) %>%
+  # recode index
+  mutate(index = ifelse(index == 1, "C", 
+                        ifelse(index == 2, "N",
+                               ifelse(index == 3, "P", "N+P")))) %>%
+  # join latin name
+  left_join(distinct(spplist[c("clean_code2","simple_name")]))
+
+
+
 # does any spp associate with a particular treatment?
 matrix_sdl2012_rel_pa <- as.data.frame(ifelse(matrix_sdl2012_rel>0,1,0))
 matrix_sdl2012_phi <- multipatt(matrix_sdl2012_rel_pa, sitematrix_sdl2012$trt, duleg = T, func = "r.g", control = how(nperm = 999))
@@ -637,10 +777,24 @@ summary(sdl2016_ind_dry, indvalcomp = T)
 # any significant with adjusted p vals?
 summary(p.adjust(sdl2016_ind_dry$sign$p.value, method = "holm")< 0.1) #nothing significant
 
+# gather results
+sdl2016_ind_df <- cbind(sdl2016_ind_dry$A, sdl2016_ind_dry$B, sdl2016_ind_dry$sign,
+                        holm.pval = p.adjust(sdl2016_ind_dry$sign$p.value, method = "holm")) 
+colnames(sdl2016_ind_df)[1:3] <- paste0("a.",colnames(sdl2016_ind_df)[1:3])
+colnames(sdl2016_ind_df)[4:6] <- paste0("b.",colnames(sdl2016_ind_df)[4:6])
+sdl2016_ind_df$clean_code2 <- rownames(sdl2016_ind_df)
+sdl2016_ind_df <- arrange(sdl2016_ind_df, p.value) %>%
+  # recode index
+  mutate(index = ifelse(index == 1, "C", 
+                        ifelse(index == 2, "N",
+                               ifelse(index == 3, "P", "N+P")))) %>%
+  # join latin name
+  left_join(distinct(spplist[c("clean_code2","simple_name")]))
+
 # same results with spp associations?
 sdl2016_rel_pa <- as.data.frame(ifelse(matrix_sdl2016_rel>0, 1,0))
 sdl2016_phi_dry = multipatt(sdl2016_rel_pa, sitematrix_sdl2016$trt, 
-                            func = "r.g", control = how(nperm = 999))
+                            func = "r.g", control = how(nperm = 999)) #duleg = TRUE)
 summary(sdl2016_phi_dry, indvalcomp = T) # nothing prefers any treatment, but there are species that occur in a combination of treatments
 # any significant with adjusted p vals?
 summary(p.adjust(sdl2016_phi_dry$sign$p.value, method = "holm") <= 0.1) #CARUD signficant marginally [epending on permuation] (0.1, but not at 0.05 )
@@ -709,10 +863,11 @@ names(simplecols) <- simpletrts
 
 # specify plotting cols for lifeform
 plantcols <- c("N-fixer" = "chocolate4", "Forb" = "grey30", "Grass" = "seagreen4", "Shrub" = "orchid")
-
+aqcol <- "deeppink2"
+concol <- "darkred"
 
 # specify species text size
-plottext <- 3
+plottext <- 5
 
 
 # -- sdl 2016, dry meadows ----
@@ -724,7 +879,9 @@ spp_df1 <- data.frame(nmds_sdl2016$species) %>%
   mutate(clean_code2 = row.names(.)) %>%
   left_join(distinct(spplist[,2:ncol(spplist)])) %>%
   # add trait PC scores
-  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")])
+  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")]) %>%
+  # attach indicator spp results
+  left_join(sdl2016_ind_df[c("clean_code2", "index", "p.value", "holm.pval")])
 
 # capture hulls
 grp1.np <- plot_df1[plot_df1$trt == "N+P", ][chull(plot_df1[plot_df1$trt == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
@@ -738,23 +895,30 @@ grpdf1 <- rbind(grp1.np, grp1.n, grp1.p, grp1.c)
 vec.sdl2016<-as.data.frame(scores(fit_sdl2016, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
 vec.sdl2016$species<-rownames(vec.sdl2016)
 
-sdl2016_fig <- ggplot(spp_df1, aes(MDS1, MDS2)) + 
+#sdl2016_fig <- 
+spp_df1$resource_grp[is.na(spp_df1$resource_grp)] <- "Unknown"
+  ggplot(spp_df1, aes(MDS1, MDS2)) + 
   geom_polygon(data = grpdf1, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
   geom_segment(data=vec.sdl2016,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
                arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
   # add label to envfit arrow
   geom_text(data=vec.sdl2016,aes(x=NMDS1+0.02,y=NMDS2, label = "Forb:\nGrass"), col = "black", size = plottext, fontface = "italic", hjust = 0) +
   #geom_point(aes(MDS1, MDS2, shape = simple_lifeform), col = "grey30", size = 3) + #pch = 8
-  geom_text(data = subset(spp_df1, is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1)), col = "grey50", size = plottext) +
-  geom_text(data = subset(spp_df1, !is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1), color = resource_grp), fontface = "bold", size = plottext) +
+  #geom_text(data = subset(spp_df1, is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1)), col = "grey50", size = plottext) +
+  # manually add in trait data species so can specify color
+  #geom_point(data = subset(spp_df6, resource_grp == "Acquisitive"), aes(MDS1, MDS2), col = aqcol, size = 3, alpha  = 0.8) +
+  #geom_point(data = subset(spp_df6, resource_grp == "Conservative"), aes(MDS1, MDS2), col = concol, size = 3, alpha  = 0.8) +
+  geom_point(data = subset(spp_df1, !is.na(resource_grp)), aes(MDS1, MDS2, shape = resource_grp)) +
   #geom_point(data = plot_df1, aes(MDS1, MDS2,fill = trt), pch = 21) +
   geom_point(data = plot_df1, aes(MDS1, MDS2,fill = trt), pch = 21) +
   #scale_color_discrete(name = "Lifeform") +
   scale_color_manual(name = "Resource group", values = traitcols) +
   scale_fill_manual(name = "Plot\ntreatment", values = trtcols) +
-  #scale_shape_discrete(solid = FALSE) +
+  scale_shape_discrete(solid = FALSE) +
   # add figure label in top corner
   geom_text(aes(min(MDS1), max(MDS2), label = "SDL 2016"), hjust = 0, vjust = 1, col = "black") +
+  # annotate any species that is a significant indicator
+  geom_text(data = subset(spp_df1, holm.pval <= 0.1), aes(MDS1, MDS2, label = simple_name), nudge_y = 0.1, fontface = "italic") +
   coord_fixed() +
   theme_bw() +
   theme(axis.title = element_blank(),
@@ -771,7 +935,9 @@ spp_df2 <- data.frame(nmds_nn2017$species) %>%
   mutate(clean_code2 = row.names(.)) %>%
   left_join(distinct(spplist[,2:ncol(spplist)])) %>%
   # join trait PC scores
-  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")])
+  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")]) %>%
+  # attach indicator spp results
+  left_join(nn2017_ind.simple_df[c("clean_code2", "index", "p.value", "holm.pval")])
 
 
 
@@ -824,24 +990,30 @@ grpdf2sim <- rbind(grp2sim.c, grp2sim.n,grp2sim.np)
 vec.nn2017.sim<-as.data.frame(scores(fitnn2017.simple, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
 vec.nn2017.sim$species<-rownames(vec.nn2017.sim)
 
-ggplot(spp_df2, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grpdf2sim, aes(MDS1, MDS2, fill = trt2), alpha = 0.5) +
+
+nn2017.simple_fig <- ggplot(spp_df2, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf2sim, aes(MDS1, MDS2, fill = trt2, col = trt2), alpha = 0.4) +
+  # envfit arrow
   geom_segment(data=vec.nn2017.sim,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
                arrow = arrow(length = unit(0.25, "cm")),colour="black", lwd = 1) + 
   # add label to envfit arrow
-  geom_text(data=vec.nn2017.sim,aes(x=NMDS1-0.02,y=NMDS2, label = "Forb/\nGrass"), col = "black", size = plottext, fontface = "italic", hjust = 1) +
-  #geom_point(data = subset(spp_df2, is.na(resource_grp)), aes(MDS1, MDS2), col = "grey30", alpha = 0.6, size = 3, pch = 1) +
-  #geom_point(data = subset(spp_df2, resource_grp == "Acquisitive"), aes(MDS1, MDS2), color = "deeppink2", size = 3) +
-  #geom_point(data = subset(spp_df2, resource_grp == "Conservative"), aes(MDS1, MDS2), color = "darkred", size = 3) +
-  geom_text(data = subset(spp_df2, is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1)), color = "grey30", size = plottext) +
-   geom_text(data = subset(spp_df2, !is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1), col = resource_grp), fontface = "bold", size = plottext) +
-  #geom_point(data = plot_df2, aes(MDS1, MDS2, col = trt2), pch = 3, inherit.aes = FALSE) +
-  scale_color_manual(name = "Resource", values = traitcols) +
-  scale_fill_manual(name = "Plot\ntreatment", values = simplecols, drop = F) +
-  #scale_color_manual(name = "Plot\ntreatment", values = simplecols, drop = F) +
-  coord_fixed() +
+  geom_text(data=vec.nn2017.sim,aes(x=NMDS1-0.02,y=NMDS2, label = "F:G***"), col = "black", size = plottext, fontface = "italic", hjust = 1) +
+  # add species points
+  geom_point(data = subset(spp_df2, is.na(resource_grp)), aes(MDS1, MDS2), col = "grey30", alpha = 0.6, size = 3, pch = 1) +
+  # manually add in trait data species so can specify color
+  geom_point(data = subset(spp_df2, resource_grp == "Acquisitive"), aes(MDS1, MDS2), col = aqcol, size = 3, alpha  = 0.8) +
+  geom_point(data = subset(spp_df2, resource_grp == "Conservative"), aes(MDS1, MDS2), col = concol, size = 3, alpha  = 0.8) +
+  # annotate any species that is a significant indicator
+  geom_text(data = subset(spp_df2, holm.pval <= 0.1), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+            fontface = "bold.italic", family = "Times New Roman", size = 4, lineheight = 0.5, nudge_y = 0.05) +
   # add figure label
-  geom_text(aes(min(MDS1), max(MDS2), label = "NutNet 2017"), hjust = 0, vjust = 1, col = "black") +
+  annotate(geom = "text", x= -1.2, y = 1.2, label = "NutNet 2017", hjust = 0, vjust = 1, size = plottext) +
+  # add NMDS stress in upper right corner
+  annotate(geom = "text", x = 1.2, y = 1.2, label = paste("Stress:", round(nmds_nn2017$stress,3)), vjust = 1, hjust = 1, size = plottext) +
+  # designate treatment colors
+  scale_fill_manual(name = "Plot\ntreatment", values = simplecols, drop = F) +
+  scale_color_manual(name = "Plot\ntreatment", values = simplecols, drop = F) +
+  coord_fixed() +
   theme_bw() +
   theme(axis.title = element_blank(),
         axis.text = element_blank(),
@@ -945,13 +1117,14 @@ plot_df6 <- data.frame(nmds_nn2013$points) %>%
   mutate(rowid = row.names(.)) %>%
   left_join(sitematrix_nn2013)
 plot_df6$trt <- factor(plot_df6$trt, levels = alltrts)
-plot_df6$trt2 <- factor(plot_df6$trt2, levels = )
+plot_df6$trt2 <- factor(plot_df6$trt2, levels = simpletrts)
 spp_df6 <- data.frame(nmds_nn2013$species) %>%
   mutate(clean_code2 = row.names(.)) %>%
   left_join(distinct(spplist[,2:ncol(spplist)])) %>%
   # join trait PC scores
-  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")])
-
+  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")]) %>%
+  # join indicator analysis results
+  left_join(nn2013_ind.simple_df[c("clean_code2", "index", "p.value", "holm.pval")])
 
 # capture hulls
 grpdf6 <- rbind(data.frame(plot_df6[plot_df6$trt == "N+P", ][chull(plot_df6[plot_df6$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
@@ -967,12 +1140,9 @@ vec.nn2013$species<-rownames(vec.nn2013)
 
 
 # simplified treatments
-grpdf6.simple <- rbind(data.frame(plot_df6[plot_df6$trt2 == "N+P", ][chull(plot_df6[plot_df6$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
-                data.frame(plot_df6[plot_df6$trt == "N+P+K", ][chull(plot_df6[plot_df6$trt == "N+P+K", c("MDS1", "MDS2")]),]), # hull values for grp n+p+k
-                data.frame(plot_df6[plot_df6$trt == "N+K", ][chull(plot_df6[plot_df6$trt == "N+K", c("MDS1", "MDS2")]),]),# hull values for grp n+p
-                data.frame(plot_df6[plot_df6$trt == "N", ][chull(plot_df6[plot_df6$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
-                data.frame(plot_df6[plot_df6$trt == "K", ][chull(plot_df6[plot_df6$trt == "K", c("MDS1", "MDS2")]), ]),  # hull values for grp k
-                data.frame(plot_df6[plot_df6$trt == "C", ][chull(plot_df6[plot_df6$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
+grpdf6.simple <- rbind(data.frame(plot_df6[plot_df6$trt2 == "N+P", ][chull(plot_df6[plot_df6$trt2 == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+                data.frame(plot_df6[plot_df6$trt2 == "N", ][chull(plot_df6[plot_df6$trt2 == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
+                data.frame(plot_df6[plot_df6$trt2 == "C", ][chull(plot_df6[plot_df6$trt2 == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
 
 # capture envfit
 vec.nn2013.simple <-as.data.frame(scores(fitnn2013.simple, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
@@ -981,6 +1151,7 @@ vec.nn2013$species<-rownames(vec.nn2013.simple)
 
 # original figure
 nn2013_fig <- ggplot(spp_df6, aes(MDS1, MDS2)) + 
+  #stat_ellipse(data = grpdf6, aes(MDS1, MDS2, col = trt)) +
   geom_polygon(data = grpdf6, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
   #geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
   geom_text(data = subset(spp_df6, is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1)), col = "grey30", size = plottext) +
@@ -1001,6 +1172,40 @@ nn2013_fig <- ggplot(spp_df6, aes(MDS1, MDS2)) +
         legend.position = c(0.87, 0.26),
         legend.background = element_rect(color = "black", fill = NULL),
         legend.title = element_text(size = 9))
+
+
+# simplified treatments fig
+#nn2013.simple_fig <- 
+  ggplot(spp_df6, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf6.simple, aes(MDS1, MDS2, fill = trt2, col = trt2), alpha = 0.4) +
+  # envfit arrow
+  geom_segment(data=vec.nn2013.simple,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
+               arrow = arrow(length = unit(0.25, "cm")),colour="black", lwd = 1) + 
+  # add label to envfit arrow
+  geom_text(data=vec.nn2013.simple,aes(x=NMDS1-0.02,y=NMDS2, label = "F:G***"), col = "black", size = plottext, fontface = "italic", hjust = 1) +
+  # add species points
+  geom_point(data = subset(spp_df6, is.na(resource_grp)), aes(MDS1, MDS2), col = "grey30", alpha = 0.6, size = 3, pch = 1) +
+  # manually add in trait data species so can specify color
+  geom_point(data = subset(spp_df6, resource_grp == "Acquisitive"), aes(MDS1, MDS2), col = aqcol, size = 3, alpha  = 0.8) +
+  geom_point(data = subset(spp_df6, resource_grp == "Conservative"), aes(MDS1, MDS2), col = concol, size = 3, alpha  = 0.8) +
+  # annotate any species that is a significant indicator
+  geom_text(data = subset(spp_df6, holm.pval <= 0.1), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+            fontface = "bold.italic", family = "Times New Roman", size = 4, lineheight = 0.5, nudge_y = 0.05) +
+  # add figure label
+  annotate(geom = "text", x= -1.2, y = 1.2, label = "NutNet 2013", hjust = 0, vjust = 1, size = plottext) +
+  # add NMDS stress in upper right corner
+  annotate(geom = "text", x = 1.2, y = 1.2, label = paste("Stress:", round(nmds_nn2013$stress,3)), vjust = 1, hjust = 1, size = plottext) +
+  # designate treatment colors
+  scale_fill_manual(name = "Treatment", values = simplecols, drop = F) +
+  scale_color_manual(name = "Treatment", values = simplecols, drop = F) +
+  coord_fixed() +
+  theme_bw() +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        legend.position = c(0.87, 0.15),
+        legend.background = element_rect(color = "black", fill = NULL),
+        legend.title = element_text(size = 9))
+
 
 
 # -- full panel plot -----
