@@ -335,11 +335,13 @@ plot(fitnn2013.simple, col = 1:7)
 orditorp (nmds_nn2013, display="species", col="grey30", air=0.01)
 
 # indicator species analysis
-nn2013_ind.simple = multipatt(matrix_nn2013_rel, sitematrix_nn2013$trt2, func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
+nn2013_ind.simple <- multipatt(matrix_nn2013, sitematrix_nn2013$trt2, func = "IndVal.g", duleg = TRUE, control = how(nperm = 10000))
 summary(nn2013_ind.simple, alpha = 0.1)
+
 # check signif of adjust pvals (for multiple spp comparisons)
 summary(p.adjust(nn2013_ind.simple$sign$p.value, method = "holm") < 0.1) #2 true
-nn2013_ind.simple$sign[(p.adjust(nn2013_ind.simple$sign$p.value, method = "holm") < 0.1),]
+nn2013_ind.simple$sign[(p.adjust(nn2013_ind.simple$sign$p.value, method = "holm") <= 0.1),]
+# trisetum spic, cerastium, and febr, depending on permutation, are signif
 
 # gather results
 nn2013_ind.simple_df <- cbind(nn2013_ind.simple$A, nn2013_ind.simple$B, nn2013_ind.simple$sign,
@@ -355,11 +357,12 @@ nn2013_ind.simple_df <- arrange(nn2013_ind.simple_df, p.value) %>%
   left_join(distinct(spplist[c("clean_code2","simple_name")]))
 
 # does any spp associate with a particular treatment?
-matrix_nn2013_rel_pa <- as.data.frame(ifelse(matrix_nn2013_rel>0,1,0))
-nn2013_phi.simple <- multipatt(matrix_nn2013_rel_pa, sitematrix_nn2013$trt2, duleg = T, func = "r.g", control = how(nperm = 999))
+matrix_nn2013_pa <- as.data.frame(ifelse(matrix_nn2013>0,1,0))
+nn2013_phi.simple <- multipatt(matrix_nn2013_pa, sitematrix_nn2013$trt2, duleg = T, func = "r.g", control = how(nperm = 10000))
 summary(nn2013_phi.simple)
 # check signif for multiple spp comparisons
 summary(p.adjust(nn2013_phi.simple$sign$p.value, method = "holm")<0.1) #nothing signig, 2 NAs
+subset(nn2013_phi.simple$sign, p.adjust(nn2013_phi.simple$sign$p.value, method = "holm")<0.1) #Cerastrium arvense associates with N+P sometimes significantly
 # who are the generalists?
 subset(nn2013_phi.simple$sign, is.na(nn2013_phi.simple$sign$p.value)) # carex rupestris and kobresia...
 
@@ -455,14 +458,14 @@ adonis(nn2017_rel ~ lnf2gFNF * trt, data = sitematrix_nn2017, strata = sitematri
 
 # indicator species for nutnet plots
 # indicator species
-nn2017_ind <- multipatt(nn2017_rel, sitematrix_nn2017$trt, func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
+nn2017_ind <- multipatt(nn2017_rel, sitematrix_nn2017$trt, func = "IndVal.g", duleg = TRUE, control = how(nperm = 10000))
 summary(nn2017_ind, alpha = 0.1)
 # check signif of adjust pvals (for multiple spp comparisons)
 summary(p.adjust(nn2017_ind$sign$p.value, method = "holm") < 0.1) #nothing signif
 
 # does any spp associate with a particular treatment?
-nn2017_rel_pa <- as.data.frame(ifelse(nn2017_rel>0,1,0))
-nn2017_phi <- multipatt(nn2017_rel_pa, sitematrix_nn2017$trt, duleg = T, func = "r.g", control = how(nperm = 999))
+nn2017_pa <- as.data.frame(ifelse(matrix_nn2017>0,1,0))
+nn2017_phi <- multipatt(nn2017_pa, sitematrix_nn2017$trt, duleg = T, func = "r.g", control = how(nperm = 999))
 summary(nn2017_phi)
 # check signif for multiple spp comparisons
 summary(p.adjust(nn2017_phi$sign$p.value, method = "holm")<0.1) #nada
@@ -483,7 +486,7 @@ adonis(nn2017_rel ~ lnf2gFNF * trt, data = sitematrix_nn2017, strata = sitematri
 # with collapsed treatment
 # indicator species for nutnet plots
 # indicator species
-nn2017_ind.simple <- multipatt(nn2017_rel, sitematrix_nn2017$trt2, func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
+nn2017_ind.simple <- multipatt(matrix_nn2017, sitematrix_nn2017$trt2, func = "IndVal.g", duleg = TRUE, control = how(nperm = 10000))
 summary(nn2017_ind.simple, alpha = 0.1)
 # check signif of adjust pvals (for multiple spp comparisons)
 summary(p.adjust(nn2017_ind.simple$sign$p.value, method = "holm") < 0.1) #4 true!
@@ -503,11 +506,17 @@ nn2017_ind.simple_df <- arrange(nn2017_ind.simple_df, p.value) %>%
   left_join(distinct(spplist[c("clean_code2","simple_name")]))
 
 # does any spp associate with a particular treatment?
-nn2017_phi.simple <- multipatt(nn2017_rel_pa, sitematrix_nn2017$trt2, duleg = T, func = "r.g", control = how(nperm = 999))
-summary(nn2017_phi.simple)
+nn2017_phi.simple <- multipatt(nn2017_pa, sitematrix_nn2017$trt2, duleg = T, func = "r.g", control = how(nperm = 999))
+summary(nn2017_phi.simple, alpha = 1)
 # check signif for multiple spp comparisons
 summary(p.adjust(nn2017_phi.simple$sign$p.value, method = "holm")<0.1) #1 true
-nn2017_phi.simple$sign[(p.adjust(nn2017_phi.simple$sign$p.value, method = "holm") < 0.1),]
+nn2017_phi.simple$sign[(p.adjust(nn2017_phi.simple$sign$p.value, method = "holm") < 0.1),] # TRSP N+P
+
+# check komy and carud abundances in n vs c plots in 2017
+koca17 <- matrix_nn2017 %>%
+  mutate(rowid = rownames(.)) %>%
+  dplyr::select(KOMY, CARUD, rowid) %>%
+  left_join(sitematrix_nn2017)
 
 # test for homogeneity of variances
 nn2017_disper.simple <- betadisper(nn2017_rel_bray, sitematrix_nn2017$trt2)
@@ -515,6 +524,14 @@ nn2017_disper.simple
 anova(nn2017_disper.simple) # no difference in homogeneity of dispersion
 TukeyHSD(nn2017_disper.simple)
 boxplot(nn2017_disper.simple)
+
+summary(anosim(nn2017_rel_bray, grouping = sitematrix_nn2017$trt2, strata = sitematrix_nn2017$block, permutations = 999))
+mrpp(nn2017_rel,  grouping = sitematrix_nn2017$trt2, strata = sitematrix_nn2017$block, distance = "bray")
+adonis(nn2017_rel ~ trt2 * lnf2gFNF, data = sitematrix_nn2017, strata = sitematrix_nn2017$block, permutations = 999, method = "bray")
+# change order of variables
+adonis(nn2017_rel ~ lnf2gFNF * trt2, data = sitematrix_nn2017, strata = sitematrix_nn2017$block, permutations = 999, method = "bray")
+# either order of explanatory vars, forb:grass ration and trtment is distinct, but there is no interaction
+
 
 # try PCoA just to see..
 nn2017.b.pcoa<-cmdscale(nn2017_rel_bray, eig=TRUE)
@@ -592,10 +609,16 @@ adonis(sdl1997_rel ~ trt * lnf2gFNF, data = sitematrix_sdl1997, permutations = 9
 adonis(sdl1997_rel ~ lnf2gFNF * trt, data = sitematrix_sdl1997, permutations = 999, method = "bray")
 # either order of explanatory vars, forb:grass ratio and treattment is signif, but there is no interaction
 
+# test for homogeneity of variances
+sdl1997_disper <- betadisper(sdl1997_rel_bray, sitematrix_sdl1997$trt)
+sdl1997_disper
+anova(sdl1997_disper) # no difference in homogeneity of dispersion
+TukeyHSD(sdl1997_disper)
+boxplot(sdl1997_disper)
 
 # indicator species analysis for 1997 saddle plots
 # indicator species
-sdl1997_ind = multipatt(sdl1997_rel, sitematrix_sdl1997$trt, func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
+sdl1997_ind = multipatt(matrix_sdl1997, sitematrix_sdl1997$trt, func = "IndVal.g", duleg = TRUE, control = how(nperm = 10000))
 summary(sdl1997_ind, alpha = 0.1)
 # check signif of adjust pvals (for multiple spp comparisons)
 subset(sdl1997_ind$sign, p.adjust(sdl1997_ind$sign$p.value, method = "holm") < 0.1) #CARUD in control sometimes signif depending on permutations
@@ -617,12 +640,12 @@ sdl1997_ind_df <- arrange(sdl1997_ind_df, p.value) %>%
 
 
 # does any spp associate with a particular treatment?
-sdl1997_rel_pa <- as.data.frame(ifelse(sdl1997_rel>0,1,0))
-sdl1997_phi <- multipatt(sdl1997_rel_pa, sitematrix_sdl1997$trt, duleg = T, func = "r.g", control = how(nperm = 999))
-summary(sdl1997_phi, alpha = 1) # nothing is significant
+sdl1997_pa <- as.data.frame(ifelse(matrix_sdl1997>0,1,0))
+sdl1997_phi <- multipatt(sdl1997_pa, sitematrix_sdl1997$trt, duleg = T, func = "r.g", control = how(nperm = 10000))
+summary(sdl1997_phi, alpha = 0.1) # nothing is significant
 
 #check with trt combos allowed
-sdl1997_phi_comb <- multipatt(sdl1997_rel_pa, sitematrix_sdl1997$trt, func = "r.g", control = how(nperm = 999))
+sdl1997_phi_comb <- multipatt(sdl1997_pa, sitematrix_sdl1997$trt, func = "r.g", control = how(nperm = 999))
 summary(sdl1997_phi_comb)
 # check signif for multiple spp comparisons
 subset(sdl1997_phi_comb$sign, p.adjust(sdl1997_phi_comb$sign$p.value, method = "holm")<0.1) # nothing signif
@@ -688,9 +711,18 @@ adonis(matrix_sdl2012_rel ~ trt * lnf2g, data = sitematrix_sdl2012, permutations
 adonis(matrix_sdl2012_rel ~ lnf2g * trt, data = sitematrix_sdl2012, permutations = 999, method = "bray")
 # trt always signif, interactions always marginally signif, lnf2g only signif if lnf2g first
 
-# indicator species analysis for 1997 saddle plots
+
+# test for homogeneity of variances
+sdl2012_disper <- betadisper(matrix_sdl2012_rel_bray, sitematrix_sdl2012$trt)
+sdl2012_disper
+anova(sdl2012_disper) # no difference in homogeneity of dispersion
+TukeyHSD(sdl2012_disper)
+boxplot(sdl2012_disper, main = "SDL 2012 dispersion")
+
+
+# indicator species analysis for 2012 saddle plots
 # indicator species
-matrix_sdl2012_ind = multipatt(matrix_sdl2012_rel, sitematrix_sdl2012$trt, func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
+matrix_sdl2012_ind = multipatt(matrix_sdl2012, sitematrix_sdl2012$trt, func = "IndVal.g", duleg = TRUE, control = how(nperm = 10000))
 summary(matrix_sdl2012_ind, alpha = 0.1, indvalcomp = T)
 # check signif of adjust pvals (for multiple spp comparisons)
 summary(p.adjust(matrix_sdl2012_ind$sign$p.value, method = "holm") < 0.1) #nothing signif
@@ -712,8 +744,8 @@ sdl2012_ind_df <- arrange(sdl2012_ind_df, p.value) %>%
 
 
 # does any spp associate with a particular treatment?
-matrix_sdl2012_rel_pa <- as.data.frame(ifelse(matrix_sdl2012_rel>0,1,0))
-matrix_sdl2012_phi <- multipatt(matrix_sdl2012_rel_pa, sitematrix_sdl2012$trt, duleg = T, func = "r.g", control = how(nperm = 999))
+matrix_sdl2012_pa <- as.data.frame(ifelse(matrix_sdl2012>0,1,0))
+matrix_sdl2012_phi <- multipatt(matrix_sdl2012_pa, sitematrix_sdl2012$trt, duleg = T, func = "r.g", control = how(nperm = 10000))
 summary(matrix_sdl2012_phi, alpha = 0.1) # a few signif for control, marginal for P
 # check signif with holm's test
 # check signif for multiple spp comparisons
@@ -776,8 +808,8 @@ plot(fit_sdl2016, col = 1:5)
 orditorp (nmds_sdl2016, display="species", col="black", air=0.01)
 
 # indicator species analysis on dry meadow plots only
-sdl2016_ind_dry = multipatt(matrix_sdl2016_rel, sitematrix_sdl2016$trt, 
-                            func = "IndVal.g", duleg = TRUE, control = how(nperm = 999))
+sdl2016_ind_dry = multipatt(matrix_sdl2016, sitematrix_sdl2016$trt, 
+                            func = "IndVal.g", duleg = TRUE, control = how(nperm = 10000))
 summary(sdl2016_ind_dry, indvalcomp = T)
 # any significant with adjusted p vals?
 summary(p.adjust(sdl2016_ind_dry$sign$p.value, method = "holm")< 0.1) #nothing significant
@@ -797,9 +829,9 @@ sdl2016_ind_df <- arrange(sdl2016_ind_df, p.value) %>%
   left_join(distinct(spplist[c("clean_code2","simple_name")]))
 
 # same results with spp associations?
-sdl2016_rel_pa <- as.data.frame(ifelse(matrix_sdl2016_rel>0, 1,0))
-sdl2016_phi_dry = multipatt(sdl2016_rel_pa, sitematrix_sdl2016$trt, 
-                            func = "r.g", control = how(nperm = 999)) #duleg = TRUE)
+sdl2016_pa <- as.data.frame(ifelse(matrix_sdl2016>0, 1,0))
+sdl2016_phi_dry = multipatt(sdl2016_pa, sitematrix_sdl2016$trt, duleg = T,
+                            func = "r.g", control = how(nperm = 10000)) #duleg = TRUE)
 summary(sdl2016_phi_dry, indvalcomp = T) # nothing prefers any treatment, but there are species that occur in a combination of treatments
 # any significant with adjusted p vals?
 summary(p.adjust(sdl2016_phi_dry$sign$p.value, method = "holm") <= 0.1) #CARUD signficant marginally [epending on permuation] (0.1, but not at 0.05 )
@@ -807,6 +839,24 @@ summary(p.adjust(sdl2016_phi_dry$sign$p.value, method = "holm") <= 0.1) #CARUD s
 subset(sdl2016_phi_dry$sign, is.na(sdl2016_phi_dry$sign$p.value)) #geum rossii
 # Carex rupestris is the only signif species, prefers dry meadow Control or +N (doesn't like +P?)
 subset(sdl2016_phi_dry$sign, p.adjust(sdl2016_phi_dry$sign$p.value, method = "holm") < 0.1)
+
+# calculate bray diss matrix
+matrix_sdl2016_rel_bray <- vegdist(matrix_sdl2016_rel)
+
+summary(anosim(matrix_sdl2016_rel_bray, grouping = sitematrix_sdl2016$trt, permutations = 999))
+mrpp(matrix_sdl2016_rel,  grouping = sitematrix_sdl2016$trt, distance = "bray")
+adonis(matrix_sdl2016_rel ~ trt * lnf2g, data = sitematrix_sdl2016, permutations = 999, method = "bray")
+# change order of variables
+adonis(matrix_sdl2016_rel ~ lnf2g * trt, data = sitematrix_sdl2016, permutations = 999, method = "bray")
+# trt always signif, interactions always marginally signif, lnf2g only signif if lnf2g first
+
+# test for homogeneity of variances
+sdl2016_disper <- betadisper(matrix_sdl2016_rel_bray, sitematrix_sdl2016$trt)
+sdl2016_disper
+anova(sdl2016_disper) # no difference in homogeneity of dispersion
+TukeyHSD(sdl2016_disper)
+boxplot(sdl2016_disper, main = "SDL 2016 dispersion")
+
 
 # try PCoA just to see..
 sdl2016.bray<-as.matrix(vegdist(matrix_sdl2016_rel)) 
@@ -966,8 +1016,11 @@ nn2013.simple_fig <-ggplot(spp_df_nn13, aes(MDS1, MDS2)) +
   # designate resource colors
   scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
   # annotate any species that is a significant indicator
-  geom_text(data = subset(spp_df_nn13, holm.pval <= 0.1 & !grepl("Cerast", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+  geom_text(data = subset(spp_df_nn13, holm.pval <= 0.1 & !grepl("Cerast|Fest", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
             fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, vjust = -0.5, hjust = 0,  show.legend = FALSE) +
+  # plot Festuca differently than others
+  geom_text(data = subset(spp_df_nn13, holm.pval <= 0.1 & grepl("Fest", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, show.legend = FALSE, hjust = 1, vjust = 0) +
   # plot Cerastrium differently than Trisetum
   geom_text(data = subset(spp_df_nn13, holm.pval <= 0.1 & grepl("Ceras", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
             fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, nudge_x = -0.04, show.legend = FALSE, hjust = 1) +
@@ -1250,7 +1303,7 @@ sdl2016_fig <- ggplot(spp_df_sdl16, aes(MDS1, MDS2)) +
   geom_segment(data=vec.sdl2016,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
                arrow = arrow(length = unit(0.25, "cm")),colour="black", lwd = 1) + 
   # add label to envfit arrow
-  geom_text(data=vec.sdl2016,aes(x=NMDS1+0.02,y=NMDS2, label = "F:G***"), col = "black", size = plottext, fontface = "bold.italic", hjust = 0) +
+  geom_text(data=vec.sdl2016,aes(x=NMDS1+0.02,y=NMDS2, label = "F:G*"), col = "black", size = plottext, fontface = "bold.italic", hjust = 0) +
   # add new color scale
   new_scale_fill() +
   # add species points
@@ -1299,3 +1352,13 @@ sdl_panel <- plot_grid(sdl1997_fig, sdl2012_fig, sdl2016_fig, nrow = 1, align = 
 ggsave(plot = sdl_panel, 
        filename = "alpine_addnuts/figures/sdl_nmds_panel.pdf", scale = 1,
        width = 12, height = 4, units = "in")
+
+# dispersion plot
+quartz()
+par(mfrow = c(3,2))
+boxplot(nn2013_disper.simple, main = "NN 2013 dispersion")
+boxplot(nn2017_disper.simple, main = "NN 2017 dispersion")
+boxplot(sdl1997_disper, main = "SDL 1997 dispersion")
+boxplot(sdl2012_disper, main = "SDL 2012 dispersion")
+boxplot(sdl2016_disper, main = "SDL 2016 dispersion")
+par(mfrow = c(1,1))
