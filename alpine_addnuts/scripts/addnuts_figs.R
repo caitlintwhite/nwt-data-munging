@@ -15,11 +15,15 @@
 # 5) table:
 # spp table with code, latin name, common name, functional group
 
+# notes:
+# TS prefers hull be shaded in. Species names should be colored to match trt color, so manually specify colors and hull outlines
+
 
 
 # -- SETUP -----
 rm(list = ls())
 library(tidyverse)
+library(ggnewscale)
 library(vegan)
 library(indicspecies)
 library(cowplot)
@@ -46,7 +50,8 @@ traitdat <- getTabular(500) %>% data.frame()
 
 
 # -- RECODE TRTMENTS FOR NUTNET (SIMPLIFY) -----
-#ts found no effect of +k
+#ts found no effect of +k, condense +k into other treatments (e.g. n+p+k to n+p; k to control)
+# in previous ordination analysis, k plots overlay similar treatments without k (e.g. n+p and n+p+k hulls overlap on nmds) 
 nnplots$trt2 <- gsub("[+]K", "", nnplots$trt)
 nnplots$trt2 <- gsub("K", "C", nnplots$trt2)
 
@@ -599,14 +604,14 @@ subset(sdl1997_ind$sign, p.adjust(sdl1997_ind$sign$p.value, method = "holm") < 0
 sdl_ind_grps <- c(`1` ="C", `2`="N", `3` = "P", `4` = "N+P") 
 # gather results
 sdl1997_ind_df <- cbind(sdl1997_ind$A, sdl1997_ind$B, sdl1997_ind$sign,
-                              holm.pval = p.adjust(sdl1997_ind$sign$p.value, method = "holm")) 
+                        holm.pval = p.adjust(sdl1997_ind$sign$p.value, method = "holm")) 
 colnames(sdl1997_ind_df)[1:3] <- paste0("a.",colnames(sdl1997_ind_df)[1:3])
 colnames(sdl1997_ind_df)[4:6] <- paste0("b.",colnames(sdl1997_ind_df)[4:6])
 sdl1997_ind_df$clean_code2 <- rownames(sdl1997_ind_df)
 sdl1997_ind_df <- arrange(sdl1997_ind_df, p.value) %>%
   mutate(index = ifelse(index == 1, "C", 
                         ifelse(index == 2, "N",
-                        ifelse(index == 3, "P", "N+P")))) %>%
+                               ifelse(index == 3, "P", "N+P")))) %>%
   # join latin name
   left_join(distinct(spplist[c("clean_code2","simple_name")]))
 
@@ -818,19 +823,23 @@ ggplot(testdf, aes(Dim1, Dim2, col = trt)) +
 
 
 # -- FIGURES -----
-# 1) trait pca
+# 1) trait pca -----
 # choose color scheme here to color in spp in nmds points with..
-traitcols <- c("Acquisitive" = "deeppink2", "Conservative" = "darkred", "Unknown" = "grey80") #springgreen3, slateblue3
+traitcols <- c("Acquisitive" = "deeppink2", "Conservative" = "darkred", "Unknown" = NA) #springgreen3, slateblue3
 
 pcfig <- ggplot() +
   geom_vline(aes(xintercept = 0), lty = 2, col = "grey") +
   geom_hline(aes(yintercept = 0), lty = 2, col = "grey") +
   geom_segment(data=varscores,aes(x=0,xend=PC1,y=0,yend=PC2),
                arrow = arrow(length = unit(0.25, "cm")),colour="grey40") + 
-  geom_point(data = sppscores, aes(PC1, PC2, col = resource_grp), size = plottext) +
-  geom_text(data = subset(varscores, PC1 <=0 & abbr != "LDMC"), aes(PC1, PC2, label = abbr), check_overlap = T, nudge_x = -0.15, size = plottext) +
-  geom_text(data = subset(varscores, PC1 >0 & abbr != "Dry weight"), aes(PC1, PC2, label = abbr), check_overlap = T, nudge_x = 0.15, size = plottext) +
-  geom_text(data = subset(varscores, abbr %in% c("LDMC", "Dry weight")), aes(PC1, PC2, label = abbr), check_overlap = T, nudge_x = 0.02, nudge_y = 0.1, size = plottext) +
+  geom_point(data = sppscores, aes(PC1, PC2, col = resource_grp), size = pointsize) +
+  geom_text(data = subset(varscores, PC1 <=0 & !grepl("D13", abbr)), aes(PC1, PC2, label = abbr), check_overlap = T, hjust = 1, nudge_x = -0.02, size = plottext) +
+  # plot D13c separately
+    geom_text(data = subset(varscores,abbr == "D13C"), aes(PC1, PC2, label = abbr), check_overlap = T, hjust = 0.2, nudge_y = -0.1, size = plottext) +
+  geom_text(data = subset(varscores, PC1 >0 & !grepl("D15|Chl|Hei", abbr)), aes(PC1, PC2, label = abbr), check_overlap = T, hjust = -0.1, size = plottext) +
+  # plot height separately
+    geom_text(data = subset(varscores, abbr == "Height"), aes(PC1, PC2, label = abbr), check_overlap = T, vjust = -0.5, hjust = 0.7, size = plottext) +
+  geom_text(data = subset(varscores, abbr %in% c("D15N", "Chl")), aes(PC1, PC2, label = abbr), check_overlap = F, vjust = 0, hjust = -0.1, size = plottext) +
   labs(x = "PC1 (41% variance explained)",
        y = "PC2 (20% variance explained)") +
   # describe axes
@@ -841,14 +850,16 @@ pcfig <- ggplot() +
   geom_text(aes(2, (min(sppscores$PC2)-0.08), label = "Resource acquisitive"), fontface = "italic", col = "grey20", size = plottext, hjust = 1) +
   geom_text(aes(-1.5, (min(sppscores$PC2)-0.08), label = "Resource conservative"), fontface = "italic", col = "grey20", size = plottext, hjust = 0) +
   coord_fixed() +
-  scale_color_manual(values = traitcols, guide = FALSE)
+  scale_color_manual(values = traitcols, guide = FALSE) +
+  theme(axis.text = element_text(size = 16),
+        axis.title = element_text(size = 18))
 
 pcfig
-ggsave(plot = pcfig, 
+ggsave(plot = pcfig, scale = 1.25,
        filename = "alpine_addnuts/figures/pcfig.pdf")
 
 
-# 2) time series NMDS plots
+# -- NMDS plots -----
 # specify plotting colors for all treatments
 # original treatments
 alltrts <- sort(unique(c(as.character(sitematrix_nn2017$trt), as.character(sitematrix_sdl2016$trt))))
@@ -863,287 +874,20 @@ names(simplecols) <- simpletrts
 
 # specify plotting cols for lifeform
 plantcols <- c("N-fixer" = "chocolate4", "Forb" = "grey30", "Grass" = "seagreen4", "Shrub" = "orchid")
-aqcol <- "deeppink2"
-concol <- "darkred"
+
 
 # specify species text size
 plottext <- 5
+pointsize <- 3
 
 
-# -- sdl 2016, dry meadows ----
-plot_df1 <- data.frame(nmds_sdl2016$points) %>%
-  mutate(rowid = row.names(.)) %>%
-  left_join(sitematrix_sdl2016)
-
-spp_df1 <- data.frame(nmds_sdl2016$species) %>%
-  mutate(clean_code2 = row.names(.)) %>%
-  left_join(distinct(spplist[,2:ncol(spplist)])) %>%
-  # add trait PC scores
-  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")]) %>%
-  # attach indicator spp results
-  left_join(sdl2016_ind_df[c("clean_code2", "index", "p.value", "holm.pval")])
-
-# capture hulls
-grp1.np <- plot_df1[plot_df1$trt == "N+P", ][chull(plot_df1[plot_df1$trt == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-grp1.n <- plot_df1[plot_df1$trt == "N", ][chull(plot_df1[plot_df1$trt == "N", c("MDS1", "MDS2")]), ]  # hull values for grp n
-grp1.p <- plot_df1[plot_df1$trt == "P", ][chull(plot_df1[plot_df1$trt == "P", c("MDS1", "MDS2")]), ]  # hull values for grp p
-grp1.c <- plot_df1[plot_df1$trt == "C", ][chull(plot_df1[plot_df1$trt == "C", c("MDS1", "MDS2")]), ]  # hull values for grp control
-# stack grp dfs
-grpdf1 <- rbind(grp1.np, grp1.n, grp1.p, grp1.c)
-
-# capture envfit
-vec.sdl2016<-as.data.frame(scores(fit_sdl2016, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
-vec.sdl2016$species<-rownames(vec.sdl2016)
-
-#sdl2016_fig <- 
-spp_df1$resource_grp[is.na(spp_df1$resource_grp)] <- "Unknown"
-  ggplot(spp_df1, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grpdf1, aes(MDS1, MDS2, col = trt), fill = NA, alpha = 0.5) +
-  geom_segment(data=vec.sdl2016,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
-               arrow = arrow(length = unit(0.25, "cm")),colour="black", lwd = 1) + 
-  # add label to envfit arrow
-  geom_text(data=vec.sdl2016,aes(x=NMDS1+0.02,y=NMDS2, label = "F:G***"), col = "black", size = plottext, fontface = "bold.italic", hjust = 0) +
-  #geom_point(aes(MDS1, MDS2, shape = simple_lifeform), col = "grey30", size = 3) + #pch = 8
-  #geom_text(data = subset(spp_df1, is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1)), col = "grey50", size = plottext) +
-  # manually add in trait data species so can specify color
-  #geom_point(data = subset(spp_df6, resource_grp == "Acquisitive"), aes(MDS1, MDS2), col = aqcol, size = 3, alpha  = 0.8) +
-  #geom_point(data = subset(spp_df6, resource_grp == "Conservative"), aes(MDS1, MDS2), col = concol, size = 3, alpha  = 0.8) +
-  geom_point(data = subset(spp_df1, !is.na(resource_grp)), aes(MDS1, MDS2, fill = resource_grp), color = "transparent", pch = 21, size = 3) +
-  #geom_point(data = plot_df1, aes(MDS1, MDS2,fill = trt), pch = 21) +
-  geom_point(data = plot_df1, aes(MDS1, MDS2, col = trt), pch = 0, size = 3) +
-    # annotate any species that is a significant indicator
-    geom_text(data = subset(spp_df1, holm.pval <= 0.15), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-              fontface = "bold.italic", family = "Times New Roman", size = 4, lineheight = 0.5, nudge_y = 0.05, show.legend = FALSE) +
-  #scale_color_discrete(name = "Lifeform") +
-  scale_color_manual(name = "Treatment", values = trtcols) +
-  scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
-  #scale_shape_discrete(solid = FALSE) +
-  # add figure label in top corner
-  annotate(geom = "text", x = -1, y = 1, label = "SDL 2016", hjust = 0, vjust = 1, col = "black", size = plottext) +
-    # add NMDS stress in upper right corner
-    annotate(geom = "text", x = 1, y = 1, label = paste("Stress:", round(nmds_sdl2016$stress,3)), vjust = 1, hjust = 1, size = plottext) +
-  # annotate any species that is a significant indicator
-  geom_text(data = subset(spp_df1, holm.pval <= 0.1), aes(MDS1, MDS2, label = simple_name), nudge_y = 0.1, fontface = "italic", family= "Times New Roman") +
-  #coord_fixed() +
-  theme_bw() +
-  theme(axis.title = element_blank(),
-        axis.text = element_blank(),
-        legend.position = "none")
-
-
-# -- nutnet 2017, common plots -------
-# original treatments
-plot_df2 <- data.frame(nmds_nn2017$points) %>%
-  mutate(rowid = row.names(.)) %>%
-  left_join(sitematrix_nn2017)
-spp_df2 <- data.frame(nmds_nn2017$species) %>%
-  mutate(clean_code2 = row.names(.)) %>%
-  left_join(distinct(spplist[,2:ncol(spplist)])) %>%
-  # join trait PC scores
-  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")]) %>%
-  # attach indicator spp results
-  left_join(nn2017_ind.simple_df[c("clean_code2", "index", "p.value", "holm.pval")])
-
-
-
-# original treatment overlays..
-grp2.np <- plot_df2[plot_df2$trt == "N+P", ][chull(plot_df2[plot_df2$trt == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-grp2.npk <- plot_df2[plot_df2$trt == "N+P+K", ][chull(plot_df2[plot_df2$trt == "N+P+K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-grp2.nk <- plot_df2[plot_df2$trt == "N+K", ][chull(plot_df2[plot_df2$trt == "N+K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-grp2.c <- plot_df2[plot_df2$trt == "C", ][chull(plot_df2[plot_df2$trt == "C", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-grp2.n <- plot_df2[plot_df2$trt == "N", ][chull(plot_df2[plot_df2$trt == "N", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-grp2.k <- plot_df2[plot_df2$trt == "K", ][chull(plot_df2[plot_df2$trt == "K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-# stack treatments
-grpdf2 <- rbind(grp2.c, grp2.n, grp2.k, grp2.nk, grp2.np, grp2.npk)
-
-# capture envfit
-vec.nn2017<-as.data.frame(scores(fitnn2017, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
-vec.nn2017$species<-rownames(vec.nn2017)
-
-
-# original treatment figure
-nn2017_fig <- ggplot(spp_df2, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grpdf2, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
-  geom_segment(data=vec.nn2017,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
-               arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
-  # add label to envfit arrow
-  geom_text(data=vec.nn2017,aes(x=NMDS1-0.02,y=NMDS2, label = "Forb:\nGrass"), col = "black", size = plottext, fontface = "italic", hjust = 1) +
-  #geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
-  geom_text(data = subset(spp_df2, is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1)), color = "grey30", size = plottext) +
-  geom_text(data = subset(spp_df2, !is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1), col = resource_grp), fontface = "bold", size = plottext) +
-  geom_point(data = plot_df2, aes(MDS1, MDS2,fill = trt), pch = 21) +
-  scale_color_manual(name = "Resource", values = traitcols) +
-  scale_fill_manual(name = "Plot\ntreatment", values = trtcols, drop = F) +
-  coord_fixed() +
-  # add figure label
-  geom_text(aes(min(MDS1), max(MDS2), label = "NutNet 2017"), hjust = 0, vjust = 1, col = "black") +
-  labs(y = "NMDS2", x = "NMDS1") +
-  theme_bw() +
-  theme(#axis.title = element_blank(),
-        #axis.text = element_blank(),
-        legend.position = "none")
-
-
-# simplified treatment
-# simplified treatment overlays
-grp2sim.np <- plot_df2[plot_df2$trt2 == "N+P", ][chull(plot_df2[plot_df2$trt2 == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-grp2sim.c <- plot_df2[plot_df2$trt2 == "C", ][chull(plot_df2[plot_df2$trt2 == "C", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-grp2sim.n <- plot_df2[plot_df2$trt2 == "N", ][chull(plot_df2[plot_df2$trt2 == "N", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
-# stack treatments
-grpdf2sim <- rbind(grp2sim.c, grp2sim.n,grp2sim.np)
-
-# capture envfit
-vec.nn2017.sim<-as.data.frame(scores(fitnn2017.simple, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
-vec.nn2017.sim$species<-rownames(vec.nn2017.sim)
-
-
-nn2017.simple_fig <- ggplot(spp_df2, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grpdf2sim, aes(MDS1, MDS2, fill = trt2, col = trt2), alpha = 0.4) +
-  # envfit arrow
-  geom_segment(data=vec.nn2017.sim,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
-               arrow = arrow(length = unit(0.25, "cm")),colour="black", lwd = 1) + 
-  # add label to envfit arrow
-  geom_text(data=vec.nn2017.sim,aes(x=NMDS1-0.02,y=NMDS2, label = "F:G***"), col = "black", size = plottext, fontface = "italic", hjust = 1) +
-  # add species points
-  geom_point(data = subset(spp_df2, is.na(resource_grp)), aes(MDS1, MDS2), col = "grey30", alpha = 0.6, size = 3, pch = 1) +
-  # manually add in trait data species so can specify color
-  geom_point(data = subset(spp_df2, resource_grp == "Acquisitive"), aes(MDS1, MDS2), col = aqcol, size = 3, alpha  = 0.8) +
-  geom_point(data = subset(spp_df2, resource_grp == "Conservative"), aes(MDS1, MDS2), col = concol, size = 3, alpha  = 0.8) +
-  # annotate any species that is a significant indicator
-  geom_text(data = subset(spp_df2, holm.pval <= 0.1), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times New Roman", size = 4, lineheight = 0.5, nudge_y = 0.05) +
-  # add figure label
-  annotate(geom = "text", x= -1.2, y = 1.2, label = "NutNet 2017", hjust = 0, vjust = 1, size = plottext) +
-  # add NMDS stress in upper right corner
-  annotate(geom = "text", x = 1.2, y = 1.2, label = paste("Stress:", round(nmds_nn2017$stress,3)), vjust = 1, hjust = 1, size = plottext) +
-  # designate treatment colors
-  scale_fill_manual(name = "Plot\ntreatment", values = simplecols, drop = F) +
-  scale_color_manual(name = "Plot\ntreatment", values = simplecols, drop = F) +
-  coord_fixed() +
-  labs(x = "NMDS1", y = "NMDS2") +
-  theme_bw() +
-  theme(#axis.title = element_blank(),
-        #axis.text = element_blank(),
-        legend.position = "none")
-
-
-
-# -- sdl 1997, dry meadow only ----
-plot_df3 <- data.frame(nmds_sdl1997$points) %>%
-  mutate(rowid = row.names(.)) %>%
-  left_join(sitematrix_sdl1997)
-plot_df3$trt <- factor(plot_df3$trt, levels = alltrts)
-
-spp_df3 <- data.frame(nmds_sdl1997$species) %>%
-  mutate(clean_code2 = row.names(.)) %>%
-  left_join(distinct(spplist[,2:ncol(spplist)]))%>%
-  # add trait PC scores
-  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")]) %>%
-  mutate(resource_grp = ifelse(is.na(resource_grp), "Unknown", resource_grp)) %>%
-  # attach indicator spp results
-  left_join(sdl1997_ind_df[c("clean_code2", "index", "p.value", "holm.pval")])
-
-
-# capture hulls
-grpdf3 <- rbind(data.frame(plot_df3[plot_df3$trt == "N+P", ][chull(plot_df3[plot_df3$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
-                data.frame(plot_df3[plot_df3$trt == "N", ][chull(plot_df3[plot_df3$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
-                data.frame(plot_df3[plot_df3$trt == "P", ][chull(plot_df3[plot_df3$trt == "P", c("MDS1", "MDS2")]), ]),  # hull values for grp p
-                data.frame(plot_df3[plot_df3$trt == "C", ][chull(plot_df3[plot_df3$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
-
-# capture envfit
-vec.sdl1997<-as.data.frame(scores(fitsdl1997, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
-vec.sdl2016$species<-rownames(vec.sdl1997)
-
-sdl1997_fig <- ggplot(spp_df3, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grpdf3, aes(MDS1, MDS2, col = trt), fill = NA, alpha = 0.5) +
-  geom_segment(data=vec.sdl1997,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
-               arrow = arrow(length = unit(0.25, "cm")),colour="black", lwd = 1) + 
-  # add label to envfit arrow
-  geom_text(data=vec.sdl1997,aes(x=NMDS1+0.02,y=NMDS2, label = "F:G***"), col = "black", size = plottext, fontface = "bold.italic", hjust = 0) +
-  #geom_text(data = subset(spp_df3, Symbol != "STLO2" & is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1)), col = "grey30", size = plottext) +
-  # plot STLO2 separately bc overplots with grass in top right corner of plot
-  #geom_text(data = subset(spp_df3, Symbol == "STLO2"), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1)), col = "grey30", size = plottext, nudge_y = -0.1) +
-  # add text for spp with PC score
-  #geom_text(data = subset(spp_df3, !is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1), col = resource_grp), size = plottext, fontface = "bold") +
-    geom_point(aes(MDS1, MDS2, fill = resource_grp), color = "transparent", pch = 21, size = 3) +
-    geom_point(data = plot_df3, aes(MDS1, MDS2,col = trt), pch = 0) +
-  #scale_color_discrete(name = "Lifeform") +
-  scale_color_manual(name = "Treatment", values = simplecols) +
-  scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
-  coord_fixed() +
-  #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
-  annotate(geom = "text", x = min(spp_df3$MDS1), y = max(spp_df3$MDS2), label = "SDL 1997", hjust = 0, vjust = 1, col = "black", size = plottext) +
-  # add NMDS stress in upper right corner
-  annotate(geom = "text", x = max(spp_df3$MDS1), y = max(spp_df3$MDS2), label = paste("Stress:", round(nmds_sdl1997$stress,3)), vjust = 1, hjust = 1, size = plottext) +
-  # annotate any species that is a significant indicator
-  geom_text(data = subset(spp_df3, holm.pval <= 0.1), aes(MDS1, MDS2, label = simple_name), nudge_y = 0.1, fontface = "italic", family= "Times New Roman") +
-  labs(y = "NMDS2", x = "NMDS1") +
-  theme_bw() +
-  theme(#axis.title = element_blank(),
-        #axis.text = element_blank(),
-        # add legend here
-        legend.position = c(0.9,0.19),
-        legend.background = element_blank(),
-        legend.title = element_text(size = 9))
-
-sdl1997_fig
-
-
-# ---- sdl 2012, dry meadow only ----
-plot_df4 <- data.frame(nmds_sdl2012$points) %>%
-  mutate(rowid = row.names(.)) %>%
-  left_join(sitematrix_sdl2012)
-
-spp_df4 <- data.frame(nmds_sdl2012$species) %>%
-  mutate(clean_code2 = row.names(.)) %>%
-  left_join(distinct(spplist[,2:ncol(spplist)])) %>%
-  # add trait PC scores
-  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")]) %>%
-  mutate(resource_grp = ifelse(is.na(resource_grp), "Unknown", resource_grp)) %>%
-  # attach indicator spp results
-  left_join(sdl2012_ind_df[c("clean_code2", "index", "p.value", "holm.pval")])
-
-
-# capture hulls
-grpdf4 <- rbind(data.frame(plot_df4[plot_df4$trt == "N+P", ][chull(plot_df4[plot_df4$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
-                data.frame(plot_df4[plot_df4$trt == "N", ][chull(plot_df4[plot_df4$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
-                data.frame(plot_df4[plot_df4$trt == "P", ][chull(plot_df4[plot_df4$trt == "P", c("MDS1", "MDS2")]), ]),  # hull values for grp p
-                data.frame(plot_df4[plot_df4$trt == "C", ][chull(plot_df4[plot_df4$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
-
-
-sdl2012_fig <- ggplot(spp_df4, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grpdf4, aes(MDS1, MDS2, col = trt), fill = NA, alpha = 0.5) +
-  #geom_text(data = subset(spp_df4, is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1)), col = "grey30", size = plottext) +
-  #geom_text(data = subset(spp_df4, !is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1), col  = resource_grp), size = plottext, fontface = "bold") +
-  geom_point(aes(MDS1, MDS2, fill = resource_grp), color = "transparent", pch = 21, size = 3) +
-  geom_point(data = plot_df4, aes(MDS1, MDS2,col = trt), pch = 4, size = 3) +
-  #scale_color_discrete(name = "Lifeform") +
-  scale_fill_manual(name = "Resource", values = traitcols) +
-  scale_color_manual(name = "Treatment", values = trtcols) +
-  #guides(guide_legend(override.aes = list(pch =21))) +
-  #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
-  annotate(geom = "text", x = min(spp_df4$MDS1), y = max(spp_df4$MDS2), label = "SDL 2012", hjust = 0, vjust = 1, col = "black", size = plottext) +
-  # add NMDS stress in upper right corner
-  annotate(geom = "text", x = max(spp_df4$MDS1), y = max(spp_df4$MDS2), label = paste("Stress:", round(nmds_sdl2012$stress,3)), vjust = 1, hjust = 1, size = plottext) +
-  # annotate any species that is a significant indicator
-  geom_text(data = subset(spp_df4, holm.pval <= 0.1), aes(MDS1, MDS2, label = simple_name, col = index), nudge_y = 0.1, fontface = "italic", family= "Times New Roman") +
-  labs(x = "NMDS1", y = "NMDS2") +
-    coord_fixed() +
-  theme_bw() +
-  theme(#axis.title = element_blank(),
-        #axis.text = element_blank(), 
-        legend.position = "none")
-
-
-
-
-# ---- nutnet 2013, common plots only -----
-plot_df6 <- data.frame(nmds_nn2013$points) %>%
+# 2) nutnet 2013, common plots only -----
+plot_df_nn13 <- data.frame(nmds_nn2013$points) %>%
   mutate(rowid = row.names(.)) %>%
   left_join(sitematrix_nn2013)
-plot_df6$trt <- factor(plot_df6$trt, levels = alltrts)
-plot_df6$trt2 <- factor(plot_df6$trt2, levels = simpletrts)
-spp_df6 <- data.frame(nmds_nn2013$species) %>%
+plot_df_nn13$trt <- factor(plot_df_nn13$trt, levels = alltrts)
+plot_df_nn13$trt2 <- factor(plot_df_nn13$trt2, levels = simpletrts)
+spp_df_nn13 <- data.frame(nmds_nn2013$species) %>%
   mutate(clean_code2 = row.names(.)) %>%
   left_join(distinct(spplist[,2:ncol(spplist)])) %>%
   # join trait PC scores
@@ -1153,12 +897,12 @@ spp_df6 <- data.frame(nmds_nn2013$species) %>%
   left_join(nn2013_ind.simple_df[c("clean_code2", "index", "p.value", "holm.pval")])
 
 # capture hulls
-grpdf6 <- rbind(data.frame(plot_df6[plot_df6$trt == "N+P", ][chull(plot_df6[plot_df6$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
-                data.frame(plot_df6[plot_df6$trt == "N+P+K", ][chull(plot_df6[plot_df6$trt == "N+P+K", c("MDS1", "MDS2")]),]), # hull values for grp n+p+k
-                data.frame(plot_df6[plot_df6$trt == "N+K", ][chull(plot_df6[plot_df6$trt == "N+K", c("MDS1", "MDS2")]),]),# hull values for grp n+p
-                data.frame(plot_df6[plot_df6$trt == "N", ][chull(plot_df6[plot_df6$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
-                data.frame(plot_df6[plot_df6$trt == "K", ][chull(plot_df6[plot_df6$trt == "K", c("MDS1", "MDS2")]), ]),  # hull values for grp k
-                data.frame(plot_df6[plot_df6$trt == "C", ][chull(plot_df6[plot_df6$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
+grpdf_nn13 <- rbind(data.frame(plot_df_nn13[plot_df_nn13$trt == "N+P", ][chull(plot_df_nn13[plot_df_nn13$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+                    data.frame(plot_df_nn13[plot_df_nn13$trt == "N+P+K", ][chull(plot_df_nn13[plot_df_nn13$trt == "N+P+K", c("MDS1", "MDS2")]),]), # hull values for grp n+p+k
+                    data.frame(plot_df_nn13[plot_df_nn13$trt == "N+K", ][chull(plot_df_nn13[plot_df_nn13$trt == "N+K", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+                    data.frame(plot_df_nn13[plot_df_nn13$trt == "N", ][chull(plot_df_nn13[plot_df_nn13$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
+                    data.frame(plot_df_nn13[plot_df_nn13$trt == "K", ][chull(plot_df_nn13[plot_df_nn13$trt == "K", c("MDS1", "MDS2")]), ]),  # hull values for grp k
+                    data.frame(plot_df_nn13[plot_df_nn13$trt == "C", ][chull(plot_df_nn13[plot_df_nn13$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
 
 # capture envfit
 vec.nn2013<-as.data.frame(scores(fitnn2013, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
@@ -1166,23 +910,23 @@ vec.nn2013$species<-rownames(vec.nn2013)
 
 
 # simplified treatments
-grpdf6.simple <- rbind(data.frame(plot_df6[plot_df6$trt2 == "N+P", ][chull(plot_df6[plot_df6$trt2 == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
-                data.frame(plot_df6[plot_df6$trt2 == "N", ][chull(plot_df6[plot_df6$trt2 == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
-                data.frame(plot_df6[plot_df6$trt2 == "C", ][chull(plot_df6[plot_df6$trt2 == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
+grpdf_nn13.simple <- rbind(data.frame(plot_df_nn13[plot_df_nn13$trt2 == "N+P", ][chull(plot_df_nn13[plot_df_nn13$trt2 == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+                           data.frame(plot_df_nn13[plot_df_nn13$trt2 == "N", ][chull(plot_df_nn13[plot_df_nn13$trt2 == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
+                           data.frame(plot_df_nn13[plot_df_nn13$trt2 == "C", ][chull(plot_df_nn13[plot_df_nn13$trt2 == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
 
 # capture envfit
 vec.nn2013.simple <-as.data.frame(scores(fitnn2013.simple, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
-vec.nn2013$species<-rownames(vec.nn2013.simple)
+vec.nn2013.simple$species<-rownames(vec.nn2013.simple)
 
 
 # original figure
-nn2013_fig <- ggplot(spp_df6, aes(MDS1, MDS2)) + 
-  #stat_ellipse(data = grpdf6, aes(MDS1, MDS2, col = trt)) +
-  geom_polygon(data = grpdf6, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+nn2013_fig <- ggplot(spp_df_nn13, aes(MDS1, MDS2)) + 
+  #stat_ellipse(data = grpdf_nn13, aes(MDS1, MDS2, col = trt)) +
+  geom_polygon(data = grpdf_nn13, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
   #geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
-  geom_text(data = subset(spp_df6, is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1)), col = "grey30", size = plottext) +
-  geom_text(data = subset(spp_df6, !is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1), col = resource_grp), size = plottext, fontface = "bold") +
-  geom_point(data = plot_df6, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  geom_text(data = subset(spp_df_nn13, is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1)), col = "grey30", size = plottext) +
+  geom_text(data = subset(spp_df_nn13, !is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1), col = resource_grp), size = plottext, fontface = "bold") +
+  geom_point(data = plot_df_nn13, aes(MDS1, MDS2,fill = trt), pch = 21) +
   geom_segment(data=vec.nn2013,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
                arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
   # add label to envfit arrow
@@ -1201,42 +945,335 @@ nn2013_fig <- ggplot(spp_df6, aes(MDS1, MDS2)) +
 
 
 # simplified treatments fig
-nn2013.simple_fig <- ggplot(spp_df6, aes(MDS1, MDS2)) + 
-  geom_polygon(data = grpdf6.simple, aes(MDS1, MDS2, col = trt2), fill = NA, alpha = 0.4) +
-    geom_point(data = plot_df6, aes(MDS1, MDS2, col = trt2), size = 3, pch = 0) +
+nn2013.simple_fig <- ggplot(spp_df_nn13, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf_nn13.simple, aes(MDS1, MDS2, fill = trt2, col = trt2), alpha = 0.4) +
+  geom_point(data = plot_df_nn13, aes(MDS1, MDS2, col = trt2), size = pointsize, pch = 8) +
+  # designate treatment colors
+  scale_fill_manual(name = "Treatment", values = simplecols) +
+  scale_color_manual(name = "Treatment", values = simplecols) +
   # envfit arrow
   geom_segment(data=vec.nn2013.simple,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
                arrow = arrow(length = unit(0.25, "cm")),colour="black", lwd = 1) + 
   # add label to envfit arrow
   geom_text(data=vec.nn2013.simple,aes(x=NMDS1-0.02,y=NMDS2, label = "F:G***"), col = "black", size = plottext, fontface = "bold.italic", hjust = 1) +
+  # add new color scale
+  new_scale_fill() +
   # add species points
-  geom_point(aes(MDS1, MDS2, fill = resource_grp), color = "transparent", size = 3, pch = 21) +
-  # manually add in trait data species so can specify color
-  #geom_point(data = subset(spp_df6, resource_grp == "Acquisitive"), aes(MDS1, MDS2), col = aqcol, size = 3, alpha  = 0.8) +
-  #geom_point(data = subset(spp_df6, resource_grp == "Conservative"), aes(MDS1, MDS2), col = concol, size = 3, alpha  = 0.8) +
-  # annotate any species that is a significant indicator
-  geom_text(data = subset(spp_df6, holm.pval <= 0.1), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times New Roman", size = 4, lineheight = 0.5, nudge_y = 0.05, show.legend = FALSE) +
-  # add figure label
-  annotate(geom = "text", x= -1.2, y = 1.2, label = "NutNet 2013", hjust = 0, vjust = 1, size = plottext) +
-  # add NMDS stress in upper right corner
-  annotate(geom = "text", x = 1.2, y = 1.2, label = paste("Stress:", round(nmds_nn2013$stress,3)), vjust = 1, hjust = 1, size = plottext) +
-  # designate treatment colors
+  geom_point(aes(MDS1, MDS2, fill = resource_grp), col = "grey30", size = pointsize, pch = 21) +
+  # designate resource colors
   scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
-  scale_color_manual(name = "Treatment", values = simplecols) +
+  # annotate any species that is a significant indicator
+  geom_text(data = subset(spp_df_nn13, holm.pval <= 0.1 & !grepl("Cerast", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, vjust = -0.5, hjust = 0,  show.legend = FALSE) +
+    # plot Cerastrium differently than Trisetum
+    geom_text(data = subset(spp_df_nn13, holm.pval <= 0.1 & grepl("Ceras", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+              fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, nudge_x = -0.04, show.legend = FALSE, hjust = 1) +
+  # add figure label
+  annotate(geom = "text", x= min(spp_df_nn13$MDS1), y = max(spp_df_nn13$MDS2), label = "NutNet 2013", hjust = 0, vjust = 1, size = plottext, fontface = "bold") +
+  # add NMDS stress in upper right corner
+  annotate(geom = "text", x = max(spp_df_nn13$MDS1), y = max(spp_df_nn13$MDS2), label = paste("Stress:", round(nmds_nn2013$stress,3)), vjust = 1, hjust = 1, size = (plottext-1)) +
   coord_fixed() +
-    labs(y = "NMDS2", x = "NMDS1") +
-    theme_bw() +
+  labs(y = "NMDS2", x = "NMDS1") +
+  theme_bw() +
+    theme(#axis.title = element_blank(),
+    #axis.text = element_blank(),
+    legend.position = c(0.88, 0.25),
+    legend.background = element_blank(),
+    legend.title = element_text(size = 9),
+    legend.spacing = unit(0, units = "pt"))
+
+
+
+# 3) nutnet 2017, common plots -------
+# original treatments
+plot_df_nn17 <- data.frame(nmds_nn2017$points) %>%
+  mutate(rowid = row.names(.)) %>%
+  left_join(sitematrix_nn2017)
+spp_df_nn17 <- data.frame(nmds_nn2017$species) %>%
+  mutate(clean_code2 = row.names(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)])) %>%
+  # join trait PC scores
+  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")]) %>%
+  # attach indicator spp results
+  left_join(nn2017_ind.simple_df[c("clean_code2", "index", "p.value", "holm.pval")])
+
+
+
+# original treatment overlays..
+grp_nn17.np <- plot_df_nn17[plot_df_nn17$trt == "N+P", ][chull(plot_df_nn17[plot_df_nn17$trt == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp_nn17.npk <- plot_df_nn17[plot_df_nn17$trt == "N+P+K", ][chull(plot_df_nn17[plot_df_nn17$trt == "N+P+K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp_nn17.nk <- plot_df_nn17[plot_df_nn17$trt == "N+K", ][chull(plot_df_nn17[plot_df_nn17$trt == "N+K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp_nn17.c <- plot_df_nn17[plot_df_nn17$trt == "C", ][chull(plot_df_nn17[plot_df_nn17$trt == "C", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp_nn17.n <- plot_df_nn17[plot_df_nn17$trt == "N", ][chull(plot_df_nn17[plot_df_nn17$trt == "N", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp_nn17.k <- plot_df_nn17[plot_df_nn17$trt == "K", ][chull(plot_df_nn17[plot_df_nn17$trt == "K", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+# stack treatments
+grpdf_nn17 <- rbind(grp_nn17.c, grp_nn17.n, grp_nn17.k, grp_nn17.nk, grp_nn17.np, grp_nn17.npk)
+
+# capture envfit
+vec.nn2017<-as.data.frame(scores(fitnn2017, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
+vec.nn2017$species<-rownames(vec.nn2017)
+
+
+# original treatment figure
+nn2017_fig <- ggplot(spp_df_nn17, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf_nn17, aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+  geom_segment(data=vec.nn2017,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
+               arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
+  # add label to envfit arrow
+  geom_text(data=vec.nn2017,aes(x=NMDS1-0.02,y=NMDS2, label = "Forb:\nGrass"), col = "black", size = plottext, fontface = "italic", hjust = 1) +
+  #geom_point(aes(MDS1, MDS2, col = simple_lifeform), alpha = 0.6, pch = 8) +
+  geom_text(data = subset(spp_df_nn17, is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1)), color = "grey30", size = plottext) +
+  geom_text(data = subset(spp_df_nn17, !is.na(resource_grp)), aes(MDS1, MDS2, label = substr(simple_lifeform,1,1), col = resource_grp), fontface = "bold", size = plottext) +
+  geom_point(data = plot_df_nn17, aes(MDS1, MDS2,fill = trt), pch = 21) +
+  scale_color_manual(name = "Resource", values = traitcols) +
+  scale_fill_manual(name = "Plot\ntreatment", values = trtcols, drop = F) +
+  coord_fixed() +
+  # add figure label
+  geom_text(aes(min(MDS1), max(MDS2), label = "NutNet 2017"), hjust = 0, vjust = 1, col = "black") +
+  labs(y = "NMDS2", x = "NMDS1") +
+  theme_bw() +
   theme(#axis.title = element_blank(),
-        #axis.text = element_blank(),
-        legend.position = c(0.87, 0.26),
-        legend.background = element_blank(),
-        legend.title = element_text(size = 9),
-        legend.spacing = unit(0, units = "pt"))
+    #axis.text = element_blank(),
+    legend.position = "none")
+
+
+# simplified treatment
+# simplified treatment overlays
+grp_nn17sim.np <- plot_df_nn17[plot_df_nn17$trt2 == "N+P", ][chull(plot_df_nn17[plot_df_nn17$trt2 == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp_nn17sim.c <- plot_df_nn17[plot_df_nn17$trt2 == "C", ][chull(plot_df_nn17[plot_df_nn17$trt2 == "C", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp_nn17sim.n <- plot_df_nn17[plot_df_nn17$trt2 == "N", ][chull(plot_df_nn17[plot_df_nn17$trt2 == "N", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+# stack treatments
+grpdf_nn17.simple <- rbind(grp_nn17sim.c, grp_nn17sim.n,grp_nn17sim.np)
+
+# capture envfit
+vec.nn2017.simple<-as.data.frame(scores(fitnn2017.simple, display = "vectors")) #$vectors$arrows*sqrt(fit_sdl2016$vectors$r))
+vec.nn2017.simple$species<-rownames(vec.nn2017.sim)
+
+
+nn2017.simple_fig <- ggplot(spp_df_nn17, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf_nn17.simple, aes(MDS1, MDS2, fill = trt2, col = trt2), alpha = 0.4) +
+  geom_point(data = plot_df_nn17, aes(MDS1, MDS2, col = trt2), size = pointsize, pch = 8) +
+  # designate treatment colors
+  scale_fill_manual(name = "Treatment", values = simplecols) +
+  scale_color_manual(name = "Treatment", values = simplecols) +
+  # envfit arrow
+  geom_segment(data=vec.nn2017.simple,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
+               arrow = arrow(length = unit(0.25, "cm")),colour="black", lwd = 1) + 
+  # add label to envfit arrow
+  geom_text(data=vec.nn2017.simple,aes(x=NMDS1-0.02,y=NMDS2, label = "F:G***"), col = "black", size = plottext, fontface = "bold.italic", hjust = 1) +
+  # add new color scale
+  new_scale_fill() +
+  # add species points
+  geom_point(aes(MDS1, MDS2, fill = resource_grp), col = "grey30", size = pointsize, pch = 21) +
+  # designate resource colors
+  scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
+  # manually add in trait data species so can specify color
+  # annotate any species that is a significant indicator
+  geom_text(data = subset(spp_df_nn17, holm.pval <= 0.1 & !grepl("Carex|Sela|Tri", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, nudge_y = -0.02, nudge_x = -0.02, hjust = 0, vjust = 1, show.legend = FALSE) +
+    # annotate trisetum
+    geom_text(data = subset(spp_df_nn17, holm.pval <= 0.1 & grepl("Tris", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+              fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, hjust = 1, nudge_x = -0.04, show.legend = FALSE) +
+    # annotate selaginella separately
+    geom_text(data = subset(spp_df_nn17, holm.pval <= 0.1 & grepl("Sela", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+              fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, hjust = 0, nudge_x = 0.02, show.legend = FALSE) +
+    # annotate carex rupestris separately
+    geom_text(data = subset(spp_df_nn17, holm.pval <= 0.1 & grepl("Carex", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+              fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, hjust = 0, vjust = -0.5, show.legend = FALSE) +
+  # add figure label
+  annotate(geom = "text", x= -1.2, y = 1.2, label = "NutNet 2017", hjust = 0, vjust = 1, size = plottext, fontface = "bold") +
+  # add NMDS stress in upper right corner
+  annotate(geom = "text", x = 1.2, y = 1.2, label = paste("Stress:", round(nmds_nn2017$stress,3)), vjust = 1, hjust = 1, size = (plottext-1)) +
+  coord_fixed() +
+  labs(y = NULL, x = "NMDS1") +
+  theme_bw() +
+  theme(#axis.title = element_blank(),
+    #axis.text = element_blank(),
+    legend.position = "none")
 
 
 
-# -- full panel plot -----
+# 4) sdl 1997, dry meadow only ----
+plot_df_sdl97 <- data.frame(nmds_sdl1997$points) %>%
+  mutate(rowid = row.names(.)) %>%
+  left_join(sitematrix_sdl1997)
+plot_df_sdl97$trt <- factor(plot_df_sdl97$trt, levels = alltrts)
+
+spp_df_sdl97 <- data.frame(nmds_sdl1997$species) %>%
+  mutate(clean_code2 = row.names(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)]))%>%
+  # add trait PC scores
+  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")]) %>%
+  mutate(resource_grp = ifelse(is.na(resource_grp), "Unknown", resource_grp)) %>%
+  # attach indicator spp results
+  left_join(sdl1997_ind_df[c("clean_code2", "index", "p.value", "holm.pval")])
+
+
+# capture hulls
+grpdf_sdl97 <- rbind(data.frame(plot_df_sdl97[plot_df_sdl97$trt == "N+P", ][chull(plot_df_sdl97[plot_df_sdl97$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+                     data.frame(plot_df_sdl97[plot_df_sdl97$trt == "N", ][chull(plot_df_sdl97[plot_df_sdl97$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
+                     data.frame(plot_df_sdl97[plot_df_sdl97$trt == "P", ][chull(plot_df_sdl97[plot_df_sdl97$trt == "P", c("MDS1", "MDS2")]), ]),  # hull values for grp p
+                     data.frame(plot_df_sdl97[plot_df_sdl97$trt == "C", ][chull(plot_df_sdl97[plot_df_sdl97$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
+
+# capture envfit
+vec.sdl1997<-as.data.frame(scores(fitsdl1997, display = "vectors"))
+vec.sdl1997$species<-rownames(vec.sdl1997)
+
+sdl1997_fig <- ggplot(spp_df_sdl97, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf_sdl97, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
+  geom_point(data = plot_df_sdl97, aes(MDS1, MDS2, col = trt), size = pointsize, pch = 8) +
+  # designate treatment colors
+  scale_fill_manual(name = "Treatment", values = simplecols) +
+  scale_color_manual(name = "Treatment", values = simplecols) +
+  # add envfit arrow
+  geom_segment(data=vec.sdl1997,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
+               arrow = arrow(length = unit(0.25, "cm")),colour="black", lwd = 1) + 
+  # add label to envfit arrow
+  geom_text(data=vec.sdl1997,aes(x=NMDS1+0.02,y=NMDS2, label = "F:G***"), col = "black", size = plottext, fontface = "bold.italic", hjust = 0) +
+  # add new fill scale for spp points
+  new_scale_fill() +
+  # add species points
+  geom_point(aes(MDS1, MDS2, fill = resource_grp), col = "grey30", size = pointsize, pch = 21) +
+  # designate resource colors
+  scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
+  # annotate any species that is a significant indicator
+  geom_text(data = subset(spp_df_sdl97, holm.pval <= 0.1), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, nudge_y = 0.06, show.legend = FALSE) +
+  #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
+  annotate(geom = "text", x = min(spp_df_sdl97$MDS1), y = max(spp_df_sdl97$MDS2), label = "SDL 1997", hjust = 0, vjust = 1, col = "black", size = plottext) +
+  # add NMDS stress in upper right corner
+  annotate(geom = "text", x = max(spp_df_sdl97$MDS1), y = max(spp_df_sdl97$MDS2), label = paste("Stress:", round(nmds_sdl1997$stress,3)), vjust = 1, hjust = 1, size = plottext) +
+  coord_fixed() +
+  labs(y = "NMDS2", x = "NMDS1") +
+  theme_bw() +
+  theme(#axis.title = element_blank(),
+    #axis.text = element_blank(),
+    # add legend here
+    legend.position = c(0.9,0.19),
+    legend.background = element_blank(),
+    legend.title = element_text(size = 9))
+
+
+
+
+# 5) sdl 2012, dry meadow only ----
+plot_df_sdl12 <- data.frame(nmds_sdl2012$points) %>%
+  mutate(rowid = row.names(.)) %>%
+  left_join(sitematrix_sdl2012)
+
+spp_df_sdl12 <- data.frame(nmds_sdl2012$species) %>%
+  mutate(clean_code2 = row.names(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)])) %>%
+  # add trait PC scores
+  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")]) %>%
+  mutate(resource_grp = ifelse(is.na(resource_grp), "Unknown", resource_grp)) %>%
+  # attach indicator spp results
+  left_join(sdl2012_ind_df[c("clean_code2", "index", "p.value", "holm.pval")])
+
+
+# capture hulls
+grpdf_sdl12 <- rbind(data.frame(plot_df_sdl12[plot_df_sdl12$trt == "N+P", ][chull(plot_df_sdl12[plot_df_sdl12$trt == "N+P", c("MDS1", "MDS2")]),]),# hull values for grp n+p
+                     data.frame(plot_df_sdl12[plot_df_sdl12$trt == "N", ][chull(plot_df_sdl12[plot_df_sdl12$trt == "N", c("MDS1", "MDS2")]),]), # hull values for grp n
+                     data.frame(plot_df_sdl12[plot_df_sdl12$trt == "P", ][chull(plot_df_sdl12[plot_df_sdl12$trt == "P", c("MDS1", "MDS2")]), ]),  # hull values for grp p
+                     data.frame(plot_df_sdl12[plot_df_sdl12$trt == "C", ][chull(plot_df_sdl12[plot_df_sdl12$trt == "C", c("MDS1", "MDS2")]), ])) # hull values for grp control 
+
+
+sdl2012_fig <- ggplot(spp_df_sdl12, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf_sdl12, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
+  geom_point(data = plot_df_sdl12, aes(MDS1, MDS2, col = trt), size = pointsize, pch = 8) +
+  # designate treatment colors
+  scale_fill_manual(name = "Treatment", values = simplecols) +
+  scale_color_manual(name = "Treatment", values = simplecols) +
+  # no envfit arrow bc not signif
+  # add new fill scale for spp points
+  new_scale_fill() +
+  # add species points
+  geom_point(aes(MDS1, MDS2, fill = resource_grp), col = "grey30", size = pointsize, pch = 21) +
+  # designate resource colors
+  scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
+  # annotate any species that is a significant indicator
+  geom_text(data = subset(spp_df_sdl12, holm.pval <= 0.1), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, nudge_y = 0.06, show.legend = FALSE) +
+  # add SDL 2012 label in top left
+  annotate(geom = "text", x = min(spp_df_sdl12$MDS1), y = max(spp_df_sdl12$MDS2), label = "SDL 2012", hjust = 0, vjust = 1, col = "black", size = plottext, fontface = "bold") +
+  # add NMDS stress in upper right corner
+  annotate(geom = "text", x = max(spp_df_sdl12$MDS1), y = max(spp_df_sdl12$MDS2), label = paste("Stress:", round(nmds_sdl2012$stress,3)), vjust = 1, hjust = 1, size = (plottext-1)) +
+  labs(x = "NMDS1", y = "NMDS2") +
+  coord_fixed() +
+  theme_bw() +
+  theme(#axis.title = element_blank(),
+    #axis.text = element_blank(), 
+    legend.position = "none")
+
+
+# 6) sdl 2016, dry meadows ----
+plot_df_sdl16 <- data.frame(nmds_sdl2016$points) %>%
+  mutate(rowid = row.names(.)) %>%
+  left_join(sitematrix_sdl2016)
+
+spp_df_sdl16 <- data.frame(nmds_sdl2016$species) %>%
+  mutate(clean_code2 = row.names(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)])) %>%
+  # add trait PC scores
+  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")]) %>%
+  mutate(resource_grp = ifelse(is.na(resource_grp), "Unknown", resource_grp)) %>%
+  # attach indicator spp results
+  left_join(sdl2016_ind_df[c("clean_code2", "index", "p.value", "holm.pval")])
+
+# capture hulls
+grp_sdl16.np <- plot_df_sdl16[plot_df_sdl16$trt == "N+P", ][chull(plot_df_sdl16[plot_df_sdl16$trt == "N+P", c("MDS1", "MDS2")]), ]  # hull values for grp n+p
+grp_sdl16.n <- plot_df_sdl16[plot_df_sdl16$trt == "N", ][chull(plot_df_sdl16[plot_df_sdl16$trt == "N", c("MDS1", "MDS2")]), ]  # hull values for grp n
+grp_sdl16.p <- plot_df_sdl16[plot_df_sdl16$trt == "P", ][chull(plot_df_sdl16[plot_df_sdl16$trt == "P", c("MDS1", "MDS2")]), ]  # hull values for grp p
+grp_sdl16.c <- plot_df_sdl16[plot_df_sdl16$trt == "C", ][chull(plot_df_sdl16[plot_df_sdl16$trt == "C", c("MDS1", "MDS2")]), ]  # hull values for grp control
+# stack grp dfs
+grpdf_sdl16 <- rbind(grp_sdl16.np, grp_sdl16.n, grp_sdl16.p, grp_sdl16.c)
+
+# capture envfit
+vec.sdl2016<-as.data.frame(scores(fit_sdl2016, display = "vectors"))
+vec.sdl2016$species<-rownames(vec.sdl2016)
+
+
+sdl2016_fig <- ggplot(spp_df_sdl16, aes(MDS1, MDS2)) + 
+  geom_polygon(data = grpdf_sdl16, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
+  geom_point(data = plot_df_sdl16, aes(MDS1, MDS2, col = trt), size = pointsize, pch = 8) +
+  # designate treatment colors
+  scale_fill_manual(name = "Treatment", values = simplecols) +
+  scale_color_manual(name = "Treatment", values = simplecols) +
+  # add envfit arrow
+  geom_segment(data=vec.sdl2016,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
+               arrow = arrow(length = unit(0.25, "cm")),colour="black", lwd = 1) + 
+  # add label to envfit arrow
+  geom_text(data=vec.sdl2016,aes(x=NMDS1+0.02,y=NMDS2, label = "F:G***"), col = "black", size = plottext, fontface = "bold.italic", hjust = 0) +
+  # add new color scale
+  new_scale_fill() +
+  # add species points
+  geom_point(aes(MDS1, MDS2, fill = resource_grp), col = "grey30", size = pointsize, pch = 21) +
+  # designate resource colors
+  scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
+  # annotate any species that is a significant indicator
+  geom_text(data = subset(spp_df_sdl16, holm.pval <= 0.15), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, nudge_y = 0.05, show.legend = FALSE) +
+  # annotate any species that is a significant indicator
+  geom_text(data = subset(spp_df_sdl16, holm.pval <= 0.1), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
+            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, nudge_y = 0.06, show.legend = FALSE) +
+  # annotate Geum rossii specifically
+  #geom_text(data = subset(spp_df_sdl16, clean_code2 == "GERO2"), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10)), col = "grey30", 
+  #          fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, nudge_y = 0.06, show.legend = FALSE) +
+  # add figure label
+  annotate(geom = "text", x= min(spp_df_nn13$MDS1), y = max(spp_df_nn13$MDS2), label = "SDL 2016", hjust = 0, vjust = 1, size = plottext, fontface = "bold") +
+  # add NMDS stress in upper right corner
+  annotate(geom = "text", x= max(spp_df_nn13$MDS1), y = max(spp_df_nn13$MDS2), label = paste("Stress:", round(nmds_sdl2016$stress,3)), vjust = 1, hjust = 1, size = (plottext-1)) +
+  coord_fixed() +
+  labs(y = "NMDS2", x = "NMDS1") +
+  theme_bw() +
+  theme(#axis.title = element_blank(),
+    #axis.text = element_blank(),
+    legend.position = "none")
+
+
+
+
+# --panel plots -----
 # 6-panel plot of everything
 full_panel <- plot_grid(pcfig, nn2013_fig, nn2017_fig,
                         sdl1997_fig, sdl2012_fig, sdl2016_fig,
@@ -1247,7 +1284,15 @@ ggsave(plot = full_panel,
        filename = "alpine_addnuts/figures/pca_nmds_fullpanel.pdf", scale = 2,
        width = 6, heigh = 4, units = "in")
 
-# nutnet panel
-#nn_panel <- 
-  plot_grid(nn2013.simple_fig, nn2017.simple_fig, nrow = 1, align = "h")
-  
+# nutnet-only panel
+nn_panel <- plot_grid(nn2013.simple_fig, nn2017.simple_fig, nrow = 1, align = "vh")
+nn_panel
+ggsave(plot = nn_panel, 
+       filename = "alpine_addnuts/figures/nn_nmds_panel.pdf", scale = 2,
+       width = 6, height = 4, units = "in")
+
+#sdl-only panel
+sdl_panel <- plot_grid(sdl1997_fig, sdl2012_fig, sdl2016_fig, nrow = 1, align = "vh")
+ggsave(plot = nn_panel, 
+       filename = "alpine_addnuts/figures/sdl_nmds_panel.pdf", scale = 1.8,
+       width = 6, height = 4, units = "in")
