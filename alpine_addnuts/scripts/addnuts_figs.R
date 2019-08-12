@@ -823,6 +823,27 @@ ggplot(testdf, aes(Dim1, Dim2, col = trt)) +
 
 
 # -- FIGURES -----
+# specify plotting colors for all treatments
+# original treatments
+alltrts <- sort(unique(c(as.character(sitematrix_nn2017$trt), as.character(sitematrix_sdl2016$trt))))
+trtcols <- viridis::viridis(n = length(alltrts))
+names(trtcols) <- alltrts
+
+# simplified treatments
+simpletrts <- sort(unique(c(as.character(sitematrix_nn2017$trt2), as.character(sitematrix_sdl2016$trt))))
+simplecols <- viridis::viridis(n = length(simpletrts))
+names(simplecols) <- simpletrts
+
+
+# specify plotting cols for lifeform
+plantcols <- c("N-fixer" = "chocolate4", "Forb" = "grey30", "Grass" = "seagreen4", "Shrub" = "orchid")
+
+
+# specify species text size
+plottext <- 3
+pointsize <- 2
+
+
 # 1) trait pca -----
 # choose color scheme here to color in spp in nmds points with..
 traitcols <- c("Acquisitive" = "deeppink2", "Conservative" = "darkred", "Unknown" = NA) #springgreen3, slateblue3
@@ -850,35 +871,17 @@ pcfig <- ggplot() +
   geom_text(aes(2, (min(sppscores$PC2)-0.08), label = "Resource acquisitive"), fontface = "italic", col = "grey20", size = plottext, hjust = 1) +
   geom_text(aes(-1.5, (min(sppscores$PC2)-0.08), label = "Resource conservative"), fontface = "italic", col = "grey20", size = plottext, hjust = 0) +
   coord_fixed() +
-  scale_color_manual(values = traitcols, guide = FALSE) +
-  theme(axis.text = element_text(size = 16),
-        axis.title = element_text(size = 18))
+  scale_color_manual(values = traitcols, guide = FALSE)
+  #theme(axis.text = element_text(size = 16),
+      #  axis.title = element_text(size = 18))
 
 pcfig
-ggsave(plot = pcfig, scale = 1.25,
-       filename = "alpine_addnuts/figures/pcfig.pdf")
+ggsave(plot = pcfig, scale = 1,
+       filename = "alpine_addnuts/figures/pcfig.pdf", 
+       width = 4, height = 4, units = "in")
 
 
 # -- NMDS plots -----
-# specify plotting colors for all treatments
-# original treatments
-alltrts <- sort(unique(c(as.character(sitematrix_nn2017$trt), as.character(sitematrix_sdl2016$trt))))
-trtcols <- viridis::viridis(n = length(alltrts))
-names(trtcols) <- alltrts
-
-# simplified treatments
-simpletrts <- sort(unique(c(as.character(sitematrix_nn2017$trt2), as.character(sitematrix_sdl2016$trt))))
-simplecols <- viridis::viridis(n = length(simpletrts))
-names(simplecols) <- simpletrts
-
-
-# specify plotting cols for lifeform
-plantcols <- c("N-fixer" = "chocolate4", "Forb" = "grey30", "Grass" = "seagreen4", "Shrub" = "orchid")
-
-
-# specify species text size
-plottext <- 5
-pointsize <- 3
 
 
 # 2) nutnet 2013, common plots only -----
@@ -939,13 +942,13 @@ nn2013_fig <- ggplot(spp_df_nn13, aes(MDS1, MDS2)) +
   theme_bw() +
   theme(axis.title = element_blank(),
         axis.text = element_blank(),
-        legend.position = c(0.87, 0.26),
+        legend.position = c(0.85, 0.8),
         legend.background = element_rect(color = "black", fill = NULL),
         legend.title = element_text(size = 9))
 
 
 # simplified treatments fig
-nn2013.simple_fig <- ggplot(spp_df_nn13, aes(MDS1, MDS2)) + 
+nn2013.simple_fig <-ggplot(spp_df_nn13, aes(MDS1, MDS2)) + 
   geom_polygon(data = grpdf_nn13.simple, aes(MDS1, MDS2, fill = trt2, col = trt2), alpha = 0.5) +
   geom_point(data = plot_df_nn13, aes(MDS1, MDS2, col = trt2), size = pointsize, pch = 8) +
   # designate treatment colors
@@ -964,23 +967,27 @@ nn2013.simple_fig <- ggplot(spp_df_nn13, aes(MDS1, MDS2)) +
   scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
   # annotate any species that is a significant indicator
   geom_text(data = subset(spp_df_nn13, holm.pval <= 0.1 & !grepl("Cerast", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, vjust = -0.5, hjust = 0,  show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, vjust = -0.5, hjust = 0,  show.legend = FALSE) +
   # plot Cerastrium differently than Trisetum
   geom_text(data = subset(spp_df_nn13, holm.pval <= 0.1 & grepl("Ceras", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, nudge_x = -0.04, show.legend = FALSE, hjust = 1) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, nudge_x = -0.04, show.legend = FALSE, hjust = 1) +
   # add figure label
-  annotate(geom = "text", x= min(spp_df_nn13$MDS1), y = max(spp_df_nn13$MDS2), label = "NutNet 2013", hjust = 0, vjust = 1, size = plottext, fontface = "bold") +
+  annotate(geom = "text", x= min(spp_df_nn13$MDS1), y = max(spp_df_nn13$MDS2), label = "NutNet 2013", hjust = 0, vjust = 1, size = (plottext+1), fontface = "bold") +
   # add NMDS stress in upper right corner
-  annotate(geom = "text", x = max(spp_df_nn13$MDS1), y = max(spp_df_nn13$MDS2), label = paste("Stress:", round(nmds_nn2013$stress,3)), vjust = 1, hjust = 1, size = (plottext-1)) +
+  annotate(geom = "text", x = max(spp_df_nn13$MDS1), y = max(spp_df_nn13$MDS2), label = paste("Stress:", round(nmds_nn2013$stress,3)), vjust = 1, hjust = 1, size = plottext) +
   coord_fixed() +
   labs(y = "NMDS2", x = "NMDS1") +
   theme_bw() +
   theme(#axis.title = element_blank(),
     #axis.text = element_blank(),
-    legend.position = c(0.88, 0.25),
+    legend.position = c(0.86, 0.3),
+    #legend.justification = c(0,0),
     legend.background = element_blank(),
-    legend.title = element_text(size = 9),
-    legend.spacing = unit(0, units = "pt"))
+    legend.title = element_text(size = 8, face = "bold"),
+    legend.text = element_text(size = 8),
+    legend.key.size = unit(10, units = "pt"),
+    legend.spacing = unit(0, units = "pt"),
+    plot.margin = margin(0,0,0,1, unit = "pt"))
 
 
 
@@ -1070,26 +1077,27 @@ nn2017.simple_fig <- ggplot(spp_df_nn17, aes(MDS1, MDS2)) +
   # manually add in trait data species so can specify color
   # annotate any species that is a significant indicator
   geom_text(data = subset(spp_df_nn17, holm.pval <= 0.1 & !grepl("Carex|Sela|Tri", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, nudge_y = -0.02, nudge_x = -0.02, hjust = 0, vjust = 1, show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, nudge_y = -0.02, nudge_x = -0.02, hjust = 0, vjust = 1, show.legend = FALSE) +
   # annotate trisetum
   geom_text(data = subset(spp_df_nn17, holm.pval <= 0.1 & grepl("Tris", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, hjust = 1, nudge_x = -0.04, show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, hjust = 1, nudge_x = -0.04, show.legend = FALSE) +
   # annotate selaginella separately
   geom_text(data = subset(spp_df_nn17, holm.pval <= 0.1 & grepl("Sela", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, hjust = 0, nudge_x = 0.02, show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, hjust = 0, nudge_x = 0.02, show.legend = FALSE) +
   # annotate carex rupestris separately
   geom_text(data = subset(spp_df_nn17, holm.pval <= 0.1 & grepl("Carex", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, hjust = 0, vjust = -0.5, show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, hjust = 0, vjust = -0.5, show.legend = FALSE) +
   # add figure label
-  annotate(geom = "text", x= -1.2, y = 1.2, label = "NutNet 2017", hjust = 0, vjust = 1, size = plottext, fontface = "bold") +
+  annotate(geom = "text", x= -1.2, y = 1.2, label = "NutNet 2017", hjust = 0, vjust = 1, size = (plottext+1), fontface = "bold") +
   # add NMDS stress in upper right corner
-  annotate(geom = "text", x = 1.2, y = 1.2, label = paste("Stress:", round(nmds_nn2017$stress,3)), vjust = 1, hjust = 1, size = (plottext-1)) +
+  annotate(geom = "text", x = 1.2, y = 1.2, label = paste("Stress:", round(nmds_nn2017$stress,3)), vjust = 1, hjust = 1, size = plottext) +
   coord_fixed() +
   labs(y = NULL, x = "NMDS1") +
   theme_bw() +
   theme(#axis.title = element_blank(),
     #axis.text = element_blank(),
-    legend.position = "none")
+    legend.position = "none",
+    plot.margin = margin(0,1,0,0, unit = "pt"))
 
 
 
@@ -1140,20 +1148,19 @@ sdl1997_fig <- ggplot(spp_df_sdl97, aes(MDS1, MDS2)) +
   geom_text(data = subset(spp_df_sdl97, holm.pval <= 0.1), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
             fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, nudge_y = 0.06, show.legend = FALSE) +
   #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
-  annotate(geom = "text", x = min(spp_df_sdl97$MDS1), y = max(spp_df_sdl97$MDS2), label = "SDL 1997", hjust = 0, vjust = 1, col = "black", size = plottext, fontface = "bold") +
+  annotate(geom = "text", x = min(spp_df_sdl97$MDS1), y = max(spp_df_sdl97$MDS2), label = "SDL 1997", hjust = 0, vjust = 1, col = "black", size = (plottext+1), fontface = "bold") +
   # add NMDS stress in upper right corner
-  annotate(geom = "text", x = max(spp_df_sdl97$MDS1), y = max(spp_df_sdl97$MDS2), label = paste("Stress:", round(nmds_sdl1997$stress,3)), vjust = 1, hjust = 1.1, size = (plottext-1)) +
+  annotate(geom = "text", x = max(spp_df_sdl97$MDS1), y = max(spp_df_sdl97$MDS2), label = paste("Stress:", round(nmds_sdl1997$stress,3)), vjust = 1, hjust = 1.1, size = plottext) +
   coord_fixed() +
   labs(y = "NMDS2", x = "NMDS1") +
   theme_bw() +
-  theme(axis.title = element_text(size = 12),
-        axis.text = element_text(size = 14),
-    # add legend here
-    legend.position = c(0.86,0.35),
+  theme(
+    legend.position = c(0.85,0.33),
     legend.background = element_blank(),
-    legend.box.margin = margin(0,0,0,0),
-    legend.margin = margin(0,0,0,0),
-    legend.title = element_text(size = 9))
+    legend.title = element_text(size = 8, face = "bold"),
+    legend.text = element_text(size = 8),
+    legend.key.size = unit(10, units = "pt"),
+    plot.margin = margin(0,0,0,1, unit = "pt"))
 
 
 
@@ -1196,15 +1203,14 @@ sdl2012_fig <- ggplot(spp_df_sdl12, aes(MDS1, MDS2)) +
   geom_text(data = subset(spp_df_sdl12, holm.pval <= 0.1), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
             fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, nudge_y = 0.06, show.legend = FALSE) +
   # add SDL 2012 label in top left
-  annotate(geom = "text", x = min(spp_df_sdl12$MDS1), y = max(spp_df_sdl12$MDS2), label = "SDL 2012", hjust = 0, vjust = 1, col = "black", size = plottext, fontface = "bold") +
+  annotate(geom = "text", x = min(spp_df_sdl12$MDS1), y = max(spp_df_sdl12$MDS2), label = "SDL 2012", hjust = 0, vjust = 1, col = "black", size = (plottext+1), fontface = "bold") +
   # add NMDS stress in upper right corner
-  annotate(geom = "text", x = max(spp_df_sdl12$MDS1), y = max(spp_df_sdl12$MDS2), label = paste("Stress:", round(nmds_sdl2012$stress,3)), vjust = 1, hjust = 1, size = (plottext-1)) +
+  annotate(geom = "text", x = max(spp_df_sdl12$MDS1), y = max(spp_df_sdl12$MDS2), label = paste("Stress:", round(nmds_sdl2012$stress,3)), vjust = 1, hjust = 1, size = plottext) +
   labs(x = "NMDS1", y = NULL) +
   coord_fixed() +
   theme_bw() +
-  theme(axis.title = element_text(size = 12),
-        axis.text = element_text(size = 14),
-        legend.position = "none")
+  theme(legend.position = "none",
+        plot.margin = margin(0,0,0,0, unit = "pt"))
 
 
 # 6) sdl 2016, dry meadows ----
@@ -1253,20 +1259,19 @@ sdl2016_fig <- ggplot(spp_df_sdl16, aes(MDS1, MDS2)) +
   scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
   # annotate any species that is a significant indicator
   geom_text(data = subset(spp_df_sdl16, holm.pval <= 0.1), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, vjust = 1, show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, vjust = 1, show.legend = FALSE) +
   # annotate Geum rossii specifically
   geom_text(data = subset(spp_df_sdl16, grepl("Geum", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10)), 
             fontface = "bold.italic", family = "Times", size = plottext, col = "grey30", lineheight = 0.6, vjust = -0.5, show.legend = FALSE) +
   # add figure label
-  annotate(geom = "text", x= min(spp_df_sdl16$MDS1), y = max(spp_df_sdl16$MDS2), label = "SDL 2016", hjust = 0.1, vjust = 1, size = plottext, fontface = "bold") +
+  annotate(geom = "text", x= min(spp_df_sdl16$MDS1), y = max(spp_df_sdl16$MDS2), label = "SDL 2016", hjust = 0.1, vjust = 1, size = (plottext+1), fontface = "bold") +
   # add NMDS stress in upper right corner
-  annotate(geom = "text", x= max(spp_df_sdl16$MDS1), y = max(spp_df_sdl16$MDS2), label = paste("Stress:", round(nmds_sdl2016$stress,3)), vjust = 1, hjust = 1, size = (plottext-1)) +
+  annotate(geom = "text", x= max(spp_df_sdl16$MDS1), y = max(spp_df_sdl16$MDS2), label = paste("Stress:", round(nmds_sdl2016$stress,3)), vjust = 1, hjust = 1, size = plottext) +
   coord_fixed() +
   labs(y = NULL, x = "NMDS1") +
   theme_bw() +
-  theme(axis.title = element_text(size = 12),
-        axis.text = element_text(size = 14),
-        legend.position = "none")
+  theme(legend.position = "none",
+        plot.margin = margin(0,1,0,0, unit = "pt"))
 
 
 
@@ -1286,11 +1291,11 @@ ggsave(plot = full_panel,
 nn_panel <- plot_grid(nn2013.simple_fig, nn2017.simple_fig, nrow = 1, align = "vh")
 nn_panel
 ggsave(plot = nn_panel, 
-       filename = "alpine_addnuts/figures/nn_nmds_panel.pdf", scale = 2,
-       width = 6, height = 4, units = "in")
+       filename = "alpine_addnuts/figures/nn_nmds_panel.pdf", scale = 1,
+       width = 8, height = 4, units = "in")
 
 #sdl-only panel
 sdl_panel <- plot_grid(sdl1997_fig, sdl2012_fig, sdl2016_fig, nrow = 1, align = "vh")
 ggsave(plot = sdl_panel, 
-       filename = "alpine_addnuts/figures/sdl_nmds_panel.pdf", scale = 1.5,
-       width = 9, height = 4, units = "in")
+       filename = "alpine_addnuts/figures/sdl_nmds_panel.pdf", scale = 1,
+       width = 12, height = 4, units = "in")
