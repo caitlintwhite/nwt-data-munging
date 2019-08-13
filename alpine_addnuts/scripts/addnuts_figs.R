@@ -922,8 +922,8 @@ pcfig <- ggplot() +
   geom_text(aes(-1.5, (min(sppscores$PC2)-0.08), label = "Resource conservative"), fontface = "italic", col = "grey20", size = plottext, hjust = 0) +
   coord_fixed() +
   scale_color_manual(values = traitcols, guide = FALSE)
-  #theme(axis.text = element_text(size = 16),
-      #  axis.title = element_text(size = 18))
+#theme(axis.text = element_text(size = 16),
+#  axis.title = element_text(size = 18))
 
 pcfig
 ggsave(plot = pcfig, scale = 1,
@@ -1017,13 +1017,17 @@ nn2013.simple_fig <-ggplot(spp_df_nn13, aes(MDS1, MDS2)) +
   scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
   # annotate any species that is a significant indicator
   geom_text(data = subset(spp_df_nn13, holm.pval <= 0.1 & !grepl("Cerast|Fest", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, vjust = -0.5, hjust = 0,  show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.8, vjust = -0.5, hjust = 0, nudge_x = -0.02,  show.legend = FALSE) +
   # plot Festuca differently than others
+  # add line pointing from Festuca label to its point
+  geom_segment(data = subset(spp_df_nn13, holm.pval <= 0.1 & grepl("Fest", simple_name)), aes(x=MDS1-0.28,xend=MDS1-0.03,y=MDS2+0.09,yend=MDS2 +0.02),
+               colour="grey50", lwd = 0.5) +
+  #label Festuca
   geom_text(data = subset(spp_df_nn13, holm.pval <= 0.1 & grepl("Fest", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, show.legend = FALSE, hjust = 1, vjust = 0) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.8, show.legend = FALSE, hjust = 1, vjust = 0, nudge_x = -0.3, nudge_y = 0.04) +
   # plot Cerastrium differently than Trisetum
   geom_text(data = subset(spp_df_nn13, holm.pval <= 0.1 & grepl("Ceras", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, nudge_x = -0.04, show.legend = FALSE, hjust = 1) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.8, nudge_x = -0.04,nudge_y = 0.03, show.legend = FALSE, hjust = 1) +
   # add figure label
   annotate(geom = "text", x= min(spp_df_nn13$MDS1), y = max(spp_df_nn13$MDS2), label = "NutNet 2013", hjust = 0, vjust = 1, size = (plottext+1), fontface = "bold") +
   # add NMDS stress in upper right corner
@@ -1129,17 +1133,24 @@ nn2017.simple_fig <- ggplot(spp_df_nn17, aes(MDS1, MDS2)) +
   scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
   # manually add in trait data species so can specify color
   # annotate any species that is a significant indicator
+  ## Campanula rotundifolia
+  geom_segment(data = subset(spp_df_nn17, holm.pval <= 0.1 & grepl("Camp", simple_name)),
+               aes(x=MDS1+0.035, xend = MDS1+0.43, y = MDS2-0.01, yend = MDS2-0.3), colour="grey50", lwd = 0.5) +
   geom_text(data = subset(spp_df_nn17, holm.pval <= 0.1 & !grepl("Carex|Sela|Tri", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, nudge_y = -0.02, nudge_x = -0.02, hjust = 0, vjust = 1, show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.8, nudge_y = -0.32, nudge_x = 0.25, hjust = 0, vjust = 1, show.legend = FALSE) +
   # annotate trisetum
   geom_text(data = subset(spp_df_nn17, holm.pval <= 0.1 & grepl("Tris", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, hjust = 1, nudge_x = -0.04, show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.8, hjust = 1, nudge_x = -0.04, nudge_y = -0.04, show.legend = FALSE) +
   # annotate selaginella separately
+  geom_segment(data = subset(spp_df_nn17, holm.pval <= 0.1 & grepl("Sela", simple_name)),
+               aes(x=MDS1+0.033, xend = MDS1+0.14, y = MDS2-0.01, yend = MDS2-0.04), colour="grey50") + 
   geom_text(data = subset(spp_df_nn17, holm.pval <= 0.1 & grepl("Sela", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, hjust = 0, nudge_x = 0.02, show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.8, hjust = 0, nudge_x = 0.15, nudge_y = -0.1, show.legend = FALSE) +
   # annotate carex rupestris separately
+  geom_segment(data = subset(spp_df_nn17, holm.pval <= 0.1 & grepl("Carex", simple_name)),
+               aes(x=MDS1+0.032, xend = MDS1+0.19, y = MDS2+0.01, yend = MDS2+0.12), colour="grey50") + 
   geom_text(data = subset(spp_df_nn17, holm.pval <= 0.1 & grepl("Carex", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, hjust = 0, vjust = -0.5, show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.8, hjust = 0, vjust = -0.5, nudge_x = 0.2, nudge_y = 0.04, show.legend = FALSE) +
   # add figure label
   annotate(geom = "text", x= -1.2, y = 1.2, label = "NutNet 2017", hjust = 0, vjust = 1, size = (plottext+1), fontface = "bold") +
   # add NMDS stress in upper right corner
@@ -1190,8 +1201,8 @@ sdl1997_fig <- ggplot(spp_df_sdl97, aes(MDS1, MDS2)) +
   geom_segment(data=vec.sdl1997,aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
                arrow = arrow(length = unit(0.25, "cm")),colour="black", lwd = 1) + 
   # add label to envfit arrow
-  geom_text(data=vec.sdl1997,aes(x=NMDS1+0.02,y=NMDS2, label = "F:G***"), col = "black", size = plottext, fontface = "bold.italic", hjust = 0.5, vjust = 1.2) +
-    # add new fill scale for spp points
+  geom_text(data=vec.sdl1997,aes(x=NMDS1+0.02,y=NMDS2, label = "F:G***"), col = "black", size = plottext, fontface = "bold.italic", hjust = 0.5, vjust = 1.2, nudge_y = -0.01) +
+  # add new fill scale for spp points
   new_scale_fill() +
   # add species points
   geom_point(aes(MDS1, MDS2, fill = resource_grp), col = "grey30", size = pointsize, pch = 21) +
@@ -1199,7 +1210,7 @@ sdl1997_fig <- ggplot(spp_df_sdl97, aes(MDS1, MDS2)) +
   scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
   # annotate any species that is a significant indicator
   geom_text(data = subset(spp_df_sdl97, holm.pval <= 0.1), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, nudge_y = 0.06, show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.6, nudge_y = 0.06, show.legend = FALSE) +
   #scale_shape_manual(values = c("Dry" = 21, "Mesic" = 24, "Unknown" = 22)) +
   annotate(geom = "text", x = min(spp_df_sdl97$MDS1), y = max(spp_df_sdl97$MDS2), label = "SDL 1997", hjust = 0, vjust = 1, col = "black", size = (plottext+1), fontface = "bold") +
   # add NMDS stress in upper right corner
@@ -1254,7 +1265,7 @@ sdl2012_fig <- ggplot(spp_df_sdl12, aes(MDS1, MDS2)) +
   scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
   # annotate any species that is a significant indicator
   geom_text(data = subset(spp_df_sdl12, holm.pval <= 0.1), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.5, nudge_y = 0.06, show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = 4, lineheight = 0.6, nudge_y = 0.06, show.legend = FALSE) +
   # add SDL 2012 label in top left
   annotate(geom = "text", x = min(spp_df_sdl12$MDS1), y = max(spp_df_sdl12$MDS2), label = "SDL 2012", hjust = 0, vjust = 1, col = "black", size = (plottext+1), fontface = "bold") +
   # add NMDS stress in upper right corner
@@ -1312,10 +1323,10 @@ sdl2016_fig <- ggplot(spp_df_sdl16, aes(MDS1, MDS2)) +
   scale_fill_manual(name = "Resource\nstrategy", values = traitcols) +
   # annotate any species that is a significant indicator
   geom_text(data = subset(spp_df_sdl16, holm.pval <= 0.1), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10), col = index), 
-            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.5, vjust = 1, show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = plottext, lineheight = 0.6, vjust = 1, show.legend = FALSE) +
   # annotate Geum rossii specifically
   geom_text(data = subset(spp_df_sdl16, grepl("Geum", simple_name)), aes(MDS1, MDS2, label = stringr::str_wrap(simple_name, 10)), 
-            fontface = "bold.italic", family = "Times", size = plottext, col = "grey30", lineheight = 0.6, vjust = -0.5, show.legend = FALSE) +
+            fontface = "bold.italic", family = "Times", size = plottext, col = "grey30", lineheight = 0.8, nudge_x = 0.03, nudge_y=0.1, show.legend = FALSE) +
   # add figure label
   annotate(geom = "text", x= min(spp_df_sdl16$MDS1), y = max(spp_df_sdl16$MDS2), label = "SDL 2016", hjust = 0.1, vjust = 1, size = (plottext+1), fontface = "bold") +
   # add NMDS stress in upper right corner
@@ -1362,3 +1373,28 @@ boxplot(sdl1997_disper, main = "SDL 1997 dispersion")
 boxplot(sdl2012_disper, main = "SDL 2012 dispersion")
 boxplot(sdl2016_disper, main = "SDL 2016 dispersion")
 par(mfrow = c(1,1))
+
+
+
+
+# -- REPLICATE/RECHECK TS FIGS -----
+# 1) test forb to grass means and se over time by site
+test <- plantcom_fg %>%
+  filter(site == "sdl" & plotid %in% sdlcommon$plotid) %>%
+  mutate(plotid = as.numeric(plotid)) %>%
+  left_join(distinct(sdlplots[c("plot", "trt")]), by = c("plotid" = "plot"))
+
+test %>%
+  dplyr::select(site, yr, plotid, trt, Grass, ForbNFix) %>%
+  gather(fungrp, val, Grass, ForbNFix) %>%
+  group_by(yr, trt, fungrp) %>%
+  summarise(avgcov = mean(val),
+            se_cov = sd(val)/sqrt(length(val))) %>%
+  ungroup() %>%
+  ggplot(aes(trt, avgcov, fill = fungrp)) +
+  geom_col(position = "dodge") +
+  scale_fill_grey() +
+  #geom_errorbar(aes(ymax = avgcov + se_cov, ymin = avgcov - se_cov)) %>%
+  facet_wrap(~yr, nrow = 3)
+# > note: these are mean hits, but tim's figure is mean *relative* cover
+# > that explains why 1997 panel is so different
