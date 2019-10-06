@@ -171,13 +171,13 @@ nnlist[[sppdats[8]]] # same as 1..
 # start with #1 since everything else seems to be made from that/variations on that
 sppcomp1 <- nnlist[[sppdats[1]]]
 names(sppcomp1)
-sppcomp <- sppcomp1[[2]] # wide form..
-sppcomp.1 <- sppcomp1[[1]] # can extract spp list/codes from here
+sppcomp1.2 <- sppcomp1[[2]] # wide form..
+sppcomp1.1 <- sppcomp1[[1]] # can extract spp list/codes from here
 sppS <- sppcomp1[[4]] # richness and other aggregate values (e.g. forb cover, grass:forb ratio)
 
 # get to work!
 # spp LUT
-sppcodes <- sppcomp.1[,1:2]
+sppcodes <- sppcomp1.1[,1:2]
 sppcodes <- noNA(sppcodes)
 names(sppcodes) <- sppcodes[1,]; sppcodes <- sppcodes[!sppcodes[[2]] %in% c("CODE", NA),]
 # clean up names (remove _, -, captalize first letter)
@@ -199,7 +199,7 @@ sppcodes <- left_join(sppcodes, sdlnnLUT, by = c("CODE" = "code"))
 
 # continue with spp comp
 # make sppcomp long form
-sppcomp.long <- gather(sppcomp, Code, Hits, (grep("tot_treat", names(sppcomp))+1):ncol(sppcomp)) %>%
+sppcomp.long <- gather(sppcomp1.2, Code, Hits, (grep("tot_treat", names(sppcomp1.2))+1):ncol(sppcomp1.2)) %>%
   # append presence col for presence/absence
   mutate(Present = ifelse(Hits > 0, 1, 0)) %>%
   # clean up colnames to match biomass
@@ -209,7 +209,10 @@ sppcomp.long <- gather(sppcomp, Code, Hits, (grep("tot_treat", names(sppcomp))+1
   mutate(Code = gsub("2WOOD", "WOOD", Code)) %>%
   # join CTW LUT to correct spp codes to USDA codes
   left_join(sdlnnLUT, by = c("Code" = "code")) %>%
-  dplyr::select(Block:Treatment, clean_code2, Hits:ncol(.))
+  # recode 2WOOD back to original code to join nutnet names
+  mutate(Code = gsub("WOOD", "2WOOD", Code)) %>%
+  left_join(sppcodes[c("CODE", "Spp")], by = c("Code" = "CODE")) %>%
+  dplyr::select(Block:Treatment, Code, Spp, clean_code2, Hits:ncol(.))
 
 # fill in empty common name with unk codes common name for non-vascular veg cover
 needscommon <- unique(sppcomp.long$clean_code2[is.na(sppcomp.long$Common_Name)])
@@ -218,3 +221,78 @@ for(i in needscommon){
 }
 # check for NAs
 summary(is.na(sppcomp.long$Common_Name)) # nope!
+
+# clean up Growth Habit values for unk forbs and grams
+sppcomp.long$Growth_Habit[sppcomp.long$clean_code2 == "2FORB"] <- "Forb/herb"
+sppcomp.long$Growth_Habit[sppcomp.long$clean_code2 == "2GRAM"] <- "Graminoid"
+
+# add in simple functional group
+sppcomp.long$Group <- with(sppcomp.long, ifelse(grepl("Fabace", Family), "Legume",
+                                                ifelse(grepl("forb", Growth_Habit, ignore.case = T), "Forb",
+                                                       ifelse(grepl("grami", Growth_Habit, ignore.case = T), "Grass", 
+                                                              # add in non-vascular cover (w.g. moss, lichen, wood, litter, bare ground, rock)
+                                                              ifelse(grepl("^2", clean_code2), "Non-vascular ground cover", NA))))) 
+
+# check Accepted_Symbol_x = Symbol (i.e. is it a redundant column in this case?)
+summary(sppcomp.long$Symbol == sppcomp.long$Accepted_Symbol_x) # yes, NAs are 2xx codes
+
+
+# -- PREP SPP COMP FOR EDI -----
+# clean up data frame for final product
+# i.e. remove redudant colnames.. perhaps indicate certain cols as from USDA (could also indicate in EML to avoid long names)
+sppcomp.long.final <- dplyr::select(sppcomp.long,Block:Treatment, Code, Spp, Group, Hits, Present, clean_code2, Scientific_Name_x:ncol(sppcomp.long)) %>%
+  rename(USDA_Symbol = clean_code2,
+         Scientific_Name = Scientific_Name_x,
+         Name = Spp) %>%
+  arrange(Block, Plot, Code)
+# Code and Name correspond to values used by NutNet, all other descriptive cols are from USDA Plants DB (except Group, specified by CTW)
+
+# > there are a few unk forbs and grasses.. check to see if these were counted separately in richness
+
+# clean up colnames in USDA wide.. preserve NutNet codes as colnames
+sppcomp.wide.final <- sppcomp1.2 %>%
+  rename(K = `K+`,
+         Treatment = tot_treat) %>%
+  # reorder spp cols alphabetically
+  dplyr::select(Block:Treatment, sort(names(sppcomp.wide.final)[7:ncol(.)])) %>%
+  arrange(Block, Plot)
+
+
+
+# -- REVIEW RICHNESS AND AGGREGATE SPP COMP METRICS -----
+# does richness count unk forbs (2) and unk grams (2) separately or as 1 each?
+summarize_richness <- subset(sppcomp.long.final, Present == 1 & !grepl("Non-vascular", Group)) %>%
+  grouped_df(names(sppcomp.long.final)[c(1:6, 9)]) %>%
+  summarize(richness = length(unique(Code)),
+            cover = sum(Hits)) %>%
+  ungroup()%>%
+  gather(met, val, richness:cover) %>%
+  unite(cat, Group, met, sep = "_") %>%
+  spread(cat, val, fill = 0) %>%
+  arrange(Block, Plot) %>%
+  mutate(Total_cover = Forb_cover + Grass_cover, Legume_cover,
+         Total_richness = Forb_richness + Grass_richness + Legume_richness)
+
+# compare richness and cover btwn ctw calculated and files given to SCE
+compare <- rename(sppS, K = 'K+', Treatment = tot_treat) %>%
+  left_join(summarize_richness) %>%
+  dplyr::select(Block:Treatment, GRASS_RICH, Grass_richness, FORB_RICH, Forb_richness, Legume_richness, SPP_RICH, Total_richness,
+                GRASS_COVER, Grass_cover, FORB_COVER, Forb_cover, Legume_cover, TOTAL_COVER, Total_cover, FORB_GRASS_RATIO)
+compare$GRASS_RICH-compare$Grass_richness # no diff
+compare$FORB_RICH-compare$Forb_richness # ctw over by 1
+compare$SPP_RICH-compare$Total_richness # ctw over by 1 most times
+# check out spp list for 2nd row (ctw forb richness over by 1 .. is it bc of unk forbs?)
+sort(sppcomp.long.final$Code[sppcomp.long.final$Block == "B1" & sppcomp.long.final$Plot == 2]) # has forb1 and forb2, grass 1 and grass 2.. (but grass richness was okay for that one)
+# try another
+sort(sppcomp.long.final$Code[sppcomp.long.final$Block == "B1" & sppcomp.long.final$Plot == 3]) # has forb1 and forb2, grass 1 and grass 2.. (but grass richness was okay for that one)
+# idk.. even their own grass and forb cover sums to more than total, and I can't explain discrepancies in richness counts
+# my calcs agree with theirs for grass cover and grass richness, but differs on forbs and idk what they did for legumes.. (maybe they classed some spp as subshrubs and not forbs??)
+# their forb_grass_ratio numbers are also incorrect.. maybe it's just better to post spp comp/presence absence data and let data users calculate richness or aggregate cover on their own?
+
+
+# > CTW opened up one of the workbooks, looked at formulas used and found this:
+# 1) Selaginella densa (spikemoss) is NOT counted in veg cover (even tho is vascular plant)
+# 2) forbs 1 and 2 and unk grasses 1 and 2 are counted separately (for richness), legumes are counted in with forb cover and richness, when remove Selaginella, forb numbers are correct
+# 3) Total cover != grass + forb cover; it equals 100- sum(non-veg cover).. which isn't really total veg cover and is not even rel cov necessarily (don't know if non-veg recorded under veg hits)
+# NutNet protocol says total cover should = grass + forb, but then NutNet uses modified Daubenmire not hits so idk..
+# 4) forb:grass ratio is not actually forb cover/grass cover (or forb S/grass S). It's grass S/total S, so rel grass richness
