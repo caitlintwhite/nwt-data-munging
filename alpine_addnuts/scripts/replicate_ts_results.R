@@ -194,7 +194,9 @@ ggplot(all_means, aes(post_yrs, meancov, group = site, col = site)) +
 
 
 
-# -- FORBS VS GRASSES ----
+# -- ABUNDANT FORBS IN NUTNEt 2017 (Table 4) -----
+
+# -- FORBS VS GRASSES (Figs 1 + 2) ----
 # (out of curiosity make similar time since exp onset plot to compare forb shift over time by site by trt)
 fgdat <- plantcom %>%
   left_join(distinct(spplist[c("clean_code2", "simple_lifeform2")])) %>%
