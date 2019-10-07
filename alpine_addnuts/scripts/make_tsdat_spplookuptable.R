@@ -27,6 +27,7 @@
 # GRDAZ = I'm clueless = unknown
 # LATER =  my guess is that's "litter"
 
+# 9/6/19: from reviewing nutnet2013 data from SCE and looking at JGS list, ORAL should be ORALA (alpina ssp.)
 
 # -- SETUP -----
 rm(list = ls())
@@ -50,7 +51,7 @@ nutnet17 <- read.csv(datfiles[grep("net17[.]", datfiles)], strip.white = T, na.s
 nutnet17raw <- read.csv(datfiles[grep("net17r", datfiles)], strip.white = T, na.strings = na_vals)
 
 ## Sdl 
-plot_codes <- read.csv(datfiles[grep("codes", datfiles)], strip.white = T, na.strings = na_vals)
+plot_codes <- read.csv(datfiles[grep("Saddle_codes", datfiles)], strip.white = T, na.strings = na_vals)
 sdl1997 <- read.csv(datfiles[grep("1997", datfiles)], strip.white = T, na.strings = na_vals)
 sdl2012 <- read.csv(datfiles[grep("2012", datfiles)], strip.white = T, na.strings = na_vals)
 sdl2016 <- read.csv(datfiles[grep("2016", datfiles)], strip.white = T, na.strings = na_vals)
@@ -267,6 +268,8 @@ for(i in correctdf$code){
 
 # check to make sure no missing usda codes
 summary(is.na(spplist_master$clean_code2)) # none. huzzah!
+# finally, manually correct ORAL to ORALA
+spplist_master$clean_code2[spplist_master$clean_code2 == "ORAL"] <- "ORALA"
 # clean up environment
 rm(correctdf,temp_df, altcodes, check, correctcodes, i, missingcodes, n, needsusda, nlength, replace)
 
@@ -434,6 +437,32 @@ spplist_master[spplist_master$clean_code2 %in% needsinfill,] # looks good
 # change unknown for no-hit to NA since not applicable
 spplist_master$unknown[spplist_master$clean_code2 == "No hit"] <- NA
 
+
+# fill in unknowns/ground cover common_name (i.e. symbols that start with "2") and usda symbols
+for(i in unique(spplist_master$clean_code2[spplist_master$clean_code2 %in% usda_unk$SYMBOL])){
+  spplist_master$Common_Name[spplist_master$clean_code2 == i] <- usda_unk$Common.Name[usda_unk$SYMBOL == i]
+  spplist_master$Symbol[spplist_master$clean_code2 == i] <- i
+  spplist_master$Accepted_Symbol_x[spplist_master$clean_code2 == i] <- i
+}
+# fill in simple name
+spplist_master <- spplist_master %>%
+  mutate(simple_name = ifelse(is.na(simple_name), Common_Name, simple_name),
+         # clean up certain unk simple names for ground cover/unks
+         simple_name = ifelse(clean_code2 == "2FORB", "Forb sp.",
+                              ifelse(clean_code2 == "2GRAM", "Grass sp.",
+                                     ifelse(clean_code2 == "2LTRWS", "Woody litter", simple_name))),
+         # update lifeform for unk forb and grass, and duration
+         Duration = ifelse(grepl("2FOR|2GRA", clean_code2), "Perennial", Duration),
+         Growth_Habit = ifelse(clean_code2 == "2FORB", "Forb/herb",
+                               ifelse(clean_code2 == "2GRAM", "Graminoid", Growth_Habit)))
+
+# because I know it exists from cleaning nutnet2013 data, add row for 2WOOD code, copy values for code = WOOD
+woodrow <- spplist_master[spplist_master$code == "WOOD",] 
+woodrow$code <- "2WOOD"
+# rbind to master
+spplist_master <- rbind(spplist_master, woodrow)
+# sort by code
+spplist_master <- arrange(spplist_master, code)
 
 
 # -- FINISHING -----
