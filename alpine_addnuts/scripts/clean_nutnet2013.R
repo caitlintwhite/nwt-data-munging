@@ -11,6 +11,7 @@
 # -- SETUP ----
 library(tidyverse)
 library(readxl)
+library(vegan)
 options(stringsAsFactors = F)
 
 # read in CTW spp lookup table for nutnet and saddle grid (made for Tim's ms)
@@ -312,6 +313,52 @@ sort(sppcomp.long.final$Code[sppcomp.long.final$Block == 1 & sppcomp.long.final$
 sppcomp.long.final$Group[sppcomp.long.final$Code == "SEDES"] <- "Ground cover"
 sppcomp.long.final$Group[grepl("Non-vascular", sppcomp.long.final$Group)] <- "Ground cover"
 
+# clean up environment
+rm(sppcomp.long, bad, needscommon)
+
+
+
+# -- PREP AGGREGATE AND BIODIVERSITY FOR EDI -----
+# need: total richness, grass richness, forb richness, total cover (actual total cover), grass cover, forb cover, and shannon div
+# ctw will calculate then compare to nutnet data to be sure
+biodiv <- subset(sppcomp.long.final, Present == 1 & Group != "Ground cover") %>%
+  grouped_df(names(sppcomp.long.final)[c(1:6, 9)]) %>%
+  summarize(richness = length(unique(Code)),
+            hits = sum(Hits)) %>%
+  ungroup()%>%
+  gather(met, val, richness:hits) %>%
+  unite(cat, Group, met, sep = "_") %>%
+  spread(cat, val, fill = 0) %>%
+  arrange(Block, Plot) %>%
+  mutate(AllForb_hits = Forb_hits + Legume_hits,
+         AllForb_richness = Forb_richness + Legume_richness,
+         AllSpecies_hits = Forb_hits + Grass_hits, Legume_hits,
+         AllSpecies_richness = Forb_richness + Grass_richness + Legume_richness)
+# add in plant cover as 100-sum(Ground cover)
+groundcover <-  subset(sppcomp.long.final, Group == "Ground cover") %>%
+  grouped_df(names(sppcomp.long.final)[c(1:6)]) %>%
+  summarize(Ground_hits = sum(Hits)) %>%
+  ungroup()%>%
+  mutate(Plant_cover = 100-Ground_hits) %>%
+  arrange(Block, Plot)
+# append plant cover
+biodiv <- left_join(biodiv, dplyr::select(groundcover, -Ground_hits)) %>%
+  #rearrange Grass cols before Forb
+  dplyr::select(Block:FullTreatment, Grass_hits, Grass_richness, Forb_hits:ncol(.))
+
+# calculate and append Shannon diversity
+# make relative cover dataset on all non-ground cover cols
+plantdat <- sppcomp.wide.final[!names(sppcomp.wide.final) %in% unique(sppcomp.long.final$Code[sppcomp.long.final$Group == "Ground cover"])] %>%
+  arrange(Block, Plot)
+relcov <- vegan::decostand(plantdat[(grep("FullTreatment", names(plantdat))+1):ncol(plantdat)], method = "total")
+# to be sure relcov the same as nutnet calculated, compare
+nnrelcov <- nnlist[[8]][[9]]
+nnrelcov <- nnrelcov[c(names(nnrelcov)[1:6], sort(names(nnrelcov)[7:ncol(nnrelcov)]))]
+summary(relcov - nnrelcov[,7:ncol(nnrelcov)]) # same
+# calculate shannon div
+Sdiv <- diversity(relcov)
+# append diversity to biodiv df
+biodiv$Shannon_diversity <- Sdiv
 
 
 
