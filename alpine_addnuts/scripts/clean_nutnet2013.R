@@ -124,9 +124,8 @@ summary(anpp2.wide$TOTAL == apply(anpp2.wide[c("FORB", "GRASS", "LEGUME")], 1, s
 bad <- which(anpp2.wide$TOTAL != apply(anpp2.wide[c("FORB", "GRASS", "LEGUME")], 1, sum))
 anpp2.wide[bad,] # seems correct..
 anpp2.wide$TOTAL - apply(anpp2.wide[c("FORB", "GRASS", "LEGUME")], 1, sum) # it's fine, anpp not recorded to that fine of decimal, just wonky R stuff
-# clean up colnames for anpp wide
-anpp2.wide <- rename(anpp2.wide, K = `K+`,
-                     Treatment = tot_treat) %>%
+# clean up colnames for anpp wide -- keep K+ as is because that is the colname used in NutNet protocols
+anpp2.wide <- rename(anpp2.wide, FullTreatment = tot_treat) %>%
   rename_at(c("FORB", "GRASS", "LEGUME", "TOTAL"), function(x) paste0(substr(x,1,1), casefold(substr(x, 2,nchar(x)))))
 
 #gather wide to long form (since already prepped, and confirm same as anpp1.1)
@@ -296,3 +295,30 @@ sort(sppcomp.long.final$Code[sppcomp.long.final$Block == "B1" & sppcomp.long.fin
 # 3) Total cover != grass + forb cover; it equals 100- sum(non-veg cover).. which isn't really total veg cover and is not even rel cov necessarily (don't know if non-veg recorded under veg hits)
 # NutNet protocol says total cover should = grass + forb, but then NutNet uses modified Daubenmire not hits so idk..
 # 4) forb:grass ratio is not actually forb cover/grass cover (or forb S/grass S). It's grass S/total S, so rel grass richness
+
+
+# .. for now, follow what NutNet did for output datasets (i.e. Selaginella = non-plant cover, not counted in spp richness or Shannon div)
+# do count distinct unk forbs and grams separately, and do fold legumes into forb richness and cover
+
+# recode selaginella's group, then recalc richness, diversity, total grass and forb cover
+# change "Non-vascular cover" to "Ground cover"
+sppcomp.long.final$Group[sppcomp.long.final$Code == "SEDES"] <- "Ground cover"
+sppcomp.long.final$Group[grepl("Non-vascular", sppcomp.long.final$Group)] <- "Ground cover"
+
+
+
+
+# -- WRITE OUT FINAL DATASETS -----
+# specify pathway for writing out final datasets
+outpath <- "alpine_addnuts/output_data/nutnet2013_alldats/"
+
+# anpp, long and wide form
+write.csv(anpp.long, paste0(outpath, "nutnet2013_anpp_long.csv"), row.names = F)
+write.csv(anpp2.wide, paste0(outpath, "nutnet2013_anpp_wide.csv"), row.names = F)
+
+# spp comp, long and wide form
+write.csv(sppcomp.long.final, paste0(outpath, "nutnet2013_sppcomp_long.csv"), row.names = F)
+write.csv(sppcomp.wide.final, paste0(outpath, "nutnet2013_sppcomp_wide.csv"), row.names = F)
+
+# aggregate metrics, long form only
+write.csv(biodiv, paste0(outpath, "nutnet2013_aggregate_and_biodiversity.csv"), row.names = F)
