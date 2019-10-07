@@ -1,0 +1,201 @@
+"Site","Date","DataType","Block","Plot","Subplot","Subsubplot","N","P","K+","FullTreatment","Group","ANPP_g_per_m2"
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,6,"A",2,1,0,1,"N+K","Dead grass",45.9
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,6,"A",2,1,0,1,"N+K","Forb",36.3
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,6,"A",2,1,0,1,"N+K","Grass",42.9
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,6,"A",2,1,0,1,"N+K","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,7,"A",2,1,1,0,"N+P","Dead grass",52.4
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,7,"A",2,1,1,0,"N+P","Forb",92.5
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,7,"A",2,1,1,0,"N+P","Grass",35
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,7,"A",2,1,1,0,"N+P","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,8,"A",2,1,1,1,"N+P+K","Dead grass",87.7
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,8,"A",2,1,1,1,"N+P+K","Forb",33.8
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,8,"A",2,1,1,1,"N+P+K","Grass",67.8
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,8,"A",2,1,1,1,"N+P+K","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,9,"A",2,0,0,0,"C","Dead grass",4.2
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,9,"A",2,0,0,0,"C","Forb",323.5
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,9,"A",2,0,0,0,"C","Grass",6.9
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,9,"A",2,0,0,0,"C","Legume",26.1
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,10,"A",2,1,1,1,"N+P+K","Dead grass",17.3
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,10,"A",2,1,1,1,"N+P+K","Forb",104.5
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,10,"A",2,1,1,1,"N+P+K","Grass",8.4
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",1,10,"A",2,1,1,1,"N+P+K","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,6,"A",2,1,0,1,"N+K","Dead grass",41.8
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,6,"A",2,1,0,1,"N+K","Forb",112.7
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,6,"A",2,1,0,1,"N+K","Grass",31.5
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,6,"A",2,1,0,1,"N+K","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,7,"A",2,1,1,0,"N+P","Dead grass",63
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,7,"A",2,1,1,0,"N+P","Forb",27.4
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,7,"A",2,1,1,0,"N+P","Grass",79.6
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,7,"A",2,1,1,0,"N+P","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,8,"A",2,1,1,1,"N+P+K","Dead grass",56.1
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,8,"A",2,1,1,1,"N+P+K","Forb",74.2
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,8,"A",2,1,1,1,"N+P+K","Grass",72.6
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,8,"A",2,1,1,1,"N+P+K","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,9,"A",2,0,0,0,"C","Dead grass",43.2
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,9,"A",2,0,0,0,"C","Forb",54.2
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,9,"A",2,0,0,0,"C","Grass",60.4
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,9,"A",2,0,0,0,"C","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,10,"A",2,1,1,1,"N+P+K","Dead grass",30.5
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,10,"A",2,1,1,1,"N+P+K","Forb",59.2
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,10,"A",2,1,1,1,"N+P+K","Grass",24
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",2,10,"A",2,1,1,1,"N+P+K","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,1,"B",1,0,0,0,"C","Dead grass",44.7
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,1,"B",1,0,0,0,"C","Forb",14
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,1,"B",1,0,0,0,"C","Grass",53.4
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,1,"B",1,0,0,0,"C","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,3,"A",3,0,1,0,"P","Dead grass",22.3
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,3,"A",3,0,1,0,"P","Forb",37.1
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,3,"A",3,0,1,0,"P","Grass",28.9
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,3,"A",3,0,1,0,"P","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,5,"A",3,0,1,1,"P+K","Dead grass",61.2
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,5,"A",3,0,1,1,"P+K","Forb",31.2
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,5,"A",3,0,1,1,"P+K","Grass",82.8
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,5,"A",3,0,1,1,"P+K","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,7,"A",3,1,1,0,"N+P","Dead grass",32.7
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,7,"A",3,1,1,0,"N+P","Forb",75.7
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,7,"A",3,1,1,0,"N+P","Grass",43.4
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,7,"A",3,1,1,0,"N+P","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,9,"A",3,0,0,0,"C","Dead grass",29.5
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,9,"A",3,0,0,0,"C","Forb",75.7
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,9,"A",3,0,0,0,"C","Grass",107.6
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",3,9,"A",3,0,0,0,"C","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,1,"B",1,0,0,0,"C","Dead grass",37.1
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,1,"B",1,0,0,0,"C","Forb",56.3
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,1,"B",1,0,0,0,"C","Grass",36.9
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,1,"B",1,0,0,0,"C","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,4,"A",2,1,0,0,"N","Dead grass",42.7
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,4,"A",2,1,0,0,"N","Forb",149.7
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,4,"A",2,1,0,0,"N","Grass",34.7
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,4,"A",2,1,0,0,"N","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,5,"A",2,0,1,1,"P+K","Dead grass",18.2
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,5,"A",2,0,1,1,"P+K","Forb",100.3
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,5,"A",2,0,1,1,"P+K","Grass",19.2
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,5,"A",2,0,1,1,"P+K","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,7,"A",2,1,1,0,"N+P","Dead grass",21.1
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,7,"A",2,1,1,0,"N+P","Forb",49.7
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,7,"A",2,1,1,0,"N+P","Grass",19.7
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,7,"A",2,1,1,0,"N+P","Legume",0
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,9,"B",1,0,0,0,"C","Dead grass",31.1
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,9,"B",1,0,0,0,"C","Forb",78.1
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,9,"B",1,0,0,0,"C","Grass",28.9
+"NWT NutNet",2007-08-03,"Pre-treatment (Baseline)",4,9,"B",1,0,0,0,"C","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,1,NA,NA,0,0,0,"C","Forb",84.32
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,1,NA,NA,0,0,0,"C","Grass",69.37
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,1,NA,NA,0,0,0,"C","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,2,NA,NA,0,0,1,"K","Forb",20.83
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,2,NA,NA,0,0,1,"K","Grass",105.96
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,2,NA,NA,0,0,1,"K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,3,NA,NA,0,1,0,"P","Forb",83.03
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,3,NA,NA,0,1,0,"P","Grass",80.75
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,3,NA,NA,0,1,0,"P","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,4,NA,NA,1,0,0,"N","Forb",96.81
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,4,NA,NA,1,0,0,"N","Grass",158.27
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,4,NA,NA,1,0,0,"N","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,5,NA,NA,0,1,1,"P+K","Forb",119.23
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,5,NA,NA,0,1,1,"P+K","Grass",37.12
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,5,NA,NA,0,1,1,"P+K","Legume",8.41
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,6,NA,NA,1,0,1,"N+K","Forb",137.5
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,6,NA,NA,1,0,1,"N+K","Grass",64.28
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,6,NA,NA,1,0,1,"N+K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,7,NA,NA,1,1,0,"N+P","Forb",213.59
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,7,NA,NA,1,1,0,"N+P","Grass",210.41
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,7,NA,NA,1,1,0,"N+P","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,8,NA,NA,1,1,1,"N+P+K","Forb",126.42
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,8,NA,NA,1,1,1,"N+P+K","Grass",203.29
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,8,NA,NA,1,1,1,"N+P+K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,9,NA,NA,0,0,0,"C","Forb",71.83
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,9,NA,NA,0,0,0,"C","Grass",102.21
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,9,NA,NA,0,0,0,"C","Legume",1.53
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,10,NA,NA,1,1,1,"N+P+K","Forb",112.98
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,10,NA,NA,1,1,1,"N+P+K","Grass",159.14
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",1,10,NA,NA,1,1,1,"N+P+K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,1,NA,NA,0,0,0,"C","Forb",40.3
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,1,NA,NA,0,0,0,"C","Grass",84.26
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,1,NA,NA,0,0,0,"C","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,2,NA,NA,0,0,1,"K","Forb",127.85
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,2,NA,NA,0,0,1,"K","Grass",79.6
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,2,NA,NA,0,0,1,"K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,3,NA,NA,0,1,0,"P","Forb",63.82
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,3,NA,NA,0,1,0,"P","Grass",59.18
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,3,NA,NA,0,1,0,"P","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,4,NA,NA,1,0,0,"N","Forb",93.41
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,4,NA,NA,1,0,0,"N","Grass",142.05
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,4,NA,NA,1,0,0,"N","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,5,NA,NA,0,1,1,"P+K","Forb",85.66
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,5,NA,NA,0,1,1,"P+K","Grass",77.36
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,5,NA,NA,0,1,1,"P+K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,6,NA,NA,1,0,1,"N+K","Forb",86.31
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,6,NA,NA,1,0,1,"N+K","Grass",101.1
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,6,NA,NA,1,0,1,"N+K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,7,NA,NA,1,1,0,"N+P","Forb",39.68
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,7,NA,NA,1,1,0,"N+P","Grass",309.91
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,7,NA,NA,1,1,0,"N+P","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,8,NA,NA,1,1,1,"N+P+K","Forb",175.72
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,8,NA,NA,1,1,1,"N+P+K","Grass",170.28
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,8,NA,NA,1,1,1,"N+P+K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,9,NA,NA,0,0,0,"C","Forb",44.11
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,9,NA,NA,0,0,0,"C","Grass",167.02
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,9,NA,NA,0,0,0,"C","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,10,NA,NA,1,1,1,"N+P+K","Forb",101.34
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,10,NA,NA,1,1,1,"N+P+K","Grass",185.07
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",2,10,NA,NA,1,1,1,"N+P+K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,1,NA,NA,0,0,0,"C","Forb",23.7
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,1,NA,NA,0,0,0,"C","Grass",44.96
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,1,NA,NA,0,0,0,"C","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,2,NA,NA,0,0,1,"K","Forb",32.95
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,2,NA,NA,0,0,1,"K","Grass",76.11
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,2,NA,NA,0,0,1,"K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,3,NA,NA,0,1,0,"P","Forb",30.38
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,3,NA,NA,0,1,0,"P","Grass",73.8
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,3,NA,NA,0,1,0,"P","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,4,NA,NA,1,0,0,"N","Forb",31.45
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,4,NA,NA,1,0,0,"N","Grass",150.75
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,4,NA,NA,1,0,0,"N","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,5,NA,NA,0,1,1,"P+K","Forb",79.76
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,5,NA,NA,0,1,1,"P+K","Grass",107.59
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,5,NA,NA,0,1,1,"P+K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,6,NA,NA,1,0,1,"N+K","Forb",35.82
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,6,NA,NA,1,0,1,"N+K","Grass",112.29
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,6,NA,NA,1,0,1,"N+K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,7,NA,NA,1,1,0,"N+P","Forb",123.45
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,7,NA,NA,1,1,0,"N+P","Grass",147.91
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,7,NA,NA,1,1,0,"N+P","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,8,NA,NA,1,1,1,"N+P+K","Forb",117.72
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,8,NA,NA,1,1,1,"N+P+K","Grass",103.18
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,8,NA,NA,1,1,1,"N+P+K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,9,NA,NA,0,0,0,"C","Forb",42.44
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,9,NA,NA,0,0,0,"C","Grass",67.53
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,9,NA,NA,0,0,0,"C","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,10,NA,NA,1,1,1,"N+P+K","Forb",97.53
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,10,NA,NA,1,1,1,"N+P+K","Grass",205.15
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",3,10,NA,NA,1,1,1,"N+P+K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,1,NA,NA,0,0,0,"C","Forb",68.92
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,1,NA,NA,0,0,0,"C","Grass",55.11
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,1,NA,NA,0,0,0,"C","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,2,NA,NA,0,0,1,"K","Forb",51.83
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,2,NA,NA,0,0,1,"K","Grass",67.57
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,2,NA,NA,0,0,1,"K","Legume",22.67
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,3,NA,NA,0,1,0,"P","Forb",105.22
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,3,NA,NA,0,1,0,"P","Grass",68.26
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,3,NA,NA,0,1,0,"P","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,4,NA,NA,1,0,0,"N","Forb",51.2
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,4,NA,NA,1,0,0,"N","Grass",115.77
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,4,NA,NA,1,0,0,"N","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,5,NA,NA,0,1,1,"P+K","Forb",25.24
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,5,NA,NA,0,1,1,"P+K","Grass",93.7
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,5,NA,NA,0,1,1,"P+K","Legume",5.01
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,6,NA,NA,1,0,1,"N+K","Forb",114.8
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,6,NA,NA,1,0,1,"N+K","Grass",68.2
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,6,NA,NA,1,0,1,"N+K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,7,NA,NA,1,1,0,"N+P","Forb",131.36
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,7,NA,NA,1,1,0,"N+P","Grass",181.55
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,7,NA,NA,1,1,0,"N+P","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,8,NA,NA,1,1,1,"N+P+K","Forb",189.2
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,8,NA,NA,1,1,1,"N+P+K","Grass",375.3
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,8,NA,NA,1,1,1,"N+P+K","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,9,NA,NA,0,0,0,"C","Forb",37.68
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,9,NA,NA,0,0,0,"C","Grass",59.39
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,9,NA,NA,0,0,0,"C","Legume",0
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,10,NA,NA,1,1,1,"N+P+K","Forb",169.12
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,10,NA,NA,1,1,1,"N+P+K","Grass",127.64
+"NWT NutNet",2013-08-02,"Post-treatment (Experimental)",4,10,NA,NA,1,1,1,"N+P+K","Legume",0
