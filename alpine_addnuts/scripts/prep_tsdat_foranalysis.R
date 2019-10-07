@@ -396,6 +396,55 @@ sdl_plots2[sdl_plots2$old_plot == 96 & !is.na(sdl_plots2$old_plot),c(1,3:ncol(sd
 
 
 
+# -- PREP DATASETS TO INCLUDE VERTICAL HIT LEVEL ----
+# for datasets available: sdl 2016, nutnet2017 (that's it!)
+nn17_wvert <- nutnet17raw %>%
+  dplyr::select(-date) %>%
+  mutate(block = paste0("B", block),
+         yr = 2017) %>%
+  #join treatment info
+  left_join(nutnet_plots) %>%
+  dplyr::select(site, yr, plotid, block, plot, n:trt, point, hit, species) %>%
+  filter(!species == "O") %>%
+  # replace species with USDA_code
+  left_join(spplt, by = c("species" = "code")) %>%
+  mutate(fxnl_grp = ifelse(grepl("forb", Growth_Habit, ignore.case = T), "Forb",
+                           ifelse(grepl("Gram", Growth_Habit), "Grass", "Ground cover")),
+         nutnet_grp = ifelse(clean_code2 == "SEDES", "Ground cover",
+                             ifelse(grepl("forb", Growth_Habit, ignore.case = T), "Forb",
+                                    ifelse(grepl("Gram", Growth_Habit), "Grass", "Ground cover")))) %>%
+  dplyr::select(site:hit, clean_code2, simple_name, Common_Name, Category, Family, Growth_Habit, fxnl_grp, nutnet_grp)
+
+
+sdl16_wvert <- sdl2016 %>%
+  group_by(plot, point) %>%
+  mutate(hit = seq(1, length(species), 1)) %>%
+  ungroup() %>%
+  # remove placeholders Tim inserted
+  filter(species != "junk1") %>%
+  # replace species with USDA_code
+  left_join(spplt, by = c("species" = "code")) %>%
+  mutate(fxnl_grp = ifelse(grepl("forb", Growth_Habit, ignore.case = T), "Forb",
+                           ifelse(grepl("Gram", Growth_Habit), "Grass", "Ground cover")),
+         nutnet_grp = ifelse(clean_code2 == "SEDES", "Ground cover",
+                             ifelse(grepl("forb", Growth_Habit, ignore.case = T), "Forb",
+                                    ifelse(grepl("Gram", Growth_Habit), "Grass", "Ground cover")))) %>%
+  # join plot info
+  left_join(plots2016) %>%
+  mutate(site = "SDL",
+         yr = 2016) %>%
+  dplyr::select(site, yr, plot, Snow, Meadow, trt, recovery, X.1, point, hit, clean_code2, simple_name, Common_Name, Category, Family, Growth_Habit, fxnl_grp, nutnet_grp) %>%
+  # clean up colnames and correct typo in recovery code
+  rename(sf_recovery_notes = X.1,
+         snow = Snow,
+         meadow = Meadow,
+         sf_recovery_code = recovery) %>%
+  mutate(trt = ifelse(trt == "control", "C", trt),
+         sf_recovery_code = ifelse(sf_recovery_code == 3 & grepl("recovery", sf_recovery_notes), 2, sf_recovery_code)) %>%
+  arrange(plot, point, hit)
+
+
+
 # -- FINISHING -----
 # write out cleaned master plant dataset and site lookup datasets
 # plant dats
@@ -404,3 +453,6 @@ write_csv(master_plant, "alpine_addnuts/output_data/sdl_nutnet_plantcom_allyrs.c
 write_csv(nutnet_plots, "alpine_addnuts/output_data/nutnet_plot_lookup.csv")
 # sdl site lookup
 write_csv(sdl_plots2, "alpine_addnuts/output_data/sdl_plot_lookup.csv")
+# cleaned up vertical hits datasets
+write_csv(nn17_wvert, "alpine_addnuts/output_data/nutnet2017_vertical_sppcomp.csv")
+write_csv(sdl16_wvert, "alpine_addnuts/output_data/sdl2016_vertical_sppcomp.csv")
