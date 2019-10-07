@@ -51,6 +51,10 @@ nnplots <- read.csv("alpine_addnuts/output_data/nutnet_plot_lookup.csv")
 sdlplots_full <- read.csv("alpine_addnuts/output_data/sdl_plots_lookup_trblshoot.csv")
 
 
+# read in prepped datasets where can pull top hits only
+nn17_wvert <- read.csv("alpine_addnuts/output_data/nutnet2017_vertical_sppcomp.csv") 
+sdl16_wvert <- read.csv("alpine_addnuts/output_data/sdl2016_vertical_sppcomp.csv") 
+
 
 
 # -- RECODE TRTMENTS FOR NUTNET (SIMPLIFY) -----
@@ -60,8 +64,8 @@ nnplots$trt2 <- gsub("[+]K", "", nnplots$trt)
 nnplots$trt2 <- gsub("K", "C", nnplots$trt2)
 
 # make trts factor in each site
-nnplots$trt <- factor(nnplots$trt, levels = c(c("C", "K", "N", "P", "P+K", "N+K", "N+P", "N+P+K")))
-nnplots$trt2 <- factor(nnplots$trt2, levels = c("C", "N", "P", "N+P"))
+#nnplots$trt <- factor(nnplots$trt, levels = c(c("C", "K", "N", "P", "P+K", "N+K", "N+P", "N+P+K")))
+#nnplots$trt2 <- factor(nnplots$trt2, levels = c("C", "N", "P", "N+P"))
 sdlplots$trt <- factor(sdlplots$trt, levels = c("C", "N", "P", "N+P"))
 
 
@@ -78,14 +82,19 @@ spplist <- spplist %>%
   mutate(simple_lifeform = ifelse(clean_code2 == "2FORB", "Forb",
                                   ifelse(clean_code2 == "2GRAM", "Grass", simple_lifeform))) %>%
   # add alternative lifeform group where N-fixer lumped into forb group
-  mutate(simple_lifeform2 = ifelse(simple_lifeform == "N-fixer", "Forb", simple_lifeform))
+  mutate(simple_lifeform2 = ifelse(simple_lifeform == "N-fixer", "Forb", simple_lifeform),
+         # add nutnet grouping (Selaginella densa [spikemoss] = ground cover, not forb)
+         nutnet_grp = ifelse(clean_code2 == "SEDES", "Ground cover", simple_lifeform2),
+         nutnet_grp = ifelse(grepl("^2", clean_code2) & is.na(nutnet_grp), "Ground cover", simple_lifeform2))
 
 
 
 # -- Table 3: Relative cover of G. rossii by study by year ----
 # rel cov = number hits per species/total number of veg hits in the plot
 geum_relcov <- plantcom %>%
-  filter(!grepl("2BA|2LT|2RF", clean_code2)) %>%
+  #filter(!grepl("2BA|2LT|2RF", clean_code2)) %>%
+  #filter(!clean_code2 %in% unique(spplist$clean_code2[spplist$nutnet_grp == "Ground cover"])) %>%
+  filter(clean_code2 %in% sort(unique(spplist$clean_code2[!is.na(spplist$simple_lifeform2)]))) %>%
   # sum total veg hits per site per plot per yr
   group_by(site, yr, plotid) %>%
   mutate(totveg = sum(hits)) %>%
@@ -194,7 +203,8 @@ ggplot(all_means, aes(post_yrs, meancov, group = site, col = site)) +
 
 
 
-# -- ABUNDANT FORBS IN NUTNEt 2017 (Table 4) -----
+# -- ABUNDANT FORBS IN NUTNET 2017 (Table 4) -----
+
 
 # -- FORBS VS GRASSES (Figs 1 + 2) ----
 # (out of curiosity make similar time since exp onset plot to compare forb shift over time by site by trt)
