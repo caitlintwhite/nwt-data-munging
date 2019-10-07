@@ -332,8 +332,12 @@ biodiv <- subset(sppcomp.long.final, Present == 1 & Group != "Ground cover") %>%
   arrange(Block, Plot) %>%
   mutate(AllForb_hits = Forb_hits + Legume_hits,
          AllForb_richness = Forb_richness + Legume_richness,
-         AllSpecies_hits = Forb_hits + Grass_hits, Legume_hits,
-         AllSpecies_richness = Forb_richness + Grass_richness + Legume_richness)
+         AllSpecies_hits = AllForb_hits + Grass_hits,
+         AllSpecies_richness = AllForb_richness + Grass_richness)
+# check agrees with nutnet-calculated numbers
+biodiv$AllForb_hits - sppS$FORB_COVER # yay
+biodiv$AllSpecies_richness - sppS$SPP_RICH # agrees
+
 # add in plant cover as 100-sum(Ground cover)
 groundcover <-  subset(sppcomp.long.final, Group == "Ground cover") %>%
   grouped_df(names(sppcomp.long.final)[c(1:6)]) %>%
@@ -345,20 +349,27 @@ groundcover <-  subset(sppcomp.long.final, Group == "Ground cover") %>%
 biodiv <- left_join(biodiv, dplyr::select(groundcover, -Ground_hits)) %>%
   #rearrange Grass cols before Forb
   dplyr::select(Block:FullTreatment, Grass_hits, Grass_richness, Forb_hits:ncol(.))
+# check plant cov agrees
+biodiv$Plant_cover - sppS$TOTAL_COVER # agrees
 
 # calculate and append Shannon diversity
 # make relative cover dataset on all non-ground cover cols
 plantdat <- sppcomp.wide.final[!names(sppcomp.wide.final) %in% unique(sppcomp.long.final$Code[sppcomp.long.final$Group == "Ground cover"])] %>%
   arrange(Block, Plot)
 relcov <- vegan::decostand(plantdat[(grep("FullTreatment", names(plantdat))+1):ncol(plantdat)], method = "total")
+relcov <- as.matrix(relcov)
+rownames(relcov) <- paste0("B", plantdat$Block, "_", plantdat$Plot)
+
 # to be sure relcov the same as nutnet calculated, compare
 nnrelcov <- nnlist[[8]][[9]]
 nnrelcov <- nnrelcov[c(names(nnrelcov)[1:6], sort(names(nnrelcov)[7:ncol(nnrelcov)]))]
 summary(relcov - nnrelcov[,7:ncol(nnrelcov)]) # same
 # calculate shannon div
 Sdiv <- diversity(relcov)
+Sdiv # same order as biodiv, so can append values directly
 # append diversity to biodiv df
 biodiv$Shannon_diversity <- Sdiv
+
 
 
 
