@@ -31,11 +31,11 @@
 1,1,0,0,0,"C","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 1,1,0,0,0,"C","ERSI3","Erigeron simplex","Forb",0.25,1,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,1,0,0,0,"C","FEBR","Festuca brachyphylla","Grass",4,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-1,1,0,0,0,"C","FORB1","Unk forb1","Forb",1,1,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-1,1,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+1,1,0,0,0,"C","FORB1","Unk forb1","Forb",1,1,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+1,1,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 1,1,0,0,0,"C","GERO2","Geum rossii","Forb",17,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-1,1,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-1,1,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+1,1,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+1,1,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 1,1,0,0,0,"C","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 1,1,0,0,0,"C","KOMY","Kobresia myosuroides","Grass",18,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 1,1,0,0,0,"C","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -44,7 +44,7 @@
 1,1,0,0,0,"C","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 1,1,0,0,0,"C","MIOB2","Minuartia obtusiloba","Forb",8,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 1,1,0,0,0,"C","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-1,1,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",6,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+1,1,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",6,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 1,1,0,0,0,"C","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 1,1,0,0,0,"C","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,1,0,0,0,"C","PEPA3","Pedicularis parryi","Forb",2,1,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -100,11 +100,11 @@
 1,2,0,0,1,"K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 1,2,0,0,1,"K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,2,0,0,1,"K","FEBR","Festuca brachyphylla","Grass",0,0,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-1,2,0,0,1,"K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-1,2,0,0,1,"K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+1,2,0,0,1,"K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+1,2,0,0,1,"K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 1,2,0,0,1,"K","GERO2","Geum rossii","Forb",0,0,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-1,2,0,0,1,"K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-1,2,0,0,1,"K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+1,2,0,0,1,"K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+1,2,0,0,1,"K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 1,2,0,0,1,"K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 1,2,0,0,1,"K","KOMY","Kobresia myosuroides","Grass",66,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 1,2,0,0,1,"K","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -113,7 +113,7 @@
 1,2,0,0,1,"K","MELA3","Mertensia lanceolata","Forb",1,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 1,2,0,0,1,"K","MIOB2","Minuartia obtusiloba","Forb",6,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 1,2,0,0,1,"K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-1,2,0,0,1,"K","ORALA","Oreoxis alpina ssp. alpina","Forb",21,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+1,2,0,0,1,"K","ORALA","Oreoxis alpina ssp. alpina","Forb",21,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 1,2,0,0,1,"K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 1,2,0,0,1,"K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,2,0,0,1,"K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -169,11 +169,11 @@
 1,3,0,1,0,"P","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 1,3,0,1,0,"P","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,3,0,1,0,"P","FEBR","Festuca brachyphylla","Grass",4,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-1,3,0,1,0,"P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-1,3,0,1,0,"P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+1,3,0,1,0,"P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+1,3,0,1,0,"P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 1,3,0,1,0,"P","GERO2","Geum rossii","Forb",25,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-1,3,0,1,0,"P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-1,3,0,1,0,"P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+1,3,0,1,0,"P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+1,3,0,1,0,"P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 1,3,0,1,0,"P","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 1,3,0,1,0,"P","KOMY","Kobresia myosuroides","Grass",5,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 1,3,0,1,0,"P","LEPY2","Lewisia pygmaea","Forb",1,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -182,7 +182,7 @@
 1,3,0,1,0,"P","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 1,3,0,1,0,"P","MIOB2","Minuartia obtusiloba","Forb",8,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 1,3,0,1,0,"P","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-1,3,0,1,0,"P","ORALA","Oreoxis alpina ssp. alpina","Forb",0.25,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+1,3,0,1,0,"P","ORALA","Oreoxis alpina ssp. alpina","Forb",0.25,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 1,3,0,1,0,"P","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 1,3,0,1,0,"P","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,3,0,1,0,"P","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -238,11 +238,11 @@
 1,4,1,0,0,"N","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 1,4,1,0,0,"N","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,4,1,0,0,"N","FEBR","Festuca brachyphylla","Grass",3,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-1,4,1,0,0,"N","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-1,4,1,0,0,"N","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+1,4,1,0,0,"N","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+1,4,1,0,0,"N","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 1,4,1,0,0,"N","GERO2","Geum rossii","Forb",10,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-1,4,1,0,0,"N","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-1,4,1,0,0,"N","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+1,4,1,0,0,"N","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+1,4,1,0,0,"N","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 1,4,1,0,0,"N","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 1,4,1,0,0,"N","KOMY","Kobresia myosuroides","Grass",26,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 1,4,1,0,0,"N","LEPY2","Lewisia pygmaea","Forb",0.25,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -251,7 +251,7 @@
 1,4,1,0,0,"N","MELA3","Mertensia lanceolata","Forb",4,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 1,4,1,0,0,"N","MIOB2","Minuartia obtusiloba","Forb",9,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 1,4,1,0,0,"N","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-1,4,1,0,0,"N","ORALA","Oreoxis alpina ssp. alpina","Forb",14,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+1,4,1,0,0,"N","ORALA","Oreoxis alpina ssp. alpina","Forb",14,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 1,4,1,0,0,"N","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 1,4,1,0,0,"N","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,4,1,0,0,"N","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -307,11 +307,11 @@
 1,5,0,1,1,"P+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 1,5,0,1,1,"P+K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,5,0,1,1,"P+K","FEBR","Festuca brachyphylla","Grass",6,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-1,5,0,1,1,"P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-1,5,0,1,1,"P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+1,5,0,1,1,"P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+1,5,0,1,1,"P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 1,5,0,1,1,"P+K","GERO2","Geum rossii","Forb",1,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-1,5,0,1,1,"P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-1,5,0,1,1,"P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+1,5,0,1,1,"P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+1,5,0,1,1,"P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 1,5,0,1,1,"P+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 1,5,0,1,1,"P+K","KOMY","Kobresia myosuroides","Grass",35,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 1,5,0,1,1,"P+K","LEPY2","Lewisia pygmaea","Forb",3,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -320,7 +320,7 @@
 1,5,0,1,1,"P+K","MELA3","Mertensia lanceolata","Forb",0.25,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 1,5,0,1,1,"P+K","MIOB2","Minuartia obtusiloba","Forb",11,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 1,5,0,1,1,"P+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-1,5,0,1,1,"P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",2,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+1,5,0,1,1,"P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",2,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 1,5,0,1,1,"P+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 1,5,0,1,1,"P+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,5,0,1,1,"P+K","PEPA3","Pedicularis parryi","Forb",0.25,1,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -376,11 +376,11 @@
 1,6,1,0,1,"N+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 1,6,1,0,1,"N+K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,6,1,0,1,"N+K","FEBR","Festuca brachyphylla","Grass",2,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-1,6,1,0,1,"N+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-1,6,1,0,1,"N+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+1,6,1,0,1,"N+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+1,6,1,0,1,"N+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 1,6,1,0,1,"N+K","GERO2","Geum rossii","Forb",0,0,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-1,6,1,0,1,"N+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-1,6,1,0,1,"N+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+1,6,1,0,1,"N+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+1,6,1,0,1,"N+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 1,6,1,0,1,"N+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 1,6,1,0,1,"N+K","KOMY","Kobresia myosuroides","Grass",53,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 1,6,1,0,1,"N+K","LEPY2","Lewisia pygmaea","Forb",0.25,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -389,7 +389,7 @@
 1,6,1,0,1,"N+K","MELA3","Mertensia lanceolata","Forb",2,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 1,6,1,0,1,"N+K","MIOB2","Minuartia obtusiloba","Forb",3,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 1,6,1,0,1,"N+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-1,6,1,0,1,"N+K","ORALA","Oreoxis alpina ssp. alpina","Forb",13,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+1,6,1,0,1,"N+K","ORALA","Oreoxis alpina ssp. alpina","Forb",13,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 1,6,1,0,1,"N+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 1,6,1,0,1,"N+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,6,1,0,1,"N+K","PEPA3","Pedicularis parryi","Forb",4,1,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -445,11 +445,11 @@
 1,7,1,1,0,"N+P","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 1,7,1,1,0,"N+P","ERSI3","Erigeron simplex","Forb",3,1,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,7,1,1,0,"N+P","FEBR","Festuca brachyphylla","Grass",4,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-1,7,1,1,0,"N+P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-1,7,1,1,0,"N+P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+1,7,1,1,0,"N+P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+1,7,1,1,0,"N+P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 1,7,1,1,0,"N+P","GERO2","Geum rossii","Forb",2,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-1,7,1,1,0,"N+P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-1,7,1,1,0,"N+P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+1,7,1,1,0,"N+P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+1,7,1,1,0,"N+P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 1,7,1,1,0,"N+P","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 1,7,1,1,0,"N+P","KOMY","Kobresia myosuroides","Grass",38,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 1,7,1,1,0,"N+P","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -458,7 +458,7 @@
 1,7,1,1,0,"N+P","MELA3","Mertensia lanceolata","Forb",4,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 1,7,1,1,0,"N+P","MIOB2","Minuartia obtusiloba","Forb",5,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 1,7,1,1,0,"N+P","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-1,7,1,1,0,"N+P","ORALA","Oreoxis alpina ssp. alpina","Forb",22,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+1,7,1,1,0,"N+P","ORALA","Oreoxis alpina ssp. alpina","Forb",22,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 1,7,1,1,0,"N+P","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 1,7,1,1,0,"N+P","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,7,1,1,0,"N+P","PEPA3","Pedicularis parryi","Forb",5,1,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -514,11 +514,11 @@
 1,8,1,1,1,"N+P+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 1,8,1,1,1,"N+P+K","ERSI3","Erigeron simplex","Forb",1,1,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,8,1,1,1,"N+P+K","FEBR","Festuca brachyphylla","Grass",3,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-1,8,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-1,8,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",1,1,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+1,8,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+1,8,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",1,1,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 1,8,1,1,1,"N+P+K","GERO2","Geum rossii","Forb",15,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-1,8,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",1,1,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-1,8,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+1,8,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",1,1,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+1,8,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 1,8,1,1,1,"N+P+K","HEMO3","Helictotrichon mortonianum","Grass",4,1,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 1,8,1,1,1,"N+P+K","KOMY","Kobresia myosuroides","Grass",68,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 1,8,1,1,1,"N+P+K","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -527,7 +527,7 @@
 1,8,1,1,1,"N+P+K","MELA3","Mertensia lanceolata","Forb",10,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 1,8,1,1,1,"N+P+K","MIOB2","Minuartia obtusiloba","Forb",2,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 1,8,1,1,1,"N+P+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-1,8,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",28,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+1,8,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",28,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 1,8,1,1,1,"N+P+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 1,8,1,1,1,"N+P+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,8,1,1,1,"N+P+K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -583,11 +583,11 @@
 1,9,0,0,0,"C","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 1,9,0,0,0,"C","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,9,0,0,0,"C","FEBR","Festuca brachyphylla","Grass",1,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-1,9,0,0,0,"C","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-1,9,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+1,9,0,0,0,"C","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+1,9,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 1,9,0,0,0,"C","GERO2","Geum rossii","Forb",25,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-1,9,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-1,9,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+1,9,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+1,9,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 1,9,0,0,0,"C","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 1,9,0,0,0,"C","KOMY","Kobresia myosuroides","Grass",16,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 1,9,0,0,0,"C","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -596,7 +596,7 @@
 1,9,0,0,0,"C","MELA3","Mertensia lanceolata","Forb",2,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 1,9,0,0,0,"C","MIOB2","Minuartia obtusiloba","Forb",11,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 1,9,0,0,0,"C","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-1,9,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",13,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+1,9,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",13,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 1,9,0,0,0,"C","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 1,9,0,0,0,"C","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,9,0,0,0,"C","PEPA3","Pedicularis parryi","Forb",1,1,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -652,11 +652,11 @@
 1,10,1,1,1,"N+P+K","ERPI6","Erigeron pinnatisectus","Forb",2,1,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 1,10,1,1,1,"N+P+K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,10,1,1,1,"N+P+K","FEBR","Festuca brachyphylla","Grass",15,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-1,10,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-1,10,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+1,10,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+1,10,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 1,10,1,1,1,"N+P+K","GERO2","Geum rossii","Forb",7,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-1,10,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-1,10,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+1,10,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+1,10,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 1,10,1,1,1,"N+P+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 1,10,1,1,1,"N+P+K","KOMY","Kobresia myosuroides","Grass",5,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 1,10,1,1,1,"N+P+K","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -665,7 +665,7 @@
 1,10,1,1,1,"N+P+K","MELA3","Mertensia lanceolata","Forb",6,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 1,10,1,1,1,"N+P+K","MIOB2","Minuartia obtusiloba","Forb",16,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 1,10,1,1,1,"N+P+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-1,10,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",7,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+1,10,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",7,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 1,10,1,1,1,"N+P+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 1,10,1,1,1,"N+P+K","PAPU2","Paronychia pulvinata","Forb",3,1,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 1,10,1,1,1,"N+P+K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -721,11 +721,11 @@
 2,1,0,0,0,"C","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 2,1,0,0,0,"C","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,1,0,0,0,"C","FEBR","Festuca brachyphylla","Grass",0,0,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-2,1,0,0,0,"C","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-2,1,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+2,1,0,0,0,"C","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+2,1,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 2,1,0,0,0,"C","GERO2","Geum rossii","Forb",21,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-2,1,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-2,1,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+2,1,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+2,1,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 2,1,0,0,0,"C","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 2,1,0,0,0,"C","KOMY","Kobresia myosuroides","Grass",44,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 2,1,0,0,0,"C","LEPY2","Lewisia pygmaea","Forb",0.25,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -734,7 +734,7 @@
 2,1,0,0,0,"C","MELA3","Mertensia lanceolata","Forb",2,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 2,1,0,0,0,"C","MIOB2","Minuartia obtusiloba","Forb",14,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 2,1,0,0,0,"C","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-2,1,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",3,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+2,1,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",3,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 2,1,0,0,0,"C","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 2,1,0,0,0,"C","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,1,0,0,0,"C","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -790,11 +790,11 @@
 2,2,0,0,1,"K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 2,2,0,0,1,"K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,2,0,0,1,"K","FEBR","Festuca brachyphylla","Grass",0,0,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-2,2,0,0,1,"K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-2,2,0,0,1,"K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+2,2,0,0,1,"K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+2,2,0,0,1,"K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 2,2,0,0,1,"K","GERO2","Geum rossii","Forb",15,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-2,2,0,0,1,"K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-2,2,0,0,1,"K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+2,2,0,0,1,"K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+2,2,0,0,1,"K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 2,2,0,0,1,"K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 2,2,0,0,1,"K","KOMY","Kobresia myosuroides","Grass",47,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 2,2,0,0,1,"K","LEPY2","Lewisia pygmaea","Forb",3,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -803,7 +803,7 @@
 2,2,0,0,1,"K","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 2,2,0,0,1,"K","MIOB2","Minuartia obtusiloba","Forb",3,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 2,2,0,0,1,"K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-2,2,0,0,1,"K","ORALA","Oreoxis alpina ssp. alpina","Forb",1,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+2,2,0,0,1,"K","ORALA","Oreoxis alpina ssp. alpina","Forb",1,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 2,2,0,0,1,"K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 2,2,0,0,1,"K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,2,0,0,1,"K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -859,11 +859,11 @@
 2,3,0,1,0,"P","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 2,3,0,1,0,"P","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,3,0,1,0,"P","FEBR","Festuca brachyphylla","Grass",0.25,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-2,3,0,1,0,"P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-2,3,0,1,0,"P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+2,3,0,1,0,"P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+2,3,0,1,0,"P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 2,3,0,1,0,"P","GERO2","Geum rossii","Forb",11,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-2,3,0,1,0,"P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-2,3,0,1,0,"P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+2,3,0,1,0,"P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+2,3,0,1,0,"P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 2,3,0,1,0,"P","HEMO3","Helictotrichon mortonianum","Grass",0.25,1,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 2,3,0,1,0,"P","KOMY","Kobresia myosuroides","Grass",67,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 2,3,0,1,0,"P","LEPY2","Lewisia pygmaea","Forb",4,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -872,7 +872,7 @@
 2,3,0,1,0,"P","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 2,3,0,1,0,"P","MIOB2","Minuartia obtusiloba","Forb",4,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 2,3,0,1,0,"P","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-2,3,0,1,0,"P","ORALA","Oreoxis alpina ssp. alpina","Forb",4,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+2,3,0,1,0,"P","ORALA","Oreoxis alpina ssp. alpina","Forb",4,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 2,3,0,1,0,"P","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 2,3,0,1,0,"P","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,3,0,1,0,"P","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -928,11 +928,11 @@
 2,4,1,0,0,"N","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 2,4,1,0,0,"N","ERSI3","Erigeron simplex","Forb",4,1,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,4,1,0,0,"N","FEBR","Festuca brachyphylla","Grass",4,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-2,4,1,0,0,"N","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-2,4,1,0,0,"N","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+2,4,1,0,0,"N","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+2,4,1,0,0,"N","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 2,4,1,0,0,"N","GERO2","Geum rossii","Forb",25,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-2,4,1,0,0,"N","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-2,4,1,0,0,"N","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+2,4,1,0,0,"N","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+2,4,1,0,0,"N","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 2,4,1,0,0,"N","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 2,4,1,0,0,"N","KOMY","Kobresia myosuroides","Grass",9,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 2,4,1,0,0,"N","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -941,7 +941,7 @@
 2,4,1,0,0,"N","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 2,4,1,0,0,"N","MIOB2","Minuartia obtusiloba","Forb",8,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 2,4,1,0,0,"N","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-2,4,1,0,0,"N","ORALA","Oreoxis alpina ssp. alpina","Forb",12,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+2,4,1,0,0,"N","ORALA","Oreoxis alpina ssp. alpina","Forb",12,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 2,4,1,0,0,"N","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 2,4,1,0,0,"N","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,4,1,0,0,"N","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -997,11 +997,11 @@
 2,5,0,1,1,"P+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 2,5,0,1,1,"P+K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,5,0,1,1,"P+K","FEBR","Festuca brachyphylla","Grass",2,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-2,5,0,1,1,"P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-2,5,0,1,1,"P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+2,5,0,1,1,"P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+2,5,0,1,1,"P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 2,5,0,1,1,"P+K","GERO2","Geum rossii","Forb",1,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-2,5,0,1,1,"P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-2,5,0,1,1,"P+K","GRASS2","Unk grass2","Grass",1,1,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+2,5,0,1,1,"P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+2,5,0,1,1,"P+K","GRASS2","Unk grass2","Grass",1,1,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 2,5,0,1,1,"P+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 2,5,0,1,1,"P+K","KOMY","Kobresia myosuroides","Grass",49,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 2,5,0,1,1,"P+K","LEPY2","Lewisia pygmaea","Forb",1,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1010,7 +1010,7 @@
 2,5,0,1,1,"P+K","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 2,5,0,1,1,"P+K","MIOB2","Minuartia obtusiloba","Forb",0,0,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 2,5,0,1,1,"P+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-2,5,0,1,1,"P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+2,5,0,1,1,"P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 2,5,0,1,1,"P+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 2,5,0,1,1,"P+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,5,0,1,1,"P+K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -1066,11 +1066,11 @@
 2,6,1,0,1,"N+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 2,6,1,0,1,"N+K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,6,1,0,1,"N+K","FEBR","Festuca brachyphylla","Grass",4,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-2,6,1,0,1,"N+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-2,6,1,0,1,"N+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+2,6,1,0,1,"N+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+2,6,1,0,1,"N+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 2,6,1,0,1,"N+K","GERO2","Geum rossii","Forb",5,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-2,6,1,0,1,"N+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-2,6,1,0,1,"N+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+2,6,1,0,1,"N+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+2,6,1,0,1,"N+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 2,6,1,0,1,"N+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 2,6,1,0,1,"N+K","KOMY","Kobresia myosuroides","Grass",40,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 2,6,1,0,1,"N+K","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1079,7 +1079,7 @@
 2,6,1,0,1,"N+K","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 2,6,1,0,1,"N+K","MIOB2","Minuartia obtusiloba","Forb",15,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 2,6,1,0,1,"N+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-2,6,1,0,1,"N+K","ORALA","Oreoxis alpina ssp. alpina","Forb",8,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+2,6,1,0,1,"N+K","ORALA","Oreoxis alpina ssp. alpina","Forb",8,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 2,6,1,0,1,"N+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 2,6,1,0,1,"N+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,6,1,0,1,"N+K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -1135,11 +1135,11 @@
 2,7,1,1,0,"N+P","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 2,7,1,1,0,"N+P","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,7,1,1,0,"N+P","FEBR","Festuca brachyphylla","Grass",6,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-2,7,1,1,0,"N+P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-2,7,1,1,0,"N+P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+2,7,1,1,0,"N+P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+2,7,1,1,0,"N+P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 2,7,1,1,0,"N+P","GERO2","Geum rossii","Forb",4,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-2,7,1,1,0,"N+P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-2,7,1,1,0,"N+P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+2,7,1,1,0,"N+P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+2,7,1,1,0,"N+P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 2,7,1,1,0,"N+P","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 2,7,1,1,0,"N+P","KOMY","Kobresia myosuroides","Grass",58,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 2,7,1,1,0,"N+P","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1148,7 +1148,7 @@
 2,7,1,1,0,"N+P","MELA3","Mertensia lanceolata","Forb",5,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 2,7,1,1,0,"N+P","MIOB2","Minuartia obtusiloba","Forb",17,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 2,7,1,1,0,"N+P","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-2,7,1,1,0,"N+P","ORALA","Oreoxis alpina ssp. alpina","Forb",4,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+2,7,1,1,0,"N+P","ORALA","Oreoxis alpina ssp. alpina","Forb",4,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 2,7,1,1,0,"N+P","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 2,7,1,1,0,"N+P","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,7,1,1,0,"N+P","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -1204,11 +1204,11 @@
 2,8,1,1,1,"N+P+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 2,8,1,1,1,"N+P+K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,8,1,1,1,"N+P+K","FEBR","Festuca brachyphylla","Grass",13,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-2,8,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-2,8,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+2,8,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+2,8,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 2,8,1,1,1,"N+P+K","GERO2","Geum rossii","Forb",15,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-2,8,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-2,8,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+2,8,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+2,8,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 2,8,1,1,1,"N+P+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 2,8,1,1,1,"N+P+K","KOMY","Kobresia myosuroides","Grass",37,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 2,8,1,1,1,"N+P+K","LEPY2","Lewisia pygmaea","Forb",1,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1217,7 +1217,7 @@
 2,8,1,1,1,"N+P+K","MELA3","Mertensia lanceolata","Forb",1,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 2,8,1,1,1,"N+P+K","MIOB2","Minuartia obtusiloba","Forb",10,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 2,8,1,1,1,"N+P+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-2,8,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",17,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+2,8,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",17,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 2,8,1,1,1,"N+P+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 2,8,1,1,1,"N+P+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,8,1,1,1,"N+P+K","PEPA3","Pedicularis parryi","Forb",1,1,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -1273,11 +1273,11 @@
 2,9,0,0,0,"C","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 2,9,0,0,0,"C","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,9,0,0,0,"C","FEBR","Festuca brachyphylla","Grass",1,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-2,9,0,0,0,"C","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-2,9,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+2,9,0,0,0,"C","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+2,9,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 2,9,0,0,0,"C","GERO2","Geum rossii","Forb",9,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-2,9,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-2,9,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+2,9,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+2,9,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 2,9,0,0,0,"C","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 2,9,0,0,0,"C","KOMY","Kobresia myosuroides","Grass",63,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 2,9,0,0,0,"C","LEPY2","Lewisia pygmaea","Forb",3,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1286,7 +1286,7 @@
 2,9,0,0,0,"C","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 2,9,0,0,0,"C","MIOB2","Minuartia obtusiloba","Forb",2,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 2,9,0,0,0,"C","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-2,9,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",1,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+2,9,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",1,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 2,9,0,0,0,"C","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 2,9,0,0,0,"C","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,9,0,0,0,"C","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -1342,11 +1342,11 @@
 2,10,1,1,1,"N+P+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 2,10,1,1,1,"N+P+K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,10,1,1,1,"N+P+K","FEBR","Festuca brachyphylla","Grass",7,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-2,10,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-2,10,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+2,10,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+2,10,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 2,10,1,1,1,"N+P+K","GERO2","Geum rossii","Forb",12,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-2,10,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-2,10,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+2,10,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+2,10,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 2,10,1,1,1,"N+P+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 2,10,1,1,1,"N+P+K","KOMY","Kobresia myosuroides","Grass",25,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 2,10,1,1,1,"N+P+K","LEPY2","Lewisia pygmaea","Forb",3,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1355,7 +1355,7 @@
 2,10,1,1,1,"N+P+K","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 2,10,1,1,1,"N+P+K","MIOB2","Minuartia obtusiloba","Forb",2,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 2,10,1,1,1,"N+P+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-2,10,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+2,10,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 2,10,1,1,1,"N+P+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 2,10,1,1,1,"N+P+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 2,10,1,1,1,"N+P+K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -1411,11 +1411,11 @@
 3,1,0,0,0,"C","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 3,1,0,0,0,"C","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,1,0,0,0,"C","FEBR","Festuca brachyphylla","Grass",3,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-3,1,0,0,0,"C","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-3,1,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+3,1,0,0,0,"C","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+3,1,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 3,1,0,0,0,"C","GERO2","Geum rossii","Forb",2,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-3,1,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-3,1,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+3,1,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+3,1,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 3,1,0,0,0,"C","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 3,1,0,0,0,"C","KOMY","Kobresia myosuroides","Grass",41,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 3,1,0,0,0,"C","LEPY2","Lewisia pygmaea","Forb",1,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1424,7 +1424,7 @@
 3,1,0,0,0,"C","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 3,1,0,0,0,"C","MIOB2","Minuartia obtusiloba","Forb",2,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 3,1,0,0,0,"C","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-3,1,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+3,1,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 3,1,0,0,0,"C","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 3,1,0,0,0,"C","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,1,0,0,0,"C","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -1480,11 +1480,11 @@
 3,2,0,0,1,"K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 3,2,0,0,1,"K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,2,0,0,1,"K","FEBR","Festuca brachyphylla","Grass",5,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-3,2,0,0,1,"K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-3,2,0,0,1,"K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+3,2,0,0,1,"K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+3,2,0,0,1,"K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 3,2,0,0,1,"K","GERO2","Geum rossii","Forb",0,0,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-3,2,0,0,1,"K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-3,2,0,0,1,"K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+3,2,0,0,1,"K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+3,2,0,0,1,"K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 3,2,0,0,1,"K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 3,2,0,0,1,"K","KOMY","Kobresia myosuroides","Grass",30,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 3,2,0,0,1,"K","LEPY2","Lewisia pygmaea","Forb",0.25,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1493,7 +1493,7 @@
 3,2,0,0,1,"K","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 3,2,0,0,1,"K","MIOB2","Minuartia obtusiloba","Forb",7,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 3,2,0,0,1,"K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-3,2,0,0,1,"K","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+3,2,0,0,1,"K","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 3,2,0,0,1,"K","PACA15","Packera cana","Forb",1,1,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 3,2,0,0,1,"K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,2,0,0,1,"K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -1549,11 +1549,11 @@
 3,3,0,1,0,"P","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 3,3,0,1,0,"P","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,3,0,1,0,"P","FEBR","Festuca brachyphylla","Grass",9,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-3,3,0,1,0,"P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-3,3,0,1,0,"P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+3,3,0,1,0,"P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+3,3,0,1,0,"P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 3,3,0,1,0,"P","GERO2","Geum rossii","Forb",1,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-3,3,0,1,0,"P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-3,3,0,1,0,"P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+3,3,0,1,0,"P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+3,3,0,1,0,"P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 3,3,0,1,0,"P","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 3,3,0,1,0,"P","KOMY","Kobresia myosuroides","Grass",48,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 3,3,0,1,0,"P","LEPY2","Lewisia pygmaea","Forb",1,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1562,7 +1562,7 @@
 3,3,0,1,0,"P","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 3,3,0,1,0,"P","MIOB2","Minuartia obtusiloba","Forb",1,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 3,3,0,1,0,"P","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-3,3,0,1,0,"P","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+3,3,0,1,0,"P","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 3,3,0,1,0,"P","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 3,3,0,1,0,"P","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,3,0,1,0,"P","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -1618,11 +1618,11 @@
 3,4,1,0,0,"N","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 3,4,1,0,0,"N","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,4,1,0,0,"N","FEBR","Festuca brachyphylla","Grass",4,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-3,4,1,0,0,"N","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-3,4,1,0,0,"N","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+3,4,1,0,0,"N","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+3,4,1,0,0,"N","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 3,4,1,0,0,"N","GERO2","Geum rossii","Forb",0,0,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-3,4,1,0,0,"N","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-3,4,1,0,0,"N","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+3,4,1,0,0,"N","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+3,4,1,0,0,"N","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 3,4,1,0,0,"N","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 3,4,1,0,0,"N","KOMY","Kobresia myosuroides","Grass",75,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 3,4,1,0,0,"N","LEPY2","Lewisia pygmaea","Forb",0.25,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1631,7 +1631,7 @@
 3,4,1,0,0,"N","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 3,4,1,0,0,"N","MIOB2","Minuartia obtusiloba","Forb",0,0,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 3,4,1,0,0,"N","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-3,4,1,0,0,"N","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+3,4,1,0,0,"N","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 3,4,1,0,0,"N","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 3,4,1,0,0,"N","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,4,1,0,0,"N","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -1687,11 +1687,11 @@
 3,5,0,1,1,"P+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 3,5,0,1,1,"P+K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,5,0,1,1,"P+K","FEBR","Festuca brachyphylla","Grass",4,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-3,5,0,1,1,"P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-3,5,0,1,1,"P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+3,5,0,1,1,"P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+3,5,0,1,1,"P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 3,5,0,1,1,"P+K","GERO2","Geum rossii","Forb",11,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-3,5,0,1,1,"P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-3,5,0,1,1,"P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+3,5,0,1,1,"P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+3,5,0,1,1,"P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 3,5,0,1,1,"P+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 3,5,0,1,1,"P+K","KOMY","Kobresia myosuroides","Grass",61,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 3,5,0,1,1,"P+K","LEPY2","Lewisia pygmaea","Forb",3,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1700,7 +1700,7 @@
 3,5,0,1,1,"P+K","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 3,5,0,1,1,"P+K","MIOB2","Minuartia obtusiloba","Forb",0,0,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 3,5,0,1,1,"P+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-3,5,0,1,1,"P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",1,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+3,5,0,1,1,"P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",1,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 3,5,0,1,1,"P+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 3,5,0,1,1,"P+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,5,0,1,1,"P+K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -1756,11 +1756,11 @@
 3,6,1,0,1,"N+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 3,6,1,0,1,"N+K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,6,1,0,1,"N+K","FEBR","Festuca brachyphylla","Grass",2,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-3,6,1,0,1,"N+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-3,6,1,0,1,"N+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+3,6,1,0,1,"N+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+3,6,1,0,1,"N+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 3,6,1,0,1,"N+K","GERO2","Geum rossii","Forb",0,0,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-3,6,1,0,1,"N+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-3,6,1,0,1,"N+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+3,6,1,0,1,"N+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+3,6,1,0,1,"N+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 3,6,1,0,1,"N+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 3,6,1,0,1,"N+K","KOMY","Kobresia myosuroides","Grass",46,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 3,6,1,0,1,"N+K","LEPY2","Lewisia pygmaea","Forb",2,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1769,7 +1769,7 @@
 3,6,1,0,1,"N+K","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 3,6,1,0,1,"N+K","MIOB2","Minuartia obtusiloba","Forb",1,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 3,6,1,0,1,"N+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-3,6,1,0,1,"N+K","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+3,6,1,0,1,"N+K","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 3,6,1,0,1,"N+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 3,6,1,0,1,"N+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,6,1,0,1,"N+K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -1825,11 +1825,11 @@
 3,7,1,1,0,"N+P","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 3,7,1,1,0,"N+P","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,7,1,1,0,"N+P","FEBR","Festuca brachyphylla","Grass",4,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-3,7,1,1,0,"N+P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-3,7,1,1,0,"N+P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+3,7,1,1,0,"N+P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+3,7,1,1,0,"N+P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 3,7,1,1,0,"N+P","GERO2","Geum rossii","Forb",43,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-3,7,1,1,0,"N+P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-3,7,1,1,0,"N+P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+3,7,1,1,0,"N+P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+3,7,1,1,0,"N+P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 3,7,1,1,0,"N+P","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 3,7,1,1,0,"N+P","KOMY","Kobresia myosuroides","Grass",26,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 3,7,1,1,0,"N+P","LEPY2","Lewisia pygmaea","Forb",3,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1838,7 +1838,7 @@
 3,7,1,1,0,"N+P","MELA3","Mertensia lanceolata","Forb",1,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 3,7,1,1,0,"N+P","MIOB2","Minuartia obtusiloba","Forb",0,0,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 3,7,1,1,0,"N+P","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-3,7,1,1,0,"N+P","ORALA","Oreoxis alpina ssp. alpina","Forb",4,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+3,7,1,1,0,"N+P","ORALA","Oreoxis alpina ssp. alpina","Forb",4,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 3,7,1,1,0,"N+P","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 3,7,1,1,0,"N+P","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,7,1,1,0,"N+P","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -1894,11 +1894,11 @@
 3,8,1,1,1,"N+P+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 3,8,1,1,1,"N+P+K","ERSI3","Erigeron simplex","Forb",1,1,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,8,1,1,1,"N+P+K","FEBR","Festuca brachyphylla","Grass",9,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-3,8,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-3,8,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+3,8,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+3,8,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 3,8,1,1,1,"N+P+K","GERO2","Geum rossii","Forb",11,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-3,8,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-3,8,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+3,8,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+3,8,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 3,8,1,1,1,"N+P+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 3,8,1,1,1,"N+P+K","KOMY","Kobresia myosuroides","Grass",30,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 3,8,1,1,1,"N+P+K","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1907,7 +1907,7 @@
 3,8,1,1,1,"N+P+K","MELA3","Mertensia lanceolata","Forb",1,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 3,8,1,1,1,"N+P+K","MIOB2","Minuartia obtusiloba","Forb",12,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 3,8,1,1,1,"N+P+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-3,8,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+3,8,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 3,8,1,1,1,"N+P+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 3,8,1,1,1,"N+P+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,8,1,1,1,"N+P+K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -1963,11 +1963,11 @@
 3,9,0,0,0,"C","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 3,9,0,0,0,"C","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,9,0,0,0,"C","FEBR","Festuca brachyphylla","Grass",0.25,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-3,9,0,0,0,"C","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-3,9,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+3,9,0,0,0,"C","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+3,9,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 3,9,0,0,0,"C","GERO2","Geum rossii","Forb",3,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-3,9,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-3,9,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+3,9,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+3,9,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 3,9,0,0,0,"C","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 3,9,0,0,0,"C","KOMY","Kobresia myosuroides","Grass",32,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 3,9,0,0,0,"C","LEPY2","Lewisia pygmaea","Forb",2,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -1976,7 +1976,7 @@
 3,9,0,0,0,"C","MELA3","Mertensia lanceolata","Forb",1,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 3,9,0,0,0,"C","MIOB2","Minuartia obtusiloba","Forb",6,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 3,9,0,0,0,"C","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-3,9,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",4,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+3,9,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",4,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 3,9,0,0,0,"C","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 3,9,0,0,0,"C","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,9,0,0,0,"C","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -2032,11 +2032,11 @@
 3,10,1,1,1,"N+P+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 3,10,1,1,1,"N+P+K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,10,1,1,1,"N+P+K","FEBR","Festuca brachyphylla","Grass",24,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-3,10,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-3,10,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+3,10,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+3,10,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 3,10,1,1,1,"N+P+K","GERO2","Geum rossii","Forb",1,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-3,10,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-3,10,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+3,10,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+3,10,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 3,10,1,1,1,"N+P+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 3,10,1,1,1,"N+P+K","KOMY","Kobresia myosuroides","Grass",23,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 3,10,1,1,1,"N+P+K","LEPY2","Lewisia pygmaea","Forb",1,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -2045,7 +2045,7 @@
 3,10,1,1,1,"N+P+K","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 3,10,1,1,1,"N+P+K","MIOB2","Minuartia obtusiloba","Forb",2,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 3,10,1,1,1,"N+P+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-3,10,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+3,10,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 3,10,1,1,1,"N+P+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 3,10,1,1,1,"N+P+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 3,10,1,1,1,"N+P+K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -2101,11 +2101,11 @@
 4,1,0,0,0,"C","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 4,1,0,0,0,"C","ERSI3","Erigeron simplex","Forb",2,1,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,1,0,0,0,"C","FEBR","Festuca brachyphylla","Grass",1,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-4,1,0,0,0,"C","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-4,1,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+4,1,0,0,0,"C","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+4,1,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 4,1,0,0,0,"C","GERO2","Geum rossii","Forb",5,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-4,1,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-4,1,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+4,1,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+4,1,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 4,1,0,0,0,"C","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 4,1,0,0,0,"C","KOMY","Kobresia myosuroides","Grass",32,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 4,1,0,0,0,"C","LEPY2","Lewisia pygmaea","Forb",0.25,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -2114,7 +2114,7 @@
 4,1,0,0,0,"C","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 4,1,0,0,0,"C","MIOB2","Minuartia obtusiloba","Forb",4,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 4,1,0,0,0,"C","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-4,1,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",1,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+4,1,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",1,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 4,1,0,0,0,"C","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 4,1,0,0,0,"C","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,1,0,0,0,"C","PEPA3","Pedicularis parryi","Forb",2,1,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -2170,11 +2170,11 @@
 4,2,0,0,1,"K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 4,2,0,0,1,"K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,2,0,0,1,"K","FEBR","Festuca brachyphylla","Grass",2,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-4,2,0,0,1,"K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-4,2,0,0,1,"K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+4,2,0,0,1,"K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+4,2,0,0,1,"K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 4,2,0,0,1,"K","GERO2","Geum rossii","Forb",3,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-4,2,0,0,1,"K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-4,2,0,0,1,"K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+4,2,0,0,1,"K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+4,2,0,0,1,"K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 4,2,0,0,1,"K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 4,2,0,0,1,"K","KOMY","Kobresia myosuroides","Grass",62,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 4,2,0,0,1,"K","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -2183,7 +2183,7 @@
 4,2,0,0,1,"K","MELA3","Mertensia lanceolata","Forb",3,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 4,2,0,0,1,"K","MIOB2","Minuartia obtusiloba","Forb",5,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 4,2,0,0,1,"K","NOMOM","Noccaea montana var. montana","Forb",2,1,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-4,2,0,0,1,"K","ORALA","Oreoxis alpina ssp. alpina","Forb",7,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+4,2,0,0,1,"K","ORALA","Oreoxis alpina ssp. alpina","Forb",7,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 4,2,0,0,1,"K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 4,2,0,0,1,"K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,2,0,0,1,"K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -2239,11 +2239,11 @@
 4,3,0,1,0,"P","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 4,3,0,1,0,"P","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,3,0,1,0,"P","FEBR","Festuca brachyphylla","Grass",4,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-4,3,0,1,0,"P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-4,3,0,1,0,"P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+4,3,0,1,0,"P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+4,3,0,1,0,"P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 4,3,0,1,0,"P","GERO2","Geum rossii","Forb",17,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-4,3,0,1,0,"P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-4,3,0,1,0,"P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+4,3,0,1,0,"P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+4,3,0,1,0,"P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 4,3,0,1,0,"P","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 4,3,0,1,0,"P","KOMY","Kobresia myosuroides","Grass",38,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 4,3,0,1,0,"P","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -2252,7 +2252,7 @@
 4,3,0,1,0,"P","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 4,3,0,1,0,"P","MIOB2","Minuartia obtusiloba","Forb",8,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 4,3,0,1,0,"P","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-4,3,0,1,0,"P","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+4,3,0,1,0,"P","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 4,3,0,1,0,"P","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 4,3,0,1,0,"P","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,3,0,1,0,"P","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -2308,11 +2308,11 @@
 4,4,1,0,0,"N","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 4,4,1,0,0,"N","ERSI3","Erigeron simplex","Forb",1,1,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,4,1,0,0,"N","FEBR","Festuca brachyphylla","Grass",2,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-4,4,1,0,0,"N","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-4,4,1,0,0,"N","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+4,4,1,0,0,"N","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+4,4,1,0,0,"N","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 4,4,1,0,0,"N","GERO2","Geum rossii","Forb",5,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-4,4,1,0,0,"N","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-4,4,1,0,0,"N","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+4,4,1,0,0,"N","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+4,4,1,0,0,"N","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 4,4,1,0,0,"N","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 4,4,1,0,0,"N","KOMY","Kobresia myosuroides","Grass",60,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 4,4,1,0,0,"N","LEPY2","Lewisia pygmaea","Forb",1,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -2321,7 +2321,7 @@
 4,4,1,0,0,"N","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 4,4,1,0,0,"N","MIOB2","Minuartia obtusiloba","Forb",5,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 4,4,1,0,0,"N","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-4,4,1,0,0,"N","ORALA","Oreoxis alpina ssp. alpina","Forb",5,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+4,4,1,0,0,"N","ORALA","Oreoxis alpina ssp. alpina","Forb",5,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 4,4,1,0,0,"N","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 4,4,1,0,0,"N","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,4,1,0,0,"N","PEPA3","Pedicularis parryi","Forb",4,1,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -2377,11 +2377,11 @@
 4,5,0,1,1,"P+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 4,5,0,1,1,"P+K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,5,0,1,1,"P+K","FEBR","Festuca brachyphylla","Grass",3,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-4,5,0,1,1,"P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-4,5,0,1,1,"P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+4,5,0,1,1,"P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+4,5,0,1,1,"P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 4,5,0,1,1,"P+K","GERO2","Geum rossii","Forb",17,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-4,5,0,1,1,"P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-4,5,0,1,1,"P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+4,5,0,1,1,"P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+4,5,0,1,1,"P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 4,5,0,1,1,"P+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 4,5,0,1,1,"P+K","KOMY","Kobresia myosuroides","Grass",42,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 4,5,0,1,1,"P+K","LEPY2","Lewisia pygmaea","Forb",0.25,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -2390,7 +2390,7 @@
 4,5,0,1,1,"P+K","MELA3","Mertensia lanceolata","Forb",1,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 4,5,0,1,1,"P+K","MIOB2","Minuartia obtusiloba","Forb",5,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 4,5,0,1,1,"P+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-4,5,0,1,1,"P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+4,5,0,1,1,"P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",0,0,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 4,5,0,1,1,"P+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 4,5,0,1,1,"P+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,5,0,1,1,"P+K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -2446,11 +2446,11 @@
 4,6,1,0,1,"N+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 4,6,1,0,1,"N+K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,6,1,0,1,"N+K","FEBR","Festuca brachyphylla","Grass",2,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-4,6,1,0,1,"N+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-4,6,1,0,1,"N+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+4,6,1,0,1,"N+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+4,6,1,0,1,"N+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 4,6,1,0,1,"N+K","GERO2","Geum rossii","Forb",3,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-4,6,1,0,1,"N+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-4,6,1,0,1,"N+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+4,6,1,0,1,"N+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+4,6,1,0,1,"N+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 4,6,1,0,1,"N+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 4,6,1,0,1,"N+K","KOMY","Kobresia myosuroides","Grass",42,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 4,6,1,0,1,"N+K","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -2459,7 +2459,7 @@
 4,6,1,0,1,"N+K","MELA3","Mertensia lanceolata","Forb",2,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 4,6,1,0,1,"N+K","MIOB2","Minuartia obtusiloba","Forb",13,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 4,6,1,0,1,"N+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-4,6,1,0,1,"N+K","ORALA","Oreoxis alpina ssp. alpina","Forb",20,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+4,6,1,0,1,"N+K","ORALA","Oreoxis alpina ssp. alpina","Forb",20,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 4,6,1,0,1,"N+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 4,6,1,0,1,"N+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,6,1,0,1,"N+K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -2515,11 +2515,11 @@
 4,7,1,1,0,"N+P","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 4,7,1,1,0,"N+P","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,7,1,1,0,"N+P","FEBR","Festuca brachyphylla","Grass",15,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-4,7,1,1,0,"N+P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-4,7,1,1,0,"N+P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+4,7,1,1,0,"N+P","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+4,7,1,1,0,"N+P","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 4,7,1,1,0,"N+P","GERO2","Geum rossii","Forb",1,1,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-4,7,1,1,0,"N+P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-4,7,1,1,0,"N+P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+4,7,1,1,0,"N+P","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+4,7,1,1,0,"N+P","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 4,7,1,1,0,"N+P","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 4,7,1,1,0,"N+P","KOMY","Kobresia myosuroides","Grass",31,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 4,7,1,1,0,"N+P","LEPY2","Lewisia pygmaea","Forb",3,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -2528,7 +2528,7 @@
 4,7,1,1,0,"N+P","MELA3","Mertensia lanceolata","Forb",0,0,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 4,7,1,1,0,"N+P","MIOB2","Minuartia obtusiloba","Forb",0,0,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 4,7,1,1,0,"N+P","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-4,7,1,1,0,"N+P","ORALA","Oreoxis alpina ssp. alpina","Forb",1,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+4,7,1,1,0,"N+P","ORALA","Oreoxis alpina ssp. alpina","Forb",1,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 4,7,1,1,0,"N+P","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 4,7,1,1,0,"N+P","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,7,1,1,0,"N+P","PEPA3","Pedicularis parryi","Forb",13,1,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -2584,11 +2584,11 @@
 4,8,1,1,1,"N+P+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 4,8,1,1,1,"N+P+K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,8,1,1,1,"N+P+K","FEBR","Festuca brachyphylla","Grass",8,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-4,8,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-4,8,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+4,8,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+4,8,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 4,8,1,1,1,"N+P+K","GERO2","Geum rossii","Forb",0,0,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-4,8,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-4,8,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+4,8,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+4,8,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 4,8,1,1,1,"N+P+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 4,8,1,1,1,"N+P+K","KOMY","Kobresia myosuroides","Grass",43,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 4,8,1,1,1,"N+P+K","LEPY2","Lewisia pygmaea","Forb",1,1,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -2597,7 +2597,7 @@
 4,8,1,1,1,"N+P+K","MELA3","Mertensia lanceolata","Forb",2,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 4,8,1,1,1,"N+P+K","MIOB2","Minuartia obtusiloba","Forb",3,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 4,8,1,1,1,"N+P+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-4,8,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",19,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+4,8,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",19,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 4,8,1,1,1,"N+P+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 4,8,1,1,1,"N+P+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,8,1,1,1,"N+P+K","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -2653,11 +2653,11 @@
 4,9,0,0,0,"C","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 4,9,0,0,0,"C","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,9,0,0,0,"C","FEBR","Festuca brachyphylla","Grass",0.25,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-4,9,0,0,0,"C","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-4,9,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+4,9,0,0,0,"C","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+4,9,0,0,0,"C","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 4,9,0,0,0,"C","GERO2","Geum rossii","Forb",0,0,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-4,9,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-4,9,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+4,9,0,0,0,"C","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+4,9,0,0,0,"C","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 4,9,0,0,0,"C","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 4,9,0,0,0,"C","KOMY","Kobresia myosuroides","Grass",35,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 4,9,0,0,0,"C","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -2666,7 +2666,7 @@
 4,9,0,0,0,"C","MELA3","Mertensia lanceolata","Forb",2,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 4,9,0,0,0,"C","MIOB2","Minuartia obtusiloba","Forb",1,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 4,9,0,0,0,"C","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-4,9,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",2,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+4,9,0,0,0,"C","ORALA","Oreoxis alpina ssp. alpina","Forb",2,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 4,9,0,0,0,"C","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 4,9,0,0,0,"C","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,9,0,0,0,"C","PEPA3","Pedicularis parryi","Forb",0,0,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"
@@ -2722,11 +2722,11 @@
 4,10,1,1,1,"N+P+K","ERPI6","Erigeron pinnatisectus","Forb",0,0,"ERPI6","Erigeron pinnatisectus (A. Gray) A. Nelson","featherleaf fleabane","Dicot","Asteraceae","Aster family","Perennial","Forb/herb","L48 (N)"
 4,10,1,1,1,"N+P+K","ERSI3","Erigeron simplex","Forb",0,0,"ERSI3","Erigeron simplex Greene","onestem fleabane","Dicot","Asteraceae","Aster family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,10,1,1,1,"N+P+K","FEBR","Festuca brachyphylla","Grass",18,1,"FEBR","Festuca brachyphylla Schult. ex Schult. & Schult. f.","alpine fescue","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
-4,10,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
-4,10,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,NA,"Forb/herb",NA
+4,10,1,1,1,"N+P+K","FORB1","Unk forb1","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
+4,10,1,1,1,"N+P+K","FORB2","Unk forb2","Forb",0,0,"2FORB",NA,"Forb (herbaceous, not grass nor grass-like)",NA,NA,NA,"Perennial","Forb/herb",NA
 4,10,1,1,1,"N+P+K","GERO2","Geum rossii","Forb",0,0,"GERO2","Geum rossii (R. Br.) Ser.","Ross' avens","Dicot","Rosaceae","Rose family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N), GL (N)"
-4,10,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
-4,10,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,NA,"Graminoid",NA
+4,10,1,1,1,"N+P+K","GRASS1","Unk grass1","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
+4,10,1,1,1,"N+P+K","GRASS2","Unk grass2","Grass",0,0,"2GRAM",NA,"Graminoid (grass or grass-like)",NA,NA,NA,"Perennial","Graminoid",NA
 4,10,1,1,1,"N+P+K","HEMO3","Helictotrichon mortonianum","Grass",0,0,"HEMO3","Helictotrichon mortonianum (Scribn.) Henr.","Morton's alpine oatgrass","Monocot","Poaceae","Grass family","Perennial","Graminoid","L48 (N)"
 4,10,1,1,1,"N+P+K","KOMY","Kobresia myosuroides","Grass",29,1,"KOMY","Kobresia myosuroides (Vill.) Fiori","Bellardi bog sedge","Monocot","Cyperaceae","Sedge family","Perennial","Graminoid","L48 (N), AK (N), CAN (N), GL (N)"
 4,10,1,1,1,"N+P+K","LEPY2","Lewisia pygmaea","Forb",0,0,"LEPY2","Lewisia pygmaea (A. Gray) B.L. Rob.","alpine lewisia","Dicot","Portulacaceae","Purslane family","Perennial","Forb/herb","L48 (N), AK (N), CAN (N)"
@@ -2735,7 +2735,7 @@
 4,10,1,1,1,"N+P+K","MELA3","Mertensia lanceolata","Forb",1,1,"MELA3","Mertensia lanceolata (Pursh) DC.","prairie bluebells","Dicot","Boraginaceae","Borage family","Perennial","Forb/herb","L48 (N), CAN (N)"
 4,10,1,1,1,"N+P+K","MIOB2","Minuartia obtusiloba","Forb",7,1,"MIOB2","Minuartia obtusiloba (Rydb.) House","twinflower sandwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N), AK (N), CAN (N)"
 4,10,1,1,1,"N+P+K","NOMOM","Noccaea montana var. montana","Forb",0,0,"NOFEG","Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch","alpine pennycress","Dicot","Brassicaceae","Mustard family","Perennial","Forb/herb","L48 (N)"
-4,10,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",13,1,"ORAL","Oreoxis alpina (A. Gray) J.M. Coult. & Rose","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
+4,10,1,1,1,"N+P+K","ORALA","Oreoxis alpina ssp. alpina","Forb",13,1,"ORALA","Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina","alpine oreoxis","Dicot","Apiaceae","Carrot family","Perennial","Forb/herb","L48 (N)"
 4,10,1,1,1,"N+P+K","PACA15","Packera cana","Forb",0,0,"PACA15","Packera cana (Hook.) W.A. Weber & Á. Löve","woolly groundsel","Dicot","Asteraceae","Aster family","Perennial","Forb/herb, Subshrub","L48 (N), CAN (N)"
 4,10,1,1,1,"N+P+K","PAPU2","Paronychia pulvinata","Forb",0,0,"PAPU2","Paronychia pulvinata A. Gray","Rocky Mountain nailwort","Dicot","Caryophyllaceae","Pink family","Perennial","Subshrub, Forb/herb","L48 (N)"
 4,10,1,1,1,"N+P+K","PEPA3","Pedicularis parryi","Forb",5,1,"PEPA3","Pedicularis parryi A. Gray","Parry's lousewort","Dicot","Scrophulariaceae","Figwort family","Perennial","Forb/herb","L48 (N)"

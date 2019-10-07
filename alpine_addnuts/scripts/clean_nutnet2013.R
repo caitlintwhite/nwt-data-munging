@@ -9,6 +9,7 @@
 
 
 # -- SETUP ----
+rm(list = ls())
 library(tidyverse)
 library(readxl)
 library(vegan)
@@ -189,9 +190,9 @@ sppcodes$Spp <- paste0(casefold(substr(sppcodes$Spp, 1,1), upper = T), substr(sp
 sppcodes$Spp <- gsub("UNK", "Unk", sppcodes$Spp)
 
 # which of these codes are not in CTW's lookup table?
-sppcodes[!sppcodes$CODE %in% sdlnnLUT$code,] # all but 5..
-# wood and some species noted as combined.. see nutnet notes spreadsheet:
-sppcomp1[["notes"]] # recode trpa5 as trpap, others were not hit or present, wood = 2LTRWS (Litter, woody, <2.5cm) [in CTW LUT]
+sppcodes[!sppcodes$CODE %in% sdlnnLUT$code,] # all but 4..
+# some species noted as combined.. see nutnet notes spreadsheet:
+sppcomp1[["notes"]] # recode trpa5 as trpap, others were not hit or present
 
 # compare names
 sppcodes <- left_join(sppcodes, sdlnnLUT, by = c("CODE" = "code"))
@@ -209,26 +210,19 @@ sppcomp.long <- gather(sppcomp1.2, Code, Hits, (grep("tot_treat", names(sppcomp1
          Block = as.numeric(gsub("B", "", Block))) %>%
   # clean up colnames to match biomass
   rename(FullTreatment = tot_treat) %>%
-  # recode 2WOOD with something in CTW LUT that will match to correct USDA code
-  mutate(Code = gsub("2WOOD", "WOOD", Code)) %>%
   # join CTW LUT to correct spp codes to USDA codes
   left_join(sdlnnLUT, by = c("Code" = "code")) %>%
-  # recode 2WOOD back to original code to join nutnet names
-  mutate(Code = gsub("WOOD", "2WOOD", Code)) %>%
   left_join(sppcodes[c("CODE", "Spp")], by = c("Code" = "CODE")) %>%
   dplyr::select(Block:FullTreatment, Code, Spp, clean_code2, Hits:ncol(.))
 
-# fill in empty common name with unk codes common name for non-vascular veg cover
-needscommon <- unique(sppcomp.long$clean_code2[is.na(sppcomp.long$Common_Name)])
-for(i in needscommon){
-  sppcomp.long$Common_Name[sppcomp.long$clean_code2 == i] <- unkcodes$Common.Name[unkcodes$SYMBOL == i]
-}
+# # fill in empty common name with unk codes common name for non-vascular veg cover
+# needscommon <- unique(sppcomp.long$clean_code2[is.na(sppcomp.long$Common_Name)])
+# for(i in needscommon){
+#   sppcomp.long$Common_Name[sppcomp.long$clean_code2 == i] <- unkcodes$Common.Name[unkcodes$SYMBOL == i]
+# }
 # check for NAs
 summary(is.na(sppcomp.long$Common_Name)) # nope!
 
-# clean up Growth Habit values for unk forbs and grams
-sppcomp.long$Growth_Habit[sppcomp.long$clean_code2 == "2FORB"] <- "Forb/herb"
-sppcomp.long$Growth_Habit[sppcomp.long$clean_code2 == "2GRAM"] <- "Graminoid"
 
 # add in simple functional group
 sppcomp.long$Group <- with(sppcomp.long, ifelse(grepl("Fabace", Family), "Legume",
@@ -259,7 +253,7 @@ sppcomp.wide.final <- sppcomp1.2 %>%
   # strip B from block vals
   mutate(Block = as.numeric(gsub("B", "", Block))) %>%
   # reorder spp cols alphabetically
-  dplyr::select(Block:FullTreatment, sort(names(sppcomp.wide.final)[7:ncol(.)])) %>%
+  dplyr::select(Block:FullTreatment, sort(names(.)[7:ncol(.)])) %>%
   arrange(Block, Plot)
 
 
