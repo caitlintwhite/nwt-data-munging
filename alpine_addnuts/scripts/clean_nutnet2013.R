@@ -478,6 +478,13 @@ sppcomp.simple <- sppcomp.simple %>%
   dplyr::select(Site, Date, Block:ncol(.)) %>%
   arrange(Block, Plot, Code)
 
+# clean up "(ERIMEL?)" in spp Name
+sppcomp.simple <- mutate(sppcomp.simple, Name = ifelse(grepl("Erig.* melano", Name),
+                                                       str_extract(unique(sppcomp.simple$Name), "^.* melanocephalus"),Name))
+# check names
+sort(unique(sppcomp.simple$Name))
+
+
 
 # -- WRITE OUT FINAL DATASETS -----
 # specify pathway for writing out final datasets
