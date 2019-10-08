@@ -169,7 +169,7 @@ stack_anpp <- subset(anpp.long, Group != "Total") %>%  # remove derived bmass
          Date = as.Date("2013-08-02"), # last date of spp comp sampling (but not exactly sure when bmass clipped)
          Site = "NWT NutNet") %>%
   dplyr::select(Site, Date, DataType, Block, Plot, Subplot, Subsubplot,N:Group, ANPP_g_per_m2)
-  
+
 anpp2007.long <- nnanpp_2007 %>%
   gather(Group, ANPP_g, live_gram:trifolium) %>%
   # standardize bmass (is g/0.1m^2) (20x50cm clip)
@@ -184,7 +184,7 @@ anpp2007.long <- nnanpp_2007 %>%
          Site = "NWT NutNet") %>%
   # reorder cols
   dplyr::select(Site, Date, DataType, Block:Subsubplot, N:FullTreatment, Group, ANPP_g_per_m2)
-  
+
 stack_anpp <- rbind(stack_anpp, anpp2007.long) %>%
   # sort by date, block, plot and group
   arrange(Date, Block, Plot, Group)
@@ -348,8 +348,7 @@ sppcomp.long.final$Group[sppcomp.long.final$Code == "SEDES"] <- "Ground cover"
 sppcomp.long.final$Group[grepl("Non-vascular", sppcomp.long.final$Group)] <- "Ground cover"
 
 # clean up environment
-rm(sppcomp.long, bad, needscommon)
-
+rm(sppcomp.long, bad)
 
 
 # -- PREP AGGREGATE AND BIODIVERSITY FOR EDI -----
@@ -405,6 +404,79 @@ Sdiv # same order as biodiv, so can append values directly
 biodiv$Shannon_diversity <- Sdiv
 
 
+# -- SIMPLIFY LONG-FORM SPP COMP -----
+# simplify long-form dataset for SCE (remove Nutnet grouping) + add site info and dates
+sppcomp.simple <- sppcomp.long.final %>%
+  mutate(Site = "NWT NutNet") %>%
+  dplyr::select(Site, Block:Name, Hits:ncol(.)) %>%
+  # append USDA to USDA cols
+  rename_at((grep("USDA", names(.))+1):ncol(.), function(x)paste("USDA", x, sep = "_"))
+
+# each block-workbook has the survey dates for spp comp.. need to iterate through and scrap those
+blockdats <- grep("_block", names(nnlist))
+datedat <- data.frame()
+for(i in blockdats){
+  templist <- nnlist[[i]]
+  # get position of data tabs that correspond to plot spp comp (have the date)
+  blocksheets <- grep("block", nnsheets[[i]])
+  for(b in blocksheets){
+    worksheet <- nnlist[[i]][[b]]
+    datepos <- grep("DATE", worksheet[[1]], ignore.case = T)
+    if(length(datepos) != 0){
+      tempdate <- worksheet[[2]][[datepos]] 
+
+      tempdat <- data.frame(item = nnsheets[[i]][[b]],
+                            datenum = tempdate,
+                            Date = as.Date(as.numeric(tempdate), origin = "1904-01-01"),
+                            Block = worksheet[[2]][[grep("BLOCK", worksheet[[1]], ignore.case = T)]],
+                            Plot = worksheet[[2]][[grep("PLOT", worksheet[[1]], ignore.case = T)]])
+      
+    } else{
+      # search for date in colnames
+      tempdate <- names(worksheet)[grep("DATE", names(worksheet))]
+      tempdate <- gsub("DATE: ", "", tempdate)
+      blockplot <- worksheet[[grep("Block", worksheet, ignore.case = T)]]
+      tempdat <- data.frame(item = nnsheets[[i]][[b]],
+                            datenum = tempdate,
+                            Date = as.Date(tempdate, format = "%B %d, %Y"),
+                            Block = parse_number(blockplot[[grep("BLOCK:", blockplot, ignore.case = T)]]),
+                            Plot = parse_number(blockplot[[grep("PLOT:", blockplot, ignore.case = T)]]))
+    }
+    
+    datedat <- rbind(datedat, tempdat)
+  }
+}
+
+# triage missing date data
+datedat <- datedat %>%
+  mutate(Plot = ifelse(is.na(Plot),parse_number(gsub("^.+plot ", "", datedat$item)),Plot),
+         Block = ifelse(is.na(Block),parse_number(gsub(" plot.*$", "", datedat$item)),Block))
+
+# get block 3 plot 8 9 10 dates
+block3 <- nnlist[[grep("block3", names(nnlist))]]
+for(i in 8:10){
+  worksheet <- block3[[grep(paste("plot", i), names(block3))]]
+  # date is in colnames
+  tempdate <- names(worksheet)[grep("DATE", names(worksheet))]
+  tempdate <- gsub("DATE: ", "", tempdate)
+  datedat$datenum[datedat$Block == 3 & datedat$Plot == i] <- tempdate
+  datedat$Date[datedat$Block == 3 & datedat$Plot == i] <- as.Date(tempdate, format = "%B %d, %Y")
+}
+
+# manually correct B1 7
+datedat$Date[datedat$Block == 1 & datedat$Plot == 7] <- as.Date(datedat$datenum[datedat$Block == 1 & datedat$Plot == 7], format = "%B %d %Y")
+# subset datedat to max date per block-plot
+datedat <- distinct(datedat[c("Block", "Plot", "Date")]) %>%
+  group_by(Block, Plot) %>%
+  filter(Date == max(Date)) %>%
+  ungroup() %>%
+  mutate_at(c("Block", "Plot"), as.numeric)
+
+# now, infill missing Dates
+sppcomp.simple <- sppcomp.simple %>%
+  left_join(datedat) %>%
+  dplyr::select(Site, Date, Block:ncol(.)) %>%
+  arrange(Block, Plot, Code)
 
 
 # -- WRITE OUT FINAL DATASETS -----
@@ -414,11 +486,12 @@ outpath <- "alpine_addnuts/output_data/nutnet2013_alldats/"
 # anpp, long and wide form + stacked for EDI
 write.csv(anpp.long, paste0(outpath, "nutnet2013_anpp_long.csv"), row.names = F)
 write.csv(anpp2.wide, paste0(outpath, "nutnet2013_anpp_wide.csv"), row.names = F)
-write.csv(stack_anpp, paste0(outpath, "nutnet_anpp_2007ongoing.csv"), row.names = F)
+write.csv(stack_anpp, paste0(outpath, "NWTnutnet_anpp_2007ongoing.csv"), row.names = F)
 
-# spp comp, long and wide form
+# spp comp, long and wide form, and simplified long-form spp comp
 write.csv(sppcomp.long.final, paste0(outpath, "nutnet2013_sppcomp_long.csv"), row.names = F)
 write.csv(sppcomp.wide.final, paste0(outpath, "nutnet2013_sppcomp_wide.csv"), row.names = F)
+write.csv(sppcomp.simple, paste0(outpath, "NWTnutnet_sppcomp_2013ongoing_long.csv"), row.names = F)
 
 # aggregate metrics, long form only
 write.csv(biodiv, paste0(outpath, "nutnet2013_aggregate_and_biodiversity.csv"), row.names = F)
