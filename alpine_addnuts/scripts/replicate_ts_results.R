@@ -272,7 +272,8 @@ nn13_biodiv_means
 total_anpp <- nn13_anpp %>%
   mutate(yr = ifelse(grepl("2013", as.character(Date)), 2013, 2007)) %>%
   group_by(yr, Block, Plot, FullTreatment) %>%
-  summarise(total_anpp = sum(ANPP_g_per_m2))
+  summarise(total_anpp = sum(ANPP_g_per_m2)) %>%
+  ungroup()
 
 # see if it changed over time
 total_anpp %>%
@@ -281,6 +282,15 @@ total_anpp %>%
   geom_point(alpha = 0.5, size = 2) +
   facet_wrap(~FullTreatment, scales = "free_x")
 
+mean_anpp_2013 <- subset(total_anpp, yr == 2013) %>%
+  mutate(FullTrt2 = gsub("([+]K)", "", FullTreatment),
+         FullTrt2 = gsub("K", "C", FullTrt2)) %>%
+  group_by(FullTrt2) %>%
+  summarise(meanANPP = mean(total_anpp),
+            se = sd(total_anpp)/sqrt(length(total_anpp)),
+            nobs = length(total_anpp))
+
+nn13_biodiv_means  
 # -- Table 2: NutNet 2017 biodiversity and vertical complexity ----
 
 
