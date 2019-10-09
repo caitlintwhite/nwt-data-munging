@@ -11,8 +11,9 @@
 # notes:
 # SADDLE
 # only 16 dry meadow plots consistently sampled across all three years
-# plant cover = % (FIRST hits that were vegetation/ all FIRST hits) [veg = not litter, rock or bare ground]
-# rel plant cov = % (number of hits of single species/total vascaular vegetation hits) <-- is this top or all hits?
+# plant cover = % (FIRST hits that were vegetation/ all FIRST hits) [veg = not litter, moss, lichen, rock or bare ground]
+# > but when look at nutnet spreadsheets, it's actually 100-sum(non-veg cover) bc i think the protocol is to only record non-veg if no live veg above
+# rel plant cov = % (number of hits of single species/total vascaular vegetation hits) <-- this ALL HITS!
 # 1997 only had top hits; 2012 and 2016 allowed multiple hits per points
 # > stat tests:
 # > full factorial, randomized, no blocks
@@ -20,6 +21,7 @@
 # NUTNET
 # +P and +P+K not sampled in 2017
 # 0.25 cover = present in 1m^2 plot but not hit
+# in nutnet 2013, selaginella = non-veg cover by nutnet analysis, meaning they wouldn't record selaginella if under any other plant (tim did in 2017, but only happened 2x. usually selaginella is the only species if it's at a point)
 # ran Shannon Div on NutNet (including species present but not hit)
 # 2 reps of C and +N+P+K so averaged those per block for subsequent calculations
 # > stat tests:
@@ -33,9 +35,9 @@ rm(list = ls())
 library(tidyverse)
 library(vegan)
 library(cowplot)
-options(stringsAsFactors = F)
-theme_set(theme_bw())
 na_vals <- c("", " ", NA, "NA", "NaN", NaN, ".")
+options(stringsAsFactors = F, strip.white = T, na.strings = na_vals)
+theme_set(theme_bw())
 
 
 # get data
@@ -54,6 +56,9 @@ sdlplots_full <- read.csv("alpine_addnuts/output_data/sdl_plots_lookup_trblshoot
 # read in prepped datasets where can pull top hits only
 nn17_wvert <- read.csv("alpine_addnuts/output_data/nutnet2017_vertical_sppcomp.csv") 
 sdl16_wvert <- read.csv("alpine_addnuts/output_data/sdl2016_vertical_sppcomp.csv") 
+# cleaned up 2013 nutnet (all spp hit and present, ctw cleaned up for SCE)
+nn13_clean <- read.csv("alpine_addnuts/output_data/nutnet2013_alldats/NWTnutnet_sppcomp_2013ongoing.csv") 
+nn13_anpp <- read.csv("alpine_addnuts/output_data/nutnet2013_alldats/NWTnutnet_anpp_2007ongoing.csv")
 
 
 
@@ -86,6 +91,197 @@ spplist <- spplist %>%
          # add nutnet grouping (Selaginella densa [spikemoss] = ground cover, not forb)
          nutnet_grp = ifelse(clean_code2 == "SEDES", "Ground cover", simple_lifeform2),
          nutnet_grp = ifelse(grepl("^2", clean_code2) & is.na(nutnet_grp), "Ground cover", simple_lifeform2))
+
+
+# -- QA check: does NN-provided 2013 data, presence-only-removed, match NN 2013 cover data Tim sent?----
+check2013 <- subset(nn13_clean, Hits > 0.25) %>%
+  arrange(Block, Plot, USDA_Symbol)
+plantcom2013 <- subset(plantcom,yr == 2013) %>%
+  mutate(block = substr(plotid, 2,2), 
+         plot = as.numeric(gsub("B[1-4]_", "", plotid))) %>%
+  arrange(block, plot, clean_code2)
+
+summary(check2013[c("Block", "Plot", "USDA_Symbol", "Hits")] == plantcom2013[c("block", "plot", "clean_code2", "hits")])
+#same
+
+
+# -- Fig 1 and 2: FORBS VS GRASSES (Figs 1 + 2) ----
+# (out of curiosity make similar time since exp onset plot to compare forb shift over time by site by trt)
+fgdat <- plantcom %>%
+  left_join(distinct(spplist[c("clean_code2", "simple_lifeform2")])) %>%
+  subset(!is.na(simple_lifeform2)) %>%
+  group_by(site, yr, plotid, simple_lifeform2) %>%
+  summarise(hits = sum(hits),
+            sppR = length(clean_code2)) %>%
+  ungroup() %>%
+  # add total hits col
+  group_by(site, yr, plotid) %>%
+  mutate(tothits = sum(hits)) %>%
+  ungroup() %>%
+  #calculate relcov
+  mutate(relcov = (hits/tothits)*100)
+
+# split out sdl and nutnet so can average C and N+P+K
+sdl_fg <- subset(fgdat, site == "sdl") %>%
+  # select only dry meadow plots consistently sampled
+  # subset to dry meadow plots surveyed across all years only (corresponds to what was surveyed in 1997)
+  ## should be plots 1-16
+  subset(plotid %in% unique(sdlplots$plot[!is.na(sdlplots$old_plot) & sdlplots$meadow == "Dry"])) %>%
+  # drop any shrubs (only in 2 rows, <1% relcov)
+  filter(simple_lifeform2 != "Shrub") %>%
+  # join site info
+  ## convert plotid from char to numeric to join with sdlplots df (nutnet has alpha chars in plotid)
+  mutate(plotid = as.numeric(plotid)) %>%
+  left_join(unique(sdlplots[c("plot", "trt")]), by = c("plotid" = "plot"))
+
+# visualize to check what to expect
+ggplot(sdl_fg, aes(yr, relcov, col = simple_lifeform2)) +
+  stat_summary() +
+  facet_wrap(~trt)
+
+sdl_fg_means <- data.frame(sdl_fg) %>%
+  group_by(site, yr, trt, simple_lifeform2) %>%
+  summarise(meancov = mean(relcov),
+            secov = sd(relcov)/sqrt(length(relcov)),
+            nobs = length(relcov)) %>%
+  # calculate yrs passed since start of exp
+  mutate(post_yrs = yr - 1993) %>%
+  as.data.frame()
+sdl_fg_means
+
+
+# nutnet
+## need to average N+P and C by block first (2 reps per block)
+nn_fg <- subset(fgdat, site == "nutnet") %>%
+  # join site data
+  full_join(nnplots) %>%
+  # recode 2017 N+K as N.. (so have 4 N trt plots, as is have 3 N and 1 N+K)
+  mutate(trt = ifelse(yr == 2017 & trt == "N+K", "N", trt)) %>%
+  # average reps in C and N+P+K by block
+  group_by(site, yr, block, trt, simple_lifeform2) %>%
+  mutate(relcov2 = mean(relcov),
+         # to verify 2 obs per C and N+P+K per block
+         nobs = length(relcov)) %>% # yes (checked manually)
+  ungroup()
+
+
+# visualize to check what to expect
+ggplot(subset(nn_fg, trt %in% c("C", "N", "N+P", "P")), aes(trt, relcov2, col = simple_lifeform2)) +
+  stat_summary() +
+  facet_wrap(~yr)
+
+# calculate table of means and ses
+nn_fg_means <- data.frame(nn_fg) %>%
+  dplyr::select(site, yr, block, trt, simple_lifeform2, relcov2) %>%
+  distinct() %>%
+  group_by(site, yr, trt, simple_lifeform2) %>%
+  summarise(meancov = mean(relcov2),
+            secov = sd(relcov2)/sqrt(length(relcov2)),
+            nobs = length(relcov2)) %>%
+  ungroup() %>%
+  # calculate yrs passed since start of exp
+  mutate(post_yrs = yr - 2008) %>%
+  as.data.frame()
+nn_fg_means
+
+
+# stack sdl and nutnet to plot means and ses by yr since trts initiated
+all_fg_means <- rbind(sdl_fg_means, nn_fg_means) %>%
+  # keep only trts of interest
+  subset(trt %in% c("C", "N", "P", "N+P")) %>%
+  mutate_at(vars("meancov", "secov", "nobs"), as.numeric)
+
+
+# plot means by time since experiment onset
+ggplot(subset(all_fg_means, simple_lifeform2 == "Forb"), aes(post_yrs, meancov, group = site, col = site)) +
+  #ggplot(all_fg_means, aes(post_yrs, meancov, group = site, fill = simple_lifeform2)) +
+  geom_errorbar(aes(ymax = meancov + secov, ymin = meancov - secov), width = 0) +
+  geom_point() +
+  #geom_line(aes(col = site)) +
+  scale_color_manual(name = "Site", values = c("salmon", "darkred")) +
+  labs(y = "Forb mean relative cover (%)",
+       x = "Years since experiment onset") +
+  scale_y_continuous(breaks = seq(20,80, 10)) +
+  facet_grid(.~trt)
+
+
+# -- Table 1: NutNet 2013 biodiversity and vertical complexity ----
+# only plots used in 2017??, Tim pooled +micro additions with otherwise similar (c, c+micro)
+# K+ only added in 2016, not added for 2013 surveys.. so in 2013 +micro is just +micro, and in 2017 those +micro plots are +micro+K+ (K as K2SO4)
+
+# build by plot:
+# richness, shannon div, plant cov (100- sum(non-veg hits)), sum veg hits
+# check codes with no growth habit value are non-veg
+sort(unique(nn13_clean$Code[is.na(nn13_clean$USDA_Growth_Habit)])) # yup
+nn13_biodiv <- nn13_clean %>%
+  subset(Hits > 0) %>%
+  mutate(CoverType = ifelse(is.na(USDA_Growth_Habit), "NonVascular", "Vascular"),
+         CoverType2 = ifelse(Code == "SEDES", "NonVascular", CoverType),
+         yr= 2013) %>%
+  group_by(yr, Block, Plot, N, P, `K.`, FullTreatment, CoverType2) %>%
+  summarise(AllHits = sum(Hits),
+            S = length(unique(Code))) %>%
+  ungroup() %>%
+  gather(met, val, AllHits, S) %>%
+  unite(cat, CoverType2, met) %>%
+  spread(cat, val, fill = 0) %>%
+  mutate(Plant_cover = 100-NonVascular_AllHits)
+
+# pre-plot summmaries
+nn13_biodiv %>%
+  gather(met, val, NonVascular_AllHits:ncol(.)) %>%
+  ggplot(aes(FullTreatment, val)) +
+  stat_summary() +
+  facet_wrap(~met, scales = "free_y") # the way to get Tim's table results are Selaginella = non-plant
+
+# collapse K into otherwise similar treatments to see if get exact means and ses from table
+nn13_biodiv %>%  
+  gather(met, val, NonVascular_AllHits:ncol(.)) %>%
+  mutate(FullTrt2 = gsub("([+]K)", "", FullTreatment),
+         FullTrt2 = gsub("K", "C", FullTrt2)) %>%
+  ggplot(aes(FullTrt2, val)) +
+  stat_summary() +
+  facet_wrap(~met, scales = "free_y")
+
+
+# shannon's div
+nn13_sppmatrix <- subset(nn13_clean, !is.na(USDA_Growth_Habit)) %>%
+  filter(Code != "SEDES") %>% # remove Selaginella if desire
+  mutate(plotid = paste(Block, Plot, sep = "_")) %>%
+  dplyr::select(plotid, Block, Plot, Code, Hits) %>%
+  spread(Code, Hits) %>%
+  arrange(Block, Plot) %>%
+  as.data.frame()
+rownames(nn13_sppmatrix) <- nn13_sppmatrix$plotid  
+
+nn13_rel <- decostand(nn13_sppmatrix[4:ncol(nn13_sppmatrix)], method = "total")
+nn13_biodiv$H <- diversity(nn13_rel) 
+
+# crunch table
+nn13_biodiv_means <- nn13_biodiv %>%
+  gather(met, val, NonVascular_AllHits:ncol(.)) %>%
+  mutate(FullTrt2 = gsub("([+]K)", "", FullTreatment),
+         FullTrt2 = gsub("K", "C", FullTrt2)) %>%
+  group_by(yr, FullTrt2, met) %>%
+  summarise(meanval = mean(val),
+            se = sd(val)/ sqrt(length(val)),
+            nobs = length(val)) %>%
+  subset(!grepl("NonVascular", met))
+nn13_biodiv_means
+
+total_anpp <- nn13_anpp %>%
+  mutate(yr = ifelse(grepl("2013", as.character(Date)), 2013, 2007)) %>%
+  group_by(yr, Block, Plot, FullTreatment) %>%
+  summarise(total_anpp = sum(ANPP_g_per_m2))
+
+# see if it changed over time
+total_anpp %>%
+  unite(site, Block, Plot, sep = "_") %>%
+  ggplot(aes(site, total_anpp, col = as.factor(yr))) +
+  geom_point(alpha = 0.5, size = 2) +
+  facet_wrap(~FullTreatment, scales = "free_x")
+
+# -- Table 2: NutNet 2017 biodiversity and vertical complexity ----
 
 
 
@@ -206,101 +402,3 @@ ggplot(all_means, aes(post_yrs, meancov, group = site, col = site)) +
 # -- ABUNDANT FORBS IN NUTNET 2017 (Table 4) -----
 
 
-# -- FORBS VS GRASSES (Figs 1 + 2) ----
-# (out of curiosity make similar time since exp onset plot to compare forb shift over time by site by trt)
-fgdat <- plantcom %>%
-  left_join(distinct(spplist[c("clean_code2", "simple_lifeform2")])) %>%
-  subset(!is.na(simple_lifeform2)) %>%
-  group_by(site, yr, plotid, simple_lifeform2) %>%
-  summarise(hits = sum(hits),
-            sppR = length(clean_code2)) %>%
-  ungroup() %>%
-  # add total hits col
-  group_by(site, yr, plotid) %>%
-  mutate(tothits = sum(hits)) %>%
-  ungroup() %>%
-  #calculate relcov
-  mutate(relcov = (hits/tothits)*100)
-
-# split out sdl and nutnet so can average C and N+P+K
-sdl_fg <- subset(fgdat, site == "sdl") %>%
-  # select only dry meadow plots consistently sampled
-  # subset to dry meadow plots surveyed across all years only (corresponds to what was surveyed in 1997)
-  ## should be plots 1-16
-  subset(plotid %in% unique(sdlplots$plot[!is.na(sdlplots$old_plot) & sdlplots$meadow == "Dry"])) %>%
-  # drop any shrubs (only in 2 rows, <1% relcov)
-  filter(simple_lifeform2 != "Shrub") %>%
-  # join site info
-  ## convert plotid from char to numeric to join with sdlplots df (nutnet has alpha chars in plotid)
-  mutate(plotid = as.numeric(plotid)) %>%
-  left_join(unique(sdlplots[c("plot", "trt")]), by = c("plotid" = "plot"))
-
-# visualize to check what to expect
-ggplot(sdl_fg, aes(yr, relcov, col = simple_lifeform2)) +
-  stat_summary() +
-  facet_wrap(~trt)
-
-sdl_fg_means <- data.frame(sdl_fg) %>%
-  group_by(site, yr, trt, simple_lifeform2) %>%
-  summarise(meancov = mean(relcov),
-            secov = sd(relcov)/sqrt(length(relcov)),
-            nobs = length(relcov)) %>%
-  # calculate yrs passed since start of exp
-  mutate(post_yrs = yr - 1993) %>%
-  as.data.frame()
-sdl_fg_means
-
-
-# nutnet
-## need to average N+P and C by block first (2 reps per block)
-nn_fg <- subset(fgdat, site == "nutnet") %>%
-  # join site data
-  full_join(nnplots) %>%
-  # recode 2017 N+K as N.. (so have 4 N trt plots, as is have 3 N and 1 N+K)
-  mutate(trt = ifelse(yr == 2017 & trt == "N+K", "N", trt)) %>%
-  # average reps in C and N+P+K by block
-  group_by(site, yr, block, trt, simple_lifeform2) %>%
-  mutate(relcov2 = mean(relcov),
-         # to verify 2 obs per C and N+P+K per block
-         nobs = length(relcov)) %>% # yes (checked manually)
-  ungroup()
-
-
-# visualize to check what to expect
-ggplot(subset(nn_fg, trt %in% c("C", "N", "N+P", "P")), aes(trt, relcov2, col = simple_lifeform2)) +
-  stat_summary() +
-  facet_wrap(~yr)
-
-# calculate table of means and ses
-nn_fg_means <- data.frame(nn_fg) %>%
-  dplyr::select(site, yr, block, trt, simple_lifeform2, relcov2) %>%
-  distinct() %>%
-  group_by(site, yr, trt, simple_lifeform2) %>%
-  summarise(meancov = mean(relcov2),
-            secov = sd(relcov2)/sqrt(length(relcov2)),
-            nobs = length(relcov2)) %>%
-  ungroup() %>%
-  # calculate yrs passed since start of exp
-  mutate(post_yrs = yr - 2008) %>%
-  as.data.frame()
-nn_fg_means
-
-
-# stack sdl and nutnet to plot means and ses by yr since trts initiated
-all_fg_means <- rbind(sdl_fg_means, nn_fg_means) %>%
-  # keep only trts of interest
-  subset(trt %in% c("C", "N", "P", "N+P")) %>%
-  mutate_at(vars("meancov", "secov", "nobs"), as.numeric)
-
-
-# plot means by time since experiment onset
-ggplot(subset(all_fg_means, simple_lifeform2 == "Forb"), aes(post_yrs, meancov, group = site, col = site)) +
-#ggplot(all_fg_means, aes(post_yrs, meancov, group = site, fill = simple_lifeform2)) +
-  geom_errorbar(aes(ymax = meancov + secov, ymin = meancov - secov), width = 0) +
-  geom_point() +
-  #geom_line(aes(col = site)) +
-  scale_color_manual(name = "Site", values = c("salmon", "darkred")) +
-  labs(y = "Forb mean relative cover (%)",
-       x = "Years since experiment onset") +
-  scale_y_continuous(breaks = seq(20,80, 10)) +
-  facet_grid(.~trt)
