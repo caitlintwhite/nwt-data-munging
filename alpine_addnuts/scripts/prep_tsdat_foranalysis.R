@@ -453,6 +453,74 @@ sdl16_wvert <- dplyr::select(sdl2016, -c(meadow, trt, sfcode)) %>%
   arrange(plot, point, hit)
 
 
+# -- PREP RICHNESS DATASETS -----
+# any years where spp presence (not hit) is available:
+## sdl 1997 (code = 999) and 2012 (code = 0.1), nutnet 2013 (code = 0.25)
+sdlpres97 <- subset(sdl1997, hits == 999) %>%
+  # correct 96 to 296
+  mutate(old_plot = ifelse(old_plot == 96, 296, old_plot),
+         # change presence value to nutnet presence value
+         hits = 0.25,
+         # add site and year
+         site = "sdl",
+         yr = 1997) %>%
+  #drop trt
+  dplyr::select(-trt) %>%
+  left_join(sdl_plots2, by = c("old_plot" = "old_plot97")) %>%
+  left_join(spplt[c("code", "clean_code2")], by = c("species" = "code")) %>%
+  # old plot 286 doesn't have a match for more current plot numbers.. preserve that, else keep plot values
+  mutate(plotid = ifelse(is.na(plot), old_plot, plot)) %>%
+  # same names as master for rbinding
+  dplyr::select(colnames(master_plant))
+# check for duplicates
+summary(duplicated(sdlpres97)) #none
+
+sdlpres12 <- subset(sdl2012, hits <1 & hits>0) %>% #to be sure no typos with 0.1
+  # only keep plot, species and hits
+  dplyr::select(plot, species, hits) %>%
+  # change presence value to nutnet presence value
+  mutate(hits = 0.25,
+         # add site and year
+         site = "sdl",
+         yr = 2002) %>%
+  left_join(sdl_plots2) %>%
+  left_join(spplt[c("code", "clean_code2")], by = c("species" = "code")) %>%
+  # rename plot colname to match master
+  rename(plotid = plot) %>% 
+  # same names as master for rbinding
+  dplyr::select(colnames(master_plant))
+# check for duplicates
+summary(duplicated(sdlpres12)) #none
+
+nnpres13 <- subset(nn13_sce, Hits == 0.25) %>%
+  # remove any "species" that were ground cover (one entry for 2BARE -- ctw looked and no unknown forbs or grasses are present only)
+  filter(!is.na(USDA_Growth_Habit)) %>%
+  mutate(plotid = paste0("B", Block, "_", Plot)) %>%
+  #lowercase colnames
+  rename_all(casefold) %>%
+  # rename usda_symbol to clean_code2
+  rename(clean_code2 = usda_symbol) %>%
+  mutate(site = "nutnet",
+         yr = 2013) %>%
+  dplyr::select(colnames(master_plant))
+
+# check for duplicates
+summary(duplicated(nnpres13)) # none
+
+# rbind all to master
+master_plant <- rbind(master_plant, sdlpres97, sdlpres12, nnpres13) %>%
+  #re-create block and plot to sort by numeric order
+  mutate(block = ifelse(site == "nutnet", parse_number(substr(plotid, 2,2)), NA),
+         plot = ifelse(site == "nutnet", parse_number(gsub(".*_", "", plotid)), as.numeric(plotid))) %>% #throws a warning message abut NAs but works fine
+  arrange(site, yr, block, plot, clean_code2) %>%
+    dplyr::select(-c(block, plot))
+  
+  
+# be sure spp present were not also recorded as hit
+group_by(master_plant, site, yr, plotid, clean_code2) %>%
+  summarise(nobs = length(hits)) %>%
+  summary() # obs per sp per site/yr/plot is always 1 (no species recorded as hit and present-only)
+
 
 # -- FINISHING -----
 # write out cleaned master plant dataset and site lookup datasets
