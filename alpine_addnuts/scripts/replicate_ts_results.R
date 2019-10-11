@@ -218,12 +218,12 @@ nn13_biodiv <- nn13_clean %>%
   mutate(CoverType = ifelse(is.na(USDA_Growth_Habit), "NonVascular", "Vascular"),
          CoverType2 = ifelse(Code == "SEDES", "NonVascular", CoverType),
          yr= 2013) %>%
-  group_by(yr, Block, Plot, N, P, `K.`, FullTreatment, CoverType2) %>%
-  summarise(AllHits = sum(Hits),
-            S = length(unique(Code))) %>%
+  group_by(yr, Block, Plot, N, P, `K.`, FullTreatment, CoverType) %>%
+  summarise(AllHits = sum(Hits[Hits>0.25]), # don't count species present
+            S = length(unique(Code))) %>% # do count species present
   ungroup() %>%
   gather(met, val, AllHits, S) %>%
-  unite(cat, CoverType2, met) %>%
+  unite(cat, CoverType, met) %>%
   spread(cat, val, fill = 0) %>%
   mutate(Plant_cover = 100-NonVascular_AllHits)
 
@@ -244,9 +244,9 @@ nn13_biodiv %>%
   facet_wrap(~met, scales = "free_y")
 
 
-# shannon's div
+# shannon's div -- include species present (Hit = 0.25)
 nn13_sppmatrix <- subset(nn13_clean, !is.na(USDA_Growth_Habit)) %>%
-  filter(Code != "SEDES") %>% # remove Selaginella if desire
+  #filter(Code != "SEDES") %>% # remove Selaginella if desire
   mutate(plotid = paste(Block, Plot, sep = "_")) %>%
   dplyr::select(plotid, Block, Plot, Code, Hits) %>%
   spread(Code, Hits) %>%
@@ -257,17 +257,6 @@ rownames(nn13_sppmatrix) <- nn13_sppmatrix$plotid
 nn13_rel <- decostand(nn13_sppmatrix[4:ncol(nn13_sppmatrix)], method = "total")
 nn13_biodiv$H <- diversity(nn13_rel) 
 
-# crunch table
-nn13_biodiv_means <- nn13_biodiv %>%
-  gather(met, val, NonVascular_AllHits:ncol(.)) %>%
-  mutate(FullTrt2 = gsub("([+]K)", "", FullTreatment),
-         FullTrt2 = gsub("K", "C", FullTrt2)) %>%
-  group_by(yr, FullTrt2, met) %>%
-  summarise(meanval = mean(val),
-            se = sd(val)/ sqrt(length(val)),
-            nobs = length(val)) %>%
-  subset(!grepl("NonVascular", met))
-nn13_biodiv_means
 
 total_anpp <- nn13_anpp %>%
   mutate(yr = ifelse(grepl("2013", as.character(Date)), 2013, 2007)) %>%
@@ -282,18 +271,73 @@ total_anpp %>%
   geom_point(alpha = 0.5, size = 2) +
   facet_wrap(~FullTreatment, scales = "free_x")
 
-mean_anpp_2013 <- subset(total_anpp, yr == 2013) %>%
+
+# crunch table
+## need to calculate means of double reps in control and n+p+k before take average of each treatment
+nn13_biodiv_means <- nn13_biodiv %>%
+  left_join(total_anpp[total_anpp$yr == 2013, c("Block", "Plot", "total_anpp")]) %>%
+  gather(met, val, NonVascular_AllHits:ncol(.)) %>%
   mutate(FullTrt2 = gsub("([+]K)", "", FullTreatment),
          FullTrt2 = gsub("K", "C", FullTrt2)) %>%
-  group_by(FullTrt2) %>%
-  summarise(meanANPP = mean(total_anpp),
-            se = sd(total_anpp)/sqrt(length(total_anpp)),
-            nobs = length(total_anpp))
+  group_by(yr, Block, FullTreatment, FullTrt2, met) %>%
+  summarise(blockmean = mean(val),
+            blocknobs = length(Plot)) %>%
+  ungroup() %>%
+  group_by(yr, FullTrt2, met) %>%
+  summarise(meanval = mean(blockmean),
+            se = sd(blockmean)/ sqrt(length(blockmean)),
+            nobs = length(blockmean)) %>%
+  subset(!grepl("NonVascular", met))
+nn13_biodiv_means
 
-nn13_biodiv_means  
+ggplot(nn13_biodiv_means, aes(FullTrt2, meanval)) +
+  geom_errorbar(aes(ymax = se+meanval, ymin = meanval-se), width = 0) +
+  geom_point() +
+  facet_wrap(~met, scales = "free_y")
+  
+
+
+
 # -- Table 2: NutNet 2017 biodiversity and vertical complexity ----
+# no anpp for nutnet 2017
+# can, for now, calculate total cover, all hits
+# set up richness and diversity
+
+unique(nn17_wvert$hit[nn17_wvert$fxnl_grp == "Ground cover"]) # ground cover only recorded if top hit
+unique(nn17_wvert$hit[nn17_wvert$clean_code2 == "SEDES"]) # Selaginella recorded at multiple heights
+# how many times is SEDES not top hit?
+nn17_wvert$hit[nn17_wvert$clean_code2 == "SEDES" & nn17_wvert$hit > 1] #5 times.. could always remove from below
+# is anything below SEDES? (don't expect yes)
+sedes_plots <- distinct(nn17_wvert[nn17_wvert$clean_code2 == "SEDES" & nn17_wvert$hit == 1, c("plotid", "point")])
+View(left_join(sedes_plots, nn17_wvert))
+# 4 times: grasses recorded under SEDES
+
+# i think it can work either way (SEDES as ground cover or not, just need to pick an option and stick with it)
+# for now, counting SEDES as plant cover
 
 
+nn17_nonveg <- subset(nn17_wvert, fxnl_grp == "Ground cover") %>%
+  group_by(yr, plotid) %>%
+  summarise(AllHits = sum(hit),
+            nobs = length(unique(clean_code2))) %>%
+  ungroup() %>%
+  mutate(plant_cover = 100-AllHits)
+
+nn17_biodiv <- nn17_wvert %>%
+  mutate(CoverType = ifelse(fxnl_grp == "Ground cover", "NonVascular", "Vascular"),
+         CoverType2 = ifelse(Code == "SEDES", "NonVascular", CoverType)) %>%
+  group_by(yr, Block, Plot, N, P, `K.`, FullTreatment, CoverType) %>%
+  summarise(AllHits = sum(Hits[Hits>0.25]), # don't count species present
+            S = length(unique(clean_code2))) %>% # do count species present
+  ungroup() %>%
+  gather(met, val, AllHits, S) %>%
+  unite(cat, CoverType, met) %>%
+  spread(cat, val, fill = 0) %>%
+  mutate(Plant_cover = 100-NonVascular_AllHits)
+
+sort(unique(nn13_clean$USDA_Symbol[nn13_clean$Block == 4 & nn13_clean$Plot == 6 & nn13_clean$Hits >= 1]))
+sort(unique(nn17_wvert$clean_code2[nn17_wvert$plotid == "B4_6"]))
+sort(unique(nn13_clean$USDA_Symbol[nn13_clean$Block == 4 & nn13_clean$Plot == 7 & nn13_clean$Hits >= 1]))
 
 # -- Table 3: Relative cover of G. rossii by study by year ----
 # rel cov = number hits per species/total number of veg hits in the plot
