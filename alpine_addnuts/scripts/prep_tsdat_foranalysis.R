@@ -18,7 +18,8 @@
 # -- SETUP ----
 rm(list = ls())
 library(tidyverse)
-options(stringsAsFactors = F)
+library(readxl)
+options(stringsAsFactors = F, na.strings = na_vals, strip.white = T)
 theme_set(theme_bw())
 na_vals <- c("", " ", NA, "NA", "NaN", NaN, ".")
 source("edi_functions.R")
@@ -36,6 +37,11 @@ nutnet17raw <- read.csv(datfiles[grep("net17r", datfiles)], strip.white = T, na.
 # read in block 3 plot 7 2017 (missing from above raw file), ts sent to ctw 7/9/19
 nn17_b3p7 <- read.csv(datfiles[grep("b3", datfiles)], strip.white = T, na.strings = na_vals)
 
+# ctw-cleaned nutnet2013 data from nutnet/SCE (not tim)
+nn13_sce <- read.csv("alpine_addnuts/output_data/nutnet2013_alldats/NWTnutnet_sppcomp_2013ongoing.csv") 
+# extract plot info
+nnplots_sce <- distinct(dplyr::select(nn13_sce, Block:FullTreatment))
+  
 ## Sdl 
 plot_codes <- read.csv(datfiles[grep("codes_99", datfiles)], strip.white = T, na.strings = na_vals)
 sdl1997 <- read.csv(datfiles[grep("1997", datfiles)], strip.white = T, na.string = na_vals)
@@ -47,6 +53,19 @@ plots2016 <- read.csv(datfiles[grep("16_codes", datfiles)], strip.white = T, na.
 ## spp lookup table
 spplt <- read.csv("alpine_addnuts/output_data/sdl_nutnet_spplookup.csv", na.strings = na_vals, strip.white = T)
 
+# "mystery" files from SCE
+scefiles <- list.files(paste0(gsub("dry_meado_fert", "mystery_files", datpath)), full.names = T)
+sdl12sppcomp <- read_excel(scefiles[grep("2012", scefiles)],trim_ws = T)
+sdl2003 <- read_excel(scefiles[grep("03", scefiles)], trim_ws=T)
+sffert_info <- read.csv(scefiles[grep("plotinfo", scefiles)]) #entered by ctw into spreadsheet, from pdf file "Plot locations and tag numbers snowfence fertilization plots"
+# add in meadow and nutrient info
+colordf <- data.frame(meadow_col = c("green", "blue", "orange"), meadow = c("dry", "mesic", "snowbed"))
+fertdf <- data.frame(fert_symbol = c("circle", "plus", "x", "diamond"), ferttrt = c("C", "N", "P", "N+P"))
+sffert_info <- left_join(sffert_info, colordf) %>%
+  left_join(fertdf)
+
+#sffert richness 1997 (to troubleshoot plots that don't match up)
+sdlS97 <- getTabular(138) #not very helpful..
 
 
 
@@ -60,6 +79,9 @@ glimpse(nn17_b3p7) # same as nutnet17_raw
 glimpse(sdl1997) # date read in as integer, long form total hits
 glimpse(sdl2012) # no date, total hits, long form
 glimpse(sdl2016) # no hits, just presence (spp noted at grid point) -- only top hits
+glimpse(sdl12sppcomp) # includes presence for richness!.. lots of unknowns too
+glimpse(sdl2003) # no ground cover noted, but could use to assess geum rossii in 2003, uses old plot numbers
+glimpse(sffert_info)
 
 # note: nmds must be reduced to top hit only if comparing trends in all so it's a fair comparison
 # to be sure, what is sum of total hits in each plot, per dataset?
@@ -73,6 +95,7 @@ sort(unique(sdl1997$species[sdl1997$hits == 999])); sort(unique(sdl1997$species)
 # update: TS says 999 = present in plot but not "hit" at grid point. 
 # not all datasets have spp present (but not hit) in them, so only look at cover for now
 # ts says he can send me richness dats, but would have to go digging for those files
+
 
 # nutnet -- plot not unique, must combine block_plot for unique ID
 apply(dplyr::select(nutnet13, LTR:ncol(nutnet13)), 1, sum) # sums to over 100..
@@ -110,8 +133,10 @@ nn13_tidy <- nutnet13 %>%
   mutate(plotID = paste(Block, Plot, sep = "_"),
          yr = 2013) %>%
   left_join(spplt[c("code", "clean_code2")]) %>%
-  dplyr::select(yr, plotID, Block:trt, clean_code2, hits) %>%
-  grouped_df(colnames(.)[1:9]) %>%
+  # create nutnet code to preserve distinct unknown forb and unknown grass (there are 2 each in 2013)
+  mutate(nutnet_code = ifelse(code %in% c("FORB1", "FORB2", "GRASS1", "GRASS2"), code, clean_code2)) %>%
+  dplyr::select(yr, plotID, Block:trt, nutnet_code, clean_code2, hits) %>%
+  grouped_df(colnames(.)[1:10]) %>%
   summarise(hits = sum(hits)) %>%
   arrange(Block, Plot, clean_code2) %>%
   # lower case all colnames
@@ -121,6 +146,8 @@ nn13_tidy <- nutnet13 %>%
 
 # build nutnet plot lookup table
 nutnet_plots <- distinct(dplyr::select(nn13_tidy,plotid:trt))
+# is it same as nutnet designations in 2013 data from sce?
+summary(nnplots_sce == nutnet_plots[,2:ncol(nutnet_plots)]) #block different bc LH df has "B" before block #, otherwise the same
 
 # 2017
 # append nn17_b3p7 to nutnet17raw
@@ -157,19 +184,23 @@ trtcheck <- left_join(nutnet_plots,
          kdiff = k.x != k.y)
 View(trtcheck)
 # trtment for n, and k not entered consistently within plot B2_7 in 2017
-# sometimes it's +n, +p, -k; othertimes -n, -p, +k
+# sometimes it's +n, +p, -k; other times -n, -p, +k
 # going by 2013, should be +n, +p, -k
+# also from sce nutnet metadata notes, plot 7 across all blocks should have same treatment
+unique(nn13_tidy$trt[nn13_tidy$plot == 7]) # correct, should be N+P (no K+)
 
 # > decision: drop trt cols in 2017 dataset and re-join 2013 trt cols
 nn17_tidy <- nn17_tidy %>%
   dplyr::select(-c(n,p,k, plotid, trt)) %>%
   left_join(distinct(dplyr::select(nn13_tidy, plotid:trt))) %>%
   # ms says canopy structure assessed in both 2013 and 2017, so going to assume vert summed in 2013
+  # add in nutnet_code to preserve distinct unks (there is only unk1 and 2FORB in 2017 entered data.. will assume they are different)
+  mutate(nutnet_code = ifelse(species == "unk1", "UNK1", clean_code2)) %>%
   dplyr::select(colnames(nn13_tidy)) %>%
-  grouped_df(colnames(.)[1:9]) %>%
+  grouped_df(colnames(.)[1:10]) %>%
   summarise(hits = sum(hits)) %>%
-  arrange(block, plot, clean_code2) %>%
-  ungroup()
+  ungroup() %>%
+  arrange(block, plot, clean_code2)
 
 
 
@@ -243,16 +274,28 @@ sdl_plots <- sdl_plots %>%
          old_plotLT = ifelse(is.na(plot), NA, old_plotLT)) %>%
   dplyr::select(plot, old_plotLT, old_plot97, old_plot16:ncol(.))
 
-View(sdl_plots) # inconsistencies in snow and meadow in 2012 and 2016 yrs.. write out for Tim to look at
+View(sdl_plots) # inconsistencies in snow and meadow in 2012 and 2016 yrs..
+
+# finally, append ctw-entered sdl plot info (which should be the correct dataset to use.. SCE gave to ctw 10-9-19)
+sdl_plots <- full_join(sdl_plots, sffert_info, by = c("plot" = "plot_num_tag")) %>%
+  # append PDF to ctw-entered colnames so know origin of data (pdf of site layout)
+  rename_at(vars(colnames(sffert_info)[2:ncol(sffert_info)]), function(x) paste0(x, "_PDF")) %>%
+  # reorg colnames so cols that should match up are adjacent
+  dplyr::select(plot:old_plot16, plot_ne_tag_PDF, plot_sw_tag_PDF, notes_PDF,
+                meadowLT:meadow16.2, meadow_PDF,
+                snowLT:notes16.2, snowfence_PDF,
+                trtLT, trt97, fert12, trt16, fert16.2, ferttrt_PDF) # PDF meadow data are the best ones, and match up with 2016 data (tim-dbl check plot data also alighn with 2016), 2012 bad data entry
+
+# write out for tim to review
 write_csv(sdl_plots, "alpine_addnuts/output_data/sdl_plots_lookup_trblshoot.csv")
 
 
 
 # -- PREP SDL PLANT DATA WITHOUT TRT INFO IN MATRICES (just plot num) -----
-## 1997 -- deal with 999 (present but not hit)
+## 1997 -- deal with 999 (present but not hit), no unknowns
 sdl97_tidy <- sdl1997 %>%
   # remove spp present but not hit and spp not hit
-  subset(!hits %in% c(0,999)) %>%
+  subset(!hits %in% c(0, 999)) %>%
   left_join(spplt[c("code", "clean_code2")], by = c("species" = "code")) %>%
   # join treatment info
   left_join(plot_codes) %>%
@@ -274,7 +317,7 @@ sdl97_tidy <- subset(sdl97_tidy, !is.na(snow)) %>%
   ungroup()
 
 
-# sdl 2012
+# sdl 2012 -- only 1 unk forb and 1 unk grass, so okay to use 2FORB, 2 GRASS
 sdl12_tidy <- sdl2012 %>%
   # remove spp present only or spp absent
   subset(hits >= 1) %>%
@@ -286,7 +329,7 @@ sdl12_tidy <- sdl2012 %>%
   ungroup()
 
 
-# sdl 2016
+# sdl 2016 -- no unknowns
 sdl16_tidy <- sdl2016 %>%
   # remove placeholder for nothing hit
   subset(species != "junk1") %>%
@@ -305,8 +348,9 @@ sdl16_tidy <- sdl2016 %>%
 # make 2 datasets to write out:
 # 1) stack plant community data -- need to add local_site to each dat
 # 2) stack site info
+## 2 unk forbs and 2 unk grasses in nn13 data never in same plot so okay to use usda codes only
 
-master_plant <- rbind(nn13_tidy, nn17_tidy) %>%
+master_plant <- rbind(dplyr::select(nn13_tidy, -nutnet_code), dplyr::select(nn17_tidy, -nutnet_code)) %>%
   dplyr::select(yr, plotid, clean_code2, hits) %>%
   rename(plot = plotid) %>%
   mutate(site = "nutnet") %>%
@@ -340,65 +384,37 @@ snowcodes <- c("snow", "s", "SD")
 nosnow <- c("n", "none", "recovery", "NONE", "ND")
 
 
-# select plot and treatment from sdl (choose sdl 16.2 bc that is most recent info from TS)
+# select plot and treatment from sdl (choose pdf data, then sdl 16.2 bc that is most recent info from TS)
 sdl_plots2 <- sdl_plots %>%
-  mutate(trt = ifelse(is.na(fert16.2), trt97, fert16.2),
+  mutate(trt = ifelse(is.na(ferttrt_PDF), fert16.2, ferttrt_PDF),
+         trt = ifelse(is.na(trt), trt97, trt),
          trt = ifelse(is.na(trt), fert12, trt),
          trt = casefold(trt, upper = T),
          trt = recode(trt, "NN" = "N", "CC" = "C", "CONTROL" = "C",
                       "PP" = "P", "NP" = "N+P"),
-         sfcode2016 = ifelse(!is.na(recovery16.2), recovery16.2,
-                         ifelse(snow12 == "n", 1, NA)),
-         sfcode2016 = ifelse(is.na(sfcode2016), "Unknown", sfcode2016),
-         notes2016 = notes16.2,
-         notes2016 = ifelse(is.na(notes2016) & sfcode2016 == 1, "never affected", notes2016),
-         notes2016 = ifelse(is.na(notes2016), "Unknown", notes2016)) %>%
-  rename(old_plot = old_plot97) %>%
-  #temp create rowid for grouping by row
-  mutate(rowid = row.names(.)) %>%
-  group_by(rowid) %>%
-  mutate(meadow = ifelse(meadowLT %in% c(drycodes, NA) &
-                           meadow12 %in% c(drycodes, NA) &
-                           meadow16 %in% c(drycodes, NA), "Dry", "Unknown"),
-         meadow = ifelse(meadowLT %in% c(wetcodes, NA) &
-                           meadow12 %in% c(wetcodes, NA) &
-                           meadow16 %in% c(wetcodes, NA), "Wet", meadow),
-         meadow = ifelse(meadowLT %in% c(mescodes, NA) &
-                           meadow12 %in% c(mescodes, NA) &
-                           meadow16 %in% c(mescodes, NA), "Mesic", meadow),
-         #correct for NAs in all
-         meadow = ifelse(is.na(meadowLT) & is.na(meadow12) & is.na(meadow16), "Unknown", meadow),
-         # specify snow col
-         snow = ifelse(snowLT %in% c(snowcodes, NA) &
-                         site97 %in% c(snowcodes, NA) &
-                         snow12 %in% c(snowcodes, NA) &
-                         sfcode16 %in% c(snowcodes, NA), "Snow", "Unknown"),
-         snow = ifelse(snowLT %in% c(nosnow, NA) &
-                         site97 %in% c(nosnow, NA) &
-                         snow12 %in% c(nosnow, NA) &
-                         sfcode16 %in% c(nosnow, NA), "No snow", snow),
-         #correct for NAs in all
-         snow = ifelse(is.na(snowLT) & is.na(site97) & is.na(snow12) & is.na(sfcode16), "Unknown", snow)) %>%
-  ungroup() %>%
-  # add in alternate meadow and snow cols based on most recent ts 2016 info
-  mutate(meadow_alt = ifelse(!is.na(meadow16.2), meadow16.2, meadow),
-         snow_alt = ifelse(!is.na(snow16.2), snow16.2, snow),
-         # correct code spellings for snow_alt
-         snow_alt = gsub("SNOW", "Snow", snow_alt),
-         snow_alt = gsub("NONE", "No snow", snow_alt)) %>%
-  #retain cols just used for analysis
+         snow = recode(snowfence_PDF, impacted = "snow", unimpacted = "no snow"),
+         snow = ifelse(is.na(snow), sfcode16, snow),
+         snow = ifelse(is.na(snow), site97, snow),
+         snow = recode(snow, ND = "no snow", SD = "snow"),
+         snow_notes = notes16.2,
+         snow_notes = ifelse(is.na(snow_notes) & snow == "no snow", "never affected", snow_notes),
+         meadow = ifelse(is.na(meadow_PDF),meadow16, meadow_PDF),
+         meadow = ifelse(is.na(meadow), site97, meadow),
+         meadow = recode(meadow, ND = "dry", SD = "dry")) %>%
   #retain reference cols for analysis only
-  dplyr::select(plot, old_plot, trt, meadow, meadow_alt, snow, snow_alt, sfcode2016, notes2016) %>%
+  dplyr::select(plot, old_plot97:plot_sw_tag_PDF, trt, meadow, snow, snow_notes) %>%
+  # remove 96 and 0 plots because 0s are only for 0 descae, and 96 = 296, will have only mystery 286 plot from 1997
+  filter(!old_plot97 %in% c(0, 96)) %>%
   data.frame()
-
-# after review, old_plot 96 is probably old_plot 296, so change descriptive info to match that
-sdl_plots2[sdl_plots2$old_plot == 96 & !is.na(sdl_plots2$old_plot),c(1,3:ncol(sdl_plots2))] <- sdl_plots2[sdl_plots2$old_plot == 296 & !is.na(sdl_plots2$old_plot),c(1,3:ncol(sdl_plots2))]
-
+ 
 
 
 # -- PREP DATASETS TO INCLUDE VERTICAL HIT LEVEL ----
 # for datasets available: sdl 2016, nutnet2017 (that's it!)
 nn17_wvert <- nutnet17raw %>%
+  # rbind block 3 plot 7 data
+  rbind(nn17_b3p7) %>%
+  # remove date
   dplyr::select(-date) %>%
   mutate(block = paste0("B", block),
          yr = 2017) %>%
@@ -416,7 +432,7 @@ nn17_wvert <- nutnet17raw %>%
   dplyr::select(site:hit, clean_code2, simple_name, Common_Name, Category, Family, Growth_Habit, fxnl_grp, nutnet_grp)
 
 
-sdl16_wvert <- sdl2016 %>%
+sdl16_wvert <- dplyr::select(sdl2016, -c(meadow, trt, sfcode)) %>%
   group_by(plot, point) %>%
   mutate(hit = seq(1, length(species), 1)) %>%
   ungroup() %>%
@@ -430,17 +446,10 @@ sdl16_wvert <- sdl2016 %>%
                              ifelse(grepl("forb", Growth_Habit, ignore.case = T), "Forb",
                                     ifelse(grepl("Gram", Growth_Habit), "Grass", "Ground cover")))) %>%
   # join plot info
-  left_join(plots2016) %>%
+  left_join(dplyr::select(sdl_plots2, plot, trt, meadow, snow, snow_notes)) %>%
   mutate(site = "SDL",
          yr = 2016) %>%
-  dplyr::select(site, yr, plot, Snow, Meadow, trt, recovery, X.1, point, hit, clean_code2, simple_name, Common_Name, Category, Family, Growth_Habit, fxnl_grp, nutnet_grp) %>%
-  # clean up colnames and correct typo in recovery code
-  rename(sf_recovery_notes = X.1,
-         snow = Snow,
-         meadow = Meadow,
-         sf_recovery_code = recovery) %>%
-  mutate(trt = ifelse(trt == "control", "C", trt),
-         sf_recovery_code = ifelse(sf_recovery_code == 3 & grepl("recovery", sf_recovery_notes), 2, sf_recovery_code)) %>%
+  dplyr::select(site, yr, plot, snow, snow_notes, meadow, trt, point, hit, clean_code2, simple_name, Common_Name, Category, Family, Growth_Habit, fxnl_grp, nutnet_grp) %>%
   arrange(plot, point, hit)
 
 

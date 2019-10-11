@@ -1,92 +1,93 @@
-plot,old_plotLT,old_plot97,old_plot16,meadowLT,meadow12,meadow16,meadow16.2,snowLT,site97,snow12,snow16.2,sfcode16,recovery16.2,notes16.2,trtLT,trt97,fert12,trt16,fert16.2
-1,710,710,490,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,CC,CC,cc,control,CC
-2,712,712,497,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,CC,CC,cc,control,CC
-3,709,709,494,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,CC,CC,cc,control,CC
-4,711,711,499,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,CC,CC,cc,control,CC
-5,262,262,488,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,NN,NN,nn,N,NN
-6,291,291,498,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,NN,NN,nn,N,NN
-7,292,292,486,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,NN,NN,nn,N,NN
-8,99,99,493,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,NN,NN,nn,N,NN
-9,263,263,408,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,NP,NP,np,N+P,NP
-10,290,290,495,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,NP,NP,np,N+P,NP
-11,300,300,492,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,NP,NP,np,N+P,NP
-12,261,261,498,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,NP,NP,np,N+P,NP
-13,285,285,496,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,PP,PP,pp,P,PP
-14,287,287,287,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,PP,PP,pp,P,PP
-15,289,289,500,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,PP,PP,pp,P,PP
-16,296,296,296,Dry,d,dry,Dry,NONE,ND,n,NONE,recovery,1,NA,PP,PP,pp,P,PP
-17,NA,NA,872,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,cc,control,CC
-18,NA,NA,437,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,cc,control,CC
-19,NA,NA,444,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,cc,control,CC
-20,NA,NA,445,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,cc,control,CC
-21,NA,NA,440,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,nn,N,NN
-22,NA,NA,448,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,nn,N,NN
-23,NA,NA,NA,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,nn,N,NN
-24,NA,NA,452,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,nn,N,NN
-25,NA,NA,442,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,np,N+P,NP
-26,NA,NA,439,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,np,N+P,NP
-27,NA,NA,450,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,np,N+P,NP
-28,NA,NA,220,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,np,N+P,NP
-29,NA,NA,876,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,pp,P,PP
-30,NA,NA,441,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,pp,P,PP
-31,NA,NA,449,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,pp,P,PP
-32,NA,NA,451,NA,d,mesic,Mesic,NA,NA,s,NONE,recovery,1,NA,NA,NA,pp,P,PP
-33,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,cc,NA,NA
-34,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,cc,NA,NA
-35,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,cc,NA,NA
-36,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,cc,NA,NA
-37,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,nn,NA,NA
-38,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,nn,NA,NA
-39,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,nn,NA,NA
-40,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,nn,NA,NA
-41,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,np,NA,NA
-42,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,np,NA,NA
-43,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,np,NA,NA
-44,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,np,NA,NA
-45,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,pp,NA,NA
-46,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,pp,NA,NA
-47,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,pp,NA,NA
-48,NA,NA,NA,NA,w,NA,NA,NA,NA,n,NA,NA,NA,NA,NA,NA,pp,NA,NA
-49,NA,NA,458,NA,m,dry,Dry,NA,NA,n,SNOW,snow,3,in snowfence area,NA,NA,cc,control,CC
-50,NA,NA,451,NA,m,dry,Dry,NA,NA,n,SNOW,snow,3,in snowfence area,NA,NA,cc,control,CC
-51,NA,NA,460,NA,m,dry,Dry,NA,NA,n,SNOW,snow,3,in snowfence area,NA,NA,cc,control,CC
-52,NA,NA,457,NA,m,dry,Dry,NA,NA,n,SNOW,snow,3,in snowfence area,NA,NA,cc,control,CC
-53,NA,NA,465,NA,m,dry,Dry,NA,NA,n,SNOW,snow,3,in snowfence area,NA,NA,nn,N,NN
-54,NA,NA,464,NA,m,dry,Dry,NA,NA,n,SNOW,snow,3,in snowfence area,NA,NA,nn,N,NN
-55,NA,NA,472,NA,m,dry,Dry,NA,NA,n,SNOW,snow,3,in snowfence area,NA,NA,nn,N,NN
-56,NA,NA,455,NA,m,dry,Dry,NA,NA,n,SNOW,snow,3,in snowfence area,NA,NA,nn,N,NN
-57,NA,NA,466,NA,m,dry,Dry,NA,NA,n,SNOW,snow,3,in snowfence area,NA,NA,np,N+P,NP
-58,NA,NA,461,NA,m,dry,Dry,NA,NA,n,SNOW,snow,3,in snowfence area,NA,NA,np,N+P,NP
-59,NA,NA,456,NA,m,dry,Dry,NA,NA,n,SNOW,snow,3,in snowfence area,NA,NA,np,N+P,NP
-60,NA,NA,454,NA,m,dry,Dry,NA,NA,n,SNOW,snow,3,in snowfence area,NA,NA,np,N+P,NP
-61,NA,NA,467,NA,m,dry,Dry,NA,NA,n,SNOW,snow,3,in snowfence area,NA,NA,pp,P,PP
-62,NA,NA,462,NA,m,dry,Dry,NA,NA,n,SNOW,snow,2,snowfence recovery,NA,NA,pp,P,PP
-63,NA,NA,463,NA,m,dry,Dry,NA,NA,n,SNOW,snow,2,snowfence recovery,NA,NA,pp,P,PP
-64,NA,NA,453,NA,m,dry,Dry,NA,NA,n,SNOW,snow,2,snowfence recovery,NA,NA,pp,P,PP
-65,NA,NA,476,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,3,in snowfence area,NA,NA,cc,control,CC
-66,NA,NA,474,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,3,in snowfence area,NA,NA,cc,control,CC
-67,NA,NA,882,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,3,in snowfence area,NA,NA,cc,control,CC
-68,NA,NA,473,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,3,in snowfence area,NA,NA,cc,control,CC
-69,NA,NA,878,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,2,snowfence recovery,NA,NA,nn,N,NN
-70,NA,NA,484,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,3,in snowfence area,NA,NA,nn,N,NN
-71,NA,NA,483,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,3,in snowfence area,NA,NA,nn,N,NN
-72,NA,NA,470,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,3,in snowfence area,NA,NA,nn,N,NN
-73,NA,NA,471,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,3,in snowfence area,NA,NA,np,N+P,NP
-74,NA,NA,481,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,2,snowfence recovery,NA,NA,np,N+P,NP
-75,NA,NA,871,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,2,snowfence recovery,NA,NA,np,N+P,NP
-76,NA,NA,468,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,3,snowfence recovery,NA,NA,np,N+P,NP
-77,NA,NA,478,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,2,snowfence recovery,NA,NA,pp,P,PP
-78,NA,NA,482,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,2,snowfence recovery,NA,NA,pp,P,PP
-79,NA,NA,480,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,2,snowfence recovery,NA,NA,pp,P,PP
-80,NA,NA,469,NA,m,mesic,Mesic,NA,NA,s,SNOW,snow,3,in snowfence area,NA,NA,pp,P,PP
-81,NA,NA,97,NA,NA,mesic,Mesic,NA,NA,NA,SNOW,snow,2,snowfence recovery,NA,NA,NA,control,CC
-82,NA,NA,98,NA,NA,mesic,Mesic,NA,NA,NA,SNOW,snow,2,snowfence recovery,NA,NA,NA,control,CC
-83,NA,NA,99,NA,NA,mesic,Mesic,NA,NA,NA,SNOW,snow,2,snowfence recovery,NA,NA,NA,control,CC
-84,NA,NA,100,NA,NA,dry,Dry,NA,NA,NA,SNOW,snow,2,snowfence recovery,NA,NA,NA,control,CC
-85,NA,NA,228,NA,NA,dry,Dry,NA,NA,NA,SNOW,snow,2,snowfence recovery,NA,NA,NA,control,CC
-86,NA,NA,874,NA,NA,dry,Dry,NA,NA,NA,SNOW,snow,2,snowfence recovery,NA,NA,NA,control,CC
-NA,NA,286,NA,NA,NA,NA,NA,NA,SD,NA,NA,NA,NA,NA,NA,NN,NA,NA,NA
-NA,NA,96,NA,NA,NA,NA,NA,NA,ND,NA,NA,NA,NA,NA,NA,PP,NA,NA,NA
-NA,NA,0,NA,NA,NA,NA,NA,NA,ND,NA,NA,NA,NA,NA,NA,CC,NA,NA,NA
-NA,NA,0,NA,NA,NA,NA,NA,NA,ND,NA,NA,NA,NA,NA,NA,NN,NA,NA,NA
-NA,NA,0,NA,NA,NA,NA,NA,NA,ND,NA,NA,NA,NA,NA,NA,NP,NA,NA,NA
+plot,old_plotLT,old_plot97,old_plot16,plot_ne_tag_PDF,plot_sw_tag_PDF,notes_PDF,meadowLT,meadow12,meadow16,meadow16.2,meadow_PDF,snowLT,site97,snow12,snow16.2,sfcode16,recovery16.2,notes16.2,snowfence_PDF,trtLT,trt97,fert12,trt16,fert16.2,ferttrt_PDF
+1,710,710,490,490,710,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,CC,CC,cc,control,CC,C
+2,712,712,497,497,712,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,CC,CC,cc,control,CC,C
+3,709,709,494,494,709,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,CC,CC,cc,control,CC,C
+4,711,711,499,499,711,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,CC,CC,cc,control,CC,C
+5,262,262,488,488,262,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,NN,NN,nn,N,NN,N
+6,291,291,498,489,870,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,NN,NN,nn,N,NN,N
+7,292,292,486,486,292,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,NN,NN,nn,N,NN,N
+8,99,99,493,493,99,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,NN,NN,nn,N,NN,N
+9,263,263,408,408,487,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,NP,NP,np,N+P,NP,N+P
+10,290,290,495,495,290,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,NP,NP,np,N+P,NP,N+P
+11,300,300,492,492,869,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,NP,NP,np,N+P,NP,N+P
+12,261,261,498,498,261,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,NP,NP,np,N+P,NP,N+P
+13,285,285,496,496,411,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,PP,PP,pp,P,PP,P
+14,287,287,287,NA,287,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,PP,PP,pp,P,PP,P
+15,289,289,500,500,289,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,PP,PP,pp,P,PP,P
+16,296,296,296,485,296,,Dry,d,dry,Dry,dry,NONE,ND,n,NONE,recovery,1,NA,unimpacted,PP,PP,pp,P,PP,P
+17,NA,NA,872,872,870,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,cc,control,CC,C
+18,NA,NA,437,437,436,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,cc,control,CC,C
+19,NA,NA,444,NA,444,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,cc,control,CC,C
+20,NA,NA,445,NA,445,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,cc,control,CC,C
+21,NA,NA,440,440,294,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,nn,N,NN,N
+22,NA,NA,448,448,295,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,nn,N,NN,N
+23,NA,NA,NA,NA,279,"not sure about sw tag number, blocked by plot 20 text",NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,nn,N,NN,N
+24,NA,NA,452,452,877,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,nn,N,NN,N
+25,NA,NA,442,442,298,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,np,N+P,NP,N+P
+26,NA,NA,439,439,281,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,np,N+P,NP,N+P
+27,NA,NA,450,450,403,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,np,N+P,NP,N+P
+28,NA,NA,220,220,210,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,np,N+P,NP,N+P
+29,NA,NA,876,876,875,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,pp,P,PP,P
+30,NA,NA,441,441,871,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,pp,P,PP,P
+31,NA,NA,449,449,280,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,pp,P,PP,P
+32,NA,NA,451,451,406,,NA,d,mesic,Mesic,mesic,NA,NA,s,NONE,recovery,1,NA,unimpacted,NA,NA,pp,P,PP,P
+33,NA,NA,NA,434,395,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,cc,NA,NA,C
+34,NA,NA,NA,428,394,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,cc,NA,NA,C
+35,NA,NA,NA,423,389,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,cc,NA,NA,C
+36,NA,NA,NA,421,396,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,cc,NA,NA,C
+37,NA,NA,NA,433,240,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,nn,NA,NA,N
+38,NA,NA,NA,425,297,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,nn,NA,NA,N
+39,NA,NA,NA,422,278,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,nn,NA,NA,N
+40,NA,NA,NA,390,299,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,nn,NA,NA,N
+41,NA,NA,NA,427,393,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,np,NA,NA,N+P
+42,NA,NA,NA,429,274,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,np,NA,NA,N+P
+43,NA,NA,NA,431,392,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,np,NA,NA,N+P
+44,NA,NA,NA,391,272,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,np,NA,NA,N+P
+45,NA,NA,NA,432,270,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,pp,NA,NA,P
+46,NA,NA,NA,430,275,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,pp,NA,NA,P
+47,NA,NA,NA,426,277,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,pp,NA,NA,P
+48,NA,NA,NA,424,276,,NA,w,NA,NA,snowbed,NA,NA,n,NA,NA,NA,NA,impacted,NA,NA,pp,NA,NA,P
+49,NA,NA,458,458,NA,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,3,in snowfence area,impacted,NA,NA,cc,control,CC,C
+50,NA,NA,451,459,30.11,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,3,in snowfence area,impacted,NA,NA,cc,control,CC,C
+51,NA,NA,460,460,NA,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,3,in snowfence area,impacted,NA,NA,cc,control,CC,C
+52,NA,NA,457,457,891,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,3,in snowfence area,impacted,NA,NA,cc,control,CC,C
+53,NA,NA,465,465,899,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,3,in snowfence area,impacted,NA,NA,nn,N,NN,N
+54,NA,NA,464,464,415,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,3,in snowfence area,impacted,NA,NA,nn,N,NN,N
+55,NA,NA,472,472,864,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,3,in snowfence area,impacted,NA,NA,nn,N,NN,N
+56,NA,NA,455,455,NA,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,3,in snowfence area,impacted,NA,NA,nn,N,NN,N
+57,NA,NA,466,466,NA,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,3,in snowfence area,impacted,NA,NA,np,N+P,NP,N+P
+58,NA,NA,461,461,894,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,3,in snowfence area,impacted,NA,NA,np,N+P,NP,N+P
+59,NA,NA,456,456,866,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,3,in snowfence area,impacted,NA,NA,np,N+P,NP,N+P
+60,NA,NA,454,454,869,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,3,in snowfence area,impacted,NA,NA,np,N+P,NP,N+P
+61,NA,NA,467,467,NA,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,3,in snowfence area,impacted,NA,NA,pp,P,PP,P
+62,NA,NA,462,412,416,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,2,snowfence recovery,impacted,NA,NA,pp,P,PP,P
+63,NA,NA,463,463,414,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,2,snowfence recovery,impacted,NA,NA,pp,P,PP,P
+64,NA,NA,453,453,412,,NA,m,dry,Dry,dry,NA,NA,n,SNOW,snow,2,snowfence recovery,impacted,NA,NA,pp,P,PP,P
+65,NA,NA,476,476,900,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,3,in snowfence area,impacted,NA,NA,cc,control,CC,C
+66,NA,NA,474,474,398,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,3,in snowfence area,impacted,NA,NA,cc,control,CC,C
+67,NA,NA,882,NA,882,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,3,in snowfence area,impacted,NA,NA,cc,control,CC,C
+68,NA,NA,473,473,NA,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,3,in snowfence area,impacted,NA,NA,cc,control,CC,C
+69,NA,NA,878,878,NA,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,2,snowfence recovery,impacted,NA,NA,nn,N,NN,N
+70,NA,NA,484,484,884,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,3,in snowfence area,impacted,NA,NA,nn,N,NN,N
+71,NA,NA,483,483,419,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,3,in snowfence area,impacted,NA,NA,nn,N,NN,N
+72,NA,NA,470,470,880,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,3,in snowfence area,impacted,NA,NA,nn,N,NN,N
+73,NA,NA,471,471,879,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,3,in snowfence area,impacted,NA,NA,np,N+P,NP,N+P
+74,NA,NA,481,481,873,"not sure about sw tag number, blocked by plot 78 text",NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,2,snowfence recovery,impacted,NA,NA,np,N+P,NP,N+P
+75,NA,NA,871,NA,871,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,2,snowfence recovery,impacted,NA,NA,np,N+P,NP,N+P
+76,NA,NA,468,468,NA,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,3,snowfence recovery,impacted,NA,NA,np,N+P,NP,N+P
+77,NA,NA,478,478,420,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,2,snowfence recovery,impacted,NA,NA,pp,P,PP,P
+78,NA,NA,482,482,418,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,2,snowfence recovery,impacted,NA,NA,pp,P,PP,P
+79,NA,NA,480,480,NA,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,2,snowfence recovery,impacted,NA,NA,pp,P,PP,P
+80,NA,NA,469,469,881,,NA,m,mesic,Mesic,mesic,NA,NA,s,SNOW,snow,3,in snowfence area,impacted,NA,NA,pp,P,PP,P
+81,NA,NA,97,NA,NA,NA,NA,NA,mesic,Mesic,NA,NA,NA,NA,SNOW,snow,2,snowfence recovery,NA,NA,NA,NA,control,CC,NA
+82,NA,NA,98,NA,NA,NA,NA,NA,mesic,Mesic,NA,NA,NA,NA,SNOW,snow,2,snowfence recovery,NA,NA,NA,NA,control,CC,NA
+83,NA,NA,99,NA,NA,NA,NA,NA,mesic,Mesic,NA,NA,NA,NA,SNOW,snow,2,snowfence recovery,NA,NA,NA,NA,control,CC,NA
+84,NA,NA,100,NA,NA,NA,NA,NA,dry,Dry,NA,NA,NA,NA,SNOW,snow,2,snowfence recovery,NA,NA,NA,NA,control,CC,NA
+85,NA,NA,228,NA,NA,NA,NA,NA,dry,Dry,NA,NA,NA,NA,SNOW,snow,2,snowfence recovery,NA,NA,NA,NA,control,CC,NA
+86,NA,NA,874,NA,NA,NA,NA,NA,dry,Dry,NA,NA,NA,NA,SNOW,snow,2,snowfence recovery,NA,NA,NA,NA,control,CC,NA
+NA,NA,286,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,SD,NA,NA,NA,NA,NA,NA,NA,NN,NA,NA,NA,NA
+NA,NA,96,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,ND,NA,NA,NA,NA,NA,NA,NA,PP,NA,NA,NA,NA
+NA,NA,0,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,ND,NA,NA,NA,NA,NA,NA,NA,CC,NA,NA,NA,NA
+NA,NA,0,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,ND,NA,NA,NA,NA,NA,NA,NA,NN,NA,NA,NA,NA
+NA,NA,0,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,ND,NA,NA,NA,NA,NA,NA,NA,NP,NA,NA,NA,NA
+29.5,NA,NA,NA,435,397,,NA,NA,NA,NA,mesic,NA,NA,NA,NA,NA,NA,NA,unimpacted,NA,NA,NA,NA,NA,P
