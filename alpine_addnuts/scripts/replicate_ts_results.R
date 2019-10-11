@@ -339,6 +339,7 @@ sort(unique(nn13_clean$USDA_Symbol[nn13_clean$Block == 4 & nn13_clean$Plot == 6 
 sort(unique(nn17_wvert$clean_code2[nn17_wvert$plotid == "B4_6"]))
 sort(unique(nn13_clean$USDA_Symbol[nn13_clean$Block == 4 & nn13_clean$Plot == 7 & nn13_clean$Hits >= 1]))
 
+
 # -- Table 3: Relative cover of G. rossii by study by year ----
 # rel cov = number hits per species/total number of veg hits in the plot
 geum_relcov <- plantcom %>%

@@ -447,6 +447,19 @@ sdl_plots2 <- sdl_plots %>%
   data.frame()
  
 
+# -- PREP SDL 2003 SPP COMP SEPARATELY ----
+# not sure if suveyor truly counted all ground cover classes or not (e.g. see lichen and moss, but no rock or bare ground)
+# look at colsums..
+apply(sdl2003[,4:64], 2, sum, na.rm = T) # some spp have cols, but never hit..
+sdl2003_tidy <- dplyr::select(sdl2003, -sum) %>% # drop sum cover column
+  gather(code, hit, 4:ncol(.)) %>%
+  # remove spp not hit
+  filter(!is.na(hit)) %>%
+  left_join(spplt[c("code", "clean_code2")])
+# who are the species that didn't pair?
+needs_match <- sort(unique(sdl2003_tidy$code[is.na(sdl2003_tidy$clean_code2)]))
+
+
 
 # -- PREP DATASETS TO INCLUDE VERTICAL HIT LEVEL ----
 # for datasets available: sdl 2016, nutnet2017 (that's it!)

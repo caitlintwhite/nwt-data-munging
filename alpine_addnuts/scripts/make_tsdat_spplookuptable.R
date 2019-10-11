@@ -55,7 +55,8 @@ plot_codes <- read.csv(datfiles[grep("Saddle_codes", datfiles)], strip.white = T
 sdl1997 <- read.csv(datfiles[grep("1997", datfiles)], strip.white = T, na.strings = na_vals)
 sdl2012 <- read.csv(datfiles[grep("2012", datfiles)], strip.white = T, na.strings = na_vals)
 sdl2016 <- read.csv(datfiles[grep("2016", datfiles)], strip.white = T, na.strings = na_vals)
-
+# extra 2003 dataset
+sdl2003 <- read_excel("../../Documents/nwt_lter/unpub_data/mystery_files/colin03a.xls")
 ## NWT datasets on EDI
 # MSpaso sdl spp trait dataset
 sdltraits <- getTabular(500) %>% data.frame()
@@ -107,6 +108,8 @@ glimpse(sdl1997) #long-form, total plot hits
 glimpse(sdl2012) #long-form, total plot hits
 glimpse(sdl2016) #long-form spp-presence dataset (need to transform to hit data with 0 infilled); what is sfcode?
 sapply(sdl2016, unique)
+glimpse(sdl2003) #wide form, sum column at end -- remove
+sdl2003 <- sdl2003[!colnames(sdl2003) == "sum"]
 glimpse(sdltraits)
 sort(unique(sdltraits$USDA.Code)) #137 unique codes.. see what matches in tim's data..
 # note: lowest common denom measurement = rel_cov or abs_cov, so compare trends in nutnet and sdl using that
@@ -125,11 +128,12 @@ sort(colnames(nutnet13[,7:ncol(nutnet13)])) # some USDA codes, but some user-def
 sort(unique(sdl1997$species)) # 6-letter codes
 sort(unique(sdl2012$species)) # some USDA codes, some user-defined codes.. and typos/inconsistent casing
 sort(unique(sdl2016$species)) # mostly USDA codes, except "junk1" (juncus?)
-
+sort(colnames(sdl2003[,4:ncol(sdl2003)])) # 6-letter codes with some multi-spp guesses
 spplist_master <- rbind(data.frame(set = "NutNet 2013", code = sort(colnames(nutnet13[,7:ncol(nutnet13)]))),
                         data.frame(set = "NutNet 2017", code = sort(unique(nutnet17$species))),
                         data.frame(set = "NutNet 2017 raw", code = sort(unique(nutnet17raw$species))),
                         data.frame(set = "Saddle 1997", code = sort(unique(sdl1997$species))),
+                        data.frame(set = "Saddle 2003", code = sort(colnames(sdl2003)[4:ncol(sdl2003)])),
                         data.frame(set = "Saddle 2012", code = sort(unique(sdl2012$species))),
                         data.frame(set = "Saddle 2016", code = sort(unique(sdl2016$species)))) %>%
   # try removing dataset
@@ -257,6 +261,13 @@ correctdf$clean_code2[correctdf$code == "TEAGR"] <- unique(spplist_master$clean_
 # partial matches in USDA
 correctdf$clean_code2[correctdf$code == "ELYMUS"] <- USDAcodes$Symbol[grepl("^ELYM", USDAcodes$Symbol)]
 correctdf$clean_code2[correctdf$code == "VIOLET"] <- USDAcodes$Symbol[grepl("^VIOL", USDAcodes$Symbol)]
+
+# manually correct codes from 2003 sdl data
+correctdf$clean_code2[correctdf$code == "POT"] <- "POTEN"
+correctdf$clean_code2[correctdf$code == "STELMON"] <- "POTEN"
+correctdf$clean_code2[correctdf$code == "MINBIF/OBTBIF/LIDOBT"] <- "POTEN"
+correctdf$clean_code2[correctdf$code == "LEWPYG/OREPYG"] <- unique(spplist_master$clean_code2[grepl("CASC", spplist_master$code) & !is.na(spplist_master$clean_code2)])
+correctdf$clean_code2[correctdf$code == "THLMON/NOCMON"] <- unique(spplist_master$clean_code2[grepl("CEAR", spplist_master$code) & !is.na(spplist_master$clean_code2)])
 
 # make everything else an unk forb (only GRDAZ left, which TS says is unknown)
 correctdf$clean_code2[is.na(correctdf$clean_code2)] <- "2FORB"
