@@ -65,7 +65,12 @@ sffert_info <- left_join(sffert_info, colordf) %>%
   left_join(fertdf)
 
 #sffert richness 1997 (to troubleshoot plots that don't match up)
-sdlS97 <- getTabular(138) #not very helpful..
+sdlS97 <- getTabular(138) #colnames don't read in correctly, fix now
+names(sdlS97)
+names(sdlS97)[grep("X", names(sdlS97))] <- NA
+sdlS97[nrow(sdlS97)+1,] <- data.frame(t(names(sdlS97)))
+# manually assign names from online metadata
+names(sdlS97) <- c("yr", "loc", "trt", "plot", "sppS", "grass_wgt_rep1", "forb_wgt_rep1", "total_rep1", "grass_rep2", "forb_rep2", "total_rep2")
 
 
 
@@ -75,6 +80,12 @@ glimpse(nutnet13) # wide form, hits
 glimpse(nutnet17) # long-form, summarized (rel and abs cov)
 glimpse(nutnet17raw) # long form, raw hits at each grid pt (need to be summed to plot level)
 glimpse(nn17_b3p7) # same as nutnet17_raw
+glimpse(sdlS97) # need to correct cols to numeric
+# checks to see which cols are truly all numeric
+sapply(sdlS97, function(x)sort(unique(x))) # plot has XX1 and XX2
+sdlS972 <- mutate_at(sdlS97, vars(colnames(sdlS97)[!grepl("plot|trt|loc", colnames(sdlS97))]), as.numeric) %>%
+  arrange(yr, trt, loc, plot)
+
 # sdl
 glimpse(sdl1997) # date read in as integer, long form total hits
 glimpse(sdl2012) # no date, total hits, long form
@@ -306,9 +317,37 @@ unique(sdl1997$old_plot[!sdl1997$old_plot %in% plot_codes$old_plot])
 unique(plot_codes$old_plot[!plot_codes$old_plot %in% sdl1997$old_plot]) # all there.. 
 length(unique(plot_codes$old_plot))
 length(unique(sdl1997$old_plot)) # i guess 0, 96 and 286 really are extraneous plots? (0 or 96 = typo, but 286 is a mystery plot)
-# > drop 286 and press on with reorganizing cols for standardization
+
+# see if can ID mystery 286 plots based on spp richness data
+richness97 <- sdl1997 %>%
+  # remove spp present but not hit and spp not hit
+  subset(hits != 0) %>%
+  #correct plot 96 typo
+  mutate(old_plot = ifelse(old_plot == 96, 296, old_plot)) %>%
+  left_join(spplt[c("code", "clean_code2")], by = c("species" = "code")) %>%
+  # join treatment info
+  left_join(plot_codes) %>%
+  dplyr::select(plot, old_plot, snow, meadow, trt, species, clean_code2) %>%
+  distinct() %>%
+  #infill snow and meadow for 286 (SD)
+  mutate(snow = ifelse(old_plot == 286, "SNOW", snow),
+         meadow = ifelse(old_plot == 286, "Dry", meadow))
+S97 <- richness97 %>%
+  filter(!grepl("^2", clean_code2)) %>%
+  group_by(plot, old_plot, snow, meadow, trt) %>%
+  #summarise(S = length(unique(clean_code2))) %>%
+  summarise(S = length(species)) %>%
+  ungroup() %>%
+  mutate(old_plot = as.character(old_plot)) %>%
+  left_join(sdlS972[sdlS972$yr == 1997,], by = c("old_plot" = "plot")) 
+# .. i have no idea how sppS in the EDI dataset was calculated, i've tried different ways to calcuate (i.e. not as cleanly, including non-veg) and still don't get as high of numbers as in EDI dataset
+# i would maybe not post those data?
+# still can't figure out what 286 matches up to..
+
+
+# > *keep* 286 and press on with reorganizing cols for standardization
 # > drop site descrip cols until tim gets back to me on correct site descriptions
-sdl97_tidy <- subset(sdl97_tidy, !is.na(snow)) %>%
+sdl97_tidy <- mutate(sdl97_tidy, plot = ifelse(is.na(plot), old_plot, plot)) %>%
   dplyr::select(yr, plot, clean_code2, hits) %>%
   # sum hits by clean spp code
   grouped_df(colnames(.)[1:3]) %>%
