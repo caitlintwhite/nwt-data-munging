@@ -109,7 +109,7 @@ glimpse(sdl2012) #long-form, total plot hits
 glimpse(sdl2016) #long-form spp-presence dataset (need to transform to hit data with 0 infilled); what is sfcode?
 sapply(sdl2016, unique)
 glimpse(sdl2003) #wide form, sum column at end -- remove
-sdl2003 <- sdl2003[!colnames(sdl2003) == "sum"]
+sdl2003 <- sdl2003[!colnames(sdl2003) == "sum"] # remove sum column
 glimpse(sdltraits)
 sort(unique(sdltraits$USDA.Code)) #137 unique codes.. see what matches in tim's data..
 # note: lowest common denom measurement = rel_cov or abs_cov, so compare trends in nutnet and sdl using that
@@ -264,10 +264,11 @@ correctdf$clean_code2[correctdf$code == "VIOLET"] <- USDAcodes$Symbol[grepl("^VI
 
 # manually correct codes from 2003 sdl data
 correctdf$clean_code2[correctdf$code == "POT"] <- "POTEN"
-correctdf$clean_code2[correctdf$code == "STELMON"] <- "POTEN"
-correctdf$clean_code2[correctdf$code == "MINBIF/OBTBIF/LIDOBT"] <- "POTEN"
-correctdf$clean_code2[correctdf$code == "LEWPYG/OREPYG"] <- unique(spplist_master$clean_code2[grepl("CASC", spplist_master$code) & !is.na(spplist_master$clean_code2)])
-correctdf$clean_code2[correctdf$code == "THLMON/NOCMON"] <- unique(spplist_master$clean_code2[grepl("CEAR", spplist_master$code) & !is.na(spplist_master$clean_code2)])
+correctdf$clean_code2[correctdf$code == "CAR SSP"] <- "CAREX"
+correctdf$clean_code2[correctdf$code == "STELMON"] <- jgslist$USDA_code[jgslist$corrected_NWT_code == "STEMON" & !is.na(jgslist$corrected_NWT_code)]
+correctdf$clean_code2[correctdf$code == "MINBIF/OBTBIF/LIDOBT"] <- jgslist$USDA_code[jgslist$corrected_NWT_code == "MINBIF" & !is.na(jgslist$corrected_NWT_code)]
+correctdf$clean_code2[correctdf$code == "LEWPYG/OREPYG"] <- jgslist$USDA_code[jgslist$corrected_NWT_code == "LEWPYG" & !is.na(jgslist$corrected_NWT_code)]
+correctdf$clean_code2[correctdf$code == "THLMON/NOCMON"] <- jgslist$USDA_code[jgslist$corrected_NWT_code == "NOCMON" & !is.na(jgslist$corrected_NWT_code)]
 
 # make everything else an unk forb (only GRDAZ left, which TS says is unknown)
 correctdf$clean_code2[is.na(correctdf$clean_code2)] <- "2FORB"
@@ -281,8 +282,11 @@ for(i in correctdf$code){
 summary(is.na(spplist_master$clean_code2)) # none. huzzah!
 # finally, manually correct ORAL to ORALA
 spplist_master$clean_code2[spplist_master$clean_code2 == "ORAL"] <- "ORALA"
+# check how 2003 names paired (ctw added them in after script developed)
+check2003 <- subset(spplist_master, code %in% colnames(sdl2003)) %>% left_join(jgslist, by = c("code" = "corrected_NWT_code"))
+# 2003 looks good
 # clean up environment
-rm(correctdf,temp_df, altcodes, check, correctcodes, i, missingcodes, n, needsusda, nlength, replace)
+rm(correctdf,temp_df, altcodes, check, correctcodes, i, missingcodes, n, needsusda, nlength, replace, check2003)
 
 
 
@@ -377,6 +381,8 @@ spplist_master2$spexclude <- !(spplist_master2$in_jgs & spplist_master2$in_ts)
 # manually correct geum rossii (should only have 1 code, even tho in both datasets)
 # > choose GERO2 (used in Marko's trait dataset, is most general)
 spplist_master2$spexclude[spplist_master2$Symbol == "GEROT"] <- TRUE
+# manually correct carex heteroneura (both are in jgs dataset, are different ssp of carex h.)
+spplist_master2 <- subset(spplist_master2, simple_name != "Carex heteroneura")
 
 # replace codes and descriptive info in spp_master with codes to keep in spplist_master2
 for(i in spplist_master2$Symbol[spplist_master2$spexclude == TRUE]){
