@@ -455,9 +455,34 @@ sdl2003_tidy <- dplyr::select(sdl2003, -sum) %>% # drop sum cover column
   gather(code, hit, 4:ncol(.)) %>%
   # remove spp not hit
   filter(!is.na(hit)) %>%
-  left_join(spplt[c("code", "clean_code2")])
-# who are the species that didn't pair?
-needs_match <- sort(unique(sdl2003_tidy$code[is.na(sdl2003_tidy$clean_code2)]))
+  left_join(spplt[c("code", "clean_code2")]) %>%
+  arrange(plot, clean_code2) %>%
+  mutate(treatment = recode(treatment, CC="C", NN = "N", PP = "P", NP = "N+P")) %>%
+  rename(plot_2003 = plot,
+         trt = treatment) %>%
+  left_join(sdl_plots2[c("plot", "trt", "plot_sw_tag_PDF")], by = c("trt", "plot_2003" = "plot_sw_tag_PDF"))
+
+# which plots still need pair?
+needs_match <- distinct(sdl2003_tidy[is.na(sdl2003_tidy$plot), c("plot_2003", "trt")])
+# where do outstanding numbers match up?
+apply(sdl_plots[,1:6], 2, function(x) summary(needs_match$plot_2003 %in% x))
+# 16 and sw tags prolly are the same
+needs_match[needs_match$plot_2003 %in% sdl_plots$plot_sw_tag_PDF,] # trts don't match with sdl fert df.. should be P and N
+needs_match[needs_match$plot_2003 %in% sdl_plots$old_plot16,] # 1 matches
+needs_match[needs_match$plot_2003 %in% sdl_plots$plot_ne_tag_PDF,] # 2 trts match, 1 doesn't..
+
+# manually match up 3 plots (actually only 2, ne and plot 16 overlap)
+sdl2003_tidy2 <- rename(sdl2003_tidy, plotSW = plot) %>%
+  left_join(sdl_plots2[c(c("plot", "trt", "plot_ne_tag_PDF"))], by = c("trt", "plot_2003" = "plot_ne_tag_PDF")) %>%
+  rename(plotNE = plot) %>%
+  left_join(sdl_plots2[c(c("plot", "trt", "old_plot16"))], by = c("trt", "plot_2003" = "old_plot16")) %>%
+  rename(plot_2016 = plot) %>%
+  mutate(plot = ifelse(!is.na(plotSW), plotSW,
+                       ifelse(!is.na(plotNE), plotNE, plot_2016))) %>%
+  left_join(sdl_plots2)
+
+# write out for now.. problems and all..
+write_csv(sdl2003_tidy2, "alpine_addnuts/output_data/sdl_sffert_2003_inprogress.csv")
 
 
 
