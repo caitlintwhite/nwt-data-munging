@@ -42,7 +42,7 @@ theme_set(theme_bw())
 
 # get data
 # plant community data for sdl and nutnet, all yrs
-plantcom <- read.csv("alpine_addnuts/output_data/sdl_nutnet_plantcom_allyrs.csv") 
+plantcom <- read.csv("alpine_addnuts/output_data/sdl_nutnet_plantcom_allyrs.csv") # includes spp present (as 0.25) for yrs available
 # spp lookup table
 spplist <- read.csv("alpine_addnuts/output_data/sdl_nutnet_spplookup.csv")
 # sdl site info
@@ -59,6 +59,9 @@ sdl16_wvert <- read.csv("alpine_addnuts/output_data/sdl2016_vertical_sppcomp.csv
 # cleaned up 2013 nutnet (all spp hit and present, ctw cleaned up for SCE)
 nn13_clean <- read.csv("alpine_addnuts/output_data/nutnet2013_alldats/NWTnutnet_sppcomp_2013ongoing.csv") 
 nn13_anpp <- read.csv("alpine_addnuts/output_data/nutnet2013_alldats/NWTnutnet_anpp_2007ongoing.csv")
+
+# sdl 2003 (partially figured out -- some plots don't have match)
+sdl03 <- read.csv("alpine_addnuts/output_data/sdl_sffert_2003_inprogress.csv")
 
 
 
@@ -80,29 +83,90 @@ sdlplots$trt <- factor(sdlplots$trt, levels = c("C", "N", "P", "N+P"))
 spplist <- spplist %>%
   mutate(simple_lifeform = ifelse(Family == "Fabaceae", "N-fixer",
                                   ifelse(grepl("Shrub", Growth_Habit), "Shrub",
-                                         ifelse(Growth_Habit == "Graminoid", "Grass", "Forb")))) %>%
-  # change Dryas to forb from shrub (is listed as subshrub/shrub/forb)
-  mutate(simple_lifeform = ifelse(simple_name == "Dryas octopetala", "Forb", simple_lifeform)) %>%
-  # fill in simple lifeform for 2FORB and 2GRAM
-  mutate(simple_lifeform = ifelse(clean_code2 == "2FORB", "Forb",
-                                  ifelse(clean_code2 == "2GRAM", "Grass", simple_lifeform))) %>%
+                                         ifelse(Growth_Habit == "Graminoid", "Grass", 
+                                                ifelse(grep("Forb", Growth_Habit), "Forb", "Ground cover")))),
+         # change Dryas to forb from shrub (is listed as subshrub/shrub/forb)
+         simple_lifeform = ifelse(simple_name == "Dryas octopetala", "Forb", simple_lifeform),
+         # fill in simple lifeform for 2FORB and 2GRAM
+         simple_lifeform = ifelse(clean_code2 == "2FORB", "Forb",ifelse(clean_code2 == "2GRAM", "Grass", simple_lifeform)),
+         # ground cover doesn't assign (maybe won't work on NA values of growth)
+         simple_lifeform = ifelse(grepl("^2", clean_code2) & is.na(simple_lifeform), "Ground cover", simple_lifeform)) %>%
   # add alternative lifeform group where N-fixer lumped into forb group
   mutate(simple_lifeform2 = ifelse(simple_lifeform == "N-fixer", "Forb", simple_lifeform),
          # add nutnet grouping (Selaginella densa [spikemoss] = ground cover, not forb)
-         nutnet_grp = ifelse(clean_code2 == "SEDES", "Ground cover", simple_lifeform2),
-         nutnet_grp = ifelse(grepl("^2", clean_code2) & is.na(nutnet_grp), "Ground cover", simple_lifeform2))
+         nutnet_grp = ifelse(clean_code2 == "SEDES", "Ground cover", simple_lifeform2))
 
 
 # -- QA check: does NN-provided 2013 data, presence-only-removed, match NN 2013 cover data Tim sent?----
 check2013 <- subset(nn13_clean, Hits > 0.25) %>%
+  dplyr::select(Block, Plot, USDA_Symbol, Hits) %>%
   arrange(Block, Plot, USDA_Symbol)
-plantcom2013 <- subset(plantcom,yr == 2013) %>%
+plantcom2013 <- subset(plantcom,yr == 2013 & hits > 0.25) %>%
   mutate(block = substr(plotid, 2,2), 
          plot = as.numeric(gsub("B[1-4]_", "", plotid))) %>%
+  dplyr::select(block, plot, clean_code2, hits) %>%
   arrange(block, plot, clean_code2)
 
 summary(check2013[c("Block", "Plot", "USDA_Symbol", "Hits")] == plantcom2013[c("block", "plot", "clean_code2", "hits")])
 #same
+rm(check2013, plantcom2013)
+
+
+# -- PREP ABUNDANCE-ONLY DATASETS, VEG AND NON-VEG ----
+abundance <- subset(plantcom, hits > 0.25) %>%
+  left_join(distinct(spplist[c("clean_code2", "simple_lifeform", "simple_lifeform2")]), by = "clean_code2")
+
+# prep wide-form non veg, plant total hits, and plant cover (100-nonveg cover) data frame
+coarse_cover <- abundance %>%
+  group_by(site, yr, plotid, simple_lifeform2) %>%
+  summarise(cover = sum(hits)) %>%
+  ungroup() %>%
+  mutate(simple_lifeform2 = recode(simple_lifeform2, `Ground cover` = "NonVeg")) %>%
+  spread(simple_lifeform2, cover, fill = 0) %>%
+  mutate(PlantCov = 100-NonVeg,
+         VegHits = Forb + Grass + Shrub,
+         Forb_rel = Forb/VegHits,
+         Grass_rel = Grass/VegHits,
+         F2G_ratio = Forb/Grass)
+  
+# subset 2003 data for jane to look at
+jane1 <- subset(plantcom, plotid %in% c("11", "60")) %>%
+  mutate(plotid = as.numeric(plotid)) %>%
+  left_join(sdlplots[c("plot", "trt", "meadow", "snow")], by = c("plotid" = "plot"))
+jane <- subset(sdl03, plot_2003 == 869) %>%
+  dplyr::select(plot_2003, trt,clean_code2, hit) %>%
+  distinct() %>%
+  rename(hits = hit) %>%
+  mutate(site = "sdl",
+         plotid = "869 (old number)",
+         yr = 2003,
+         meadow = "dry",
+         snow = "?") %>%
+  dplyr::select(names(jane1)) %>%
+  rbind(jane1) %>%
+  arrange(yr, plotid, clean_code2)
+
+write.csv(jane, "alpine_addnuts/output_data/fert_drymeadow_unsure_snowfence.csv")
+
+# coarse group 2003 data just in case
+abundance03 <- subset(sdl03, hit > 0.25) %>%
+  left_join(distinct(spplist[c("clean_code2", "simple_lifeform", "simple_lifeform2")]), by = "clean_code2")
+
+coarse03 <- abundance03 %>%
+  mutate(site = "sdl", yr = 2003) %>%
+  rename(plotid = plot,
+         hits = hit) %>%
+  group_by(site, yr, plot_2003, plotid, trt, meadow, snow, simple_lifeform2) %>%
+  summarise(cover = sum(hits)) %>%
+  ungroup() %>%
+  mutate(simple_lifeform2 = recode(simple_lifeform2, `Ground cover` = "NonVeg")) %>%
+  spread(simple_lifeform2, cover, fill = 0) %>%
+  mutate(PlantCov = 100-NonVeg,
+         VegHits = Forb + Grass + Shrub,
+         Forb_rel = Forb/VegHits,
+         Grass_rel = Grass/VegHits,
+         F2G_ratio = Forb/Grass)
+
 
 
 # -- Fig 1 and 2: FORBS VS GRASSES (Figs 1 + 2) ----
