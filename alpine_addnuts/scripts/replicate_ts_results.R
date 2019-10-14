@@ -58,7 +58,7 @@ nn17_wvert <- read.csv("alpine_addnuts/output_data/nutnet2017_vertical_sppcomp.c
 sdl16_wvert <- read.csv("alpine_addnuts/output_data/sdl2016_vertical_sppcomp.csv") 
 # cleaned up 2013 nutnet (all spp hit and present, ctw cleaned up for SCE)
 nn13_clean <- read.csv("alpine_addnuts/output_data/nutnet2013_alldats/NWTnutnet_sppcomp_2013ongoing.csv") 
-nn13_anpp <- read.csv("alpine_addnuts/output_data/nutnet2013_alldats/NWTnutnet_anpp_2007ongoing.csv")
+nn_anpp <- read.csv("alpine_addnuts/output_data/nutnet2013_alldats/NWTnutnet_anpp_2007ongoing.csv")
 
 # sdl 2003 (partially figured out -- some plots don't have match)
 sdl03 <- read.csv("alpine_addnuts/output_data/sdl_sffert_2003_inprogress.csv")
@@ -200,8 +200,6 @@ coarse03 <- abundance03 %>%
 
 
 
-# -- PREP BIODIVERSITY DATASETS (where richness available) -----
-
 # -- Fig 1 and 2: FORBS VS GRASSES (Figs 1 + 2) ----
 # (out of curiosity make similar time since exp onset plot to compare forb shift over time by site by trt)
 # split out sdl and nutnet so can average C and N+P+K
@@ -262,9 +260,11 @@ ggplot(data= subset(sdl_coarse_means, grp != "Geum_rel"), aes(trt, meancov, fill
 ## need to average N+P and C by block first (2 reps per block)
 nn_coarse_blockmeans <- subset(coarse_cover, site == "nutnet") %>% 
   # select only plots consistently sampled both years
-  subset(plotid %in% c(nn_common, nn_Pplots)) %>% 
+  #subset(plotid %in% c(nn_common, nn_Pplots)) %>% 
   # join site data
   left_join(nnplots) %>%
+  # modify N+K plot to N in 2017 so block 4 has a 4th N trtment
+  mutate(trt = ifelse(yr == 2017 & grepl("B4", plotid) & trt == "N+K", "N", trt)) %>%
   gather(met, val, Forb:Geum_rel) %>%
   # average reps in C and N+P+K by block
   group_by(site, yr, block, trt, trt2, met) %>%
@@ -274,9 +274,9 @@ nn_coarse_blockmeans <- subset(coarse_cover, site == "nutnet") %>%
   ungroup()
 
 # subset to just C, N and N+P for fig2 and anova
-nn_fg_dat <- subset(nn_coarse_blockmeans, met %in% c("Forb_rel", "Grass_rel", "Geum_rel") & trt %in% c("C", "N", "P", "N+P", "N+K")) %>%
+nn_fg_dat <- subset(nn_coarse_blockmeans, met %in% c("Forb_rel", "Grass_rel", "Geum_rel") & trt %in% c("C", "N", "P", "N+P")) %>%
   mutate(trt2 = factor(trt2, levels = c("C", "N", "P", "N+P")))
-
+  
 # run anova of forbs and grass rel cov, using C, N and N+P only (so 4 reps per trt) [i.e. ignore K, N+P+K]
 nn_fg_anova_global <- aov(blockmean ~ trt2 * met * yr, data = subset(nn_fg_dat, met != "Geum_rel" & trt2 != "P"))
 summary(nn_fg_anova_global)
@@ -441,99 +441,76 @@ ggplot(all_means, aes(post_yrs, meancov, group = site, col = site)) +
   facet_wrap(~trt, nrow = 1)
 
 
+# -- PREP BIODIVERSITY DATASETS (where richness available) -----
+# nutnet 2013 and sdl 1997, 2005, and 2012 include spp present only (hits = 0.25)
+## as of 2019-10-13 CTW does not have nutnet 2017 spp present only
+plants <- subset(plantcom, yr %in% unique(yr[hits == 0.25])) %>%
+  # remove ground cover
+  filter(!clean_code2 %in% unique(spplist$clean_code2[spplist$simple_lifeform == "Ground cover" & !is.na(spplist$simple_lifeform)])) %>%
+  unite(rowid, site, yr, plotid, sep = "_", remove = F)
+  
+richness <- group_by(plants, rowid, site, yr, plotid) %>%
+  summarise(S = length(clean_code2))
 
-# -- Table 1: NutNet 2013 biodiversity and vertical complexity ----
-# only plots used in 2017??, Tim pooled +micro additions with otherwise similar (c, c+micro)
-# K+ only added in 2016, not added for 2013 surveys.. so in 2013 +micro is just +micro, and in 2017 those +micro plots are +micro+K+ (K as K2SO4)
+# shannon diversity
+sppmatrix <- spread(plants, clean_code2, hits, fill = 0) %>% as.data.frame()
+rownames(sppmatrix) <- sppmatrix$rowid
+relmatrix <- decostand(sppmatrix[,(grep("plotid", names(sppmatrix))+1):ncol(sppmatrix)], method = "total")
+H <- data.frame(H = diversity(relmatrix),
+                rowid = rownames(relmatrix))
 
-# build by plot:
-# richness, shannon div, plant cov (100- sum(non-veg hits)), sum veg hits
-# check codes with no growth habit value are non-veg
-sort(unique(nn13_clean$Code[is.na(nn13_clean$USDA_Growth_Habit)])) # yup
-nn13_biodiv <- nn13_clean %>%
-  subset(Hits > 0) %>%
-  mutate(CoverType = ifelse(is.na(USDA_Growth_Habit), "NonVascular", "Vascular"),
-         CoverType2 = ifelse(Code == "SEDES", "NonVascular", CoverType),
-         yr= 2013) %>%
-  group_by(yr, Block, Plot, N, P, `K.`, FullTreatment, CoverType) %>%
-  summarise(AllHits = sum(Hits[Hits>0.25]), # don't count species present
-            S = length(unique(Code))) %>% # do count species present
-  ungroup() %>%
-  gather(met, val, AllHits, S) %>%
-  unite(cat, CoverType, met) %>%
-  spread(cat, val, fill = 0) %>%
-  mutate(Plant_cover = 100-NonVascular_AllHits)
-
-# pre-plot summmaries
-nn13_biodiv %>%
-  gather(met, val, NonVascular_AllHits:ncol(.)) %>%
-  ggplot(aes(FullTreatment, val)) +
-  stat_summary() +
-  facet_wrap(~met, scales = "free_y") # the way to get Tim's table results are Selaginella = non-plant
-
-# collapse K into otherwise similar treatments to see if get exact means and ses from table
-nn13_biodiv %>%  
-  gather(met, val, NonVascular_AllHits:ncol(.)) %>%
-  mutate(FullTrt2 = gsub("([+]K)", "", FullTreatment),
-         FullTrt2 = gsub("K", "C", FullTrt2)) %>%
-  ggplot(aes(FullTrt2, val)) +
-  stat_summary() +
-  facet_wrap(~met, scales = "free_y")
-
-
-# shannon's div -- include species present (Hit = 0.25)
-nn13_sppmatrix <- subset(nn13_clean, !is.na(USDA_Growth_Habit)) %>%
-  #filter(Code != "SEDES") %>% # remove Selaginella if desire
-  mutate(plotid = paste(Block, Plot, sep = "_")) %>%
-  dplyr::select(plotid, Block, Plot, Code, Hits) %>%
-  spread(Code, Hits) %>%
-  arrange(Block, Plot) %>%
-  as.data.frame()
-rownames(nn13_sppmatrix) <- nn13_sppmatrix$plotid  
-
-nn13_rel <- decostand(nn13_sppmatrix[4:ncol(nn13_sppmatrix)], method = "total")
-nn13_biodiv$H <- diversity(nn13_rel) 
-
-
-total_anpp <- nn13_anpp %>%
-  mutate(yr = ifelse(grepl("2013", as.character(Date)), 2013, 2007)) %>%
-  group_by(yr, Block, Plot, FullTreatment) %>%
-  summarise(total_anpp = sum(ANPP_g_per_m2)) %>%
-  ungroup()
-
-# see if it changed over time
-total_anpp %>%
-  unite(site, Block, Plot, sep = "_") %>%
-  ggplot(aes(site, total_anpp, col = as.factor(yr))) +
-  geom_point(alpha = 0.5, size = 2) +
-  facet_wrap(~FullTreatment, scales = "free_x")
-
-
-# crunch table
-## need to calculate means of double reps in control and n+p+k before take average of each treatment
-nn13_biodiv_means <- nn13_biodiv %>%
-  left_join(total_anpp[total_anpp$yr == 2013, c("Block", "Plot", "total_anpp")]) %>%
-  gather(met, val, NonVascular_AllHits:ncol(.)) %>%
-  mutate(FullTrt2 = gsub("([+]K)", "", FullTreatment),
-         FullTrt2 = gsub("K", "C", FullTrt2)) %>%
-  group_by(yr, Block, FullTreatment, FullTrt2, met) %>%
-  summarise(blockmean = mean(val),
-            blocknobs = length(Plot)) %>%
-  ungroup() %>%
-  group_by(yr, FullTrt2, met) %>%
-  summarise(meanval = mean(blockmean),
-            se = sd(blockmean)/ sqrt(length(blockmean)),
-            nobs = length(blockmean)) %>%
-  subset(!grepl("NonVascular", met))
-nn13_biodiv_means
-
-ggplot(nn13_biodiv_means, aes(FullTrt2, meanval)) +
-  geom_errorbar(aes(ymax = se+meanval, ymin = meanval-se), width = 0) +
-  geom_point() +
-  facet_wrap(~met, scales = "free_y")
+# put it all together
+biodiv <- left_join(richness, H)
   
 
+# -- Table 1: NutNet 2013 biodiversity, biomass, and vertical complexity ----
+# only plots used in 2017??, Tim pooled +micro additions with otherwise similar (c, c+micro)
+# K+ only added in 2016, not added for 2013 surveys.. so in 2013 +micro is just +micro, and in 2017 those +micro plots are +micro+K+ (K as K2SO4)
+# the way to get Tim's table results are Selaginella = non-plant -- but everywhere else Selaginella is plant, so updating 2013 with selaginella as plant cover
 
+# prep 2013 anpp
+nn13_anpp <- subset(nn_anpp, grepl("2013", as.character(Date))) %>%
+  # crunch total
+  spread(Group, ANPP_g_per_m2, fill = 0) %>%
+  mutate(Total = Forb + Grass + Legume,
+         plotid = paste0("B", Block, "_", Plot)) %>%
+  dplyr::select(plotid, FullTreatment:Total) %>%
+  rename_all(casefold) %>%
+  rename(trt = fulltreatment)
+
+# collapse K (micro) into otherwise similar treatments (n = 8 per group)
+nn_biodiv_blockmeans <- subset(biodiv, site == "nutnet") %>%
+  # join biomass data
+  left_join(nn13_anpp) %>%
+  # join site data
+  left_join(nnplots) %>%
+  gather(met, val, S:H, forb:total) %>%
+  # average reps in C and N+P+K by block
+  group_by(site, yr, block, trt, trt2, met) %>%
+  summarise(blockmean = mean(val),
+            # to verify 2 obs per C and N+P+K per block
+            nobs = length(val)) %>% # yes (checked manually)
+  ungroup() %>%
+  # append abundance-based bockmeans (2013 and 2017)
+  rbind(nn_coarse_blockmeans) 
+  
+
+# summarise 2013
+nn_biodiv13_means <- subset(nn_biodiv_blockmeans, yr == 2013) %>%
+  group_by(site, yr, trt2, met) %>%
+  summarise(meancov = mean(blockmean),
+            secov = sd(blockmean)/sqrt(length(blockmean)),
+            nobs = length(blockmean)) %>%
+  ungroup() %>%
+  # calculate yrs passed since start of exp
+  mutate(post_yrs = yr - 2008) %>%
+  as.data.frame()
+
+# visualize
+ggplot(nn_biodiv13_means, aes(trt2, meancov)) +
+  geom_errorbar(aes(ymax = secov + meancov, ymin = meancov - secov), width = 0.1) +
+  geom_point() +
+  facet_wrap(~met, scales = "free_y")
 
 # -- Table 2: NutNet 2017 biodiversity and vertical complexity ----
 # no anpp for nutnet 2017
