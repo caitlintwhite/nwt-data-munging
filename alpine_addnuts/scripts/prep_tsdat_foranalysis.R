@@ -41,7 +41,7 @@ nn17_b3p7 <- read.csv(datfiles[grep("b3", datfiles)], strip.white = T, na.string
 nn13_sce <- read.csv("alpine_addnuts/output_data/nutnet2013_alldats/NWTnutnet_sppcomp_2013ongoing.csv") 
 # extract plot info
 nnplots_sce <- distinct(dplyr::select(nn13_sce, Block:FullTreatment))
-  
+
 ## Sdl 
 plot_codes <- read.csv(datfiles[grep("codes_99", datfiles)], strip.white = T, na.strings = na_vals)
 sdl1997 <- read.csv(datfiles[grep("1997", datfiles)], strip.white = T, na.string = na_vals)
@@ -72,6 +72,18 @@ sdlS97[nrow(sdlS97)+1,] <- data.frame(t(names(sdlS97)))
 # manually assign names from online metadata
 names(sdlS97) <- c("yr", "loc", "trt", "plot", "sppS", "grass_wgt_rep1", "forb_wgt_rep1", "total_rep1", "grass_rep2", "forb_rep2", "total_rep2")
 
+# jgs 2005 data
+jgs_files <- list.files(gsub("dry_meado_fert", "jgs_reu_2005", datpath), full.names = T)
+# cover only has 1 data sheet
+jgs_cover <- read_excel(jgs_files[grep("cover", jgs_files, ignore.case = T)], col_names = F)
+# richness has multiple data sheets
+jgs_richness_sheets <- excel_sheets(jgs_files[grep("rich", jgs_files, ignore.case = T)]) 
+jgs_rich <- list()
+for(i in 1:length(jgs_richness_sheets)){
+  jgs_rich[[i]] <- read_excel(jgs_files[grep("rich", jgs_files, ignore.case = T)], sheet = i, col_names = F)
+  names(jgs_rich)[i] <- jgs_richness_sheets[i]
+}  
+
 
 
 # -- REVIEW DATA -----
@@ -93,6 +105,10 @@ glimpse(sdl2016) # no hits, just presence (spp noted at grid point) -- only top 
 glimpse(sdl12sppcomp) # includes presence for richness!.. lots of unknowns too
 glimpse(sdl2003) # no ground cover noted, but could use to assess geum rossii in 2003, uses old plot numbers
 glimpse(sffert_info)
+glimpse(jgs_cover)
+glimpse(jgs_rich) # date is in second row, 5 sheets total
+
+
 
 # note: nmds must be reduced to top hit only if comparing trends in all so it's a fair comparison
 # to be sure, what is sum of total hits in each plot, per dataset?
@@ -187,8 +203,8 @@ nn17_tidy <- nutnet17raw %>%
 
 # where does 2017 differ in treatments?
 trtcheck <- left_join(nutnet_plots, 
-                   distinct(dplyr::select(nn17_tidy, block, plot, n, p,k)),
-                   by = c("block", "plot")) %>%
+                      distinct(dplyr::select(nn17_tidy, block, plot, n, p,k)),
+                      by = c("block", "plot")) %>%
   # check for diffences
   mutate(ndiff = n.x != n.y,
          pdiff = p.x != p.y,
@@ -275,8 +291,8 @@ sdl_plots <- dplyr::select(sdl_plots,
                            trtLT, trt97, fert12, trt16, fert16.2) %>%
   arrange(plot) %>%
   distinct()
-  #rm extra old plotnums in the 2016 that pair with plot 14 and aren't 287 since there is a match for that
-  # look like "287" got copied down in excel but sequence number went up when really it should have been 287 the entire time
+#rm extra old plotnums in the 2016 that pair with plot 14 and aren't 287 since there is a match for that
+# look like "287" got copied down in excel but sequence number went up when really it should have been 287 the entire time
 sdl_plots <- sdl_plots %>%
   filter((plot == 14 & old_plot16 == 287) |
            plot != 14 |
@@ -299,6 +315,95 @@ sdl_plots <- full_join(sdl_plots, sffert_info, by = c("plot" = "plot_num_tag")) 
 
 # write out for tim to review
 write_csv(sdl_plots, "alpine_addnuts/output_data/sdl_plots_lookup_trblshoot.csv")
+
+
+# tidy jgs sdl 05 dataset ----
+# cover needs to be split
+View(jgs_cover) 
+# NAs in col 1 split the different community datasets, spp colnames are the same
+# 2nd row within community datasets = name of meadow
+comm_pos <- which(is.na(jgs_cover$...1))
+# stack spp data
+jgs_sppdat <- data.frame()
+for(i in 1:length(comm_pos)){
+  if(i < length(comm_pos)){
+    tempdat <- jgs_cover[comm_pos[i]:(comm_pos[i+1]-1),]
+  }else{
+    # last one
+    tempdat <- jgs_cover[comm_pos[i]:nrow(jgs_cover),]
+  }
+  colnames(tempdat) <- c("plot", tempdat[1,2:ncol(tempdat)])
+  tempdat$meadow <- tempdat$plot[2]
+  # remove first two rows (spp names and meadow type) bc stored in colnames or meadow col
+  tempdat <- data.frame(tempdat[3:nrow(tempdat),])
+  tempdat <- gather(tempdat, code, hits, 2:(ncol(tempdat)-1)) %>%
+    # remove spp not hit
+    filter(!is.na(hits))
+  # rbind to master
+  jgs_sppdat <- rbind(jgs_sppdat, tempdat)
+}
+glimpse(jgs_sppdat)
+sapply(jgs_sppdat, function(x) sort(unique(x)))
+# break out plot numbers
+jgs_sites <- unique(jgs_sppdat$plot)
+jgs_sitelist <- strsplit(unique(jgs_sppdat$plot), " ")
+jgs_sites <- cbind(jgs_sites, matrix(nrow = length(jgs_sites), ncol = 10))
+for(i in 1:nrow(jgs_sites)){
+  temprow <- t(jgs_sitelist[[i]])
+  for(r in 1:ncol(temprow)){
+    jgs_sites[i,r+1] <- str_extract(temprow[[r]],"[0-9]+")
+  }
+}
+# clean up site info
+jgs_sites <- as.data.frame(jgs_sites)
+# 476 not extracted in col where no space after comma
+jgs_sites$V3[grepl(",476", jgs_sites$jgs_sites)] <- 476
+# get rid of any cols that are all NA
+jgs_sites <- jgs_sites[apply(jgs_sites, 2, function(x) any(!is.na(x)))]
+names(jgs_sites) <- c("plot", "plot_num1", "plot_num2", "plot_num3", "plot_num4")
+jgs_sites$trt <- str_extract(jgs_sites$plot, "[:alpha:]+")
+
+# extract richness - ignore dates, just compile spp present
+jgs_spppresent <- data.frame()
+for(i in jgs_richness_sheets){
+  tempdat <- jgs_rich[[i]]
+  if(nrow(tempdat) == 0){
+    next
+  }
+  for(co in 1:ncol(tempdat)){
+    temppres <- tempdat[,co]
+    temppres <- na.omit(temppres)
+    names(temppres) <- "code"
+    surveyplot <- temppres$code[1]
+    temppres$plot <- surveyplot
+    temppres <- temppres[2:nrow(temppres),]
+    # find date rows
+    daterows <- grep("^[0-9]+$", temppres$code)
+    temppres$surveydate <- temppres$code[daterows[1]]
+    temppres$surveyevent <- 1
+    # iterate through each date
+    if(length(daterows)>1){
+      for(d in 2:length(daterows)){
+        temppres$surveydate[daterows[d]:nrow(temppres)] <- temppres$code[daterows[d]] # will just keep updating rows (writing over previous) until there are no more dates, so could work for more than 2 survey dates
+        temppres$surveyevent[daterows[d]:nrow(temppres)] <- d
+      }
+    }
+    # clean up
+    temppres <- filter(temppres, !code %in% c(unique(temppres$surveydate), NA))
+    temppres$surveydate <- as.Date(as.numeric(temppres$surveydate), origin = "1899-12-30")
+    temppres$hits = 0.25
+    temppres$meadow <- i
+    
+    # add to master
+    jgs_spppresent <- rbind(jgs_spppresent, temppres)
+  }
+}
+# standardize plot names to how entered in spp comp
+jgs_spppresent$plot <- gsub(" [/] |,", ", ", jgs_spppresent$plot)
+
+# join siteinfo to jgs spp comp
+jgs_sppdat <- left_join(jgs_sppdat, jgs_sites)
+
 
 
 
@@ -445,7 +550,7 @@ sdl_plots2 <- sdl_plots %>%
   # remove 96 and 0 plots because 0s are only for 0 descae, and 96 = 296, will have only mystery 286 plot from 1997
   filter(!old_plot97 %in% c(0, 96)) %>%
   data.frame()
- 
+
 
 # -- PREP SDL 2003 SPP COMP SEPARATELY ----
 # not sure if suveyor truly counted all ground cover classes or not (e.g. see lichen and moss, but no rock or bare ground)
@@ -559,7 +664,7 @@ sdlpres12 <- subset(sdl2012, hits <1 & hits>0) %>% #to be sure no typos with 0.1
   mutate(hits = 0.25,
          # add site and year
          site = "sdl",
-         yr = 2002) %>%
+         yr = 2012) %>%
   left_join(sdl_plots2) %>%
   left_join(spplt[c("code", "clean_code2")], by = c("species" = "code")) %>%
   # rename plot colname to match master
@@ -590,9 +695,9 @@ master_plant <- rbind(master_plant, sdlpres97, sdlpres12, nnpres13) %>%
   mutate(block = ifelse(site == "nutnet", parse_number(substr(plotid, 2,2)), NA),
          plot = ifelse(site == "nutnet", parse_number(gsub(".*_", "", plotid)), as.numeric(plotid))) %>% #throws a warning message abut NAs but works fine
   arrange(site, yr, block, plot, clean_code2) %>%
-    dplyr::select(-c(block, plot))
-  
-  
+  dplyr::select(-c(block, plot))
+
+
 # be sure spp present were not also recorded as hit
 group_by(master_plant, site, yr, plotid, clean_code2) %>%
   summarise(nobs = length(hits)) %>%
