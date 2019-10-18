@@ -19,10 +19,10 @@
 rm(list = ls())
 library(tidyverse)
 library(readxl)
-options(stringsAsFactors = F, na.strings = na_vals, strip.white = T)
 theme_set(theme_bw())
 na_vals <- c("", " ", NA, "NA", "NaN", NaN, ".")
 source("edi_functions.R")
+options(stringsAsFactors = F, na.strings = na_vals, strip.white = T)
 
 # set pathway to data folder on your local machine
 datpath <- "../../Documents/nwt_lter/unpub_data/dry_meado_fert/"
@@ -332,13 +332,16 @@ for(i in 1:length(comm_pos)){
     # last one
     tempdat <- jgs_cover[comm_pos[i]:nrow(jgs_cover),]
   }
-  colnames(tempdat) <- c("plot", tempdat[1,2:ncol(tempdat)])
+  colnames(tempdat) <- c("plot", "survey_date", tempdat[1,3:ncol(tempdat)])
   tempdat$meadow <- tempdat$plot[2]
   # remove first two rows (spp names and meadow type) bc stored in colnames or meadow col
   tempdat <- data.frame(tempdat[3:nrow(tempdat),])
-  tempdat <- gather(tempdat, code, hits, 2:(ncol(tempdat)-1)) %>%
+  # spp start in 3rd col (plot first, survey date 2nd)
+  tempdat <- gather(tempdat, code, hits, 3:(ncol(tempdat)-1)) %>%
     # remove spp not hit
-    filter(!is.na(hits))
+    filter(!is.na(hits)) %>%
+    # convert date from numeric string to date
+    mutate(survey_date = as.Date(as.numeric(survey_date), origin = "1899-12-30"))
   # rbind to master
   jgs_sppdat <- rbind(jgs_sppdat, tempdat)
 }
@@ -358,6 +361,8 @@ for(i in 1:nrow(jgs_sites)){
 jgs_sites <- as.data.frame(jgs_sites)
 # 476 not extracted in col where no space after comma
 jgs_sites$V3[grepl(",476", jgs_sites$jgs_sites)] <- 476
+
+  gsub(",|, ",", ", jgs_sites$jgs_sites)
 # get rid of any cols that are all NA
 jgs_sites <- jgs_sites[apply(jgs_sites, 2, function(x) any(!is.na(x)))]
 names(jgs_sites) <- c("plot", "plot_num1", "plot_num2", "plot_num3", "plot_num4")
