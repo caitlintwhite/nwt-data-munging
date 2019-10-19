@@ -28,6 +28,8 @@
 # LATER =  my guess is that's "litter"
 
 # 9/6/19: from reviewing nutnet2013 data from SCE and looking at JGS list, ORAL should be ORALA (alpina ssp.)
+# 10/19/19: add in JGS 2005 sdl comp and richness codes
+
 
 # -- SETUP -----
 rm(list = ls())
@@ -57,6 +59,18 @@ sdl2012 <- read.csv(datfiles[grep("2012", datfiles)], strip.white = T, na.string
 sdl2016 <- read.csv(datfiles[grep("2016", datfiles)], strip.white = T, na.strings = na_vals)
 # extra 2003 dataset
 sdl2003 <- read_excel("../../Documents/nwt_lter/unpub_data/mystery_files/colin03a.xls")
+# jgs 2005 datasets
+jgs_files <- list.files(gsub("dry_meado_fert", "jgs_reu_2005", datpath), full.names = T)
+# cover only has 1 data sheet
+jgs_cover <- read_excel(jgs_files[grep("cover", jgs_files, ignore.case = T)])
+# richness has multiple data sheets
+jgs_richness_sheets <- excel_sheets(jgs_files[grep("rich", jgs_files, ignore.case = T)]) 
+jgs_rich <- list()
+for(i in 1:length(jgs_richness_sheets)){
+  jgs_rich[[i]] <- read_excel(jgs_files[grep("rich", jgs_files, ignore.case = T)], sheet = i, col_names = F)
+  names(jgs_rich)[i] <- jgs_richness_sheets[i]
+}  
+
 ## NWT datasets on EDI
 # MSpaso sdl spp trait dataset
 sdltraits <- getTabular(500) %>% data.frame()
@@ -110,6 +124,28 @@ glimpse(sdl2016) #long-form spp-presence dataset (need to transform to hit data 
 sapply(sdl2016, unique)
 glimpse(sdl2003) #wide form, sum column at end -- remove
 sdl2003 <- sdl2003[!colnames(sdl2003) == "sum"] # remove sum column
+glimpse(jgs_cover) # wide-form, spp codes in row 1
+# richness codes are within list.. iterate through list to scrape codes
+jgs_codes05 <- character()
+for(i in jgs_richness_sheets){
+  tempdat <- jgs_rich[[i]]
+  if(nrow(tempdat)== 0){
+    next
+  }
+  tempdat <- gather(tempdat, blah, code, 1:ncol(tempdat)) %>%
+    #keep only codes that begin with alpha character
+    filter(grepl("^[A-Z]", code, ignore.case = T)) %>%
+    # sort alphabetically and filter out duplicates
+    arrange(code) %>%
+    filter(!duplicated(code))
+  # append to jgs_richness if not in it
+  jgs_codes05 <- c(jgs_codes05, tempdat$code[!tempdat$code %in% jgs_codes05])
+  # sort alphabetically
+  jgs_codes05 <- sort(jgs_codes05)
+}
+# append jgs spp cover code to richness codes if not already in it
+jgs_codes05 <- sort(unique(c(jgs_codes05, colnames(jgs_cover)[3:ncol(jgs_cover)])))
+
 glimpse(sdltraits)
 sort(unique(sdltraits$USDA.Code)) #137 unique codes.. see what matches in tim's data..
 # note: lowest common denom measurement = rel_cov or abs_cov, so compare trends in nutnet and sdl using that
@@ -134,6 +170,7 @@ spplist_master <- rbind(data.frame(set = "NutNet 2013", code = sort(colnames(nut
                         data.frame(set = "NutNet 2017 raw", code = sort(unique(nutnet17raw$species))),
                         data.frame(set = "Saddle 1997", code = sort(unique(sdl1997$species))),
                         data.frame(set = "Saddle 2003", code = sort(colnames(sdl2003)[4:ncol(sdl2003)])),
+                        data.frame(set = "Saddle 2005", code = jgs_codes05),
                         data.frame(set = "Saddle 2012", code = sort(unique(sdl2012$species))),
                         data.frame(set = "Saddle 2016", code = sort(unique(sdl2016$species)))) %>%
   # try removing dataset
@@ -219,8 +256,9 @@ spplist_master[c("alt_code", "trbl_usda")] <- sapply(spplist_master[c("alt_code"
 
 # manually check suggested usda codes for anything that doesn't have a clean code yet
 View(subset(spplist_master, is.na(clean_code2) & !is.na(trbl_usda)))
-# usda code of CAHEE is incorrect for code CAREX, make NA
-spplist_master$trbl_usda <- gsub("CAHEE", NA, spplist_master$trbl_usda)
+# usda code of CAHEE is incorrect for code CAREX, make NA; Rock paired with DROC is incorrect
+spplist_master$trbl_usda[grep("CAREX", spplist_master$code)] <- NA
+spplist_master$trbl_usda[grep("Rock", spplist_master$code)] <- NA
 spplist_master <- mutate(spplist_master,
                          clean_code2 = ifelse(alt_code %in% c(USDAcodes$Symbol, usda_unk$SYMBOL) & is.na(clean_code2),alt_code, 
                                               ifelse(trbl_usda %in% c(USDAcodes$Symbol, usda_unk$SYMBOL) & is.na(clean_code2), trbl_usda, clean_code2)),
@@ -236,12 +274,12 @@ needsusda <- sort(unique(spplist_master$code[is.na(spplist_master$clean_code2)])
 # check if code had a match in scraped usda codes list
 correctdf <- data.frame(code = needsusda, clean_code2 = ifelse(needsusda %in% USDAcodes$Symbol, needsusda, NA))
 # manual correct unknowns..
-correctdf$clean_code2[grepl("lich|2lch|chn", correctdf$code, ignore.case = T)] <- usda_unk$SYMBOL[usda_unk$Common.Name == "Lichen"]
 correctdf$clean_code2[grepl("^rf|rock", correctdf$code, ignore.case = T)] <- "2RF" #rock fragment
 correctdf$clean_code2[grepl("unk", correctdf$code, ignore.case = T)] <- "2FORB" #unk forb
-correctdf$clean_code2[grepl("lit", correctdf$code, ignore.case = T)] <- "2LTR" #litter
+correctdf$clean_code2[grepl("lich|2lch|chn", correctdf$code, ignore.case = T)] <- usda_unk$SYMBOL[usda_unk$Common.Name == "Lichen"]
+correctdf$clean_code2[grepl("lit|dead veg", correctdf$code, ignore.case = T)] <- "2LTR" #litter
 correctdf$clean_code2[grepl("grass", correctdf$code, ignore.case = T)] <- "2GRAM" #unk grass
-correctdf$clean_code2[grepl("bare", correctdf$code, ignore.case = T)] <- "2BARE" #unk grass
+correctdf$clean_code2[grepl("bare|gopher", correctdf$code, ignore.case = T)] <- "2BARE" #unk grass
 correctdf$clean_code2[grepl("moss", correctdf$code, ignore.case = T)] <- "2MOSS" #unk grass
 correctdf$clean_code2[grepl("DW|WOOD", correctdf$code)] <- usda_unk$SYMBOL[grepl("woody, <2.5", usda_unk$Common.Name)]
 correctdf$clean_code2[correctdf$code == "elk.P"] <- "2SCAT" # there's no usda code for scat.. if want code can either be 2BARE or 2LTR?
@@ -253,24 +291,36 @@ View(subset(correctdf, flag == TRUE)) #ARFE, CASC, and CEAR need to be adjusted
 correctdf$clean_code2[correctdf$code == "ARFE"] <- unique(spplist_master$clean_code2[grepl("ARFE", spplist_master$code) & !is.na(spplist_master$clean_code2)])
 correctdf$clean_code2[correctdf$code == "CASC"] <- unique(spplist_master$clean_code2[grepl("CASC", spplist_master$code) & !is.na(spplist_master$clean_code2)])
 correctdf$clean_code2[correctdf$code == "CEAR"] <- unique(spplist_master$clean_code2[grepl("CEAR", spplist_master$code) & !is.na(spplist_master$clean_code2)])
+correctdf$clean_code2[grepl("CARSC", correctdf$code, ignore.case = T)] <- unique(spplist_master$clean_code2[grepl("CARSC", spplist_master$code) & !is.na(spplist_master$clean_code2)])
+
 
 # typo corrections
 correctdf$clean_code2[correctdf$code == "CAR02"] <- unique(spplist_master$clean_code2[spplist_master$code == "CARO2"])
 correctdf$clean_code2[correctdf$code == "TEAGR"] <- unique(spplist_master$clean_code2[spplist_master$code == "TEGR"])
+correctdf$clean_code2[correctdf$code == "PTODIV"] <- unique(spplist_master$clean_code2[spplist_master$code == "POTDIV"])
+correctdf$clean_code2[correctdf$code == "TIRDAS"] <- unique(spplist_master$clean_code2[spplist_master$code == "TRIDAS"])
+correctdf$clean_code2[correctdf$code == "ERIPON"] <- unique(spplist_master$clean_code2[spplist_master$code == "ERIPIN"])
+correctdf$clean_code2[correctdf$code == "ARESCO"] <- unique(spplist_master$clean_code2[spplist_master$code == "ARTSCO"])
+
 
 # partial matches in USDA
-correctdf$clean_code2[correctdf$code == "ELYMUS"] <- USDAcodes$Symbol[grepl("^ELYM", USDAcodes$Symbol)]
+correctdf$clean_code2[grepl("^ELYM", correctdf$code, ignore.case = T)] <- USDAcodes$Symbol[grepl("^ELYM", USDAcodes$Symbol)]
 correctdf$clean_code2[correctdf$code == "VIOLET"] <- USDAcodes$Symbol[grepl("^VIOL", USDAcodes$Symbol)]
 
-# manually correct codes from 2003 sdl data
+# manually correct codes from 2003 + 2005 sdl data
 correctdf$clean_code2[correctdf$code == "POT"] <- "POTEN"
-correctdf$clean_code2[correctdf$code == "CAR SSP"] <- "CAREX"
+correctdf$clean_code2[correctdf$code == "Poa sp."] <- "POA"
+correctdf$clean_code2[grepl("^Care|^CAR ", correctdf$code, ignore.case = T)] <- "CAREX"
+correctdf$clean_code2[grepl("Draba", correctdf$code, ignore.case = T)] <- "DRABA"
+correctdf$clean_code2[grepl("Festu", correctdf$code, ignore.case = T)] <- "FESTU"
+correctdf$clean_code2[grepl("Senec", correctdf$code, ignore.case = T)] <- "SENEC"
 correctdf$clean_code2[correctdf$code == "STELMON"] <- jgslist$USDA_code[jgslist$corrected_NWT_code == "STEMON" & !is.na(jgslist$corrected_NWT_code)]
 correctdf$clean_code2[correctdf$code == "MINBIF/OBTBIF/LIDOBT"] <- jgslist$USDA_code[jgslist$corrected_NWT_code == "MINBIF" & !is.na(jgslist$corrected_NWT_code)]
-correctdf$clean_code2[correctdf$code == "LEWPYG/OREPYG"] <- jgslist$USDA_code[jgslist$corrected_NWT_code == "LEWPYG" & !is.na(jgslist$corrected_NWT_code)]
-correctdf$clean_code2[correctdf$code == "THLMON/NOCMON"] <- jgslist$USDA_code[jgslist$corrected_NWT_code == "NOCMON" & !is.na(jgslist$corrected_NWT_code)]
+correctdf$clean_code2[grepl("^Orep|LEWPYG/OREPYG", correctdf$code, ignore.case = T)] <- jgslist$USDA_code[jgslist$corrected_NWT_code == "LEWPYG" & !is.na(jgslist$corrected_NWT_code)]
+correctdf$clean_code2[correctdf$code %in% c("THLMON/NOCMON", "PHLMON")] <- jgslist$USDA_code[jgslist$corrected_NWT_code == "NOCMON" & !is.na(jgslist$corrected_NWT_code)]
 
-# make everything else an unk forb (only GRDAZ left, which TS says is unknown)
+
+# make everything else an unk forb (only GRDAZ, which TS says is unknown, and and LL???? left)
 correctdf$clean_code2[is.na(correctdf$clean_code2)] <- "2FORB"
 
 # fill in spplist_master with manually corrected codes
@@ -447,6 +497,8 @@ spplist_master$Growth_Habit[spplist_master$clean_code2 %in% needsinfill & grepl(
 spplist_master$Growth_Habit[spplist_master$clean_code2 == "POTEN"] <- unique(spplist_master$Growth_Habit[grepl("Potenti", spplist_master$simple_name) & !is.na(spplist_master$Growth_Habit)])
 spplist_master$Growth_Habit[spplist_master$clean_code2 == "DRABA"] <- unique(spplist_master$Growth_Habit[grepl("Draba", spplist_master$simple_name) & !is.na(spplist_master$Growth_Habit)])
 spplist_master$Growth_Habit[spplist_master$clean_code2 == "VIOLA"] <- unique(spplist_master$Growth_Habit[grepl("Viola", spplist_master$simple_name) & !is.na(spplist_master$Growth_Habit)])
+spplist_master$Growth_Habit[spplist_master$clean_code2 == "SENEC"] <- "Forb/herb" # senecio fremontii is classes as "Forb/herb" in USDA database, so any senecio up in alpine likely that classification too?
+
 
 # review infilling
 spplist_master[spplist_master$clean_code2 %in% needsinfill,] # looks good
@@ -473,6 +525,8 @@ spplist_master <- spplist_master %>%
          Growth_Habit = ifelse(clean_code2 == "2FORB", "Forb/herb",
                                ifelse(clean_code2 == "2GRAM", "Graminoid", Growth_Habit)))
 
+# change elk poop from unknown = TRUE to unknown = NA
+spplist_master$unknown[spplist_master$clean_code2 == "2SCAT"] <- NA
 # because I know it exists from cleaning nutnet2013 data, add row for 2WOOD code, copy values for code = WOOD
 woodrow <- spplist_master[spplist_master$code == "WOOD",] 
 woodrow$code <- "2WOOD"
