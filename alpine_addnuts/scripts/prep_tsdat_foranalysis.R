@@ -13,6 +13,19 @@
 # notes:
 # ...
 
+# email from JGS to CTW 10/13:
+# I started by looking for definitely not in DM or FF species but there’s at least one in both plots!!! I highlighted them in yellow in your spreadsheet. 
+# It’s primarily Carex scopulorum (CASC12) in plot 11 and Deschampsia caespitosa (DECE) in plot 60.
+# So, I looked at my old files and found my REU data!! However, I have different plot numbers and only one as 869 and it’s classified as DM inside the snowfence. 
+# (Also super frustrating I have it as 869, 454 (NP) in my species cover file and 869, 954 (NP) in sp richness - I assume I mistook a 4 for a 9 or vice versa… 
+# Anyway, maybe these numbers help? If not, l also compared sp comp and my 869,4/954 (NP) seems most similar to your plot 60 due to the presence of STLO2, TRSP2, and TRPAP, all species not present in plot 11. 
+# I didn’t find DECE but I did find an unidentified grass sp., which could be DECE. Also, STLO2 appearing in plot 60 over time seems like a sign that it was changing to be more MM/SB-like…
+# I’ve attached my sp cover and sp richness data files. Present species that weren’t hit aren’t included in cover but everything present should be listed in sp richness. 
+# Also, doing the 100 point cover was taking me too long so I just did a subset. 
+# Looking at the total number of hits I suspect I did 50 points and counted multiple hits per point where relevant.
+
+# > jgs 869, 954 should be 869, 454 (looking at sf fert pdf)
+
 
 
 # -- SETUP ----
@@ -95,7 +108,7 @@ glimpse(nn17_b3p7) # same as nutnet17_raw
 glimpse(sdlS97) # need to correct cols to numeric
 # checks to see which cols are truly all numeric
 sapply(sdlS97, function(x)sort(unique(x))) # plot has XX1 and XX2
-sdlS972 <- mutate_at(sdlS97, vars(colnames(sdlS97)[!grepl("plot|trt|loc", colnames(sdlS97))]), as.numeric) %>%
+sdlS97 <- mutate_at(sdlS97, vars(colnames(sdlS97)[!grepl("plot|trt|loc", colnames(sdlS97))]), as.numeric) %>%
   arrange(yr, trt, loc, plot)
 
 # sdl
@@ -230,10 +243,14 @@ nn17_tidy <- nn17_tidy %>%
   arrange(block, plot, clean_code2)
 
 
+# add site to nutnet lookup
+nutnet_plots <- mutate(nutnet_plots, site = "nutnet") %>%
+  dplyr::select(site, plotid:ncol(.))
 
 
 
 # -- SDL DATA PREP -----
+# -- troubleshoot sdl site info -----
 # for all of these, keep plot/old_plot, species, and hits, use plot_codes table to crosswalk/standardize all
 # lower case plot_codes
 colnames(plot_codes) <- casefold(colnames(plot_codes))
@@ -317,7 +334,41 @@ sdl_plots <- full_join(sdl_plots, sffert_info, by = c("plot" = "plot_num_tag")) 
 write_csv(sdl_plots, "alpine_addnuts/output_data/sdl_plots_lookup_trblshoot.csv")
 
 
-# tidy jgs sdl 05 dataset ----
+# specify dry meadow codes used across sdl datasets
+drycodes <- c("d", "Dry", "dry")
+wetcodes <- c("w")
+mescodes <- c("m", "mesic")
+snowcodes <- c("snow", "s", "SD")
+nosnow <- c("n", "none", "recovery", "NONE", "ND")
+
+
+# select plot and treatment from sdl (choose pdf data, then sdl 16.2 bc that is most recent info from TS)
+sdl_plots2 <- sdl_plots %>%
+  mutate(trt = ifelse(is.na(ferttrt_PDF), fert16.2, ferttrt_PDF),
+         trt = ifelse(is.na(trt), trt97, trt),
+         trt = ifelse(is.na(trt), fert12, trt),
+         trt = casefold(trt, upper = T),
+         trt = recode(trt, "NN" = "N", "CC" = "C", "CONTROL" = "C",
+                      "PP" = "P", "NP" = "N+P"),
+         snow = recode(snowfence_PDF, impacted = "snow", unimpacted = "no snow"),
+         snow = ifelse(is.na(snow), sfcode16, snow),
+         snow = ifelse(is.na(snow), site97, snow),
+         snow = recode(snow, ND = "no snow", SD = "snow"),
+         snow_notes = notes16.2,
+         snow_notes = ifelse(is.na(snow_notes) & snow == "no snow", "never affected", snow_notes),
+         meadow = ifelse(is.na(meadow_PDF),meadow16, meadow_PDF),
+         meadow = ifelse(is.na(meadow), site97, meadow),
+         meadow = recode(meadow, ND = "dry", SD = "dry")) %>%
+  #retain reference cols for analysis only
+  dplyr::select(plot, old_plot97:plot_sw_tag_PDF, trt, meadow, snow, snow_notes) %>%
+  # remove 96 and 0 plots because 0s are only for 0 descae, and 96 = 296, will have only mystery 286 plot from 1997
+  filter(!old_plot97 %in% c(0, 96)) %>%
+  data.frame()
+
+
+
+
+# tidy jgs sdl 05 spp comp + richness ----
 # cover needs to be split
 View(jgs_cover) 
 # NAs in col 1 split the different community datasets, spp colnames are the same
@@ -332,7 +383,7 @@ for(i in 1:length(comm_pos)){
     # last one
     tempdat <- jgs_cover[comm_pos[i]:nrow(jgs_cover),]
   }
-  colnames(tempdat) <- c("plot", "survey_date", tempdat[1,3:ncol(tempdat)])
+  colnames(tempdat) <- c("plot", "surveydate", tempdat[1,3:ncol(tempdat)])
   tempdat$meadow <- tempdat$plot[2]
   # remove first two rows (spp names and meadow type) bc stored in colnames or meadow col
   tempdat <- data.frame(tempdat[3:nrow(tempdat),])
@@ -341,12 +392,15 @@ for(i in 1:length(comm_pos)){
     # remove spp not hit
     filter(!is.na(hits)) %>%
     # convert date from numeric string to date
-    mutate(survey_date = as.Date(as.numeric(survey_date), origin = "1899-12-30"))
+    mutate(surveydate = as.Date(as.numeric(surveydate), origin = "1899-12-30"))
   # rbind to master
   jgs_sppdat <- rbind(jgs_sppdat, tempdat)
 }
 glimpse(jgs_sppdat)
 sapply(jgs_sppdat, function(x) sort(unique(x)))
+# clean up site number formatting (inconsistent spacing after commas)
+jgs_sppdat$plot <- gsub(",|, ",", ", jgs_sppdat$plot)
+
 # break out plot numbers
 jgs_sites <- unique(jgs_sppdat$plot)
 jgs_sitelist <- strsplit(unique(jgs_sppdat$plot), " ")
@@ -359,13 +413,11 @@ for(i in 1:nrow(jgs_sites)){
 }
 # clean up site info
 jgs_sites <- as.data.frame(jgs_sites)
-# 476 not extracted in col where no space after comma
-jgs_sites$V3[grepl(",476", jgs_sites$jgs_sites)] <- 476
-
-  gsub(",|, ",", ", jgs_sites$jgs_sites)
 # get rid of any cols that are all NA
 jgs_sites <- jgs_sites[apply(jgs_sites, 2, function(x) any(!is.na(x)))]
 names(jgs_sites) <- c("plot", "plot_num1", "plot_num2", "plot_num3", "plot_num4")
+# convert tag numbers to numeric (to pair with sdl_plots)
+jgs_sites[grepl("plot_num", names(jgs_sites))] <- sapply(jgs_sites[grepl("plot_num", names(jgs_sites))], as.numeric)
 jgs_sites$trt <- str_extract(jgs_sites$plot, "[:alpha:]+")
 
 # extract richness - ignore dates, just compile spp present
@@ -406,9 +458,163 @@ for(i in jgs_richness_sheets){
 # standardize plot names to how entered in spp comp
 jgs_spppresent$plot <- gsub(" [/] |,", ", ", jgs_spppresent$plot)
 
-# join siteinfo to jgs spp comp
-jgs_sppdat <- left_join(jgs_sppdat, jgs_sites)
+# do all of jane's plots in spp present dataset have match in spp comp dataset?
+summary(sort(unique(jgs_spppresent$plot) %in% sort(unique(jgs_sppdat$plot)))) # 1 false..
+unique(jgs_spppresent$plot)[!unique(jgs_spppresent$plot) %in% jgs_sppdat$plot] # "869, 954 (NP)" doesn't have match..
+# jgs says 954 should be 454
+unique(jgs_sppdat$plot)[!unique(jgs_sppdat$plot) %in% jgs_spppresent$plot] # corresponding plot that doesn't match is "869, 454 (NP)"
+# correct richness plot to 454
+jgs_spppresent$plot <- gsub("869, 954", "869, 454",jgs_spppresent$plot)
 
+
+# rbind cover and presence data
+# check cover only surveyed 1 date
+distinct(jgs_sppdat[c("surveydate", "plot")]) %>%
+  group_by(plot) %>%
+  summarise(nobs = length(surveydate)) %>%
+  summary() # only once
+jgs_master <- jgs_sppdat %>%
+  mutate(surveyevent = 1) %>%
+  #reorder cols
+  dplyr::select(plot, surveydate, surveyevent, meadow, code, hits) %>%
+  rbind(jgs_spppresent[colnames(.)]) %>%
+  # add standardized spp code
+  left_join(spplt[c("code", "clean_code2")]) %>%
+  # sort by plot, date and clean code
+  arrange(plot, clean_code2, surveydate) %>%
+  mutate(hits = as.numeric(hits),
+         dataset = ifelse(hits == 0.25, "richness", "sppcomp"))
+# assess spp that don't have match in clean_code2
+sort(unique(jgs_master$code[is.na(jgs_master$clean_code2)]))
+# periods introduced.. annoying, and dates in others
+# correct dates
+jgs_master[grepl("2005", jgs_master$code),]
+jgs_master$surveydate[jgs_master$plot == "412, 453 (PP)"]
+jgs_master$surveydate[jgs_master$plot == "412, 453 (PP)"] <- unique(jgs_master$surveydate[jgs_master$plot == "412, 453 (PP)" & !is.na(jgs_master$surveydate)])
+# remove rows with dates as codes
+jgs_master <- filter(jgs_master, !grepl("2005", code))
+for(i in sort(unique(jgs_master$code[is.na(jgs_master$clean_code2)]))){
+  searchcode <- trimws(gsub("[.]", " ", i))
+  replacecode <- unique(spplt$clean_code2[grepl(searchcode, gsub("[.]", "", spplt$code), ignore.case = T)])
+  print(paste("Swapping", i, "for", replacecode))
+  jgs_master$clean_code2[jgs_master$code == i] <- replacecode
+}
+
+# review dataset
+summary(jgs_master)
+sapply(jgs_master, function(x)sort(unique(x)))
+
+# keep whichever cover value is greatest per spp per plot
+jgs_master2 <- jgs_master %>%
+  distinct() %>% # there are some duplicates for salix richness in one plot?
+  arrange(plot, clean_code2, desc(hits)) %>%
+  group_by(plot, clean_code2) %>%
+  mutate(maxval = ifelse(hits == max(hits), 1, 0)) %>%
+  ungroup() %>%
+  # only keep max cover val
+  filter(maxval == 1) %>%
+  # join treatment info
+  left_join(jgs_sites) %>%
+  # add snow info
+  mutate(snow = ifelse(grepl("Snow", meadow, ignore.case = T), "snow", "no snow"),
+         meadow = ifelse(grepl("Dry", meadow, ignore.case = T), "dry", "mesic")) %>%
+  # remove unneeded cols
+  dplyr::select(plot, plot_num1:plot_num4, surveydate, meadow, snow, trt, clean_code2, hits)
+
+
+# extract site info from jgs dataset to pair with sdl site info
+jgs_sites <- left_join(jgs_sites, distinct(jgs_master2[c("plot", "trt", "meadow", "snow")]))
+
+# find out which col #s match the best
+sapply(sdl_plots2[,1:5], function(x) summary(jgs_sites$plot_num1[!is.na(jgs_sites$plot_num1)] %in% x))
+# num 1 pairs best with sw tag #, but some pairs across all available numbers to match on
+sapply(sdl_plots2[,1:5], function(x) summary(jgs_sites$plot_num2[!is.na(jgs_sites$plot_num2)] %in% x))
+# num 2 pairs best with ne tag #, 4 numbers pair with sw tag
+sapply(sdl_plots2[,1:5], function(x) summary(jgs_sites$plot_num3[!is.na(jgs_sites$plot_num3)] %in% x))
+# 2 matches in ne tag/old 16, 1 match with sw tag
+sapply(sdl_plots2[,1:5], function(x) summary(jgs_sites$plot_num4[!is.na(jgs_sites$plot_num4)] %in% x))
+# num 4 pairs with nothing
+
+# test pair on sw
+jgs_sitematch <- rename(jgs_sites, jgs_plot = plot) %>%
+  mutate(trt = recode(trt, NN = "N", NP = "N+P", PP = "P", CC = "C")) %>%
+  left_join(sdl_plots2, by= c("plot_num1" = "plot_sw_tag_PDF", "trt", "snow")) %>%
+  mutate(check_ne = plot_num2 == plot_ne_tag_PDF) %>%
+  left_join(sdl_plots2, by= c("plot_num2" = "plot_ne_tag_PDF", "trt", "snow")) %>%
+  mutate(check_sw = plot_num1 == plot_sw_tag_PDF)
+
+# try pairing based on 3rd plot num
+for(i in jgs_sitematch$plot_num3[is.na(jgs_sitematch$plot.x) & is.na(jgs_sitematch$plot.y) & !is.na(jgs_sitematch$plot_num3)]){
+  # import info based on sw tag
+  replacement <- subset(jgs_sitematch, plot_num3 == i) %>%
+    dplyr::select(jgs_plot:snow) %>%
+    rename(meadow = `meadow.x`) %>%
+    left_join(sdl_plots2, by= c("plot_num3" = "plot_sw_tag_PDF", "trt", "snow")) %>%
+    mutate(check_ne = plot_num2 == plot_ne_tag_PDF) %>%
+    left_join(sdl_plots2, by= c("plot_num3" = "plot_ne_tag_PDF", "trt", "snow")) %>%
+    mutate(check_sw = plot_num1 == plot_sw_tag_PDF)
+  # replace
+  jgs_sitematch[jgs_sitematch$plot_num3 == i & !is.na(jgs_sitematch$plot_num3),] <- replacement
+}
+
+# check is pairing by sw or ne pairs to same plots
+summary(jgs_sitematch$plot.x - jgs_sitematch$plot.y) # whether pairing on ne or se, pairs to same plots so that's good
+# check meadow similarities
+summary(jgs_sitematch$meadow == jgs_sitematch$meadow.x) # 1 false.. is the mysterious plot 286
+summary(jgs_sitematch$meadow == jgs_sitematch$meadow.y) # all true where paired
+summary(jgs_sitematch$meadow.x == jgs_sitematch$meadow.y) # all true where plot matched on both tags
+
+# in manual check, remaining 3 that need pair pair with old plot 16
+# check spp list for 286 vs 875
+sort(unique(sdl1997$species[sdl1997$old_plot== 286]))
+sort(unique(jgs_master2$clean_code2[jgs_master2$plot_num1 == 875])) # it's pretty close
+# in manual check of 2003 data, spp list for 875 is also close
+
+# tidy up jgs site lookup table
+jgs_testsw
+
+
+# clean up environment (remove unneeded)
+rm(temppres, temprow, tempdat)
+
+
+
+# -- tidy sdl 2003 spp comp + richness ----
+# not sure if suveyor truly counted all ground cover classes or not (e.g. see lichen and moss, but no rock or bare ground)
+# look at colsums..
+apply(sdl2003[,4:64], 2, sum, na.rm = T) # some spp have cols, but never hit..
+sdl2003_tidy <- dplyr::select(sdl2003, -sum) %>% # drop sum cover column
+  gather(code, hit, 4:ncol(.)) %>%
+  # remove spp not hit
+  filter(!is.na(hit)) %>%
+  left_join(spplt[c("code", "clean_code2")]) %>%
+  arrange(plot, clean_code2) %>%
+  mutate(treatment = recode(treatment, CC="C", NN = "N", PP = "P", NP = "N+P")) %>%
+  rename(plot_2003 = plot,
+         trt = treatment) %>%
+  left_join(sdl_plots2[c("plot", "trt", "plot_sw_tag_PDF")], by = c("trt", "plot_2003" = "plot_sw_tag_PDF"))
+
+# which plots still need pair?
+needs_match <- distinct(sdl2003_tidy[is.na(sdl2003_tidy$plot), c("plot_2003", "trt")])
+# where do outstanding numbers match up?
+apply(sdl_plots[,1:6], 2, function(x) summary(needs_match$plot_2003 %in% x))
+# 16 and sw tags prolly are the same
+needs_match[needs_match$plot_2003 %in% sdl_plots$plot_sw_tag_PDF,] # trts don't match with sdl fert df.. should be P and N
+needs_match[needs_match$plot_2003 %in% sdl_plots$old_plot16,] # 1 matches
+needs_match[needs_match$plot_2003 %in% sdl_plots$plot_ne_tag_PDF,] # 2 trts match, 1 doesn't..
+
+# manually match up 3 plots (actually only 2, ne and plot 16 overlap)
+sdl2003_tidy2 <- rename(sdl2003_tidy, plotSW = plot) %>%
+  left_join(sdl_plots2[c(c("plot", "trt", "plot_ne_tag_PDF"))], by = c("trt", "plot_2003" = "plot_ne_tag_PDF")) %>%
+  rename(plotNE = plot) %>%
+  left_join(sdl_plots2[c(c("plot", "trt", "old_plot16"))], by = c("trt", "plot_2003" = "old_plot16")) %>%
+  rename(plot_2016 = plot) %>%
+  mutate(plot = ifelse(!is.na(plotSW), plotSW,
+                       ifelse(!is.na(plotNE), plotNE, plot_2016))) %>%
+  left_join(sdl_plots2)
+
+# write out for now.. problems and all..
+write_csv(sdl2003_tidy2, "alpine_addnuts/output_data/sdl_sffert_2003_inprogress.csv")
 
 
 
@@ -449,7 +655,7 @@ S97 <- richness97 %>%
   summarise(S = length(species)) %>%
   ungroup() %>%
   mutate(old_plot = as.character(old_plot)) %>%
-  left_join(sdlS972[sdlS972$yr == 1997,], by = c("old_plot" = "plot")) 
+  left_join(sdlS97[sdlS97$yr == 1997,], by = c("old_plot" = "plot")) 
 # .. i have no idea how sppS in the EDI dataset was calculated, i've tried different ways to calcuate (i.e. not as cleanly, including non-veg) and still don't get as high of numbers as in EDI dataset
 # i would maybe not post those data?
 # still can't figure out what 286 matches up to..
@@ -518,81 +724,6 @@ checkdups <- master_plant %>%
 summary(checkdups$nobs) # all 1s -- each spp only has one entry per plot. good! ready to write out
 
 
-
-# --- CLEAN UP SITE LOOKUP TABLES -----
-# add site to nutnet lookup
-nutnet_plots <- mutate(nutnet_plots, site = "nutnet") %>%
-  dplyr::select(site, plotid:ncol(.))
-
-
-# specify dry meadow codes used across sdl datasets
-drycodes <- c("d", "Dry", "dry")
-wetcodes <- c("w")
-mescodes <- c("m", "mesic")
-snowcodes <- c("snow", "s", "SD")
-nosnow <- c("n", "none", "recovery", "NONE", "ND")
-
-
-# select plot and treatment from sdl (choose pdf data, then sdl 16.2 bc that is most recent info from TS)
-sdl_plots2 <- sdl_plots %>%
-  mutate(trt = ifelse(is.na(ferttrt_PDF), fert16.2, ferttrt_PDF),
-         trt = ifelse(is.na(trt), trt97, trt),
-         trt = ifelse(is.na(trt), fert12, trt),
-         trt = casefold(trt, upper = T),
-         trt = recode(trt, "NN" = "N", "CC" = "C", "CONTROL" = "C",
-                      "PP" = "P", "NP" = "N+P"),
-         snow = recode(snowfence_PDF, impacted = "snow", unimpacted = "no snow"),
-         snow = ifelse(is.na(snow), sfcode16, snow),
-         snow = ifelse(is.na(snow), site97, snow),
-         snow = recode(snow, ND = "no snow", SD = "snow"),
-         snow_notes = notes16.2,
-         snow_notes = ifelse(is.na(snow_notes) & snow == "no snow", "never affected", snow_notes),
-         meadow = ifelse(is.na(meadow_PDF),meadow16, meadow_PDF),
-         meadow = ifelse(is.na(meadow), site97, meadow),
-         meadow = recode(meadow, ND = "dry", SD = "dry")) %>%
-  #retain reference cols for analysis only
-  dplyr::select(plot, old_plot97:plot_sw_tag_PDF, trt, meadow, snow, snow_notes) %>%
-  # remove 96 and 0 plots because 0s are only for 0 descae, and 96 = 296, will have only mystery 286 plot from 1997
-  filter(!old_plot97 %in% c(0, 96)) %>%
-  data.frame()
-
-
-# -- PREP SDL 2003 SPP COMP SEPARATELY ----
-# not sure if suveyor truly counted all ground cover classes or not (e.g. see lichen and moss, but no rock or bare ground)
-# look at colsums..
-apply(sdl2003[,4:64], 2, sum, na.rm = T) # some spp have cols, but never hit..
-sdl2003_tidy <- dplyr::select(sdl2003, -sum) %>% # drop sum cover column
-  gather(code, hit, 4:ncol(.)) %>%
-  # remove spp not hit
-  filter(!is.na(hit)) %>%
-  left_join(spplt[c("code", "clean_code2")]) %>%
-  arrange(plot, clean_code2) %>%
-  mutate(treatment = recode(treatment, CC="C", NN = "N", PP = "P", NP = "N+P")) %>%
-  rename(plot_2003 = plot,
-         trt = treatment) %>%
-  left_join(sdl_plots2[c("plot", "trt", "plot_sw_tag_PDF")], by = c("trt", "plot_2003" = "plot_sw_tag_PDF"))
-
-# which plots still need pair?
-needs_match <- distinct(sdl2003_tidy[is.na(sdl2003_tidy$plot), c("plot_2003", "trt")])
-# where do outstanding numbers match up?
-apply(sdl_plots[,1:6], 2, function(x) summary(needs_match$plot_2003 %in% x))
-# 16 and sw tags prolly are the same
-needs_match[needs_match$plot_2003 %in% sdl_plots$plot_sw_tag_PDF,] # trts don't match with sdl fert df.. should be P and N
-needs_match[needs_match$plot_2003 %in% sdl_plots$old_plot16,] # 1 matches
-needs_match[needs_match$plot_2003 %in% sdl_plots$plot_ne_tag_PDF,] # 2 trts match, 1 doesn't..
-
-# manually match up 3 plots (actually only 2, ne and plot 16 overlap)
-sdl2003_tidy2 <- rename(sdl2003_tidy, plotSW = plot) %>%
-  left_join(sdl_plots2[c(c("plot", "trt", "plot_ne_tag_PDF"))], by = c("trt", "plot_2003" = "plot_ne_tag_PDF")) %>%
-  rename(plotNE = plot) %>%
-  left_join(sdl_plots2[c(c("plot", "trt", "old_plot16"))], by = c("trt", "plot_2003" = "old_plot16")) %>%
-  rename(plot_2016 = plot) %>%
-  mutate(plot = ifelse(!is.na(plotSW), plotSW,
-                       ifelse(!is.na(plotNE), plotNE, plot_2016))) %>%
-  left_join(sdl_plots2)
-
-# write out for now.. problems and all..
-write_csv(sdl2003_tidy2, "alpine_addnuts/output_data/sdl_sffert_2003_inprogress.csv")
 
 
 
