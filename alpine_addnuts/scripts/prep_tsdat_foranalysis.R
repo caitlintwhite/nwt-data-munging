@@ -560,7 +560,8 @@ for(i in jgs_sitematch$plot_num3[is.na(jgs_sitematch$plot.x) & is.na(jgs_sitemat
 # check is pairing by sw or ne pairs to same plots
 summary(jgs_sitematch$plot.x - jgs_sitematch$plot.y) # whether pairing on ne or se, pairs to same plots so that's good
 # check meadow similarities
-summary(jgs_sitematch$meadow == jgs_sitematch$meadow.x) # 1 false.. is the mysterious plot 286
+summary(jgs_sitematch$meadow == jgs_sitematch$meadow.x) # 1 false.. is the mysterious plot 286 from 1997
+subset(jgs_sitematch, meadow != meadow.x) # doesn't match on meadow type (jgs = mesic, 1997 = dry, otherwise same)
 summary(jgs_sitematch$meadow == jgs_sitematch$meadow.y) # all true where paired
 summary(jgs_sitematch$meadow.x == jgs_sitematch$meadow.y) # all true where plot matched on both tags
 
@@ -568,14 +569,35 @@ summary(jgs_sitematch$meadow.x == jgs_sitematch$meadow.y) # all true where plot 
 # check spp list for 286 vs 875
 sort(unique(sdl1997$species[sdl1997$old_plot== 286]))
 sort(unique(jgs_master2$clean_code2[jgs_master2$plot_num1 == 875])) # it's pretty close
-# in manual check of 2003 data, spp list for 875 is also close
+# in manual check of 2003 data, spp list for 875 is also close, and 2003 dataset has plot listed as mesic .. in 2016 and on pdf also mesic, 1997 data are wrong
+# in this case, plot 875 pairs plot_num1 (875) on the SW tag (875), not ne, which is why it didn't match above; manually correct
+jgs_sitematch <- mutate(jgs_sitematch, plot.x = ifelse(is.na(plot.x & plot_num1 == 875), na.omit(sdl_plots$plot[sdl_plots$plot_sw_tag_PDF == 875]), plot.x))
+# 286 == 875 also makes sense bc in sdl richness dataset off of EDI there is no 286, but there is an 875; and in spp comp dataset there is a 286 but no 875
 
 # tidy up jgs site lookup table
-jgs_testsw
-
-
+jgs_sitematch <- jgs_sitematch %>%
+  mutate(plot = ifelse(plot.x == plot.y, plot.x, NA),
+         plot = ifelse(is.na(plot) & !is.na(plot.y), plot.y, plot.x))
+# test pairing on old plot listed in sdl 16 dataset, using plot num 1 and plot num 2
+for(i in jgs_sitematch$jgs_plot[is.na(jgs_sitematch$plot)]){
+  num1 <- jgs_sitematch$plot_num1[jgs_sitematch$jgs_plot == i]
+  num2 <- jgs_sitematch$plot_num2[jgs_sitematch$jgs_plot == i]
+  temptrt <- jgs_sitematch$trt[jgs_sitematch$jgs_plot == i]
+  if(num1 %in% sdl_plots2$old_plot16){
+    if(na.omit(sdl_plots2$trt[sdl_plots2$old_plot16 == num1]) == temptrt){
+      jgs_sitematch$plot[jgs_sitematch$jgs_plot == i] <- na.omit(sdl_plots$plot[sdl_plots$old_plot16 == num1 & !is.na(sdl_plots)])
+    }
+  }
+  if(num2 %in% sdl_plots$old_plot16){
+    if(na.omit(sdl_plots2$trt[sdl_plots2$old_plot16 == num2]) == temptrt){
+      jgs_sitematch$plot[jgs_sitematch$jgs_plot == i] <- na.omit(sdl_plots2$plot[sdl_plots2$old_plot16 == num2])
+    }
+    
+  }
+}
+jgs_sitematch <- dplyr::select(jgs_sitematch, plot, jgs_plot:snow) %>% rename(meadow = `meadow.x`)
 # clean up environment (remove unneeded)
-rm(temppres, temprow, tempdat)
+rm(temppres, temprow, tempdat, num1, num2, temptrt)
 
 
 
@@ -591,17 +613,33 @@ sdl2003_tidy <- dplyr::select(sdl2003, -sum) %>% # drop sum cover column
   arrange(plot, clean_code2) %>%
   mutate(treatment = recode(treatment, CC="C", NN = "N", PP = "P", NP = "N+P")) %>%
   rename(plot_2003 = plot,
-         trt = treatment) %>%
-  left_join(sdl_plots2[c("plot", "trt", "plot_sw_tag_PDF")], by = c("trt", "plot_2003" = "plot_sw_tag_PDF"))
+         trt = treatment)
+  #left_join(sdl_plots2[c("plot", "trt", "plot_sw_tag_PDF")], by = c("trt", "plot_2003" = "plot_sw_tag_PDF"))
+
+# try to match sites based on jane's dataset
+sdl03_sites <- distinct(sdl2003_tidy[c("plot_2003", "trt")]) %>% arrange(plot_2003) %>%
+  left_join(jgs_sitematch, by = c("plot_2003" = "plot_num1", "trt"))
+
+for(i in sdl03_sites$plot_2003[is.na(sdl03_sites$plot)]){
+  if(i %in% jgs_sitematch$plot_num2){
+    if(sdl03_sites$trt[sdl03_sites$plot_2003 == i] == na.omit(jgs_sitematch$trt[jgs_sitematch$plot_num2 == i])){
+     sdl03_sites[sdl03_sites$plot_2003 == i, 3:ncol(sdl03_sites)] <- jgs_sitematch[jgs_sitematch$plot_num2 == i & !is.na(jgs_sitematch$plot_num2), c("plot", "jgs_plot", "plot_num2", "plot_num3", "plot_num4", "meadow", "snow") ]
+    }
+  }
+}
 
 # which plots still need pair?
-needs_match <- distinct(sdl2003_tidy[is.na(sdl2003_tidy$plot), c("plot_2003", "trt")])
+needs_match <- distinct(sdl03_sites[is.na(sdl03_sites$plot), c("plot_2003", "trt")])
 # where do outstanding numbers match up?
-apply(sdl_plots[,1:6], 2, function(x) summary(needs_match$plot_2003 %in% x))
-# 16 and sw tags prolly are the same
-needs_match[needs_match$plot_2003 %in% sdl_plots$plot_sw_tag_PDF,] # trts don't match with sdl fert df.. should be P and N
-needs_match[needs_match$plot_2003 %in% sdl_plots$old_plot16,] # 1 matches
-needs_match[needs_match$plot_2003 %in% sdl_plots$plot_ne_tag_PDF,] # 2 trts match, 1 doesn't..
+apply(sdl_plots[,1:6], 2, function(x) summary(needs_match$plot_2003 %in% x)) # in sw tag only
+needs_match <- left_join(needs_match, sdl_plots2, by = c("plot_2003" = "plot_sw_tag_PDF", "trt"))
+# who is missing a match?
+subset(needs_match, is.na(plot)) # there is a 279 N plot.. 269 could be a typo
+# compare spp lists:
+sort(unique(sdl2003_tidy$clean_code2[sdl2003_tidy$plot_2003 == 269]))
+sort(unique(jgs_master2$clean_code2[jgs_master2$plot_num1 == 279]))
+sort(unique(sdl2012$species[sdl2012$plot == 23])) # 23 = 279
+# all spp in previous two are in third, when look at datasets manually, top three abundant spp agree
 
 # manually match up 3 plots (actually only 2, ne and plot 16 overlap)
 sdl2003_tidy2 <- rename(sdl2003_tidy, plotSW = plot) %>%
