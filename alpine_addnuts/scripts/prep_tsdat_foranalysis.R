@@ -569,14 +569,19 @@ summary(jgs_sitematch$meadow.x == jgs_sitematch$meadow.y) # all true where plot 
 # check spp list for 286 vs 875
 sdl1997[sdl1997$old_plot== 286, c("site", "trt", "species", "hits")] %>%
   arrange(desc(hits)) #999 is present but not hit, geum most abundant; supposedly snow, dry and N trt
-jgs_master2[jgs_master2$plot_num1 == 875, c("meadow", "trt", "clean_code2", "hits")] # spp list maybe close, meadow different, trt the same
+jgs_master2[jgs_master2$plot_num1 == 875, c("meadow", "trt", "clean_code2", "hits")] %>%
+  arrange(desc(hits))# spp list maybe close, meadow different, trt the same
 sdl2003[sdl2003$plot == 875,] %>% 
   gather(species, hits, ACOROS:ncol(.)) %>%
   filter(!is.na(hits) & !species == "sum") %>%
   arrange(desc(hits)) # carex most abundant, like in jgs survey and deschampsia and trifolium also abundant; trt the same
-sdl2012[sdl2012$plot == 29,]
+sdl2012[sdl2012$plot == 29,] %>%
+  filter(hits > 0) %>%
+  arrange(desc(hits)) # plot 29 should match with 875 (is linked in the experiment PDF, but trt info is totally different from 97, 03 and 05.. )
+# pause site match for 286/875 until review sdl 2012 data
+
 # in this case, plot 875 pairs plot_num1 (875) on the SW tag (875), not ne, which is why it didn't match above; manually correct
-jgs_sitematch <- mutate(jgs_sitematch, plot.x = ifelse(is.na(plot.x & plot_num1 == 875), na.omit(sdl_plots$plot[sdl_plots$plot_sw_tag_PDF == 875]), plot.x))
+#jgs_sitematch <- mutate(jgs_sitematch, plot.x = ifelse(is.na(plot.x & plot_num1 == 875), na.omit(sdl_plots$plot[sdl_plots$plot_sw_tag_PDF == 875]), plot.x))
 # 286 == 875 also makes sense bc in sdl richness dataset off of EDI there is no 286, but there is an 875; and in spp comp dataset there is a 286 but no 875
 
 # tidy up jgs site lookup table
@@ -584,7 +589,8 @@ jgs_sitematch <- jgs_sitematch %>%
   mutate(plot = ifelse(plot.x == plot.y, plot.x, NA),
          plot = ifelse(is.na(plot) & !is.na(plot.y), plot.y, plot.x))
 # test pairing on old plot listed in sdl 16 dataset, using plot num 1 and plot num 2
-for(i in jgs_sitematch$jgs_plot[is.na(jgs_sitematch$plot)]){
+# ignore plot 875/286 for now
+for(i in jgs_sitematch$jgs_plot[is.na(jgs_sitematch$plot) & jgs_sitematch$plot_num1 != 875]){
   num1 <- jgs_sitematch$plot_num1[jgs_sitematch$jgs_plot == i]
   num2 <- jgs_sitematch$plot_num2[jgs_sitematch$jgs_plot == i]
   temptrt <- jgs_sitematch$trt[jgs_sitematch$jgs_plot == i]
@@ -601,6 +607,9 @@ for(i in jgs_sitematch$jgs_plot[is.na(jgs_sitematch$plot)]){
   }
 }
 jgs_sitematch <- dplyr::select(jgs_sitematch, plot, jgs_plot:snow) %>% rename(meadow = `meadow.x`)
+# what other plot numbers are a possibility for 875? (875 is NN)
+sdl_plots2$plot[!sdl_plots2$plot %in% jgs_sitematch$plot] # all plots available
+sdl_plots2$plot[!sdl_plots2$plot %in% jgs_sitematch$plot & sdl_plots2$trt == "N"] # ones that are +N only
 # clean up environment (remove unneeded)
 rm(temppres, temprow, tempdat, num1, num2, temptrt)
 
@@ -640,6 +649,7 @@ apply(sdl_plots[,1:6], 2, function(x) summary(needs_match$plot_2003 %in% x)) # i
 needs_match <- left_join(needs_match, sdl_plots2, by = c("plot_2003" = "plot_sw_tag_PDF", "trt"))
 # who is missing a match?
 subset(needs_match, is.na(plot)) # there is a 279 N plot.. 269 could be a typo -- no bc there is a 279 in the 2003 dataset
+# plot 875 is also unkown for now.. spp list from 2003 does line up with spp list from 2005
 # compare spp lists:
 sort(unique(sdl2003_tidy$clean_code2[sdl2003_tidy$plot_2003 == 269]))
 sort(unique(jgs_master2$clean_code2[jgs_master2$plot_num1 == 279]))
@@ -653,12 +663,13 @@ sdl03_sites[sdl03_sites$plot_2003 %in% needs_match$plot_2003, c("plot", "meadow"
 sdl_plots2$plot[!sdl_plots2$plot %in% sdl03_sites$plot & sdl_plots2$trt == sdl03_sites$trt[sdl03_sites$plot_2003 == 269]]
 # could either be 37 or 69...
 # compare spp lists from 2012, 2016 data surveyd 69 but not 37
-sdl2012[sdl2012$plot == 37 & sdl2012$hits > 0, c("species", "hits")] #dece most abundant
-sdl2012[sdl2012$plot == 69 & sdl2012$hits > 0, c("species", "hits")] #carsco most abundant
-sdl2003_tidy[sdl2003_tidy$plot_2003 == 269, c("clean_code2", "hit")] # geum not abundant in plot 37, spp match up best with plot 69 (and 269 close to 69 in characters?)
+sdl2012[sdl2012$plot == 37 & sdl2012$hits > 0, c("species", "hits")] %>% arrange(desc(hits)) #dece most abundant
+sdl2012[sdl2012$plot == 69 & sdl2012$hits > 0, c("species", "hits")] %>% arrange(desc(hits)) #carsco most abundant
+sdl2003_tidy[sdl2003_tidy$plot_2003 == 269, c("clean_code2", "hit")] %>% arrange(desc(hit)) # geum not abundant in plot 37, spp match up best with plot 69 (and 269 close to 69 in characters?)
 sort(unique(sdl2016$species[sdl2016$plot=="69"])) # junk1 is nothing hit; same spp as in 2003
-# manually correct plot 269
-needs_match[needs_match$plot_2003 == 269,(3:ncol(needs_match))] <- sdl_plots2[sdl_plots2$plot == 69 & !is.na(sdl_plots2$plot), !colnames(sdl_plots2) %in% c("trt", "plot_sw_tag_PDF")]
+
+# manually correct plot 269.. but check 2012 plot pairing first
+#needs_match[needs_match$plot_2003 == 269,(3:ncol(needs_match))] <- sdl_plots2[sdl_plots2$plot == 69 & !is.na(sdl_plots2$plot), !colnames(sdl_plots2) %in% c("trt", "plot_sw_tag_PDF")]
 
 # pair current plot to sdl2003_tidy
 sdl2003_tidy2 <- left_join(sdl2003_tidy, sdl03_sites[c("plot_2003", "plot", "trt", "meadow", "snow")]) %>%
