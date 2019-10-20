@@ -567,9 +567,14 @@ summary(jgs_sitematch$meadow.x == jgs_sitematch$meadow.y) # all true where plot 
 
 # in manual check, remaining 3 that need pair pair with old plot 16
 # check spp list for 286 vs 875
-sort(unique(sdl1997$species[sdl1997$old_plot== 286]))
-sort(unique(jgs_master2$clean_code2[jgs_master2$plot_num1 == 875])) # it's pretty close
-# in manual check of 2003 data, spp list for 875 is also close, and 2003 dataset has plot listed as mesic .. in 2016 and on pdf also mesic, 1997 data are wrong
+sdl1997[sdl1997$old_plot== 286, c("site", "trt", "species", "hits")] %>%
+  arrange(desc(hits)) #999 is present but not hit, geum most abundant; supposedly snow, dry and N trt
+jgs_master2[jgs_master2$plot_num1 == 875, c("meadow", "trt", "clean_code2", "hits")] # spp list maybe close, meadow different, trt the same
+sdl2003[sdl2003$plot == 875,] %>% 
+  gather(species, hits, ACOROS:ncol(.)) %>%
+  filter(!is.na(hits) & !species == "sum") %>%
+  arrange(desc(hits)) # carex most abundant, like in jgs survey and deschampsia and trifolium also abundant; trt the same
+sdl2012[sdl2012$plot == 29,]
 # in this case, plot 875 pairs plot_num1 (875) on the SW tag (875), not ne, which is why it didn't match above; manually correct
 jgs_sitematch <- mutate(jgs_sitematch, plot.x = ifelse(is.na(plot.x & plot_num1 == 875), na.omit(sdl_plots$plot[sdl_plots$plot_sw_tag_PDF == 875]), plot.x))
 # 286 == 875 also makes sense bc in sdl richness dataset off of EDI there is no 286, but there is an 875; and in spp comp dataset there is a 286 but no 875
@@ -634,26 +639,35 @@ needs_match <- distinct(sdl03_sites[is.na(sdl03_sites$plot), c("plot_2003", "trt
 apply(sdl_plots[,1:6], 2, function(x) summary(needs_match$plot_2003 %in% x)) # in sw tag only
 needs_match <- left_join(needs_match, sdl_plots2, by = c("plot_2003" = "plot_sw_tag_PDF", "trt"))
 # who is missing a match?
-subset(needs_match, is.na(plot)) # there is a 279 N plot.. 269 could be a typo
+subset(needs_match, is.na(plot)) # there is a 279 N plot.. 269 could be a typo -- no bc there is a 279 in the 2003 dataset
 # compare spp lists:
 sort(unique(sdl2003_tidy$clean_code2[sdl2003_tidy$plot_2003 == 269]))
 sort(unique(jgs_master2$clean_code2[jgs_master2$plot_num1 == 279]))
 sort(unique(sdl2012$species[sdl2012$plot == 23])) # 23 = 279
 # all spp in previous two are in third, when look at datasets manually, top three abundant spp agree
 
-# manually match up 3 plots (actually only 2, ne and plot 16 overlap)
-sdl2003_tidy2 <- rename(sdl2003_tidy, plotSW = plot) %>%
-  left_join(sdl_plots2[c(c("plot", "trt", "plot_ne_tag_PDF"))], by = c("trt", "plot_2003" = "plot_ne_tag_PDF")) %>%
-  rename(plotNE = plot) %>%
-  left_join(sdl_plots2[c(c("plot", "trt", "old_plot16"))], by = c("trt", "plot_2003" = "old_plot16")) %>%
-  rename(plot_2016 = plot) %>%
-  mutate(plot = ifelse(!is.na(plotSW), plotSW,
-                       ifelse(!is.na(plotNE), plotNE, plot_2016))) %>%
-  left_join(sdl_plots2)
+
+# replace sdl03_sites unmatched with matched
+sdl03_sites[sdl03_sites$plot_2003 %in% needs_match$plot_2003, c("plot", "meadow", "snow")] <- needs_match[,c("plot", "meadow", "snow")]
+# which plot(s) are missing (maybe one pairs to 269?)
+sdl_plots2$plot[!sdl_plots2$plot %in% sdl03_sites$plot & sdl_plots2$trt == sdl03_sites$trt[sdl03_sites$plot_2003 == 269]]
+# could either be 37 or 69...
+# compare spp lists from 2012, 2016 data surveyd 69 but not 37
+sdl2012[sdl2012$plot == 37 & sdl2012$hits > 0, c("species", "hits")] #dece most abundant
+sdl2012[sdl2012$plot == 69 & sdl2012$hits > 0, c("species", "hits")] #carsco most abundant
+sdl2003_tidy[sdl2003_tidy$plot_2003 == 269, c("clean_code2", "hit")] # geum not abundant in plot 37, spp match up best with plot 69 (and 269 close to 69 in characters?)
+sort(unique(sdl2016$species[sdl2016$plot=="69"])) # junk1 is nothing hit; same spp as in 2003
+# manually correct plot 269
+needs_match[needs_match$plot_2003 == 269,(3:ncol(needs_match))] <- sdl_plots2[sdl_plots2$plot == 69 & !is.na(sdl_plots2$plot), !colnames(sdl_plots2) %in% c("trt", "plot_sw_tag_PDF")]
+
+# pair current plot to sdl2003_tidy
+sdl2003_tidy2 <- left_join(sdl2003_tidy, sdl03_sites[c("plot_2003", "plot", "trt", "meadow", "snow")]) %>%
+  # reorder cols and sort
+  dplyr::select(date, plot_2003, plot, trt, meadow, snow, clean_code2, hit) %>%
+  group_by(plot, clean_code2) %>% mutate(test = (length(hit))) %>% ungroup()
 
 # write out for now.. problems and all..
 write_csv(sdl2003_tidy2, "alpine_addnuts/output_data/sdl_sffert_2003_inprogress.csv")
-
 
 
 # -- PREP SDL PLANT DATA WITHOUT TRT INFO IN MATRICES (just plot num) -----
