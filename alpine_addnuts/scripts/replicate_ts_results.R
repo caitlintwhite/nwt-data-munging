@@ -35,6 +35,7 @@ rm(list = ls())
 library(tidyverse)
 library(vegan)
 library(cowplot)
+source("edi_functions.R")
 na_vals <- c("", " ", NA, "NA", "NaN", NaN, ".")
 options(stringsAsFactors = F, strip.white = T, na.strings = na_vals)
 theme_set(theme_bw())
@@ -63,6 +64,22 @@ nn_anpp <- read.csv("alpine_addnuts/output_data/nutnet2013_alldats/NWTnutnet_anp
 # sdl 2003 and 2005 (partially figured out -- some plots don't have match)
 sdl03 <- read.csv("alpine_addnuts/output_data/sdl_2003_sppcomp.csv")
 sdl05 <- read.csv("alpine_addnuts/output_data/sdl_2005_jgs_sppcomp.csv")
+# jgs site list
+jgs_sites <- read.csv("alpine_addnuts/output_data/sdl_2005_jgs_sites.csv")
+# sdl 03 iste list
+sdl03_sites <- read.csv("alpine_addnuts/output_data/sdl_2003_sites.csv")
+
+# sdl 97 anpp from EDI
+#sffert richness 1997 (to troubleshoot plots that don't match up)
+sdlS97 <- getTabular(138) #colnames don't read in correctly, fix now
+names(sdlS97)
+names(sdlS97)[grep("X", names(sdlS97))] <- NA
+sdlS97[nrow(sdlS97)+1,] <- data.frame(t(names(sdlS97)))
+# manually assign names from online metadata
+names(sdlS97) <- c("yr", "loc", "trt", "plot", "sppS", "grass_wgt_rep1", "forb_wgt_rep1", "total_rep1", "grass_rep2", "forb_rep2", "total_rep2")
+
+# plot info from knb-lter-nwt.138 metadata (on culter)
+sdl97_plotinfo <- read.csv("alpine_addnuts/output_data/sffert_knb138_sites.csv")
 
 
 
@@ -89,12 +106,28 @@ nnplots$trt2 <- gsub("K", "C", nnplots$trt2)
 sdlplots$trt <- factor(sdlplots$trt, levels = c("C", "N", "P", "N+P"))
 
 
+
+# -- RE-CHECK SITE INFO FOR SDL 03 AND 05 DATASETS WITH EDI METADATA -----
+sdl_sites_check <- left_join(sdlplots, sdl97_plotinfo) # checks out, still no pair for 286
+jgs_sites_check <- left_join(jgs_sites, sdl97_plotinfo, by = c("plot_num1" = "old_plot"))
+# plot 16 pairs on replacement tag (485), 30 pairs on ne tag (441).. and 875 = 69! all plots accounted for :)
+sdl05[sdl05$jgs_plot == "875 (NN)", c("plot", "meadow", "snow")] <- sdl97_plotinfo[sdl97_plotinfo$old_plot == 875, c("plot", "meadow", "snow")]
+
+
+sdl03_sites_check <- left_join(sdl03_sites, sdl97_plotinfo, by = c("plot_2003" = "old_plot", "plot", "trt"))
+# sdl 03 also checks out, plot 269 = 37, 875 = 69 (need to infill those)
+sdl03[sdl03$plot_2003 == 269, c("plot", "meadow", "snow")] <- sdl97_plotinfo[sdl97_plotinfo$old_plot == 269, c("plot", "meadow", "snow")]
+sdl03[sdl03$plot_2003 == 875, c("plot", "meadow", "snow")] <- sdl97_plotinfo[sdl97_plotinfo$old_plot == 875, c("plot", "meadow", "snow")]
+sdl03$meadow[sdl03$meadow == "wet"] <- "snowbed"
+sdl03$snow <- gsub("field", "", sdl03$snow)
+
 # pull known plots from sdl 03 and sdl 05 to append to abundance data (remove any NAs)
-abund03 <- subset(sdl03, !is.na(plot)) %>%
+abund03 <- sdl03 %>%
+  # infill plots 875 (69) and 269 (37)
   mutate(yr = 2003,
          plotid = as.character(plot)) %>%
   dplyr::select(colnames(plantcom))
-abund05 <- subset(sdl05, !is.na(plot)) %>%
+abund05 <- subset(sdl05) %>%
   mutate(yr = 2005,
          plotid = as.character(plot)) %>%
   dplyr::select(colnames(plantcom))
@@ -144,6 +177,7 @@ abundance <- subset(plantcom, hits > 0.25) %>%
 
 # prep wide-form non veg, plant total hits, and plant cover (100-nonveg cover) data frame
 coarse_cover <- abundance %>%
+  # grp by Forb, Grass, Shrub (SEDES = Forb)
   group_by(site, yr, plotid, simple_lifeform2) %>%
   summarise(cover = sum(hits)) %>%
   ungroup() %>%
@@ -176,7 +210,66 @@ coarse_cover <- left_join(coarse_cover, geum_cover[c("site", "yr", "plotid", "ge
   rename(Geum_hits = geum_hits, Geum_rel = geum_rel)
   
 
+# -- PREP BIODIVERSITY DATASETS (where richness available) -----
+# nutnet 2013 and sdl 1997, 2005, and 2012 include spp present only (hits = 0.25)
+## as of 2019-10-13 CTW does not have nutnet 2017 spp present only
+plants <- subset(plantcom, yr %in% unique(yr[hits == 0.25])) %>%
+  # remove ground cover
+  filter(!clean_code2 %in% unique(spplist$clean_code2[spplist$simple_lifeform == "Ground cover" & !is.na(spplist$simple_lifeform)])) %>%
+  unite(rowid, site, yr, plotid, sep = "_", remove = F)
 
+richness <- group_by(plants, rowid, site, yr, plotid) %>%
+  summarise(S = length(clean_code2)) %>%
+  ungroup()
+
+# shannon diversity
+sppmatrix <- spread(plants, clean_code2, hits, fill = 0) %>% as.data.frame()
+rownames(sppmatrix) <- sppmatrix$rowid
+relmatrix <- decostand(sppmatrix[,(grep("plotid", names(sppmatrix))+1):ncol(sppmatrix)], method = "total")
+H <- data.frame(H = diversity(relmatrix),
+                rowid = rownames(relmatrix))
+
+# put it all together
+biodiv <- left_join(richness, H)
+
+# join biodiv and coarse_cover to coarse summary where info available
+coarse_summary <- left_join(coarse_cover, dplyr::select(biodiv, -rowid))
+
+
+
+# -- PREP ANPP ----
+# prep 2013 anpp
+nn13_anpp <- subset(nn_anpp, grepl("2013", as.character(Date))) %>%
+  # crunch total
+  spread(Group, ANPP_g_per_m2, fill = 0) %>%
+  mutate(Total = Forb + Grass + Legume,
+         plotid = paste0("B", Block, "_", Plot),
+         site = "nutnet",
+         yr = 2013) %>%
+  dplyr::select(site, yr, plotid, FullTreatment:Total) %>%
+  rename_all(casefold) %>%
+  rename(trt = fulltreatment)
+
+# from metadata: Aboveground biomass measurements were taken by clip harvesting a 20x20 cm subplot within each plot.
+area97 <- (20/100)*(20/100) # convert to m
+sdl97_anpp <- subset(sdlS97, yr == 1997) %>%
+  # drop richness
+  dplyr::select(-sppS) %>%
+  # gather all anpp to take average per plot
+  gather(grp, anpp_g, grass_wgt_rep1:ncol(.)) %>%
+  filter(!is.na(anpp_g)) %>%
+  mutate(grp = gsub("_.+$", "", grp),
+         # convert all to anpp to g/m2
+         anpp_g_m2 = as.numeric(anpp_g)/area97,
+         old_plot = as.numeric(plot)) %>%
+  group_by(yr, loc, trt, old_plot, grp) %>%
+  summarise(mean_anpp_g_m2 = mean(anpp_g_m2)) %>%
+  ungroup() %>%
+  spread(grp, mean_anpp_g_m2) %>%
+  mutate(trt = recode(trt, CC = "C", NN = "N", PP = "P", NP = "N+P")) %>%
+  left_join(sdl97_plotinfo, by = c("old_plot", "trt"))
+  # 283 didn't pair, matches plot_num1 in jgs dataset (plot 30)
+sdl97_anpp[sdl97_anpp$old_plot == 283, c("meadow", "snow", "plot")] 
 
 
 # -- Fig 1 and 2: FORBS VS GRASSES (Figs 1 + 2) ----
@@ -426,42 +519,13 @@ ggplot(all_means, aes(post_yrs, meancov, group = site, col = site)) +
   facet_wrap(~trt, nrow = 1)
 
 
-# -- PREP BIODIVERSITY DATASETS (where richness available) -----
-# nutnet 2013 and sdl 1997, 2005, and 2012 include spp present only (hits = 0.25)
-## as of 2019-10-13 CTW does not have nutnet 2017 spp present only
-plants <- subset(plantcom, yr %in% unique(yr[hits == 0.25])) %>%
-  # remove ground cover
-  filter(!clean_code2 %in% unique(spplist$clean_code2[spplist$simple_lifeform == "Ground cover" & !is.na(spplist$simple_lifeform)])) %>%
-  unite(rowid, site, yr, plotid, sep = "_", remove = F)
-  
-richness <- group_by(plants, rowid, site, yr, plotid) %>%
-  summarise(S = length(clean_code2))
-
-# shannon diversity
-sppmatrix <- spread(plants, clean_code2, hits, fill = 0) %>% as.data.frame()
-rownames(sppmatrix) <- sppmatrix$rowid
-relmatrix <- decostand(sppmatrix[,(grep("plotid", names(sppmatrix))+1):ncol(sppmatrix)], method = "total")
-H <- data.frame(H = diversity(relmatrix),
-                rowid = rownames(relmatrix))
-
-# put it all together
-biodiv <- left_join(richness, H)
-  
 
 # -- Table 1: NutNet 2013 biodiversity, biomass, and vertical complexity ----
 # only plots used in 2017??, Tim pooled +micro additions with otherwise similar (c, c+micro)
 # K+ only added in 2016, not added for 2013 surveys.. so in 2013 +micro is just +micro, and in 2017 those +micro plots are +micro+K+ (K as K2SO4)
 # the way to get Tim's table results are Selaginella = non-plant -- but everywhere else Selaginella is plant, so updating 2013 with selaginella as plant cover
 
-# prep 2013 anpp
-nn13_anpp <- subset(nn_anpp, grepl("2013", as.character(Date))) %>%
-  # crunch total
-  spread(Group, ANPP_g_per_m2, fill = 0) %>%
-  mutate(Total = Forb + Grass + Legume,
-         plotid = paste0("B", Block, "_", Plot)) %>%
-  dplyr::select(plotid, FullTreatment:Total) %>%
-  rename_all(casefold) %>%
-  rename(trt = fulltreatment)
+
 
 # collapse K (micro) into otherwise similar treatments (n = 8 per group)
 nn_biodiv_blockmeans <- subset(biodiv, site == "nutnet") %>%
