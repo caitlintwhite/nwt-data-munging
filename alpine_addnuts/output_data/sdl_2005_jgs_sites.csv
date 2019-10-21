@@ -1,0 +1,65 @@
+plot,jgs_plot,plot_num1,plot_num2,plot_num3,plot_num4,trt,meadow,snow
+7,"292, 486 (NN)",292,486,NA,NA,N,dry,no snow
+6,"409, 489 (NN)",409,489,NA,NA,N,dry,no snow
+5,"262, 488 (NN)",262,488,NA,NA,N,dry,no snow
+8,"099, 493 (NN)",99,493,NA,NA,N,dry,no snow
+12,"261, 498 (NP)",261,498,NA,NA,N+P,dry,no snow
+9,"408, 487 (NP)",408,487,NA,NA,N+P,dry,no snow
+11,"410, 492 (NP)",410,492,NA,NA,N+P,dry,no snow
+10,"290, 495 (NP)",290,495,NA,NA,N+P,dry,no snow
+14,"287, 491 (PP)",287,491,NA,NA,P,dry,no snow
+13,"411, 496 (PP)",411,496,NA,NA,P,dry,no snow
+15,"289, 500 (PP)",289,500,NA,NA,P,dry,no snow
+16,"296, 485 (PP)",296,485,NA,NA,P,dry,no snow
+3,"709, 494 (CC)",709,494,NA,NA,C,dry,no snow
+1,"710, 490 (CC)",710,490,NA,NA,C,dry,no snow
+4,"711, 499 (CC)",711,499,NA,NA,C,dry,no snow
+2,"712, 497 (CC)",712,497,NA,NA,C,dry,no snow
+21,"294, 440 (NN)",294,440,NA,NA,N,mesic,no snow
+22,"295, 448 (NN)",295,448,NA,NA,N,mesic,no snow
+24,"264, 452 (NN)",264,452,NA,NA,N,mesic,no snow
+23,279 (NN),279,NA,NA,NA,N,mesic,no snow
+26,"281, 439 (NP)",281,439,NA,NA,N+P,mesic,no snow
+27,"403, 450 (NP)",403,450,NA,NA,N+P,mesic,no snow
+28,"293, 404, 210, 220 (NP)",293,404,210,220,N+P,mesic,no snow
+25,"298, 442 (NP)",298,442,NA,NA,N+P,mesic,no snow
+30,"283, 441 (PP)",283,441,NA,NA,P,mesic,no snow
+32,"406, 451 (PP)",406,451,NA,NA,P,mesic,no snow
+31,"280, 449 (PP)",280,449,NA,NA,P,mesic,no snow
+29.5,"397, 435, 438 (PP)",397,435,438,NA,P,mesic,no snow
+18,"268, 436, 437 (CC)",268,436,437,NA,C,mesic,no snow
+19,"267, 444 (CC)",267,444,NA,NA,C,mesic,no snow
+20,"266, 445 (CC)",266,445,NA,NA,C,mesic,no snow
+17,"870, 230 (CC)",870,230,NA,NA,C,mesic,no snow
+55,"864, 472 (NN)",864,472,NA,NA,N,dry,snow
+54,"415, 464 (NN)",415,464,NA,NA,N,dry,snow
+56,"413, 455 (NN)",413,455,NA,NA,N,dry,snow
+53,"417, 863, 465 (NN)",417,863,465,NA,N,dry,snow
+57,"868, 466 (NP)",868,466,NA,NA,N+P,dry,snow
+59,"866, 456 (NP)",866,456,NA,NA,N+P,dry,snow
+60,"869, 454 (NP)",869,454,NA,NA,N+P,dry,snow
+58,"894, 461 (NP)",894,461,NA,NA,N+P,dry,snow
+61,"400, 467 (PP)",400,467,NA,NA,P,dry,snow
+63,"414, 463, 399 (PP)",414,463,399,NA,P,dry,snow
+64,"412, 453 (PP)",412,453,NA,NA,P,dry,snow
+62,"416, 462 (PP)",416,462,NA,NA,P,dry,snow
+52,"891, 457 (CC)",891,457,NA,NA,C,dry,snow
+49,"888, 458 (CC)",888,458,NA,NA,C,dry,snow
+50,"889, 459 (CC)",889,459,NA,NA,C,dry,snow
+51,"890, 460 (CC)",890,460,NA,NA,C,dry,snow
+71,"419, 483 (NN)",419,483,NA,NA,N,mesic,snow
+70,"884, 484 (NN)",884,484,NA,NA,N,mesic,snow
+72,"880, 470 (NN)",880,470,NA,NA,N,mesic,snow
+75,871 (NP),871,NA,NA,NA,N+P,mesic,snow
+73,"877, 471 (NP)",877,471,NA,NA,N+P,mesic,snow
+74,"873, 481 (NP)",873,481,NA,NA,N+P,mesic,snow
+76,"886, 468 (NP)",886,468,NA,NA,N+P,mesic,snow
+78,"418, 482 (PP)",418,482,NA,NA,P,mesic,snow
+77,"420, 478 (PP)",420,478,NA,NA,P,mesic,snow
+79,"872, 480 (PP)",872,480,NA,NA,P,mesic,snow
+80,"881, 469 (PP)",881,469,NA,NA,P,mesic,snow
+65,"885, 476 (CC)",885,476,NA,NA,C,mesic,snow
+66,"883, 474 (CC)",883,474,NA,NA,C,mesic,snow
+67,"882, 475 (CC)",882,475,NA,NA,C,mesic,snow
+68,"887, 473 (CC)",887,473,NA,NA,C,mesic,snow
+NA,875 (NN),875,NA,NA,NA,N,mesic,snow

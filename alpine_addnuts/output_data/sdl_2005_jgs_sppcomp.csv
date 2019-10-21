@@ -1,0 +1,900 @@
+site,surveydate,plot,jgs_plot,trt,meadow,snow,clean_code2,hits
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,2LTR,1
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,2RF,0.25
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,ALGE,11
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,ARSC,1
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,CARO2,1
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,CARUD,11
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,CASC12,1
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,FEBR,1
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,GERO2,11
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,KOMY,21
+sdl,2005-06-27,1,"710, 490 (CC)",C,dry,no snow,LLSE,0.25
+sdl,2005-06-27,1,"710, 490 (CC)",C,dry,no snow,NOFEG,0.25
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,ORALA,0.25
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,POBI6,1
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,POVI3,5
+sdl,2005-06-27,1,"710, 490 (CC)",C,dry,no snow,SENEC,0.25
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,TEGR3,2
+sdl,2005-07-21,1,"710, 490 (CC)",C,dry,no snow,TRDA2,18
+sdl,2005-07-22,2,"712, 497 (CC)",C,dry,no snow,2LTR,4
+sdl,2005-07-22,2,"712, 497 (CC)",C,dry,no snow,ALGE,6
+sdl,2005-06-30,2,"712, 497 (CC)",C,dry,no snow,ARSC,0.25
+sdl,2005-07-22,2,"712, 497 (CC)",C,dry,no snow,CARO2,3
+sdl,2005-07-22,2,"712, 497 (CC)",C,dry,no snow,CARUD,2
+sdl,2005-07-22,2,"712, 497 (CC)",C,dry,no snow,CEARS2,1
+sdl,2005-07-22,2,"712, 497 (CC)",C,dry,no snow,ELYMU,2
+sdl,2005-07-22,2,"712, 497 (CC)",C,dry,no snow,ERSI3,1
+sdl,2005-07-22,2,"712, 497 (CC)",C,dry,no snow,FESTU,5
+sdl,2005-07-22,2,"712, 497 (CC)",C,dry,no snow,GERO2,14
+sdl,2005-07-22,2,"712, 497 (CC)",C,dry,no snow,KOMY,3
+sdl,2005-06-30,2,"712, 497 (CC)",C,dry,no snow,LLSE,0.25
+sdl,2005-07-22,2,"712, 497 (CC)",C,dry,no snow,MELA3,1
+sdl,2005-07-22,2,"712, 497 (CC)",C,dry,no snow,ORALA,13
+sdl,2005-06-30,2,"712, 497 (CC)",C,dry,no snow,PHPU5,0.25
+sdl,2005-07-22,2,"712, 497 (CC)",C,dry,no snow,TRDA2,30
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,2LICHN,4
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,2LTR,5
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,2RF,2
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,ALGE,2
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,CAPU,7
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,CARO2,3
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,CARUD,3
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,CEARS2,1
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,DECE,1
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,ELYMU,1
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,FESTU,1
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,GERO2,10
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,KOMY,15
+sdl,2005-06-27,3,"709, 494 (CC)",C,dry,no snow,MELA3,0.25
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,MIOB2,2
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,ORALA,3
+sdl,2005-06-27,3,"709, 494 (CC)",C,dry,no snow,PHPU5,0.25
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,POBI6,3
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,PODI2,1
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,POGL,2
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,POVI,1
+sdl,2005-07-22,3,"709, 494 (CC)",C,dry,no snow,TEACC,1
+sdl,2005-06-27,3,"709, 494 (CC)",C,dry,no snow,TEGR3,0.25
+sdl,2005-06-27,3,"709, 494 (CC)",C,dry,no snow,TRDA2,0.25
+sdl,2005-07-22,4,"711, 499 (CC)",C,dry,no snow,2LICHN,5
+sdl,2005-07-22,4,"711, 499 (CC)",C,dry,no snow,2LTR,3
+sdl,2005-07-22,4,"711, 499 (CC)",C,dry,no snow,2RF,4
+sdl,2005-07-22,4,"711, 499 (CC)",C,dry,no snow,ALGE,1
+sdl,2005-07-22,4,"711, 499 (CC)",C,dry,no snow,ARSC,2
+sdl,2005-06-27,4,"711, 499 (CC)",C,dry,no snow,CAOC4,0.25
+sdl,2005-07-22,4,"711, 499 (CC)",C,dry,no snow,CARUD,3
+sdl,2005-07-22,4,"711, 499 (CC)",C,dry,no snow,ERPI6,1
+sdl,2005-07-22,4,"711, 499 (CC)",C,dry,no snow,GERO2,4
+sdl,2005-07-22,4,"711, 499 (CC)",C,dry,no snow,KOMY,20
+sdl,2005-06-27,4,"711, 499 (CC)",C,dry,no snow,LLSE,0.25
+sdl,2005-07-22,4,"711, 499 (CC)",C,dry,no snow,ORALA,7
+sdl,2005-07-22,4,"711, 499 (CC)",C,dry,no snow,PHPU5,1
+sdl,2005-06-27,4,"711, 499 (CC)",C,dry,no snow,POBI6,0.25
+sdl,2005-07-22,4,"711, 499 (CC)",C,dry,no snow,TRDA2,27
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,2LTR,10
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,ARFEF3,0.25
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,ARSC,6
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,CAPU,5
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,CARO2,1
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,FEBR,14
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,FESTU,3
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,GERO2,8
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,KOMY,2
+sdl,2005-06-27,5,"262, 488 (NN)",N,dry,no snow,LLSE,0.25
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,MIOB2,3
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,NOFEG,0.25
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,ORALA,3
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,POBI6,1
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,POGL,0.25
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,POVI3,7
+sdl,2005-07-19,5,"262, 488 (NN)",N,dry,no snow,SIACS2,1
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,2LTR,6
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,ALGE,3
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,ARSC,3
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,CAPU,3
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,CARO2,0.25
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,CARUD,9
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,DECE,1
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,GERO2,7
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,KOMY,16
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,LLSE,0.25
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,MIOB2,1
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,ORALA,3
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,POBI6,0.25
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,POVI3,5
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,TRDA2,15
+sdl,2005-07-19,6,"409, 489 (NN)",N,dry,no snow,TRPAP,0.25
+sdl,2005-07-19,7,"292, 486 (NN)",N,dry,no snow,2BARE,7
+sdl,2005-07-19,7,"292, 486 (NN)",N,dry,no snow,2LICHN,3
+sdl,2005-07-19,7,"292, 486 (NN)",N,dry,no snow,2LTR,10
+sdl,2005-07-19,7,"292, 486 (NN)",N,dry,no snow,ARFEF3,4
+sdl,2005-06-27,7,"292, 486 (NN)",N,dry,no snow,ARSC,0.25
+sdl,2005-07-19,7,"292, 486 (NN)",N,dry,no snow,CARO2,2
+sdl,2005-07-19,7,"292, 486 (NN)",N,dry,no snow,DECE,1
+sdl,2005-06-27,7,"292, 486 (NN)",N,dry,no snow,ERSI3,0.25
+sdl,2005-07-19,7,"292, 486 (NN)",N,dry,no snow,FEBR,9
+sdl,2005-07-19,7,"292, 486 (NN)",N,dry,no snow,GERO2,11
+sdl,2005-06-27,7,"292, 486 (NN)",N,dry,no snow,LLSE,0.25
+sdl,2005-07-19,7,"292, 486 (NN)",N,dry,no snow,MIOB2,1
+sdl,2005-06-27,7,"292, 486 (NN)",N,dry,no snow,ORALA,0.25
+sdl,2005-06-27,7,"292, 486 (NN)",N,dry,no snow,POBI6,0.25
+sdl,2005-07-19,7,"292, 486 (NN)",N,dry,no snow,POGL,5
+sdl,2005-07-19,7,"292, 486 (NN)",N,dry,no snow,TRDA2,1
+sdl,2005-07-19,7,"292, 486 (NN)",N,dry,no snow,TRSP2,1
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,2LICHN,1
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,2LTR,8
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,ALGE,2
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,ARSC,2
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,CARO2,2
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,CARUD,4
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,CASC12,2
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,DECE,7
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,ELYMU,0.25
+sdl,2005-06-27,8,"099, 493 (NN)",N,dry,no snow,ERSI3,0.25
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,FESTU,2
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,GERO2,20
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,KOMY,9
+sdl,2005-06-27,8,"099, 493 (NN)",N,dry,no snow,LLSE,0.25
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,MIOB2,5
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,ORALA,2
+sdl,2005-06-27,8,"099, 493 (NN)",N,dry,no snow,POBI6,0.25
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,POVI3,1
+sdl,2005-07-21,8,"099, 493 (NN)",N,dry,no snow,TEGR3,0.25
+sdl,2005-07-19,9,"408, 487 (NP)",N+P,dry,no snow,2BARE,3
+sdl,2005-07-19,9,"408, 487 (NP)",N+P,dry,no snow,2LTR,2
+sdl,2005-07-19,9,"408, 487 (NP)",N+P,dry,no snow,ARFEF3,0.25
+sdl,2005-07-19,9,"408, 487 (NP)",N+P,dry,no snow,ARSC,8
+sdl,2005-07-19,9,"408, 487 (NP)",N+P,dry,no snow,CARO2,0.25
+sdl,2005-07-19,9,"408, 487 (NP)",N+P,dry,no snow,DECE,1
+sdl,2005-07-19,9,"408, 487 (NP)",N+P,dry,no snow,FEBR,6
+sdl,2005-07-19,9,"408, 487 (NP)",N+P,dry,no snow,GERO2,20
+sdl,2005-06-27,9,"408, 487 (NP)",N+P,dry,no snow,MELA3,0.25
+sdl,2005-07-19,9,"408, 487 (NP)",N+P,dry,no snow,NOFEG,0.25
+sdl,2005-07-19,9,"408, 487 (NP)",N+P,dry,no snow,ORALA,12
+sdl,2005-06-27,9,"408, 487 (NP)",N+P,dry,no snow,POBI6,0.25
+sdl,2005-07-19,9,"408, 487 (NP)",N+P,dry,no snow,POGL,6
+sdl,2005-07-19,9,"408, 487 (NP)",N+P,dry,no snow,POVI3,1
+sdl,2005-07-19,9,"408, 487 (NP)",N+P,dry,no snow,TRSP2,5
+sdl,2005-07-22,10,"290, 495 (NP)",N+P,dry,no snow,2LTR,10
+sdl,2005-06-30,10,"290, 495 (NP)",N+P,dry,no snow,ARSC,0.25
+sdl,2005-07-22,10,"290, 495 (NP)",N+P,dry,no snow,CARO2,4
+sdl,2005-07-22,10,"290, 495 (NP)",N+P,dry,no snow,CEARS2,2
+sdl,2005-07-22,10,"290, 495 (NP)",N+P,dry,no snow,ERPI6,1
+sdl,2005-07-22,10,"290, 495 (NP)",N+P,dry,no snow,FESTU,7
+sdl,2005-07-22,10,"290, 495 (NP)",N+P,dry,no snow,GERO2,26
+sdl,2005-06-30,10,"290, 495 (NP)",N+P,dry,no snow,MELA3,0.25
+sdl,2005-07-22,10,"290, 495 (NP)",N+P,dry,no snow,ORALA,5
+sdl,2005-07-22,10,"290, 495 (NP)",N+P,dry,no snow,PHPU5,1
+sdl,2005-07-22,10,"290, 495 (NP)",N+P,dry,no snow,POBI6,2
+sdl,2005-07-22,10,"290, 495 (NP)",N+P,dry,no snow,POGL,9
+sdl,2005-07-22,10,"290, 495 (NP)",N+P,dry,no snow,POVI3,1
+sdl,2005-07-22,10,"290, 495 (NP)",N+P,dry,no snow,TRSP2,4
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,2LTR,5
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,ALGE,0.25
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,ARSC,23
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,CARO2,1
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,CASC12,12
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,CEARS2,6
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,DECE,1
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,ERSI3,7
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,FESTU,8
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,GERO2,4
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,MIOB2,0.25
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,POBI6,5
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,POGL,6
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,POVI3,2
+sdl,2005-06-27,11,"410, 492 (NP)",N+P,dry,no snow,TEGR3,0.25
+sdl,2005-07-21,11,"410, 492 (NP)",N+P,dry,no snow,TRDA2,3
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,2LTR,12
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,ARFEF3,0.25
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,ARSC,4
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,CAPU,3
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,CARO2,5
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,CEARS2,3
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,DECE,0.25
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,FESTU,3
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,GERO2,7
+sdl,2005-06-27,12,"261, 498 (NP)",N+P,dry,no snow,LLSE,0.25
+sdl,2005-06-27,12,"261, 498 (NP)",N+P,dry,no snow,MELA3,0.25
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,NOFEG,2
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,ORALA,7
+sdl,2005-06-27,12,"261, 498 (NP)",N+P,dry,no snow,PHPU5,0.25
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,POBI6,1
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,POGL,8
+sdl,2005-06-27,12,"261, 498 (NP)",N+P,dry,no snow,SELA,0.25
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,TRDA2,5
+sdl,2005-07-22,12,"261, 498 (NP)",N+P,dry,no snow,TRSP2,5
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,2LICHN,2
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,2LTR,5
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,ALGE,1
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,ARSC,3
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,CAPU,3
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,CARO2,1
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,DECE,0.25
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,ERSI3,3
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,GERO2,4
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,KOMY,35
+sdl,2005-06-30,13,"411, 496 (PP)",P,dry,no snow,LLSE,0.25
+sdl,2005-06-30,13,"411, 496 (PP)",P,dry,no snow,MELA3,0.25
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,MIOB2,2
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,NOFEG,1
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,ORALA,1
+sdl,2005-06-30,13,"411, 496 (PP)",P,dry,no snow,PHPU5,0.25
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,POBI6,1
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,POGL,2
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,TRDA2,2
+sdl,2005-07-22,13,"411, 496 (PP)",P,dry,no snow,TRSP2,1
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,2LTR,2
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,ALGE,2
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,ARSC,4
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,CARO2,1
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,CARUD,2
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,CEARS2,0.25
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,DECE,1
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,FESTU,3
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,GERO2,10
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,KOMY,24
+sdl,2005-06-27,14,"287, 491 (PP)",P,dry,no snow,LLSE,0.25
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,MIOB2,2
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,NOFEG,1
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,ORALA,4
+sdl,2005-06-27,14,"287, 491 (PP)",P,dry,no snow,POBI6,0.25
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,POGL,2
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,POVI3,1
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,TEACC,0.25
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,TEGR3,1
+sdl,2005-07-21,14,"287, 491 (PP)",P,dry,no snow,TRDA2,21
+sdl,2005-07-22,15,"289, 500 (PP)",P,dry,no snow,2LTR,3
+sdl,2005-07-22,15,"289, 500 (PP)",P,dry,no snow,ALGE,2
+sdl,2005-07-22,15,"289, 500 (PP)",P,dry,no snow,ARSC,6
+sdl,2005-07-22,15,"289, 500 (PP)",P,dry,no snow,CARO2,3
+sdl,2005-07-22,15,"289, 500 (PP)",P,dry,no snow,CEARS2,7
+sdl,2005-07-22,15,"289, 500 (PP)",P,dry,no snow,DECE,1
+sdl,2005-07-22,15,"289, 500 (PP)",P,dry,no snow,FESTU,6
+sdl,2005-07-22,15,"289, 500 (PP)",P,dry,no snow,GERO2,3
+sdl,2005-07-22,15,"289, 500 (PP)",P,dry,no snow,KOMY,14
+sdl,2005-06-27,15,"289, 500 (PP)",P,dry,no snow,LLSE,0.25
+sdl,2005-06-27,15,"289, 500 (PP)",P,dry,no snow,NOFEG,0.25
+sdl,2005-07-22,15,"289, 500 (PP)",P,dry,no snow,ORALA,5
+sdl,2005-06-27,15,"289, 500 (PP)",P,dry,no snow,POBI6,0.25
+sdl,2005-07-22,15,"289, 500 (PP)",P,dry,no snow,SIACS2,1
+sdl,2005-06-27,15,"289, 500 (PP)",P,dry,no snow,TEGR3,0.25
+sdl,2005-07-22,15,"289, 500 (PP)",P,dry,no snow,TRDA2,21
+sdl,2005-07-22,15,"289, 500 (PP)",P,dry,no snow,TRSP2,2
+sdl,2005-07-21,16,"296, 485 (PP)",P,dry,no snow,2LICHN,2
+sdl,2005-07-21,16,"296, 485 (PP)",P,dry,no snow,2LTR,6
+sdl,2005-07-21,16,"296, 485 (PP)",P,dry,no snow,ALGE,0.25
+sdl,2005-06-27,16,"296, 485 (PP)",P,dry,no snow,ARSC,0.25
+sdl,2005-07-21,16,"296, 485 (PP)",P,dry,no snow,CARO2,2
+sdl,2005-07-21,16,"296, 485 (PP)",P,dry,no snow,DECE,0.25
+sdl,2005-07-21,16,"296, 485 (PP)",P,dry,no snow,FESTU,2
+sdl,2005-07-21,16,"296, 485 (PP)",P,dry,no snow,GERO2,1
+sdl,2005-07-21,16,"296, 485 (PP)",P,dry,no snow,KOMY,38
+sdl,2005-07-21,16,"296, 485 (PP)",P,dry,no snow,MIOB2,1
+sdl,2005-07-21,16,"296, 485 (PP)",P,dry,no snow,ORALA,2
+sdl,2005-07-21,16,"296, 485 (PP)",P,dry,no snow,POVI3,1
+sdl,2005-07-21,16,"296, 485 (PP)",P,dry,no snow,SIACS2,1
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,ALGE,5
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,ARSC,9
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,CAOC4,1
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,CASC12,1
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,CEARS2,0.25
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,DECE,10
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,ERSI3,5
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,GEAL2,2
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,GERO2,37
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,KOMY,0.25
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,POBI6,3
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,PODI2,3
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,POVI3,0.25
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,RHIN11,0.25
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,STLO2,1
+sdl,2005-07-27,17,"870, 230 (CC)",C,mesic,no snow,TRPAP,4
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,2LTR,5
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,ALGE,7
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,ARSC,9
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,CAOC4,8
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,CASC12,1
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,DECE,0.25
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,ERSI3,3
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,GEAL2,3
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,GERO2,10
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,KOMY,0.25
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,LLSE,0.25
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,POBI6,1
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,POVI3,2
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,SAGL,11
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,SANI8,1
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,STLO2,1
+sdl,2005-07-25,18,"268, 436, 437 (CC)",C,mesic,no snow,TRPAP,11
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,2BARE,1
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,2LICHN,1
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,2LTR,2
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,2MOSS,1
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,ALGE,1
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,ARSC,5
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,CASC12,7
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,DECE,4
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,ERSI3,6
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,GERO2,7
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,KOMY,17
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,MIOB2,2
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,NOFEG,1
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,POAL2,0.25
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,POBI6,1
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,POVI3,4
+sdl,2005-07-14,19,"267, 444 (CC)",C,mesic,no snow,SELA,0.25
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,STLO2,1
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,TRPAP,5
+sdl,2005-07-27,19,"267, 444 (CC)",C,mesic,no snow,TRSP2,2
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,2LTR,5
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,ALGE,4
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,ARSC,9
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,CAOC4,0.25
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,CASC12,9
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,CEARS2,0.25
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,DECE,14
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,ERSI3,11
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,FESTU,7
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,GERO2,24
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,KOMY,0.25
+sdl,2005-07-14,20,"266, 445 (CC)",C,mesic,no snow,MIOB2,0.25
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,NOFEG,1
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,ORALA,3
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,POBI6,3
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,POGL,1
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,SELA,0.25
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,STLO2,6
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,TRPAP,0.25
+sdl,2005-07-27,20,"266, 445 (CC)",C,mesic,no snow,TRSP2,1
+sdl,2005-07-25,21,"294, 440 (NN)",N,mesic,no snow,2LTR,4
+sdl,2005-07-25,21,"294, 440 (NN)",N,mesic,no snow,ALGE,4
+sdl,2005-07-25,21,"294, 440 (NN)",N,mesic,no snow,ARSC,7
+sdl,2005-07-25,21,"294, 440 (NN)",N,mesic,no snow,CAOC4,0.25
+sdl,2005-07-25,21,"294, 440 (NN)",N,mesic,no snow,CASC12,3
+sdl,2005-07-25,21,"294, 440 (NN)",N,mesic,no snow,DECE,17
+sdl,2005-07-14,21,"294, 440 (NN)",N,mesic,no snow,ERSI3,0.25
+sdl,2005-07-25,21,"294, 440 (NN)",N,mesic,no snow,FESTU,3
+sdl,2005-07-25,21,"294, 440 (NN)",N,mesic,no snow,GEAL2,4
+sdl,2005-07-25,21,"294, 440 (NN)",N,mesic,no snow,GERO2,18
+sdl,2005-07-25,21,"294, 440 (NN)",N,mesic,no snow,KOMY,1
+sdl,2005-07-25,21,"294, 440 (NN)",N,mesic,no snow,POBI6,2
+sdl,2005-07-25,21,"294, 440 (NN)",N,mesic,no snow,POVI3,1
+sdl,2005-07-25,21,"294, 440 (NN)",N,mesic,no snow,STLO2,2
+sdl,2005-07-25,21,"294, 440 (NN)",N,mesic,no snow,TRPAP,8
+sdl,2005-07-26,22,"295, 448 (NN)",N,mesic,no snow,2LTR,2
+sdl,2005-07-26,22,"295, 448 (NN)",N,mesic,no snow,ALGE,3
+sdl,2005-07-26,22,"295, 448 (NN)",N,mesic,no snow,ARSC,16
+sdl,2005-07-26,22,"295, 448 (NN)",N,mesic,no snow,CAOC4,0.25
+sdl,2005-07-26,22,"295, 448 (NN)",N,mesic,no snow,CASC12,0.25
+sdl,2005-07-26,22,"295, 448 (NN)",N,mesic,no snow,DECE,13
+sdl,2005-07-26,22,"295, 448 (NN)",N,mesic,no snow,ERSI3,3
+sdl,2005-07-26,22,"295, 448 (NN)",N,mesic,no snow,FESTU,3
+sdl,2005-07-26,22,"295, 448 (NN)",N,mesic,no snow,GERO2,29
+sdl,2005-07-26,22,"295, 448 (NN)",N,mesic,no snow,POBI6,1
+sdl,2005-07-26,22,"295, 448 (NN)",N,mesic,no snow,POVI3,3
+sdl,2005-07-26,22,"295, 448 (NN)",N,mesic,no snow,STLO2,7
+sdl,2005-07-26,22,"295, 448 (NN)",N,mesic,no snow,TRPAP,8
+sdl,2005-07-26,23,279 (NN),N,mesic,no snow,2LTR,5
+sdl,2005-07-26,23,279 (NN),N,mesic,no snow,ARSC,1
+sdl,2005-07-26,23,279 (NN),N,mesic,no snow,DECE,40
+sdl,2005-07-26,23,279 (NN),N,mesic,no snow,GERO2,27
+sdl,2005-07-26,23,279 (NN),N,mesic,no snow,POBI6,6
+sdl,2005-07-26,23,279 (NN),N,mesic,no snow,STLO2,8
+sdl,2005-07-26,23,279 (NN),N,mesic,no snow,TRPAP,4
+sdl,2005-07-25,24,"264, 452 (NN)",N,mesic,no snow,2LICHN,2
+sdl,2005-07-25,24,"264, 452 (NN)",N,mesic,no snow,2LTR,2
+sdl,2005-07-25,24,"264, 452 (NN)",N,mesic,no snow,ARSC,7
+sdl,2005-07-25,24,"264, 452 (NN)",N,mesic,no snow,CASC12,7
+sdl,2005-07-25,24,"264, 452 (NN)",N,mesic,no snow,DECE,20
+sdl,2005-07-25,24,"264, 452 (NN)",N,mesic,no snow,ERSI3,1
+sdl,2005-07-25,24,"264, 452 (NN)",N,mesic,no snow,GERO2,24
+sdl,2005-07-25,24,"264, 452 (NN)",N,mesic,no snow,POBI6,8
+sdl,2005-07-25,24,"264, 452 (NN)",N,mesic,no snow,TRPAP,2
+sdl,2005-07-26,25,"298, 442 (NP)",N+P,mesic,no snow,2LTR,3
+sdl,2005-07-14,25,"298, 442 (NP)",N+P,mesic,no snow,ARSC,0.25
+sdl,2005-07-26,25,"298, 442 (NP)",N+P,mesic,no snow,CASC12,9
+sdl,2005-07-26,25,"298, 442 (NP)",N+P,mesic,no snow,DECE,31
+sdl,2005-07-26,25,"298, 442 (NP)",N+P,mesic,no snow,GERO2,28
+sdl,2005-07-14,25,"298, 442 (NP)",N+P,mesic,no snow,POBI6,0.25
+sdl,2005-07-26,25,"298, 442 (NP)",N+P,mesic,no snow,POVI3,2
+sdl,2005-07-26,25,"298, 442 (NP)",N+P,mesic,no snow,STLO2,9
+sdl,2005-07-26,25,"298, 442 (NP)",N+P,mesic,no snow,TRPAP,2
+sdl,2005-07-25,26,"281, 439 (NP)",N+P,mesic,no snow,2LTR,1
+sdl,2005-07-14,26,"281, 439 (NP)",N+P,mesic,no snow,ARSC,0.25
+sdl,2005-07-25,26,"281, 439 (NP)",N+P,mesic,no snow,CASC12,35
+sdl,2005-07-25,26,"281, 439 (NP)",N+P,mesic,no snow,DECE,18
+sdl,2005-07-25,26,"281, 439 (NP)",N+P,mesic,no snow,ERSI3,0.25
+sdl,2005-07-25,26,"281, 439 (NP)",N+P,mesic,no snow,GEAL2,2
+sdl,2005-07-25,26,"281, 439 (NP)",N+P,mesic,no snow,GERO2,18
+sdl,2005-07-25,26,"281, 439 (NP)",N+P,mesic,no snow,POBI6,2
+sdl,2005-07-25,26,"281, 439 (NP)",N+P,mesic,no snow,POVI3,2
+sdl,2005-07-25,26,"281, 439 (NP)",N+P,mesic,no snow,STLO2,4
+sdl,2005-07-25,27,"403, 450 (NP)",N+P,mesic,no snow,2LTR,7
+sdl,2005-07-25,27,"403, 450 (NP)",N+P,mesic,no snow,ARSC,2
+sdl,2005-07-25,27,"403, 450 (NP)",N+P,mesic,no snow,CAOC4,0.25
+sdl,2005-07-25,27,"403, 450 (NP)",N+P,mesic,no snow,CASC12,5
+sdl,2005-07-25,27,"403, 450 (NP)",N+P,mesic,no snow,DECE,27
+sdl,2005-07-25,27,"403, 450 (NP)",N+P,mesic,no snow,ERSI3,0.25
+sdl,2005-07-25,27,"403, 450 (NP)",N+P,mesic,no snow,GERO2,10
+sdl,2005-07-25,27,"403, 450 (NP)",N+P,mesic,no snow,POBI6,2
+sdl,2005-07-25,27,"403, 450 (NP)",N+P,mesic,no snow,POVI3,0.25
+sdl,2005-07-25,27,"403, 450 (NP)",N+P,mesic,no snow,SAGL,7
+sdl,2005-07-25,27,"403, 450 (NP)",N+P,mesic,no snow,STLO2,4
+sdl,2005-07-14,27,"403, 450 (NP)",N+P,mesic,no snow,TRPAP,0.25
+sdl,2005-07-26,28,"293, 404, 210, 220 (NP)",N+P,mesic,no snow,2LTR,7
+sdl,2005-07-26,28,"293, 404, 210, 220 (NP)",N+P,mesic,no snow,DECE,41
+sdl,2005-07-26,28,"293, 404, 210, 220 (NP)",N+P,mesic,no snow,GERO2,2
+sdl,2005-07-26,28,"293, 404, 210, 220 (NP)",N+P,mesic,no snow,POBI6,2
+sdl,2005-07-26,28,"293, 404, 210, 220 (NP)",N+P,mesic,no snow,PODI2,2
+sdl,2005-07-26,28,"293, 404, 210, 220 (NP)",N+P,mesic,no snow,STLO2,2
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,2BARE,2
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,2LTR,1
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,2MOSS,1
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,ARSC,11
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,CAOC4,3
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,DECE,14
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,ERSI3,1
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,FESTU,1
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,GERO2,23
+sdl,2005-07-14,29.5,"397, 435, 438 (PP)",P,mesic,no snow,LLSE,0.25
+sdl,2005-07-14,29.5,"397, 435, 438 (PP)",P,mesic,no snow,POBI6,0.25
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,POVI3,7
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,SANI8,3
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,SAPL2,0.25
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,STLO2,2
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,TRDA2,1
+sdl,2005-07-25,29.5,"397, 435, 438 (PP)",P,mesic,no snow,TRPAP,15
+sdl,2005-07-25,30,"283, 441 (PP)",P,mesic,no snow,ALGE,5
+sdl,2005-07-25,30,"283, 441 (PP)",P,mesic,no snow,ARSC,12
+sdl,2005-07-25,30,"283, 441 (PP)",P,mesic,no snow,CARO2,1
+sdl,2005-07-25,30,"283, 441 (PP)",P,mesic,no snow,CASC12,2
+sdl,2005-07-25,30,"283, 441 (PP)",P,mesic,no snow,DECE,11
+sdl,2005-07-25,30,"283, 441 (PP)",P,mesic,no snow,FESTU,5
+sdl,2005-07-25,30,"283, 441 (PP)",P,mesic,no snow,GEAL2,2
+sdl,2005-07-25,30,"283, 441 (PP)",P,mesic,no snow,GERO2,11
+sdl,2005-07-25,30,"283, 441 (PP)",P,mesic,no snow,KOMY,2
+sdl,2005-07-14,30,"283, 441 (PP)",P,mesic,no snow,POBI6,0.25
+sdl,2005-07-25,30,"283, 441 (PP)",P,mesic,no snow,POVI3,7
+sdl,2005-07-14,30,"283, 441 (PP)",P,mesic,no snow,SELA,0.25
+sdl,2005-07-14,30,"283, 441 (PP)",P,mesic,no snow,SIACS2,0.25
+sdl,2005-07-25,30,"283, 441 (PP)",P,mesic,no snow,STLO2,5
+sdl,2005-07-25,30,"283, 441 (PP)",P,mesic,no snow,TRDA2,6
+sdl,2005-07-25,30,"283, 441 (PP)",P,mesic,no snow,TRPAP,14
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,2LTR,3
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,2MOSS,2
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,ALGE,10
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,ARSC,13
+sdl,2005-07-14,31,"280, 449 (PP)",P,mesic,no snow,CAOC4,0.25
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,CASC12,0.25
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,DECE,3
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,ERSI3,3
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,FESTU,7
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,GERO2,15
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,KOMY,18
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,ORALA,1
+sdl,2005-07-14,31,"280, 449 (PP)",P,mesic,no snow,POBI6,0.25
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,POVI3,5
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,STLO2,6
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,TRDA2,1
+sdl,2005-07-26,31,"280, 449 (PP)",P,mesic,no snow,TRPAP,7
+sdl,2005-07-25,32,"406, 451 (PP)",P,mesic,no snow,2LTR,13
+sdl,2005-07-25,32,"406, 451 (PP)",P,mesic,no snow,2MOSS,1
+sdl,2005-07-25,32,"406, 451 (PP)",P,mesic,no snow,ALGE,1
+sdl,2005-07-25,32,"406, 451 (PP)",P,mesic,no snow,ARSC,2
+sdl,2005-07-25,32,"406, 451 (PP)",P,mesic,no snow,CAOC4,1
+sdl,2005-07-25,32,"406, 451 (PP)",P,mesic,no snow,CASC12,3
+sdl,2005-07-25,32,"406, 451 (PP)",P,mesic,no snow,DECE,11
+sdl,2005-07-25,32,"406, 451 (PP)",P,mesic,no snow,ERSI3,7
+sdl,2005-07-25,32,"406, 451 (PP)",P,mesic,no snow,FESTU,3
+sdl,2005-07-25,32,"406, 451 (PP)",P,mesic,no snow,GERO2,11
+sdl,2005-07-14,32,"406, 451 (PP)",P,mesic,no snow,POBI6,0.25
+sdl,2005-07-25,32,"406, 451 (PP)",P,mesic,no snow,POVI3,2
+sdl,2005-07-25,32,"406, 451 (PP)",P,mesic,no snow,TRPAP,9
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,2LICHN,2
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,2LTR,10
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,ALGE,2
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,ARSC,4
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,CAOC4,0.25
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,CASC12,1
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,ERSI3,1
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,FESTU,2
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,GERO2,19
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,LEPY2,0.25
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,MELA3,0.25
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,NOFEG,0.25
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,ORALA,0.25
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,POAL2,2
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,PODI2,0.25
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,POVI3,3
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,SARH2,0.25
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,SELA,0.25
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,SIACS2,1
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,STLO2,0.25
+sdl,2005-07-28,49,"888, 458 (CC)",C,dry,snow,TRPAP,8
+sdl,2005-07-28,50,"889, 459 (CC)",C,dry,snow,2GRAM,2
+sdl,2005-07-28,50,"889, 459 (CC)",C,dry,snow,2LTR,14
+sdl,2005-07-28,50,"889, 459 (CC)",C,dry,snow,ALGE,1
+sdl,2005-07-28,50,"889, 459 (CC)",C,dry,snow,ARSC,9
+sdl,2005-07-28,50,"889, 459 (CC)",C,dry,snow,CAOC4,1
+sdl,2005-07-28,50,"889, 459 (CC)",C,dry,snow,DECE,11
+sdl,2005-07-28,50,"889, 459 (CC)",C,dry,snow,ERSI3,0.25
+sdl,2005-07-28,50,"889, 459 (CC)",C,dry,snow,GERO2,15
+sdl,2005-07-28,50,"889, 459 (CC)",C,dry,snow,NOFEG,0.25
+sdl,2005-07-28,50,"889, 459 (CC)",C,dry,snow,POBI6,2
+sdl,2005-07-28,50,"889, 459 (CC)",C,dry,snow,POVI3,1
+sdl,2005-07-28,50,"889, 459 (CC)",C,dry,snow,STLO2,0.25
+sdl,2005-07-28,50,"889, 459 (CC)",C,dry,snow,TRPAP,2
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,2LTR,11
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,ALGE,7
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,ARSC,5
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,CALE4,1
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,CAOC4,0.25
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,CASC12,0.25
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,DECE,5
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,ERSI3,6
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,FESTU,1
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,GERO2,17
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,NOFEG,1
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,ORALA,1
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,POAL2,0.25
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,POBI6,1
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,PODI2,0.25
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,POVI3,5
+sdl,2005-07-28,51,"890, 460 (CC)",C,dry,snow,STLO2,0.25
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,2LICHN,1
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,2LTR,5
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,ALGE,14
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,ARSC,3
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,CAOC4,1
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,CASC12,1
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,DECE,18
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,ERSI3,5
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,FESTU,1
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,GERO2,6
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,MIOB2,0.25
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,NOFEG,1
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,ORALA,2
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,POBI6,3
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,POGL,3
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,POVI3,1
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,STLO2,11
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,TRDA2,0.25
+sdl,2005-07-28,52,"891, 457 (CC)",C,dry,snow,TRPAP,1
+sdl,2005-07-28,53,"417, 863, 465 (NN)",N,dry,snow,2GRAM,1
+sdl,2005-07-28,53,"417, 863, 465 (NN)",N,dry,snow,2LTR,13
+sdl,2005-07-28,53,"417, 863, 465 (NN)",N,dry,snow,CAREX,5
+sdl,2005-07-28,53,"417, 863, 465 (NN)",N,dry,snow,CASC12,2
+sdl,2005-07-28,53,"417, 863, 465 (NN)",N,dry,snow,DECE,24
+sdl,2005-07-28,53,"417, 863, 465 (NN)",N,dry,snow,GERO2,7
+sdl,2005-07-28,53,"417, 863, 465 (NN)",N,dry,snow,POBI6,2
+sdl,2005-07-28,53,"417, 863, 465 (NN)",N,dry,snow,STLO2,1
+sdl,2005-07-28,53,"417, 863, 465 (NN)",N,dry,snow,TRPAP,4
+sdl,2005-07-28,54,"415, 464 (NN)",N,dry,snow,2LTR,2
+sdl,2005-07-28,54,"415, 464 (NN)",N,dry,snow,CASC12,33
+sdl,2005-07-28,54,"415, 464 (NN)",N,dry,snow,DECE,13
+sdl,2005-07-28,54,"415, 464 (NN)",N,dry,snow,ERSI3,2
+sdl,2005-07-28,54,"415, 464 (NN)",N,dry,snow,GERO2,8
+sdl,2005-07-28,54,"415, 464 (NN)",N,dry,snow,POAL2,0.25
+sdl,2005-07-28,54,"415, 464 (NN)",N,dry,snow,POBI6,0.25
+sdl,2005-07-28,54,"415, 464 (NN)",N,dry,snow,RHIN11,2
+sdl,2005-07-28,54,"415, 464 (NN)",N,dry,snow,TRPAP,18
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,2GRAM,1
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,2LTR,16
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,ALGE,3
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,ARSC,5
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,CAOC4,0.25
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,CASC12,0.25
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,DECE,8
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,ERSI3,3
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,GERO2,3
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,ORALA,5
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,POAL2,5
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,POBI6,1
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,PODI2,1
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,STLO2,3
+sdl,2005-07-28,55,"864, 472 (NN)",N,dry,snow,TRPAP,7
+sdl,2005-07-28,56,"413, 455 (NN)",N,dry,snow,2LTR,12
+sdl,2005-07-28,56,"413, 455 (NN)",N,dry,snow,ALGE,5
+sdl,2005-07-28,56,"413, 455 (NN)",N,dry,snow,ARSC,15
+sdl,2005-07-28,56,"413, 455 (NN)",N,dry,snow,ERSI3,9
+sdl,2005-07-28,56,"413, 455 (NN)",N,dry,snow,GERO2,7
+sdl,2005-07-28,56,"413, 455 (NN)",N,dry,snow,NOFEG,0.25
+sdl,2005-07-28,56,"413, 455 (NN)",N,dry,snow,ORALA,1
+sdl,2005-07-28,56,"413, 455 (NN)",N,dry,snow,POBI6,2
+sdl,2005-07-28,56,"413, 455 (NN)",N,dry,snow,POVI3,2
+sdl,2005-07-28,56,"413, 455 (NN)",N,dry,snow,STLO2,8
+sdl,2005-07-28,57,"868, 466 (NP)",N+P,dry,snow,2LTR,9
+sdl,2005-07-28,57,"868, 466 (NP)",N+P,dry,snow,ARSC,1
+sdl,2005-07-28,57,"868, 466 (NP)",N+P,dry,snow,CAREX,28
+sdl,2005-07-28,57,"868, 466 (NP)",N+P,dry,snow,DECE,10
+sdl,2005-07-28,57,"868, 466 (NP)",N+P,dry,snow,GERO2,10
+sdl,2005-07-28,57,"868, 466 (NP)",N+P,dry,snow,LEPY2,0.25
+sdl,2005-07-28,57,"868, 466 (NP)",N+P,dry,snow,MELA3,0.25
+sdl,2005-07-28,57,"868, 466 (NP)",N+P,dry,snow,ORALA,0.25
+sdl,2005-07-28,57,"868, 466 (NP)",N+P,dry,snow,POBI6,1
+sdl,2005-07-28,57,"868, 466 (NP)",N+P,dry,snow,TRPAP,5
+sdl,2005-07-28,58,"894, 461 (NP)",N+P,dry,snow,2GRAM,4
+sdl,2005-07-28,58,"894, 461 (NP)",N+P,dry,snow,2LTR,18
+sdl,2005-07-28,58,"894, 461 (NP)",N+P,dry,snow,ARSC,0.25
+sdl,2005-07-28,58,"894, 461 (NP)",N+P,dry,snow,CASC12,22
+sdl,2005-07-28,58,"894, 461 (NP)",N+P,dry,snow,DECE,0.25
+sdl,2005-07-28,58,"894, 461 (NP)",N+P,dry,snow,ERSI3,0.25
+sdl,2005-07-28,58,"894, 461 (NP)",N+P,dry,snow,GERO2,8
+sdl,2005-07-28,58,"894, 461 (NP)",N+P,dry,snow,ORALA,0.25
+sdl,2005-07-28,58,"894, 461 (NP)",N+P,dry,snow,POBI6,0.25
+sdl,2005-07-28,58,"894, 461 (NP)",N+P,dry,snow,POVI3,0.25
+sdl,2005-07-28,58,"894, 461 (NP)",N+P,dry,snow,TRPAP,5
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,2LTR,2
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,ALGE,2
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,ARSC,20
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,CAREX,1
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,DECE,0.25
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,ERSI3,6
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,FESTU,1
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,GERO2,18
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,ORALA,1
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,POA,1
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,POAL2,2
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,POBI6,3
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,POGL,1
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,POVI3,1
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,RHIN11,0.25
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,STLO2,13
+sdl,2005-07-28,59,"866, 456 (NP)",N+P,dry,snow,TRSP2,2
+sdl,2005-07-28,60,"869, 454 (NP)",N+P,dry,snow,2GRAM,1
+sdl,2005-07-28,60,"869, 454 (NP)",N+P,dry,snow,2LTR,21
+sdl,2005-07-28,60,"869, 454 (NP)",N+P,dry,snow,ALGE,1
+sdl,2005-07-28,60,"869, 454 (NP)",N+P,dry,snow,ARSC,2
+sdl,2005-07-28,60,"869, 454 (NP)",N+P,dry,snow,CAOC4,0.25
+sdl,2005-07-28,60,"869, 454 (NP)",N+P,dry,snow,ERSI3,2
+sdl,2005-07-28,60,"869, 454 (NP)",N+P,dry,snow,FESTU,3
+sdl,2005-07-28,60,"869, 454 (NP)",N+P,dry,snow,GERO2,13
+sdl,2005-07-28,60,"869, 454 (NP)",N+P,dry,snow,ORALA,1
+sdl,2005-07-28,60,"869, 454 (NP)",N+P,dry,snow,POGL,2
+sdl,2005-07-28,60,"869, 454 (NP)",N+P,dry,snow,STLO2,4
+sdl,2005-07-28,60,"869, 454 (NP)",N+P,dry,snow,TRPAP,3
+sdl,2005-07-28,60,"869, 454 (NP)",N+P,dry,snow,TRSP2,4
+sdl,2005-07-28,61,"400, 467 (PP)",P,dry,snow,2LTR,11
+sdl,2005-07-28,61,"400, 467 (PP)",P,dry,snow,ALGE,5
+sdl,2005-07-28,61,"400, 467 (PP)",P,dry,snow,ARSC,2
+sdl,2005-07-28,61,"400, 467 (PP)",P,dry,snow,CASC12,0.25
+sdl,2005-07-28,61,"400, 467 (PP)",P,dry,snow,DECE,1
+sdl,2005-07-28,61,"400, 467 (PP)",P,dry,snow,ERSI3,2
+sdl,2005-07-28,61,"400, 467 (PP)",P,dry,snow,GERO2,28
+sdl,2005-07-28,61,"400, 467 (PP)",P,dry,snow,POBI6,0.25
+sdl,2005-07-28,61,"400, 467 (PP)",P,dry,snow,PODI2,1
+sdl,2005-07-28,61,"400, 467 (PP)",P,dry,snow,POVI3,5
+sdl,2005-07-28,61,"400, 467 (PP)",P,dry,snow,RHIN11,0.25
+sdl,2005-07-28,61,"400, 467 (PP)",P,dry,snow,TRPAP,12
+sdl,2005-07-28,62,"416, 462 (PP)",P,dry,snow,2GRAM,4
+sdl,2005-07-28,62,"416, 462 (PP)",P,dry,snow,2LTR,4
+sdl,2005-07-28,62,"416, 462 (PP)",P,dry,snow,ARSC,1
+sdl,2005-07-28,62,"416, 462 (PP)",P,dry,snow,CAOC4,1
+sdl,2005-07-28,62,"416, 462 (PP)",P,dry,snow,DECE,19
+sdl,2005-07-28,62,"416, 462 (PP)",P,dry,snow,ERSI3,1
+sdl,2005-07-28,62,"416, 462 (PP)",P,dry,snow,GERO2,23
+sdl,2005-07-28,62,"416, 462 (PP)",P,dry,snow,NOFEG,1
+sdl,2005-07-28,62,"416, 462 (PP)",P,dry,snow,POBI6,0.25
+sdl,2005-07-28,62,"416, 462 (PP)",P,dry,snow,POVI3,3
+sdl,2005-07-28,62,"416, 462 (PP)",P,dry,snow,TRPAP,4
+sdl,2005-07-28,62,"416, 462 (PP)",P,dry,snow,TRSP2,3
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,2BARE,4
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,2GRAM,11
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,2LTR,2
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,ALGE,1
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,ARSC,7
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,CAOC4,0.25
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,DECE,25
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,ERSI3,2
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,FESTU,1
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,GERO2,12
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,ORALA,2
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,POAL2,0.25
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,POBI6,1
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,POVI3,2
+sdl,2005-07-28,63,"414, 463, 399 (PP)",P,dry,snow,TRPAP,15
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,2LTR,21
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,ALGE,2
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,ARSC,2
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,CAOC4,0.25
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,ERSI3,1
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,GERO2,17
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,MELA3,1
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,MIOB2,1
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,NOFEG,4
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,POBI6,0.25
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,POGL,2
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,POVI3,0.25
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,STLO2,1
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,TRDA2,0.25
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,TRPAP,4
+sdl,2005-07-28,64,"412, 453 (PP)",P,dry,snow,TRSP2,1
+sdl,2005-07-27,65,"885, 476 (CC)",C,mesic,snow,2BARE,3
+sdl,2005-07-27,65,"885, 476 (CC)",C,mesic,snow,2LTR,5
+sdl,2005-07-27,65,"885, 476 (CC)",C,mesic,snow,ALGE,1
+sdl,2005-07-27,65,"885, 476 (CC)",C,mesic,snow,ARSC,0.25
+sdl,2005-07-27,65,"885, 476 (CC)",C,mesic,snow,CAOC4,0.25
+sdl,2005-07-27,65,"885, 476 (CC)",C,mesic,snow,DECE,26
+sdl,2005-07-27,65,"885, 476 (CC)",C,mesic,snow,ERSI3,2
+sdl,2005-07-27,65,"885, 476 (CC)",C,mesic,snow,GERO2,20
+sdl,2005-07-27,65,"885, 476 (CC)",C,mesic,snow,POBI6,0.25
+sdl,2005-07-27,65,"885, 476 (CC)",C,mesic,snow,PODI2,1
+sdl,2005-07-27,65,"885, 476 (CC)",C,mesic,snow,POVI3,1
+sdl,2005-07-27,65,"885, 476 (CC)",C,mesic,snow,TRPAP,6
+sdl,2005-07-28,66,"883, 474 (CC)",C,mesic,snow,2GRAM,1
+sdl,2005-07-28,66,"883, 474 (CC)",C,mesic,snow,2LTR,12
+sdl,2005-07-28,66,"883, 474 (CC)",C,mesic,snow,ALGE,7
+sdl,2005-07-28,66,"883, 474 (CC)",C,mesic,snow,ARSC,0.25
+sdl,2005-07-28,66,"883, 474 (CC)",C,mesic,snow,CALE4,7
+sdl,2005-07-28,66,"883, 474 (CC)",C,mesic,snow,CASC12,6
+sdl,2005-07-28,66,"883, 474 (CC)",C,mesic,snow,FESTU,2
+sdl,2005-07-28,66,"883, 474 (CC)",C,mesic,snow,GERO2,11
+sdl,2005-07-28,66,"883, 474 (CC)",C,mesic,snow,NOFEG,0.25
+sdl,2005-07-28,66,"883, 474 (CC)",C,mesic,snow,POAL2,2
+sdl,2005-07-28,66,"883, 474 (CC)",C,mesic,snow,POBI6,2
+sdl,2005-07-28,66,"883, 474 (CC)",C,mesic,snow,POVI3,4
+sdl,2005-07-28,66,"883, 474 (CC)",C,mesic,snow,TRPAP,13
+sdl,2005-07-28,67,"882, 475 (CC)",C,mesic,snow,2LTR,3
+sdl,2005-07-28,67,"882, 475 (CC)",C,mesic,snow,ALGE,2
+sdl,2005-07-28,67,"882, 475 (CC)",C,mesic,snow,ARSC,7
+sdl,2005-07-28,67,"882, 475 (CC)",C,mesic,snow,CALE4,22
+sdl,2005-07-28,67,"882, 475 (CC)",C,mesic,snow,CASC12,5
+sdl,2005-07-28,67,"882, 475 (CC)",C,mesic,snow,DECE,11
+sdl,2005-07-28,67,"882, 475 (CC)",C,mesic,snow,GERO2,9
+sdl,2005-07-28,67,"882, 475 (CC)",C,mesic,snow,POBI6,1
+sdl,2005-07-28,67,"882, 475 (CC)",C,mesic,snow,POVI3,7
+sdl,2005-07-28,67,"882, 475 (CC)",C,mesic,snow,TRPAP,8
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,2BARE,7
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,2LTR,14
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,ALGE,9
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,ARSC,7
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,CAOC4,0.25
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,DECE,3
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,ERSI3,8
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,MIOB2,0.25
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,ORALA,4
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,POGL,1
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,POVI3,1
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,SARH2,0.25
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,SIACS2,0.25
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,STLO2,1
+sdl,2005-07-28,68,"887, 473 (CC)",C,mesic,snow,TRPAP,3
+sdl,2005-07-27,70,"884, 484 (NN)",N,mesic,snow,2GRAM,2
+sdl,2005-07-27,70,"884, 484 (NN)",N,mesic,snow,2LTR,14
+sdl,2005-07-27,70,"884, 484 (NN)",N,mesic,snow,2MOSS,1
+sdl,2005-07-27,70,"884, 484 (NN)",N,mesic,snow,ALGE,1
+sdl,2005-07-27,70,"884, 484 (NN)",N,mesic,snow,CALE4,1
+sdl,2005-07-27,70,"884, 484 (NN)",N,mesic,snow,CAREX,5
+sdl,2005-07-27,70,"884, 484 (NN)",N,mesic,snow,DECE,3
+sdl,2005-07-27,70,"884, 484 (NN)",N,mesic,snow,GERO2,12
+sdl,2005-07-27,70,"884, 484 (NN)",N,mesic,snow,LEPY2,0.25
+sdl,2005-07-27,70,"884, 484 (NN)",N,mesic,snow,POA,1
+sdl,2005-07-27,70,"884, 484 (NN)",N,mesic,snow,POAL2,3
+sdl,2005-07-27,70,"884, 484 (NN)",N,mesic,snow,POVI3,1
+sdl,2005-07-27,70,"884, 484 (NN)",N,mesic,snow,SELA,0.25
+sdl,2005-07-27,70,"884, 484 (NN)",N,mesic,snow,TRPAP,16
+sdl,2005-07-28,71,"419, 483 (NN)",N,mesic,snow,2FORB,0.25
+sdl,2005-07-28,71,"419, 483 (NN)",N,mesic,snow,2GRAM,1
+sdl,2005-07-28,71,"419, 483 (NN)",N,mesic,snow,2LTR,7
+sdl,2005-07-28,71,"419, 483 (NN)",N,mesic,snow,ARSC,7
+sdl,2005-07-28,71,"419, 483 (NN)",N,mesic,snow,CASC12,13
+sdl,2005-07-28,71,"419, 483 (NN)",N,mesic,snow,DECE,10
+sdl,2005-07-28,71,"419, 483 (NN)",N,mesic,snow,GERO2,20
+sdl,2005-07-28,71,"419, 483 (NN)",N,mesic,snow,POAL2,0.25
+sdl,2005-07-28,71,"419, 483 (NN)",N,mesic,snow,SANI8,4
+sdl,2005-07-28,71,"419, 483 (NN)",N,mesic,snow,STLO2,3
+sdl,2005-07-28,71,"419, 483 (NN)",N,mesic,snow,TRPAP,6
+sdl,2005-07-28,72,"880, 470 (NN)",N,mesic,snow,2GRAM,2
+sdl,2005-07-28,72,"880, 470 (NN)",N,mesic,snow,2LTR,12
+sdl,2005-07-28,72,"880, 470 (NN)",N,mesic,snow,ALGE,1
+sdl,2005-07-28,72,"880, 470 (NN)",N,mesic,snow,CALE4,0.25
+sdl,2005-07-28,72,"880, 470 (NN)",N,mesic,snow,DECE,17
+sdl,2005-07-28,72,"880, 470 (NN)",N,mesic,snow,GERO2,22
+sdl,2005-07-28,72,"880, 470 (NN)",N,mesic,snow,POAL2,0.25
+sdl,2005-07-28,72,"880, 470 (NN)",N,mesic,snow,POVI3,0.25
+sdl,2005-07-28,72,"880, 470 (NN)",N,mesic,snow,RHIN11,0.25
+sdl,2005-07-28,72,"880, 470 (NN)",N,mesic,snow,TRPAP,4
+sdl,2005-07-27,73,"877, 471 (NP)",N+P,mesic,snow,2LTR,3
+sdl,2005-07-27,73,"877, 471 (NP)",N+P,mesic,snow,2RF,1
+sdl,2005-07-27,73,"877, 471 (NP)",N+P,mesic,snow,ARSC,1
+sdl,2005-07-27,73,"877, 471 (NP)",N+P,mesic,snow,CAREX,38
+sdl,2005-07-27,73,"877, 471 (NP)",N+P,mesic,snow,DECE,16
+sdl,2005-07-27,73,"877, 471 (NP)",N+P,mesic,snow,GERO2,15
+sdl,2005-07-27,73,"877, 471 (NP)",N+P,mesic,snow,POBI6,1
+sdl,2005-07-27,73,"877, 471 (NP)",N+P,mesic,snow,PODI2,0.25
+sdl,2005-07-27,73,"877, 471 (NP)",N+P,mesic,snow,POVI3,1
+sdl,2005-07-27,73,"877, 471 (NP)",N+P,mesic,snow,TRPAP,1
+sdl,2005-07-27,74,"873, 481 (NP)",N+P,mesic,snow,2GRAM,0.25
+sdl,2005-07-27,74,"873, 481 (NP)",N+P,mesic,snow,2LTR,11
+sdl,2005-07-27,74,"873, 481 (NP)",N+P,mesic,snow,ARSC,1
+sdl,2005-07-27,74,"873, 481 (NP)",N+P,mesic,snow,CAOC4,0.25
+sdl,2005-07-27,74,"873, 481 (NP)",N+P,mesic,snow,CASC12,24
+sdl,2005-07-27,74,"873, 481 (NP)",N+P,mesic,snow,DECE,5
+sdl,2005-07-27,74,"873, 481 (NP)",N+P,mesic,snow,ERSI3,3
+sdl,2005-07-27,74,"873, 481 (NP)",N+P,mesic,snow,GERO2,11
+sdl,2005-07-27,74,"873, 481 (NP)",N+P,mesic,snow,MELA3,1
+sdl,2005-07-27,74,"873, 481 (NP)",N+P,mesic,snow,POBI6,1
+sdl,2005-07-27,74,"873, 481 (NP)",N+P,mesic,snow,SANI8,0.25
+sdl,2005-07-27,74,"873, 481 (NP)",N+P,mesic,snow,TRPAP,5
+sdl,2005-07-27,75,871 (NP),N+P,mesic,snow,2GRAM,8
+sdl,2005-07-27,75,871 (NP),N+P,mesic,snow,2LTR,7
+sdl,2005-07-27,75,871 (NP),N+P,mesic,snow,ARSC,8
+sdl,2005-07-27,75,871 (NP),N+P,mesic,snow,CAOC4,0.25
+sdl,2005-07-27,75,871 (NP),N+P,mesic,snow,CASC12,2
+sdl,2005-07-27,75,871 (NP),N+P,mesic,snow,ERSI3,5
+sdl,2005-07-27,75,871 (NP),N+P,mesic,snow,GERO2,29
+sdl,2005-07-27,75,871 (NP),N+P,mesic,snow,MELA3,0.25
+sdl,2005-07-27,75,871 (NP),N+P,mesic,snow,ORALA,9
+sdl,2005-07-27,75,871 (NP),N+P,mesic,snow,POBI6,0.25
+sdl,2005-07-27,75,871 (NP),N+P,mesic,snow,POVI3,1
+sdl,2005-07-28,76,"886, 468 (NP)",N+P,mesic,snow,2GRAM,1
+sdl,2005-07-28,76,"886, 468 (NP)",N+P,mesic,snow,2LTR,11
+sdl,2005-07-28,76,"886, 468 (NP)",N+P,mesic,snow,ARSC,0.25
+sdl,2005-07-28,76,"886, 468 (NP)",N+P,mesic,snow,CAREX,0.25
+sdl,2005-07-28,76,"886, 468 (NP)",N+P,mesic,snow,CASC12,12
+sdl,2005-07-28,76,"886, 468 (NP)",N+P,mesic,snow,DECE,14
+sdl,2005-07-28,76,"886, 468 (NP)",N+P,mesic,snow,GERO2,22
+sdl,2005-07-28,76,"886, 468 (NP)",N+P,mesic,snow,POBI6,1
+sdl,2005-07-28,76,"886, 468 (NP)",N+P,mesic,snow,TRPAP,1
+sdl,2005-07-27,77,"420, 478 (PP)",P,mesic,snow,2LTR,2
+sdl,2005-07-27,77,"420, 478 (PP)",P,mesic,snow,ALGE,1
+sdl,2005-07-27,77,"420, 478 (PP)",P,mesic,snow,ARSC,8
+sdl,2005-07-27,77,"420, 478 (PP)",P,mesic,snow,CAOC4,0.25
+sdl,2005-07-27,77,"420, 478 (PP)",P,mesic,snow,CAREX,6
+sdl,2005-07-27,77,"420, 478 (PP)",P,mesic,snow,DECE,9
+sdl,2005-07-27,77,"420, 478 (PP)",P,mesic,snow,ERSI3,3
+sdl,2005-07-27,77,"420, 478 (PP)",P,mesic,snow,GERO2,23
+sdl,2005-07-27,77,"420, 478 (PP)",P,mesic,snow,POA,2
+sdl,2005-07-27,77,"420, 478 (PP)",P,mesic,snow,POBI6,1
+sdl,2005-07-27,77,"420, 478 (PP)",P,mesic,snow,PODI2,1
+sdl,2005-07-27,77,"420, 478 (PP)",P,mesic,snow,SANI8,2
+sdl,2005-07-27,77,"420, 478 (PP)",P,mesic,snow,STLO2,3
+sdl,2005-07-27,77,"420, 478 (PP)",P,mesic,snow,TRPAP,14
+sdl,2005-07-27,78,"418, 482 (PP)",P,mesic,snow,2LTR,6
+sdl,2005-07-27,78,"418, 482 (PP)",P,mesic,snow,ARSC,3
+sdl,2005-07-27,78,"418, 482 (PP)",P,mesic,snow,CAOC4,0.25
+sdl,2005-07-27,78,"418, 482 (PP)",P,mesic,snow,CASC12,17
+sdl,2005-07-27,78,"418, 482 (PP)",P,mesic,snow,DECE,1
+sdl,2005-07-27,78,"418, 482 (PP)",P,mesic,snow,ERSI3,5
+sdl,2005-07-27,78,"418, 482 (PP)",P,mesic,snow,GERO2,20
+sdl,2005-07-27,78,"418, 482 (PP)",P,mesic,snow,POA,2
+sdl,2005-07-27,78,"418, 482 (PP)",P,mesic,snow,POAL2,2
+sdl,2005-07-27,78,"418, 482 (PP)",P,mesic,snow,POVI3,2
+sdl,2005-07-27,78,"418, 482 (PP)",P,mesic,snow,SELA,0.25
+sdl,2005-07-27,78,"418, 482 (PP)",P,mesic,snow,TRPAP,6
+sdl,2005-07-27,79,"872, 480 (PP)",P,mesic,snow,2LTR,3
+sdl,2005-07-27,79,"872, 480 (PP)",P,mesic,snow,ARSC,6
+sdl,2005-07-27,79,"872, 480 (PP)",P,mesic,snow,CAREX,10
+sdl,2005-07-27,79,"872, 480 (PP)",P,mesic,snow,DECE,17
+sdl,2005-07-27,79,"872, 480 (PP)",P,mesic,snow,ERSI3,2
+sdl,2005-07-27,79,"872, 480 (PP)",P,mesic,snow,GERO2,14
+sdl,2005-07-27,79,"872, 480 (PP)",P,mesic,snow,KOMY,1
+sdl,2005-07-27,79,"872, 480 (PP)",P,mesic,snow,POAL2,2
+sdl,2005-07-27,79,"872, 480 (PP)",P,mesic,snow,POBI6,0.25
+sdl,2005-07-27,79,"872, 480 (PP)",P,mesic,snow,POVI3,0.25
+sdl,2005-07-27,79,"872, 480 (PP)",P,mesic,snow,SANI8,6
+sdl,2005-07-27,79,"872, 480 (PP)",P,mesic,snow,TRPAP,19
+sdl,2005-07-28,80,"881, 469 (PP)",P,mesic,snow,2LTR,9
+sdl,2005-07-28,80,"881, 469 (PP)",P,mesic,snow,ALGE,2
+sdl,2005-07-28,80,"881, 469 (PP)",P,mesic,snow,ARSC,9
+sdl,2005-07-28,80,"881, 469 (PP)",P,mesic,snow,CAOC4,0.25
+sdl,2005-07-28,80,"881, 469 (PP)",P,mesic,snow,CASC12,0.25
+sdl,2005-07-28,80,"881, 469 (PP)",P,mesic,snow,DECE,13
+sdl,2005-07-28,80,"881, 469 (PP)",P,mesic,snow,ERSI3,9
+sdl,2005-07-28,80,"881, 469 (PP)",P,mesic,snow,GERO2,12
+sdl,2005-07-28,80,"881, 469 (PP)",P,mesic,snow,ORALA,10
+sdl,2005-07-28,80,"881, 469 (PP)",P,mesic,snow,POBI6,4
+sdl,2005-07-28,80,"881, 469 (PP)",P,mesic,snow,PODI2,4
+sdl,2005-07-28,80,"881, 469 (PP)",P,mesic,snow,STLO2,1
+sdl,2005-07-27,NA,875 (NN),N,mesic,snow,2LTR,2
+sdl,2005-07-27,NA,875 (NN),N,mesic,snow,ARSC,1
+sdl,2005-07-27,NA,875 (NN),N,mesic,snow,CAREX,46
+sdl,2005-07-27,NA,875 (NN),N,mesic,snow,DECE,10
+sdl,2005-07-27,NA,875 (NN),N,mesic,snow,ERSI3,0.25
+sdl,2005-07-27,NA,875 (NN),N,mesic,snow,GERO2,0.25
+sdl,2005-07-27,NA,875 (NN),N,mesic,snow,POAL2,8
+sdl,2005-07-27,NA,875 (NN),N,mesic,snow,POBI6,1
+sdl,2005-07-27,NA,875 (NN),N,mesic,snow,SANI8,0.25
+sdl,2005-07-27,NA,875 (NN),N,mesic,snow,TRPAP,9
