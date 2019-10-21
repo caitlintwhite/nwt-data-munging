@@ -60,8 +60,9 @@ sdl16_wvert <- read.csv("alpine_addnuts/output_data/sdl2016_vertical_sppcomp.csv
 nn13_clean <- read.csv("alpine_addnuts/output_data/nutnet2013_alldats/NWTnutnet_sppcomp_2013ongoing.csv") 
 nn_anpp <- read.csv("alpine_addnuts/output_data/nutnet2013_alldats/NWTnutnet_anpp_2007ongoing.csv")
 
-# sdl 2003 (partially figured out -- some plots don't have match)
-sdl03 <- read.csv("alpine_addnuts/output_data/sdl_sffert_2003_inprogress.csv")
+# sdl 2003 and 2005 (partially figured out -- some plots don't have match)
+sdl03 <- read.csv("alpine_addnuts/output_data/sdl_2003_sppcomp.csv")
+sdl05 <- read.csv("alpine_addnuts/output_data/sdl_2005_jgs_sppcomp.csv")
 
 
 
@@ -86,6 +87,20 @@ nnplots$trt2 <- gsub("K", "C", nnplots$trt2)
 #nnplots$trt <- factor(nnplots$trt, levels = c(c("C", "K", "N", "P", "P+K", "N+K", "N+P", "N+P+K")))
 #nnplots$trt2 <- factor(nnplots$trt2, levels = c("C", "N", "P", "N+P"))
 sdlplots$trt <- factor(sdlplots$trt, levels = c("C", "N", "P", "N+P"))
+
+
+# pull known plots from sdl 03 and sdl 05 to append to abundance data (remove any NAs)
+abund03 <- subset(sdl03, !is.na(plot)) %>%
+  mutate(yr = 2003,
+         plotid = as.character(plot)) %>%
+  dplyr::select(colnames(plantcom))
+abund05 <- subset(sdl05, !is.na(plot)) %>%
+  mutate(yr = 2005,
+         plotid = as.character(plot)) %>%
+  dplyr::select(colnames(plantcom))
+
+# stack to plantcom
+plantcom <- rbind(plantcom, abund03, abund05)
 
 
 
@@ -134,11 +149,16 @@ coarse_cover <- abundance %>%
   ungroup() %>%
   mutate(simple_lifeform2 = recode(simple_lifeform2, `Ground cover` = "NonVeg")) %>%
   spread(simple_lifeform2, cover, fill = 0) %>%
-  mutate(PlantCov = 100-NonVeg,
+  mutate(TotalHits = Forb + Grass + Shrub + NonVeg,
+         PlantCov = 100-NonVeg,
          VegHits = Forb + Grass + Shrub,
          Forb_rel = (Forb/VegHits)*100,
          Grass_rel = (Grass/VegHits)*100,
-         F2G_ratio = Forb/Grass)
+         F2G_ratio = Forb/Grass) %>%
+  # NA plant cover for 2003 and 2005 bc methods not consistent
+  ## 2003: unclear whether person recorded all non-veg cover
+  ## 2005: jane didn't survey 100 points per plot, not sure how to best calculate plant cover
+  mutate(PlantCov = ifelse(yr %in% c(2003, 2005), NA, PlantCov))
   
 # geum rossii
 geum_cover <- subset(abundance, clean_code2 == "GERO2") %>%
@@ -155,48 +175,7 @@ geum_cover <- subset(abundance, clean_code2 == "GERO2") %>%
 coarse_cover <- left_join(coarse_cover, geum_cover[c("site", "yr", "plotid", "geum_hits", "geum_rel")]) %>%
   rename(Geum_hits = geum_hits, Geum_rel = geum_rel)
   
-# sdl 2003
-# subset 2003 data for jane to look at
-jane1 <- subset(plantcom, plotid %in% c("11", "60")) %>%
-  mutate(plotid = as.numeric(plotid)) %>%
-  left_join(sdlplots[c("plot", "trt", "meadow", "snow")], by = c("plotid" = "plot"))
-jane <- subset(sdl03, plot_2003 == 869) %>%
-  dplyr::select(plot_2003, trt,clean_code2, hit) %>%
-  distinct() %>%
-  rename(hits = hit) %>%
-  mutate(site = "sdl",
-         plotid = "869 (old number)",
-         yr = 2003,
-         meadow = "dry",
-         snow = "?") %>%
-  dplyr::select(names(jane1)) %>%
-  rbind(jane1) %>%
-  arrange(yr, plotid, clean_code2)
 
-write.csv(jane, "alpine_addnuts/output_data/fert_drymeadow_unsure_snowfence.csv")
-
-# coarse group 2003 data just in case
-abundance03 <- subset(sdl03, hit > 0.25) %>%
-  left_join(distinct(spplist[c("clean_code2", "simple_lifeform", "simple_lifeform2")]), by = "clean_code2")
-
-coarse03 <- abundance03 %>%
-  mutate(site = "sdl", yr = 2003) %>%
-  rename(plotid = plot,
-         hits = hit) %>%
-  group_by(site, yr, plot_2003, plotid, trt, meadow, snow, simple_lifeform2) %>%
-  summarise(cover = sum(hits)) %>%
-  ungroup() %>%
-  mutate(simple_lifeform2 = recode(simple_lifeform2, `Ground cover` = "NonVeg")) %>%
-  spread(simple_lifeform2, cover, fill = 0) %>%
-  mutate(PlantCov = 100-NonVeg,
-         VegHits = Forb + Grass + Shrub,
-         Forb_rel = (Forb/VegHits)*100,
-         Grass_rel = (Grass/VegHits)*100,
-         F2G_ratio = Forb/Grass)
-
-
-
-# sdl 2005
 
 
 
@@ -225,11 +204,17 @@ summary(fg_anova_global)
 TukeyHSD(fg_anova_global)
 
 fg_anova97 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 1997))
+fg_anova03 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 2003))
+fg_anova05 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 2005))
 fg_anova12 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 2012))
 fg_anova16 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 2016))
 
 summary(fg_anova97)
 TukeyHSD(fg_anova97)
+summary(fg_anova03)
+TukeyHSD(fg_anova03)
+summary(fg_anova05)
+TukeyHSD(fg_anova05)
 summary(fg_anova12)
 TukeyHSD(fg_anova12)
 summary(fg_anova16)
@@ -253,7 +238,7 @@ ggplot(data= subset(sdl_coarse_means, grp != "Geum_rel"), aes(trt, meancov, fill
   geom_col(color = "grey30", position = position_dodge(width = 0.6), width = 0.5) +
   scale_color_grey() +
   scale_fill_grey() +
-  facet_wrap(~yr, nrow = 3)
+  facet_wrap(~yr, nrow = 2)
 
 
 # nutnet

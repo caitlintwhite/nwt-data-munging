@@ -714,8 +714,7 @@ sdl2003_tidy <- left_join(sdl2003_tidy, sdl03_sites[c("plot_2003", "plot", "trt"
   # reorder cols and sort
   dplyr::select(date, plot_2003, plot, trt, meadow, snow, clean_code2, hit)
 
-# write out for now.. problems and all..
-write_csv(sdl2003_tidy2, "alpine_addnuts/output_data/sdl_sffert_2003_inprogress.csv")
+
 
 
 # -- PREP SDL PLANT DATA WITHOUT TRT INFO IN MATRICES (just plot num) -----
