@@ -18,6 +18,8 @@
 # > stat tests:
 # > full factorial, randomized, no blocks
 
+# edi published metadata link to sdl 97 anpp: http://nwt.colorado.edu/meta_data/saddferb.ts.meta.txt
+
 # NUTNET
 # +P and +P+K not sampled in 2017
 # 0.25 cover = present in 1m^2 plot but not hit
@@ -285,6 +287,7 @@ anpp_stack <- rbind(nn13_anpp, sdl97_anpp[colnames(nn13_anpp)]) %>%
 # add to summary df
 coarse_summary <- left_join(coarse_summary, anpp_stack)
 
+
 # -- Fig 1 and 2: FORBS VS GRASSES (Figs 1 + 2) ----
 # (out of curiosity make similar time since exp onset plot to compare forb shift over time by site by trt)
 # split out sdl and nutnet so can average C and N+P+K
@@ -420,90 +423,6 @@ mutate(all_fg_means, grp = factor(grp, levels = c("Forb_rel", "Grass_rel", "Geum
 
 
 # -- Table 3: Relative cover of G. rossii by study by year ----
-# rel cov = number hits per species/total number of veg hits in the plot
-geum_relcov <- plantcom %>%
-  #filter(!grepl("2BA|2LT|2RF", clean_code2)) %>%
-  #filter(!clean_code2 %in% unique(spplist$clean_code2[spplist$nutnet_grp == "Ground cover"])) %>%
-  filter(clean_code2 %in% sort(unique(spplist$clean_code2[!is.na(spplist$simple_lifeform2)]))) %>%
-  # sum total veg hits per site per plot per yr
-  group_by(site, yr, plotid) %>%
-  mutate(totveg = sum(hits)) %>%
-  ungroup() %>%
-  # spread out species to fill in 0s where not hit
-  spread(clean_code2, hits, fill = 0) %>%
-  gather(clean_code2, hits, '2FORB':ncol(.)) %>%
-  # subset to geum rossii only
-  filter(clean_code2 == "GERO2") %>%
-  mutate(relcov = (hits/totveg)*100)
-
-# split data frame into sdl and nutnet, since treated a little differently in prep
-sdl_geum <- subset(geum_relcov, site == "sdl") %>%
-  # subset to dry meadow plots surveyed across all years only (corresponds to what was surveyed in 1997)
-  ## should be plots 1-16
-  subset(plotid %in% unique(sdlplots$plot[!is.na(sdlplots$old_plot) & sdlplots$meadow == "Dry"])) %>%
-  # join site info
-  ## convert plotid from char to numeric to join with sdlplots df (nutnet has alpha chars in plotid)
-  mutate(plotid = as.numeric(plotid)) %>%
-  left_join(unique(sdlplots[c("plot", "trt")]), by = c("plotid" = "plot"))
-
-# visualize to check what to expect
-ggplot(sdl_geum, aes(trt, relcov)) +
-  stat_summary() +
-  facet_wrap(~yr) # doesn't match tim's.. 1997 N and N+P looks greater here, other yrs could discrep bc summarized on all hits (not just top) 
-
-# calculate table of means and ses
-sdl_geum_means <- data.frame(sdl_geum) %>%
-  group_by(site, yr, trt) %>%
-  summarise(meancov = mean(relcov),
-            secov = sd(relcov)/sqrt(length(relcov)),
-            nobs = length(relcov)) %>%
-  # calculate yrs passed since start of exp
-  mutate(post_yrs = yr - 1993) %>%
-  as.data.frame()
-sdl_geum_means
-
-
-# nutnet
-## need to average N+P and C by block first (2 reps per block)
-nn_geum <- subset(geum_relcov, site == "nutnet") %>%
-  # join site data
-  full_join(nnplots) %>%
-  # recode 2017 N+K as N.. (so have 4 N trt plots, as is have 3 N and 1 N+K)
-  mutate(trt = ifelse(yr == 2017 & trt == "N+K", "N", trt)) %>%
-  # average reps in C and N+P+K by block
-  group_by(site, yr, block, trt) %>%
-  mutate(relcov2 = mean(relcov),
-         # to verify 2 obs per C and N+P+K per block
-         nobs = length(relcov)) %>% # yes (checked manually)
-  ungroup()
-
-
-# visualize to check what to expect
-ggplot(subset(nn_geum, trt %in% c("C", "N", "N+P", "P")), aes(trt, relcov2)) +
-  stat_summary() +
-  facet_wrap(~yr) # doesn't match tim's.. 1997 N and N+P looks greater here, other yrs could discrep bc summarized on all hits (not just top) 
-
-# calculate table of means and ses
-nn_geum_means <- data.frame(nn_geum) %>%
-  dplyr::select(site, yr, block, trt, relcov2) %>%
-  distinct() %>%
-  group_by(site, yr, trt) %>%
-  summarise(meancov = mean(relcov2),
-            secov = sd(relcov2)/sqrt(length(relcov2)),
-            nobs = length(relcov2)) %>%
-  ungroup() %>%
-  # calculate yrs passed since start of exp
-  mutate(post_yrs = yr - 2008) %>%
-  as.data.frame()
-nn_geum_means
-
-
-# stack sdl and nutnet to plot means and ses by yr since trts initiated
-all_geum_means <- rbind(sdl_geum_means, nn_geum_means) %>%
-  # keep only trts of interest
-  subset(trt %in% c("C", "N", "P", "N+P"))
-
-
 # enter sdl data for 1994 and 2005
 sdl_geum_9405 <- data.frame(cbind(site = "sdl",
                                   trt = rep(c("C", "N", "P", "N+P"), 2),
@@ -516,20 +435,21 @@ sdl_geum_9405 <- data.frame(cbind(site = "sdl",
   mutate(yr = as.numeric(yr),
          post_yrs = yr-1993)
 
-all_geum_means <- rbind(all_geum_means, sdl_geum_9405) %>%
-  # convert trt to factor
-  mutate(trt = factor(trt, levels = c("C", "N", "P", "N+P"))) %>%
-  mutate_at(vars("meancov", "secov", "nobs"), as.numeric)
-
-# plot means by time since experiment onset
-ggplot(all_means, aes(post_yrs, meancov, group = site, col = site)) +
-  geom_errorbar(aes(ymax = meancov + secov, ymin = meancov - secov), width = 0) +
-  geom_point(aes(col = site)) +
-  #geom_line(aes(col = site)) +
-  scale_color_manual(name = "Site", values = c("salmon", "darkred")) +
-  labs(y = "Geum rossi mean relative cover (%)",
-       x = "Years since experiment onset") +
-  facet_wrap(~trt, nrow = 1)
+# can remake this using sdl coarse means and nn coarse means, remove 2005 from sdl_geum9405
+# all_geum_means <- rbind(all_geum_means, sdl_geum_9405) %>%
+#   # convert trt to factor
+#   mutate(trt = factor(trt, levels = c("C", "N", "P", "N+P"))) %>%
+#   mutate_at(vars("meancov", "secov", "nobs"), as.numeric)
+# 
+# # plot means by time since experiment onset
+# ggplot(all_means, aes(post_yrs, meancov, group = site, col = site)) +
+#   geom_errorbar(aes(ymax = meancov + secov, ymin = meancov - secov), width = 0) +
+#   geom_point(aes(col = site)) +
+#   #geom_line(aes(col = site)) +
+#   scale_color_manual(name = "Site", values = c("salmon", "darkred")) +
+#   labs(y = "Geum rossi mean relative cover (%)",
+#        x = "Years since experiment onset") +
+#   facet_wrap(~trt, nrow = 1)
 
 
 
