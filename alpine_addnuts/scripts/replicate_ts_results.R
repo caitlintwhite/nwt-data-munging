@@ -245,10 +245,14 @@ nn13_anpp <- subset(nn_anpp, grepl("2013", as.character(Date))) %>%
   mutate(Total = Forb + Grass + Legume,
          plotid = paste0("B", Block, "_", Plot),
          site = "nutnet",
-         yr = 2013) %>%
-  dplyr::select(site, yr, plotid, FullTreatment:Total) %>%
+         yr = 2013,
+         # add forb and legume since can't separate for saddle
+         forb2 = Forb + Legume) %>%
+  dplyr::select(site, yr, plotid, FullTreatment:Total, forb2) %>%
   rename_all(casefold) %>%
-  rename(trt = fulltreatment)
+  rename(trt = fulltreatment) %>%
+  dplyr::select(site, yr, plotid, trt, forb2, grass, total) %>%
+  rename(forb = forb2)
 
 # from metadata: Aboveground biomass measurements were taken by clip harvesting a 20x20 cm subplot within each plot.
 area97 <- (20/100)*(20/100) # convert to m
@@ -258,19 +262,28 @@ sdl97_anpp <- subset(sdlS97, yr == 1997) %>%
   # gather all anpp to take average per plot
   gather(grp, anpp_g, grass_wgt_rep1:ncol(.)) %>%
   filter(!is.na(anpp_g)) %>%
-  mutate(grp = gsub("_.+$", "", grp),
+  mutate(site = "sdl",
+         grp = gsub("_.+$", "", grp),
          # convert all to anpp to g/m2
          anpp_g_m2 = as.numeric(anpp_g)/area97,
          old_plot = as.numeric(plot)) %>%
-  group_by(yr, loc, trt, old_plot, grp) %>%
+  group_by(site, yr, loc, trt, old_plot, grp) %>%
   summarise(mean_anpp_g_m2 = mean(anpp_g_m2)) %>%
   ungroup() %>%
   spread(grp, mean_anpp_g_m2) %>%
   mutate(trt = recode(trt, CC = "C", NN = "N", PP = "P", NP = "N+P")) %>%
-  left_join(sdl97_plotinfo, by = c("old_plot", "trt"))
+  left_join(sdl97_plotinfo, by = c("old_plot", "trt")) %>%
+  mutate(plotid = as.character(plot))
   # 283 didn't pair, matches plot_num1 in jgs dataset (plot 30)
-sdl97_anpp[sdl97_anpp$old_plot == 283, c("meadow", "snow", "plot")] 
+sdl97_anpp[sdl97_anpp$old_plot == 283, c("meadow", "snow", "plot")] <- jgs_sites[jgs_sites$plot_num1 == 283, c("meadow", "snow", "plot")]
 
+# stack anpp then join to coarse summary
+anpp_stack <- rbind(nn13_anpp, sdl97_anpp[colnames(nn13_anpp)]) %>%
+  mutate(yr = as.numeric(yr)) %>%
+  dplyr::select(-trt)
+
+# add to summary df
+coarse_summary <- left_join(coarse_summary, anpp_stack)
 
 # -- Fig 1 and 2: FORBS VS GRASSES (Figs 1 + 2) ----
 # (out of curiosity make similar time since exp onset plot to compare forb shift over time by site by trt)
