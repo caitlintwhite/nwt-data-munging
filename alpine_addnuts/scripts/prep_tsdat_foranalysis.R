@@ -85,6 +85,11 @@ names(sdlS97)[grep("X", names(sdlS97))] <- NA
 sdlS97[nrow(sdlS97)+1,] <- data.frame(t(names(sdlS97)))
 # manually assign names from online metadata
 names(sdlS97) <- c("yr", "loc", "trt", "plot", "sppS", "grass_wgt_rep1", "forb_wgt_rep1", "total_rep1", "grass_rep2", "forb_rep2", "total_rep2")
+# plot info from knb-lter-nwt.138 metadata (on culter)
+sdl97_plotinfo <- read.csv(scefiles[grep("metadata", scefiles)]) %>%
+# quick clean up to remove parentheses and other punctuation from tag numbers
+  mutate_at(c("plot", "old_plot", "replace_tag_2002"), parse_number) %>%
+  arrange(plot)
 
 # jgs 2005 data
 jgs_files <- list.files(gsub("dry_meado_fert", "jgs_reu_2005", datpath), full.names = T)
@@ -1023,3 +1028,5 @@ write_csv(jgs_clean, "alpine_addnuts/output_data/sdl_2005_jgs_sppcomp.csv")
 write_csv(jgs_sitematch, "alpine_addnuts/output_data/sdl_2005_jgs_sites.csv")
 write_csv(sdl03_clean, "alpine_addnuts/output_data/sdl_2003_sppcomp.csv")
 write_csv(sdl03_sites, "alpine_addnuts/output_data/sdl_2003_sites.csv")
+# write out knb-lter-nwt.138 site info metadata
+write_csv(sdl97_plotinfo, "alpine_addnuts/output_data/sffert_knb138_sites.csv")
