@@ -46,6 +46,8 @@ theme_set(theme_bw())
 # get data
 # plant community data for sdl and nutnet, all yrs
 plantcom <- read.csv("alpine_addnuts/output_data/sdl_nutnet_plantcom_allyrs.csv") # includes spp present (as 0.25) for yrs available
+# get nn 2017 richness data from TS (sent 10/22/2019)
+nn17_richness <- read.csv("../../Documents/nwt_lter/unpub_data/dry_meado_fert/summary_edit.csv")
 # spp lookup table
 spplist <- read.csv("alpine_addnuts/output_data/sdl_nutnet_spplookup.csv")
 # sdl site info
@@ -85,30 +87,6 @@ sdl97_plotinfo <- read.csv("alpine_addnuts/output_data/sffert_knb138_sites.csv")
 
 
 
-# -- PREP SITE DATA + RECODE TRTMENTS FOR NUTNET (SIMPLIFY) -----
-# id nutnet plots and sdl plots sampled across all yrs
-# sdl limited by sdl dry meadow non-snofence plots surveyed in 1997
-# nutnet limitd by plots surveyed in 2017 (fewer than in 2013)
-
-sdl_common <- unique(sdlplots$plot[!is.na(sdlplots$old_plot97) & sdlplots$snow == "no snow"])
-nn_common <- unique(plantcom$plotid[plantcom$site == "nutnet" & plantcom$yr == 2017])
-#to be sure, are these plots in 2013?
-summary(nn_common %in% unique(plantcom$plotid[plantcom$site == "nutnet" & plantcom$yr == 2013])) # yup
-# pull out P plots from nn too
-nn_Pplots <- unique(nnplots$plotid[nnplots$trt == "P"])
-
-#ts found no effect of +k, condense +k into other treatments (e.g. n+p+k to n+p; k to control)
-# in previous ordination analysis, k plots overlay similar treatments without k (e.g. n+p and n+p+k hulls overlap on nmds) 
-nnplots$trt2 <- gsub("[+]K", "", nnplots$trt)
-nnplots$trt2 <- gsub("K", "C", nnplots$trt2)
-
-# make trts factor in each site
-#nnplots$trt <- factor(nnplots$trt, levels = c(c("C", "K", "N", "P", "P+K", "N+K", "N+P", "N+P+K")))
-#nnplots$trt2 <- factor(nnplots$trt2, levels = c("C", "N", "P", "N+P"))
-sdlplots$trt <- factor(sdlplots$trt, levels = c("C", "N", "P", "N+P"))
-
-
-
 # -- RE-CHECK SITE INFO FOR SDL 03 AND 05 DATASETS WITH EDI METADATA -----
 sdl_sites_check <- left_join(sdlplots, sdl97_plotinfo) # checks out, still no pair for 286
 jgs_sites_check <- left_join(jgs_sites, sdl97_plotinfo, by = c("plot_num1" = "old_plot"))
@@ -136,6 +114,30 @@ abund05 <- subset(sdl05) %>%
 
 # stack to plantcom
 plantcom <- rbind(plantcom, abund03, abund05)
+
+
+
+# -- PREP SITE DATA + RECODE TRTMENTS FOR NUTNET (SIMPLIFY) -----
+# id nutnet plots and sdl plots sampled across all yrs
+# sdl limited by sdl dry meadow non-snofence plots surveyed in 1997
+# nutnet limitd by plots surveyed in 2017 (fewer than in 2013)
+
+sdl_common <- unique(sdlplots$plot[!is.na(sdlplots$old_plot97) & sdlplots$snow == "no snow"])
+nn_common <- unique(plantcom$plotid[plantcom$site == "nutnet" & plantcom$yr == 2017])
+#to be sure, are these plots in 2013?
+summary(nn_common %in% unique(plantcom$plotid[plantcom$site == "nutnet" & plantcom$yr == 2013])) # yup
+# pull out P plots from nn too
+nn_Pplots <- unique(nnplots$plotid[nnplots$trt == "P"])
+
+#ts found no effect of +k, condense +k into other treatments (e.g. n+p+k to n+p; k to control)
+# in previous ordination analysis, k plots overlay similar treatments without k (e.g. n+p and n+p+k hulls overlap on nmds) 
+nnplots$trt2 <- gsub("[+]K", "", nnplots$trt)
+nnplots$trt2 <- gsub("K", "C", nnplots$trt2)
+
+# make trts factor in each site
+#nnplots$trt <- factor(nnplots$trt, levels = c(c("C", "K", "N", "P", "P+K", "N+K", "N+P", "N+P+K")))
+#nnplots$trt2 <- factor(nnplots$trt2, levels = c("C", "N", "P", "N+P"))
+#sdlplots$trt <- factor(sdlplots$trt, levels = c("C", "N", "P", "N+P"))
 
 
 
@@ -195,7 +197,7 @@ coarse_cover <- abundance %>%
   ## 2003: unclear whether person recorded all non-veg cover
   ## 2005: jane didn't survey 100 points per plot, not sure how to best calculate plant cover
   mutate(PlantCov = ifelse(yr %in% c(2003, 2005), NA, PlantCov))
-  
+
 # geum rossii
 geum_cover <- subset(abundance, clean_code2 == "GERO2") %>%
   group_by(site, yr, plotid) %>%
@@ -210,7 +212,7 @@ geum_cover <- subset(abundance, clean_code2 == "GERO2") %>%
 # append geum hits and rel cov to coarse_cover
 coarse_cover <- left_join(coarse_cover, geum_cover[c("site", "yr", "plotid", "geum_hits", "geum_rel")]) %>%
   rename(Geum_hits = geum_hits, Geum_rel = geum_rel)
-  
+
 
 # -- PREP BIODIVERSITY DATASETS (where richness available) -----
 # nutnet 2013 and sdl 1997, 2005, and 2012 include spp present only (hits = 0.25)
@@ -233,6 +235,69 @@ H <- data.frame(H = diversity(relmatrix),
 
 # put it all together
 biodiv <- left_join(richness, H)
+
+# run nn 2017 separately (tim didn't record species present, just total count of richness)
+# need to first diff overall richness from spp abundance richness, then add in 0.25 per spp for extra spp present but not found
+nn17hitsdat <- subset(plantcom, site == "nutnet" & yr == 2017) %>%
+  # remove rows for non-plants
+  filter(!clean_code2 %in% unique(spplist$clean_code2[spplist$simple_lifeform2 == "Ground cover"])) %>%
+  group_by(plotid) %>%
+  mutate(S = length(unique(clean_code2)),
+         # sum hits to check against tim's
+         veghits = sum(hits), 
+         # add block and plot so can join tim's richness dat
+         block = as.numeric(substr(plotid, 2,2)),
+         plot = as.numeric(gsub("B[1-4]_", "", plotid))) %>%
+  ungroup() %>%
+  # join richness dat from tim
+  left_join(nn17_richness[c("block", "plot", "richness", "veg.hits")]) %>%
+  # diff tim's plot richness from spp hits richness as logic check (diff should always be >= 0)
+  mutate(checkS = richness-S,
+         checkvhits = veghits - veghits)
+# check
+summary(nn17hitsdat[c("checkS", "checkvhits")]) # good
+# max number of present spp is 7, so need to add 7 extra spp cols to nn17 abundance matrix
+
+nn17wide <- dplyr::select(nn17hitsdat, site:hits) %>%
+  spread(clean_code2, hits, fill = 0)
+# iterate through and add in spp present  
+present17 <- distinct(dplyr::select(nn17hitsdat, site:plotid, checkS))
+# add max spp present (7) diff to nn17wide
+nn17wide <- cbind(nn17wide, matrix(nrow = nrow(nn17wide), ncol = max(present17$checkS), dimnames = list(NULL, paste0("spp", 1:max(present17$checkS))))) %>%
+  # make unique rowid col
+  unite(rowid, site:plotid, sep = "_", remove = F)
+for(i in 1:nrow(nn17wide)){
+  # store number of spp present to infill
+  fillcols <- present17$checkS[i]
+  # infill number of extra spp
+  nn17wide[i,paste0("spp", 1:7)] <- c(rep(0.25, fillcols), rep(0,max(present17$checkS)-fillcols))
+}
+
+# calculate diversity
+rownames(nn17wide) <- nn17wide$rowid
+relmatrix17 <- decostand(nn17wide[,(grep("plotid", names(nn17wide))+1):ncol(nn17wide)], method = "total")
+# try relmatrix without additional spp to see if matches tim's numbers better
+relmatrix17.2 <- decostand(nn17wide[,(grep("plotid", names(nn17wide))+1):(grep("spp1", names(nn17wide))-1)], method = "total")
+H17 <- data.frame(H = diversity(relmatrix17),
+                  # diversity on spp hit only
+                  H2 = diversity(relmatrix17.2),
+                rowid = rownames(relmatrix17)) %>%
+  #join plot info to rbind with biodiv dat
+  left_join(nn17wide[c("rowid", "site", "yr", "plotid")]) %>%
+  # then join tim's richness data
+  left_join(distinct(nn17hitsdat[c("plotid", "richness")])) %>%
+  #rename richness to S
+  rename(S = richness)
+
+# how different are these diversity numbers from tim's?
+Hcheck <- left_join(distinct(nn17hitsdat[c("plotid", "block", "plot", "checkS")]), H17[c("plotid", "H", "H2")]) %>%
+  left_join(nn17_richness[c("block", "plot", "diversity")])
+# numbers are about the same where no additional species were present, meaning diversity run on abundance data only in tim's dat (i think)
+plot(Hcheck$checkS, Hcheck$diversity - Hcheck$H) # hm.. idk why have 3 additional present spp would make that big of a difference in H
+plot(Hcheck$checkS, Hcheck$diversity - Hcheck$H2) #hm.. also off even if use spp hit only..actually looks more off
+
+# stack H17 with biodiv
+biodiv <- rbind(biodiv, H17[names(biodiv)])
 
 # join biodiv and coarse_cover to coarse summary where info available
 coarse_summary <- left_join(coarse_cover, dplyr::select(biodiv, -rowid))
@@ -276,7 +341,7 @@ sdl97_anpp <- subset(sdlS97, yr == 1997) %>%
   mutate(trt = recode(trt, CC = "C", NN = "N", PP = "P", NP = "N+P")) %>%
   left_join(sdl97_plotinfo, by = c("old_plot", "trt")) %>%
   mutate(plotid = as.character(plot))
-  # 283 didn't pair, matches plot_num1 in jgs dataset (plot 30)
+# 283 didn't pair, matches plot_num1 in jgs dataset (plot 30)
 sdl97_anpp[sdl97_anpp$old_plot == 283, c("meadow", "snow", "plot")] <- jgs_sites[jgs_sites$plot_num1 == 283, c("meadow", "snow", "plot")]
 
 # stack anpp then join to coarse summary
@@ -363,14 +428,14 @@ nn_coarse_blockmeans <- subset(coarse_cover, site == "nutnet") %>%
   # average reps in C and N+P+K by block
   group_by(site, yr, block, trt, trt2, met) %>%
   summarise(blockmean = mean(val),
-         # to verify 2 obs per C and N+P+K per block
-         nobs = length(val)) %>% # yes (checked manually)
+            # to verify 2 obs per C and N+P+K per block
+            nobs = length(val)) %>% # yes (checked manually)
   ungroup()
 
 # subset to just C, N and N+P for fig2 and anova
 nn_fg_dat <- subset(nn_coarse_blockmeans, met %in% c("Forb_rel", "Grass_rel", "Geum_rel") & trt %in% c("C", "N", "P", "N+P")) %>%
   mutate(trt2 = factor(trt2, levels = c("C", "N", "P", "N+P")))
-  
+
 # run anova of forbs and grass rel cov, using C, N and N+P only (so 4 reps per trt) [i.e. ignore K, N+P+K]
 nn_fg_anova_global <- aov(blockmean ~ trt2 * met * yr, data = subset(nn_fg_dat, met != "Geum_rel" & trt2 != "P"))
 summary(nn_fg_anova_global)
@@ -475,7 +540,7 @@ nn_biodiv_blockmeans <- subset(biodiv, site == "nutnet") %>%
   ungroup() %>%
   # append abundance-based bockmeans (2013 and 2017)
   rbind(nn_coarse_blockmeans) 
-  
+
 
 # summarise 2013
 nn_biodiv13_means <- subset(nn_biodiv_blockmeans, yr == 2013) %>%
