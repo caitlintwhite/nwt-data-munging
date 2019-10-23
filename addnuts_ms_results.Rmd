@@ -1,0 +1,44 @@
+---
+title: "Alpine dry meadow fertilization results"
+author: "Caitlin White"
+date: "22/10/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning = F, message = F}
+knitr::opts_chunk$set(echo = FALSE)
+# note: this script copies over script worked out in other R scripts for the sole purpose of exporting statistical results, tables and figures for Tim Seastedt (to avoid exporting a bunch of figs and tables as CVSs from R)
+# see R scripts replicat_ts_results.R, analyze_ts_dats.R, and addnuts_figs.R for lengthier scripts that go through the analysis weeds
+# addnuts_figs.R contains figure generation for NWT poster for self-study (ms contains slightly different NMDS figs [earlier versions])
+
+
+# setup environment
+library(tidyverse)
+library(vegan)
+library(cowplot)
+source("edi_functions.R")
+na_vals <- c("", " ", NA, "NA", "NaN", NaN, ".")
+options(stringsAsFactors = F, strip.white = T, na.strings = na_vals)
+theme_set(theme_bw())
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r import d}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
