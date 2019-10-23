@@ -729,7 +729,7 @@ sdl_sitesLT <- sdl_plots2 %>%
 # 286 still needs to be resolved..
 
 # clean up environment
-rm(sce12_x_sffert, sdl_plots, plots2016, jgstemp, sdl97_sites, sfen, xydat, trtcheck, problemxy)
+rm(sce12_x_sffert, sdl_plots, plots2016, jgstemp, sfen, xydat, trtcheck, problemxy)
 
 
 
