@@ -54,10 +54,6 @@ spplist <- read.csv("alpine_addnuts/output_data/sdl_nutnet_spplookup.csv")
 sdlplots <- read.csv("alpine_addnuts/output_data/sdl_plot_lookup.csv") 
 nnplots <- read.csv("alpine_addnuts/output_data/nutnet_plot_lookup.csv")
 
-# full sdl site info table (troublshooting discrepancies, but good to use for plots 1-16 sampled in 1997-2016 in sdl)
-sdlplots_full <- read.csv("alpine_addnuts/output_data/sdl_plots_lookup_trblshoot.csv")
-
-
 # read in prepped datasets where can pull top hits only
 nn17_wvert <- read.csv("alpine_addnuts/output_data/nutnet2017_vertical_sppcomp.csv") 
 sdl16_wvert <- read.csv("alpine_addnuts/output_data/sdl2016_vertical_sppcomp.csv") 
@@ -65,13 +61,6 @@ sdl16_wvert <- read.csv("alpine_addnuts/output_data/sdl2016_vertical_sppcomp.csv
 nn13_clean <- read.csv("alpine_addnuts/output_data/nutnet2013_alldats/NWTnutnet_sppcomp_2013ongoing.csv") 
 nn_anpp <- read.csv("alpine_addnuts/output_data/nutnet2013_alldats/NWTnutnet_anpp_2007ongoing.csv")
 
-# sdl 2003 and 2005 (partially figured out -- some plots don't have match)
-sdl03 <- read.csv("alpine_addnuts/output_data/sdl_2003_sppcomp.csv")
-sdl05 <- read.csv("alpine_addnuts/output_data/sdl_2005_jgs_sppcomp.csv")
-# jgs site list
-jgs_sites <- read.csv("alpine_addnuts/output_data/sdl_2005_jgs_sites.csv")
-# sdl 03 iste list
-sdl03_sites <- read.csv("alpine_addnuts/output_data/sdl_2003_sites.csv")
 
 # sdl 97 anpp from EDI
 #sffert richness 1997 (to troubleshoot plots that don't match up)
@@ -82,38 +71,13 @@ sdlS97[nrow(sdlS97)+1,] <- data.frame(t(names(sdlS97)))
 # manually assign names from online metadata
 names(sdlS97) <- c("yr", "loc", "trt", "plot", "sppS", "grass_wgt_rep1", "forb_wgt_rep1", "total_rep1", "grass_rep2", "forb_rep2", "total_rep2")
 
-# plot info from knb-lter-nwt.138 metadata (on culter)
-sdl97_plotinfo <- read.csv("alpine_addnuts/output_data/sffert_knb138_sites.csv")
 
-
-
-# -- RE-CHECK SITE INFO FOR SDL 03 AND 05 DATASETS WITH EDI METADATA -----
-sdl_sites_check <- left_join(sdlplots, sdl97_plotinfo) # checks out, still no pair for 286
-jgs_sites_check <- left_join(jgs_sites, sdl97_plotinfo, by = c("plot_num1" = "old_plot"))
-# plot 16 pairs on replacement tag (485), 30 pairs on ne tag (441).. and 875 = 69! all plots accounted for :)
-sdl05[sdl05$jgs_plot == "875 (NN)", c("plot", "meadow", "snow")] <- sdl97_plotinfo[sdl97_plotinfo$old_plot == 875, c("plot", "meadow", "snow")]
-
-
-sdl03_sites_check <- left_join(sdl03_sites, sdl97_plotinfo, by = c("plot_2003" = "old_plot", "plot", "trt"))
-# sdl 03 also checks out, plot 269 = 37, 875 = 69 (need to infill those)
-sdl03[sdl03$plot_2003 == 269, c("plot", "meadow", "snow")] <- sdl97_plotinfo[sdl97_plotinfo$old_plot == 269, c("plot", "meadow", "snow")]
-sdl03[sdl03$plot_2003 == 875, c("plot", "meadow", "snow")] <- sdl97_plotinfo[sdl97_plotinfo$old_plot == 875, c("plot", "meadow", "snow")]
-sdl03$meadow[sdl03$meadow == "wet"] <- "snowbed"
-sdl03$snow <- gsub("field", "", sdl03$snow)
-
-# pull known plots from sdl 03 and sdl 05 to append to abundance data (remove any NAs)
-abund03 <- sdl03 %>%
-  # infill plots 875 (69) and 269 (37)
-  mutate(yr = 2003,
-         plotid = as.character(plot)) %>%
-  dplyr::select(colnames(plantcom))
-abund05 <- subset(sdl05) %>%
-  mutate(yr = 2005,
-         plotid = as.character(plot)) %>%
-  dplyr::select(colnames(plantcom))
-
-# stack to plantcom
-plantcom <- rbind(plantcom, abund03, abund05)
+# review dats
+glimpse(plantcom)
+sapply(plantcom, function(x) sort(unique(x))) # looks good
+glimpse(spplist)
+glimpse(sdlplots)
+glimpse(nnplots)
 
 
 
@@ -121,8 +85,7 @@ plantcom <- rbind(plantcom, abund03, abund05)
 # id nutnet plots and sdl plots sampled across all yrs
 # sdl limited by sdl dry meadow non-snofence plots surveyed in 1997
 # nutnet limitd by plots surveyed in 2017 (fewer than in 2013)
-
-sdl_common <- unique(sdlplots$plot[!is.na(sdlplots$old_plot97) & sdlplots$snow == "no snow"])
+sdl_common <- unique(sdlplots$plot[!is.na(sdlplots$old_plot97LT) & sdlplots$snow == "no snow"])
 nn_common <- unique(plantcom$plotid[plantcom$site == "nutnet" & plantcom$yr == 2017])
 #to be sure, are these plots in 2013?
 summary(nn_common %in% unique(plantcom$plotid[plantcom$site == "nutnet" & plantcom$yr == 2013])) # yup
@@ -194,7 +157,7 @@ coarse_cover <- abundance %>%
          Grass_rel = (Grass/VegHits)*100,
          F2G_ratio = Forb/Grass) %>%
   # NA plant cover for 2003 and 2005 bc methods not consistent
-  ## 2003: unclear whether person recorded all non-veg cover
+  ## 2003: unclear whether Colin Tucker recorded all non-veg cover
   ## 2005: jane didn't survey 100 points per plot, not sure how to best calculate plant cover
   mutate(PlantCov = ifelse(yr %in% c(2003, 2005), NA, PlantCov))
 
@@ -216,8 +179,10 @@ coarse_cover <- left_join(coarse_cover, geum_cover[c("site", "yr", "plotid", "ge
 
 # -- PREP BIODIVERSITY DATASETS (where richness available) -----
 # nutnet 2013 and sdl 1997, 2005, and 2012 include spp present only (hits = 0.25)
-## as of 2019-10-13 CTW does not have nutnet 2017 spp present only
+## nn 2017: spp present not recorded, just raw total richness (calculate separately below)
 plants <- subset(plantcom, yr %in% unique(yr[hits == 0.25])) %>%
+  # okay to remove date
+  dplyr::select(-date) %>%
   # remove ground cover
   filter(!clean_code2 %in% unique(spplist$clean_code2[spplist$simple_lifeform == "Ground cover" & !is.na(spplist$simple_lifeform)])) %>%
   unite(rowid, site, yr, plotid, sep = "_", remove = F)
@@ -239,6 +204,7 @@ biodiv <- left_join(richness, H)
 # run nn 2017 separately (tim didn't record species present, just total count of richness)
 # need to first diff overall richness from spp abundance richness, then add in 0.25 per spp for extra spp present but not found
 nn17hitsdat <- subset(plantcom, site == "nutnet" & yr == 2017) %>%
+  dplyr::select(-date) %>%
   # remove rows for non-plants
   filter(!clean_code2 %in% unique(spplist$clean_code2[spplist$simple_lifeform2 == "Ground cover"])) %>%
   group_by(plotid) %>%
@@ -339,10 +305,10 @@ sdl97_anpp <- subset(sdlS97, yr == 1997) %>%
   ungroup() %>%
   spread(grp, mean_anpp_g_m2) %>%
   mutate(trt = recode(trt, CC = "C", NN = "N", PP = "P", NP = "N+P")) %>%
-  left_join(sdl97_plotinfo, by = c("old_plot", "trt")) %>%
+  left_join(sdlplots[c("plot", "old_plot_edi138", "trt", "meadow", "snow")], by = c("old_plot"="old_plot_edi138", "trt")) %>%
   mutate(plotid = as.character(plot))
-# 283 didn't pair, matches plot_num1 in jgs dataset (plot 30)
-sdl97_anpp[sdl97_anpp$old_plot == 283, c("meadow", "snow", "plot")] <- jgs_sites[jgs_sites$plot_num1 == 283, c("meadow", "snow", "plot")]
+# 283 didn't pair (should be 83 not 283 to match), matches by sdl96 column
+sdl97_anpp[sdl97_anpp$old_plot == 283, c("meadow", "snow", "plot")] <- sdlplots[sdlplots$old_plot96 == 283 & !is.na(sdlplots$old_plot96), c("meadow", "snow", "plot")]
 
 # stack anpp then join to coarse summary
 anpp_stack <- rbind(nn13_anpp, sdl97_anpp[colnames(nn13_anpp)]) %>%
@@ -351,6 +317,44 @@ anpp_stack <- rbind(nn13_anpp, sdl97_anpp[colnames(nn13_anpp)]) %>%
 
 # add to summary df
 coarse_summary <- left_join(coarse_summary, anpp_stack)
+
+
+# -- WRITE OUT DATASETS FOR TS ----
+# join site info, plant info to plantcom and coarse_summary
+allsites <- dplyr::select(nnplots, -c(n,p,k)) %>%
+  mutate(meadow = "dry",
+         snow = "no snow",
+         snow_notes = "never affected") %>%
+  dplyr::select(site, plotid, block, plot, meadow, snow, snow_notes, trt, trt2)
+# prep sdl to rbind
+sdlsites <- mutate(sdlplots, plot = ifelse(is.na(plot), old_plot97LT, plot),
+                   plotid = as.character(plot),
+                   block = NA,
+                   site = "sdl",
+                   trt2 = trt) %>%
+  dplyr::select(names(allsites))
+allsites <- rbind(allsites, sdlsites) %>% distinct()
+
+# specify spp info cols to keep
+plantcomTS <- left_join(plantcom, allsites) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)])) %>%
+  dplyr::select(site:plotid, block:trt2,clean_code2, hits, simple_name,
+                Scientific_Name_x:Growth_Habit, simple_lifeform, simple_lifeform2)
+  
+
+coarse_summaryTS <- right_join(allsites, coarse_summary) %>%
+  arrange(site, yr, block, plot) %>%
+  dplyr::select(site, yr, plotid:ncol(.)) %>%
+  rename_at(vars("Forb", "Grass", "NonVeg", "Shrub"), function(x) paste0(x, "Hits")) %>%
+  rename_at(vars("forb", "grass", "total"), function(x) str_to_sentence(paste0(x, "_g_m2")))
+
+glimpse(coarse_summaryTS)
+glimpse(plantcomTS)
+
+
+# write out
+write_csv(plantcomTS, "alpine_addnuts/output_data/forTS/sdl_nutnet_sppcomp_1997-ongoing.csv")
+write_csv(coarse_summaryTS, "alpine_addnuts/output_data/forTS/sdl_nutnet_fxnl_biodiv_anpp_1997-ongoing.csv")
 
 
 # -- Fig 1 and 2: FORBS VS GRASSES (Figs 1 + 2) ----
