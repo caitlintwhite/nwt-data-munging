@@ -869,7 +869,7 @@ jgs_clean <- rename(jgs_master2, jgs_plot = plot, date = surveydate) %>%
   arrange(plot, clean_code2)
 
 sdl03_clean <- sdl2003_tidy %>%
-  mutate(site = "sdl", yr = 2013) %>%
+  mutate(site = "sdl", yr = 2003) %>%
   rename(hits = hit) %>%
   dplyr::select(site, yr, date, plot, plot_2003, trt:snow, clean_code2, hits) %>%
   arrange(plot, clean_code2)
