@@ -103,7 +103,7 @@ ERME2,ERME2,FALSE,Erigeron melanocephalus,ERME2,ERME2,Erigeron melanocephalus (A
 ERNA,ERNA,FALSE,Eritrichium nanum,ERNA,ERNA,Eritrichium nanum (Vill.) Schrad. ex Gaudin,arctic alpine forget-me-not,Dicot,Boraginaceae,Borage family,Perennial,Forb/herb,"L48 (N), AK (N), CAN (N)"
 ERPI6,ERPI6,FALSE,Erigeron pinnatisectus,ERPI6,ERPI6,Erigeron pinnatisectus (A. Gray) A. Nelson,featherleaf fleabane,Dicot,Asteraceae,Aster family,Perennial,Forb/herb,L48 (N)
 ERS6,ERSI3,FALSE,Erigeron simplex,ERSI3,ERSI3,Erigeron simplex Greene,onestem fleabane,Dicot,Asteraceae,Aster family,Perennial,"Subshrub, Forb/herb",L48 (N)
-ERSE3,ERSE3,FALSE,Eremocarpus setigerus,ERSE3,CRSE11,Eremocarpus setigerus (Hook.) Benth.,dove weed,Dicot,Euphorbiaceae,Spurge family,Annual,Forb/herb,L48 (N)
+ERSE3,ERSI3,FALSE,Erigeron simplex,ERSI3,ERSI3,Erigeron simplex Greene,onestem fleabane,Dicot,Asteraceae,Aster family,Perennial,"Subshrub, Forb/herb",L48 (N)
 ERSI3,ERSI3,FALSE,Erigeron simplex,ERSI3,ERSI3,Erigeron simplex Greene,onestem fleabane,Dicot,Asteraceae,Aster family,Perennial,"Subshrub, Forb/herb",L48 (N)
 ERTC,ERSI3,FALSE,Erigeron simplex,ERSI3,ERSI3,Erigeron simplex Greene,onestem fleabane,Dicot,Asteraceae,Aster family,Perennial,"Subshrub, Forb/herb",L48 (N)
 ERYNIV,ERCA14,FALSE,Erysimum capitatum,ERCA14,ERCA14,Erysimum capitatum (Douglas ex Hook.) Greene,sanddune wallflower,Dicot,Brassicaceae,Mustard family,"Biennial, Perennial","Forb/herb, Subshrub","L48 (N), AK (N)"

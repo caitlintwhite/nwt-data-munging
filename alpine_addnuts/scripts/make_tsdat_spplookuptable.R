@@ -184,6 +184,7 @@ correctcodes <- c(junk1 = "No hit",
                   O = "No hit",
                   ERS6 = "ERSI3",
                   ERTC = "ERSI3",
+                  ERSE3 = "ERSI3",
                   SOL = "SOMU", #solidago multiradiata
                   PrAu = "2FORB",
                   DEADKO = "2LTR",
@@ -319,7 +320,6 @@ correctdf$clean_code2[correctdf$code == "MINBIF/OBTBIF/LIDOBT"] <- jgslist$USDA_
 correctdf$clean_code2[grepl("^Orep|LEWPYG/OREPYG", correctdf$code, ignore.case = T)] <- jgslist$USDA_code[jgslist$corrected_NWT_code == "LEWPYG" & !is.na(jgslist$corrected_NWT_code)]
 correctdf$clean_code2[correctdf$code %in% c("THLMON/NOCMON", "PHLMON")] <- jgslist$USDA_code[jgslist$corrected_NWT_code == "NOCMON" & !is.na(jgslist$corrected_NWT_code)]
 
-
 # make everything else an unk forb (only GRDAZ, which TS says is unknown, and and LL???? left)
 correctdf$clean_code2[is.na(correctdf$clean_code2)] <- "2FORB"
 
@@ -327,6 +327,10 @@ correctdf$clean_code2[is.na(correctdf$clean_code2)] <- "2FORB"
 for(i in correctdf$code){
   spplist_master$clean_code2[spplist_master$code == i] <- correctdf$clean_code2[correctdf$code == i]
 }
+
+# check usda codes against codes in jgs spp list to be sure nothing in there that shouldn't be in there (e.g. ERSE6, should be ERSI6 [ctw learned after data analysis])
+codes2check <- sort(unique(spplist_master$clean_code2[!grepl("^2|No ", spplist_master$clean_code2)]))
+codes2check[!codes2check %in% jgslist$USDA_code]
 
 # check to make sure no missing usda codes
 summary(is.na(spplist_master$clean_code2)) # none. huzzah!
@@ -464,6 +468,10 @@ spplist_master$simple_name <- gsub(" L$", " sp.", spplist_master$simple_name)
 
 #reorganize cols
 spplist_master <- dplyr::select(spplist_master, code:unknown, simple_name, Symbol:ncol(spplist_master))
+
+# as final check, compare usda codes against jgs usda codes
+unique(spplist_master$clean_code2[!spplist_master$clean_code2 %in% jgslist$USDA_code])
+# these all check out, differ from jane's in code bc jane might have spp id'd to subspecies whereas these codes are more generic (to species but not subspecies)
 
 
 
