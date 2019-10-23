@@ -1,81 +1,81 @@
 trt,meadow,snow,plot,old_plot,replace_tag_2002
-C,dry,no snow,1,710,490
-C,dry,no snow,2,712,497
-C,dry,no snow,3,709,494
-C,dry,no snow,4,711,499
-N,dry,no snow,5,262,488
-N,dry,no snow,6,409,489
-N,dry,no snow,7,292,486
-N,dry,no snow,8,99,493
-N+P,dry,no snow,9,408,487
-N+P,dry,no snow,10,290,495
-N+P,dry,no snow,11,410,492
-N+P,dry,no snow,12,261,498
-P,dry,no snow,13,411,496
-P,dry,no snow,14,287,491
-P,dry,no snow,15,289,500
-P,dry,no snow,16,407,485
-C,mesic,no snow,17,870,NA
-C,mesic,no snow,18,268,NA
-C,mesic,no snow,19,267,NA
-C,mesic,no snow,20,266,NA
-N,mesic,no snow,21,294,NA
-N,mesic,no snow,22,295,NA
-N,mesic,no snow,23,279,NA
-N,mesic,no snow,24,264,NA
-N+P,mesic,no snow,25,298,NA
-N+P,mesic,no snow,26,281,NA
-N+P,mesic,no snow,27,403,NA
-N+P,mesic,no snow,28,293,NA
-P,mesic,no snow,29,397,NA
-P,mesic,no snow,30,83,NA
-P,mesic,no snow,31,280,NA
-P,mesic,no snow,32,406,NA
-C,wet,snowfield,33,395,NA
-C,wet,snowfield,34,394,NA
-C,wet,snowfield,35,389,NA
-C,wet,snowfield,36,396,NA
-N,wet,snowfield,37,269,NA
-N,wet,snowfield,38,297,NA
-N,wet,snowfield,39,278,NA
-N,wet,snowfield,40,299,NA
-N+P,wet,snowfield,41,393,NA
-N+P,wet,snowfield,42,274,NA
-N+P,wet,snowfield,43,392,NA
-N+P,wet,snowfield,44,272,NA
-P,wet,snowfield,45,270,NA
-P,wet,snowfield,46,275,NA
-P,wet,snowfield,47,277,NA
-P,wet,snowfield,48,276,NA
-C,dry,snow,49,888,NA
-C,dry,snow,50,889,NA
-C,dry,snow,51,890,NA
-C,dry,snow,52,891,NA
-N,dry,snow,53,417,NA
-N,dry,snow,54,415,NA
-N,dry,snow,55,864,NA
-N,dry,snow,56,413,NA
-N+P,dry,snow,57,868,NA
-N+P,dry,snow,58,894,NA
-N+P,dry,snow,59,866,NA
-N+P,dry,snow,60,869,NA
-P,dry,snow,61,400,NA
-P,dry,snow,62,416,NA
-P,dry,snow,63,414,NA
-P,dry,snow,64,412,NA
-C,mesic,snow,65,885,NA
-C,mesic,snow,66,883,NA
-C,mesic,snow,67,882,NA
-C,mesic,snow,68,887,NA
-N,mesic,snow,69,875,NA
-N,mesic,snow,70,884,NA
-N,mesic,snow,71,419,NA
-N,mesic,snow,72,880,NA
-N+P,mesic,snow,73,877,NA
-N+P,mesic,snow,74,873,NA
-N+P,mesic,snow,75,871,NA
-N+P,mesic,snow,76,886,NA
-P,mesic,snow,77,420,NA
-P,mesic,snow,78,418,NA
-P,mesic,snow,79,872,NA
-P,mesic,snow,80,881,NA
+CC,Dry,no snow,1,710,490
+CC,Dry,no snow,2,712,497
+CC,Dry,no snow,3,709,494
+CC,Dry,no snow,4,711,499
+NN,Dry,no snow,5,262,488
+NN,Dry,no snow,6,409,489
+NN,Dry,no snow,7,292,486
+NN,Dry,no snow,8,99,493
+NP,Dry,no snow,9,408,487
+NP,Dry,no snow,10,290,495
+NP,Dry,no snow,11,410,492
+NP,Dry,no snow,12,261,498
+PP,Dry,no snow,13,411,496
+PP,Dry,no snow,14,287,491
+PP,Dry,no snow,15,289,500
+PP,Dry,no snow,16,407,485
+CC,Mesic,no snow,17,870,NA
+CC,Mesic,no snow,18,268,NA
+CC,Mesic,no snow,19,267,NA
+CC,Mesic,no snow,20,266,NA
+NN,Mesic,no snow,21,294,NA
+NN,Mesic,no snow,22,295,NA
+NN,Mesic,no snow,23,279,NA
+NN,Mesic,no snow,24,264,NA
+NP,Mesic,no snow,25,298,NA
+NP,Mesic,no snow,26,281,NA
+NP,Mesic,no snow,27,403,NA
+NP,Mesic,no snow,28,293,NA
+PP,Mesic,no snow,29,397,NA
+PP,Mesic,no snow,30,83,NA
+PP,Mesic,no snow,31,280,NA
+PP,Mesic,no snow,32,406,NA
+CC,Wet,snowfield,33,395,NA
+CC,Wet,snowfield,34,394,NA
+CC,Wet,snowfield,35,389,NA
+CC,Wet,snowfield,36,396,NA
+NN,Wet,snowfield,37,269,NA
+NN,Wet,snowfield,38,297,NA
+NN,Wet,snowfield,39,278,NA
+NN,Wet,snowfield,40,299,NA
+NP,Wet,snowfield,41,393,NA
+NP,Wet,snowfield,42,274,NA
+NP,Wet,snowfield,43,392,NA
+NP,Wet,snowfield,44,272,NA
+PP,Wet,snowfield,45,270,NA
+PP,Wet,snowfield,46,275,NA
+PP,Wet,snowfield,47,277,NA
+PP,Wet,snowfield,48,276,NA
+CC,Dry,snow,49,888,NA
+CC,Dry,snow,50,889,NA
+CC,Dry,snow,51,890,NA
+CC,Dry,snow,52,891,NA
+NN,Dry,snow,53,417,NA
+NN,Dry,snow,54,415,NA
+NN,Dry,snow,55,864,NA
+NN,Dry,snow,56,413,NA
+NP,Dry,snow,57,868,NA
+NP,Dry,snow,58,894,NA
+NP,Dry,snow,59,866,NA
+NP,Dry,snow,60,869,NA
+PP,Dry,snow,61,400,NA
+PP,Dry,snow,62,416,NA
+PP,Dry,snow,63,414,NA
+PP,Dry,snow,64,412,NA
+CC,Mesic,snow,65,885,NA
+CC,Mesic,snow,66,883,NA
+CC,Mesic,snow,67,882,NA
+CC,Mesic,snow,68,887,NA
+NN,Mesic,snow,69,875,NA
+NN,Mesic,snow,70,884,NA
+NN,Mesic,snow,71,419,NA
+NN,Mesic,snow,72,880,NA
+NP,Mesic,snow,73,877,NA
+NP,Mesic,snow,74,873,NA
+NP,Mesic,snow,75,871,NA
+NP,Mesic,snow,76,886,NA
+PP,Mesic,snow,77,420,NA
+PP,Mesic,snow,78,418,NA
+PP,Mesic,snow,79,872,NA
+PP,Mesic,snow,80,881,NA

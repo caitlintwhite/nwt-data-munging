@@ -1,89 +1,89 @@
-plot,old_plot97LT,old_plot16,plot_ne_tag_PDF,plot_sw_tag_PDF,trt,meadow,snow,snow_notes
-1,710,490,490,710,C,dry,no snow,never affected
-2,712,497,497,712,C,dry,no snow,never affected
-3,709,494,494,709,C,dry,no snow,never affected
-4,711,499,499,711,C,dry,no snow,never affected
-5,262,488,488,262,N,dry,no snow,never affected
-6,291,498,489,870,N,dry,no snow,never affected
-7,292,486,486,292,N,dry,no snow,never affected
-8,99,493,493,99,N,dry,no snow,never affected
-9,263,408,408,487,N+P,dry,no snow,never affected
-10,290,495,495,290,N+P,dry,no snow,never affected
-11,300,492,492,869,N+P,dry,no snow,never affected
-12,261,498,498,261,N+P,dry,no snow,never affected
-13,285,496,496,411,P,dry,no snow,never affected
-14,287,287,NA,287,P,dry,no snow,never affected
-15,289,500,500,289,P,dry,no snow,never affected
-16,296,296,485,296,P,dry,no snow,never affected
-17,NA,872,872,870,C,mesic,no snow,never affected
-18,NA,437,437,436,C,mesic,no snow,never affected
-19,NA,444,NA,444,C,mesic,no snow,never affected
-20,NA,445,NA,445,C,mesic,no snow,never affected
-21,NA,440,440,294,N,mesic,no snow,never affected
-22,NA,448,448,295,N,mesic,no snow,never affected
-23,NA,NA,NA,279,N,mesic,no snow,never affected
-24,NA,452,452,877,N,mesic,no snow,never affected
-25,NA,442,442,298,N+P,mesic,no snow,never affected
-26,NA,439,439,281,N+P,mesic,no snow,never affected
-27,NA,450,450,403,N+P,mesic,no snow,never affected
-28,NA,220,220,210,N+P,mesic,no snow,never affected
-29,NA,876,876,875,P,mesic,no snow,never affected
-30,NA,441,441,871,P,mesic,no snow,never affected
-31,NA,449,449,280,P,mesic,no snow,never affected
-32,NA,451,451,406,P,mesic,no snow,never affected
-33,NA,NA,434,395,C,snowbed,snow,NA
-34,NA,NA,428,394,C,snowbed,snow,NA
-35,NA,NA,423,389,C,snowbed,snow,NA
-36,NA,NA,421,396,C,snowbed,snow,NA
-37,NA,NA,433,240,N,snowbed,snow,NA
-38,NA,NA,425,297,N,snowbed,snow,NA
-39,NA,NA,422,278,N,snowbed,snow,NA
-40,NA,NA,390,299,N,snowbed,snow,NA
-41,NA,NA,427,393,N+P,snowbed,snow,NA
-42,NA,NA,429,274,N+P,snowbed,snow,NA
-43,NA,NA,431,392,N+P,snowbed,snow,NA
-44,NA,NA,391,272,N+P,snowbed,snow,NA
-45,NA,NA,432,270,P,snowbed,snow,NA
-46,NA,NA,430,275,P,snowbed,snow,NA
-47,NA,NA,426,277,P,snowbed,snow,NA
-48,NA,NA,424,276,P,snowbed,snow,NA
-49,NA,458,458,NA,C,dry,snow,in snowfence area
-50,NA,451,459,30.11,C,dry,snow,in snowfence area
-51,NA,460,460,NA,C,dry,snow,in snowfence area
-52,NA,457,457,891,C,dry,snow,in snowfence area
-53,NA,465,465,899,N,dry,snow,in snowfence area
-54,NA,464,464,415,N,dry,snow,in snowfence area
-55,NA,472,472,864,N,dry,snow,in snowfence area
-56,NA,455,455,NA,N,dry,snow,in snowfence area
-57,NA,466,466,NA,N+P,dry,snow,in snowfence area
-58,NA,461,461,894,N+P,dry,snow,in snowfence area
-59,NA,456,456,866,N+P,dry,snow,in snowfence area
-60,NA,454,454,869,N+P,dry,snow,in snowfence area
-61,NA,467,467,NA,P,dry,snow,in snowfence area
-62,NA,462,412,416,P,dry,snow,snowfence recovery
-63,NA,463,463,414,P,dry,snow,snowfence recovery
-64,NA,453,453,412,P,dry,snow,snowfence recovery
-65,NA,476,476,900,C,mesic,snow,in snowfence area
-66,NA,474,474,398,C,mesic,snow,in snowfence area
-67,NA,882,NA,882,C,mesic,snow,in snowfence area
-68,NA,473,473,NA,C,mesic,snow,in snowfence area
-69,NA,878,878,NA,N,mesic,snow,snowfence recovery
-70,NA,484,484,884,N,mesic,snow,in snowfence area
-71,NA,483,483,419,N,mesic,snow,in snowfence area
-72,NA,470,470,880,N,mesic,snow,in snowfence area
-73,NA,471,471,879,N+P,mesic,snow,in snowfence area
-74,NA,481,481,873,N+P,mesic,snow,snowfence recovery
-75,NA,871,NA,871,N+P,mesic,snow,snowfence recovery
-76,NA,468,468,NA,N+P,mesic,snow,snowfence recovery
-77,NA,478,478,420,P,mesic,snow,snowfence recovery
-78,NA,482,482,418,P,mesic,snow,snowfence recovery
-79,NA,480,480,NA,P,mesic,snow,snowfence recovery
-80,NA,469,469,881,P,mesic,snow,in snowfence area
-81,NA,97,NA,NA,C,mesic,snow,snowfence recovery
-82,NA,98,NA,NA,C,mesic,snow,snowfence recovery
-83,NA,99,NA,NA,C,mesic,snow,snowfence recovery
-84,NA,100,NA,NA,C,dry,snow,snowfence recovery
-85,NA,228,NA,NA,C,dry,snow,snowfence recovery
-86,NA,874,NA,NA,C,dry,snow,snowfence recovery
-NA,286,NA,NA,NA,N,dry,snow,NA
-29.5,NA,NA,435,397,P,mesic,no snow,never affected
+plot,trt,meadow,snow,snow_notes,plot_sw_tag_PDF,plot_ne_tag_PDF,metadata_edi138,x,ymin,ymax,old_plot_edi138,old_plot96,old_plot97LT,replace_tag_2002_edi138,plot_2003,jgs_plot,jgs_plot_num1,jgs_plot_num2,jgs_plot_num3,jgs_plot_num4,old_plot16
+1,C,dry,no snow,never affected,710,490,"70, 44-42 (1, 710, 490+)",70,44,42,710,710,710,490,710,"710, 490 (CC)",710,490,NA,NA,490
+2,C,dry,no snow,never affected,712,497,"72, 16-18 (2, 712, 497+)",72,16,18,712,712,712,497,712,"712, 497 (CC)",712,497,NA,NA,497
+3,C,dry,no snow,never affected,709,494,"77, 25-27 (3, 709, 494+)",77,25,27,709,709,709,494,709,"709, 494 (CC)",709,494,NA,NA,494
+4,C,dry,no snow,never affected,711,499,"78, 15-18 (4, 711, 499+)",78,15,18,711,711,711,499,711,"711, 499 (CC)",711,499,NA,NA,499
+5,N,dry,no snow,never affected,262,488,"67, 50-52 (5, 262, 488+)",67,50,52,262,262,262,488,262,"262, 488 (NN)",262,488,NA,NA,488
+6,N,dry,no snow,never affected,870,489,"73, 45-47 (6, 409, 489+)",73,45,47,409,409,291,489,409,"409, 489 (NN)",409,489,NA,NA,498
+7,N,dry,no snow,never affected,292,486,"73, 54-56 (7, 292, 486+)",73,54,56,292,292,292,486,292,"292, 486 (NN)",292,486,NA,NA,486
+8,N,dry,no snow,never affected,99,493,"80, 29-31 (8, 099, 493+)",80,29,31,99,99,99,493,99,"099, 493 (NN)",99,493,NA,NA,493
+9,N+P,dry,no snow,never affected,487,408,"67, 53-55 (9, 408, 487+)",67,53,55,408,408,263,487,408,"408, 487 (NP)",408,487,NA,NA,408
+10,N+P,dry,no snow,never affected,290,495,"75, 18-19 (10, 290, 495+)",75,18,19,290,290,290,495,290,"290, 495 (NP)",290,495,NA,NA,495
+11,N+P,dry,no snow,never affected,869,492,"75, 30-32 (11, 410, 492+)",75,30,32,410,410,300,492,410,"410, 492 (NP)",410,492,NA,NA,492
+12,N+P,dry,no snow,never affected,261,498,"78, 18-20 (12, 261, 498+)",78,18,20,261,261,261,498,261,"261, 498 (NP)",261,498,NA,NA,498
+13,P,dry,no snow,never affected,411,496,"75, 16-18 (13, 411, 496+)",75,16,18,411,411,285,496,411,"411, 496 (PP)",411,496,NA,NA,496
+14,P,dry,no snow,never affected,287,NA,"75, 33-35 (14, 287, 491+)",75,33,35,287,287,287,491,287,"287, 491 (PP)",287,491,NA,NA,287
+15,P,dry,no snow,never affected,289,500,"77, 2-4 (15, 289, 500+)",77,2,4,289,289,289,500,289,"289, 500 (PP)",289,500,NA,NA,500
+16,P,dry,no snow,never affected,296,485,"80, 26-28 (16, 407, 485+)",80,26,28,407,407,296,485,296,"296, 485 (PP)",296,485,NA,NA,296
+17,C,mesic,no snow,never affected,870,872,"0, 89-91 (17, 870)",0,89,91,870,XX1,NA,NA,870,"870, 230 (CC)",870,230,NA,NA,872
+18,C,mesic,no snow,never affected,436,437,"8, 64-66 (18, 268)",8,64,66,268,268,NA,NA,436,"268, 436, 437 (CC)",268,436,437,NA,437
+19,C,mesic,no snow,never affected,444,NA,"10, 82-84 (19, 267)",10,82,84,267,267,NA,NA,267,"267, 444 (CC)",267,444,NA,NA,444
+20,C,mesic,no snow,never affected,445,NA,"15, 82-84 (20, 266)",15,82,84,266,266,NA,NA,266,"266, 445 (CC)",266,445,NA,NA,445
+21,N,mesic,no snow,never affected,294,440,"5, 72-74 (21, 294)",5,72,74,294,294,NA,NA,294,"294, 440 (NN)",294,440,NA,NA,440
+22,N,mesic,no snow,never affected,295,448,"10, 73-75 (22, 295)",10,73,75,295,295,NA,NA,295,"295, 448 (NN)",295,448,NA,NA,448
+23,N,mesic,no snow,never affected,279,NA,"15, 84-86 (23, 279)",15,84,86,279,279,NA,NA,279,279 (NN),279,NA,NA,NA,NA
+24,N,mesic,no snow,never affected,877,452,"32, 64-66 (24, 264)",32,64,66,264,264,NA,NA,264,"264, 452 (NN)",264,452,NA,NA,452
+25,N+P,mesic,no snow,never affected,298,442,"0, 76-78 (25, 298)",0,76,78,298,298,NA,NA,298,"298, 442 (NP)",298,442,NA,NA,442
+26,N+P,mesic,no snow,never affected,281,439,"8, 70-72 (26, 281)",8,70,72,281,281,NA,NA,281,"281, 439 (NP)",281,439,NA,NA,439
+27,N+P,mesic,no snow,never affected,403,450,"10, 65-67 (27, 403)",10,65,67,403,403,NA,NA,403,"403, 450 (NP)",403,450,NA,NA,450
+28,N+P,mesic,no snow,never affected,210,220,"10, 78-80 (28, 293)",10,78,80,293,293,NA,NA,293,"293, 404, 210, 220 (NP)",293,404,210,220,220
+29,P,mesic,no snow,never affected,875,876,"0, 65-67 (29, 397)",0,65,67,397,XX2,NA,NA,435,"397, 435, 438 (PP)",397,435,438,NA,876
+29.5,P,mesic,no snow,never affected,397,435,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+30,P,mesic,no snow,never affected,871,441,"0, 73-75 (30, 083)",0,73,75,83,283,NA,NA,283,"283, 441 (PP)",283,441,NA,NA,441
+31,P,mesic,no snow,never affected,280,449,"15, 73-75 (31, 280)",15,73,75,280,280,NA,NA,280,"280, 449 (PP)",280,449,NA,NA,449
+32,P,mesic,no snow,never affected,406,451,"17, 69-71 (32, 406)",17,69,71,406,406,NA,NA,406,"406, 451 (PP)",406,451,NA,NA,451
+33,C,wet,snow,in snowfield,395,434,NA,NA,NA,NA,395,395,NA,NA,395,NA,NA,NA,NA,NA,NA
+34,C,wet,snow,in snowfield,394,428,NA,NA,NA,NA,394,394,NA,NA,394,NA,NA,NA,NA,NA,NA
+35,C,wet,snow,in snowfield,389,423,NA,NA,NA,NA,389,389,NA,NA,389,NA,NA,NA,NA,NA,NA
+36,C,wet,snow,in snowfield,396,421,NA,NA,NA,NA,396,396,NA,NA,396,NA,NA,NA,NA,NA,NA
+37,N,wet,snow,in snowfield,240,433,NA,NA,NA,NA,269,269,NA,NA,269,NA,NA,NA,NA,NA,NA
+38,N,wet,snow,in snowfield,297,425,NA,NA,NA,NA,297,297,NA,NA,297,NA,NA,NA,NA,NA,NA
+39,N,wet,snow,in snowfield,278,422,NA,NA,NA,NA,278,278,NA,NA,278,NA,NA,NA,NA,NA,NA
+40,N,wet,snow,in snowfield,299,390,NA,NA,NA,NA,299,299,NA,NA,299,NA,NA,NA,NA,NA,NA
+41,N+P,wet,snow,in snowfield,393,427,NA,NA,NA,NA,393,393,NA,NA,393,NA,NA,NA,NA,NA,NA
+42,N+P,wet,snow,in snowfield,274,429,NA,NA,NA,NA,274,274,NA,NA,274,NA,NA,NA,NA,NA,NA
+43,N+P,wet,snow,in snowfield,392,431,NA,NA,NA,NA,392,392,NA,NA,392,NA,NA,NA,NA,NA,NA
+44,N+P,wet,snow,in snowfield,272,391,NA,NA,NA,NA,272,272,NA,NA,272,NA,NA,NA,NA,NA,NA
+45,P,wet,snow,in snowfield,270,432,NA,NA,NA,NA,270,270,NA,NA,270,NA,NA,NA,NA,NA,NA
+46,P,wet,snow,in snowfield,275,430,NA,NA,NA,NA,275,275,NA,NA,275,NA,NA,NA,NA,NA,NA
+47,P,wet,snow,in snowfield,277,426,NA,NA,NA,NA,277,277,NA,NA,277,NA,NA,NA,NA,NA,NA
+48,P,wet,snow,in snowfield,276,424,NA,NA,NA,NA,276,276,NA,NA,276,NA,NA,NA,NA,NA,NA
+49,C,dry,snow,in snowfence area,NA,458,"25, 11-13 (49, 888)",25,11,13,888,888,NA,NA,888,"888, 458 (CC)",888,458,NA,NA,458
+50,C,dry,snow,in snowfence area,30.11,459,"30, 11-13 (50, 889)",30,11,13,889,889,NA,NA,889,"889, 459 (CC)",889,459,NA,NA,451
+51,C,dry,snow,in snowfence area,NA,460,"30, 15-17 (51, 890)",30,15,17,890,890,NA,NA,890,"890, 460 (CC)",890,460,NA,NA,460
+52,C,dry,snow,in snowfence area,891,457,"40, 19-21 (52, 891)",40,19,21,891,891,NA,NA,891,"891, 457 (CC)",891,457,NA,NA,457
+53,N,dry,snow,in snowfence area,899,465,"20, 31-32 (53, 417)",20,31,32,417,417,NA,NA,417,"417, 863, 465 (NN)",417,863,465,NA,465
+54,N,dry,snow,in snowfence area,415,464,"25, 33-34 (54, 415)",25,33,34,415,415,NA,NA,415,"415, 464 (NN)",415,464,NA,NA,464
+55,N,dry,snow,in snowfence area,864,472,"40, 8-10 (55, 864)",40,8,10,864,864,NA,NA,864,"864, 472 (NN)",864,472,NA,NA,472
+56,N,dry,snow,in snowfence area,NA,455,"45, 17-19 (56, 413)",45,17,19,413,413,NA,NA,413,"413, 455 (NN)",413,455,NA,NA,455
+57,N+P,dry,snow,in snowfence area,NA,466,"25, 17-19 (57, 868)",25,17,19,868,868,NA,NA,868,"868, 466 (NP)",868,466,NA,NA,466
+58,N+P,dry,snow,in snowfence area,894,461,"30, 19-20 (58, 894)",30,19,20,894,894,NA,NA,894,"894, 461 (NP)",894,461,NA,NA,461
+59,N+P,dry,snow,in snowfence area,866,456,"45, 7.5-8.5 (59, 866)",45,7.5,8.5,866,866,NA,NA,866,"866, 456 (NP)",866,456,NA,NA,456
+60,N+P,dry,snow,in snowfence area,869,454,"45, 27-29 (60, 869)",45,27,29,869,869,NA,NA,869,"869, 454 (NP)",869,454,NA,NA,454
+61,P,dry,snow,in snowfence area,NA,467,"10, 25-27 (61, 400)",10,25,27,400,400,NA,NA,400,"400, 467 (PP)",400,467,NA,NA,467
+62,P,dry,snow,snowfence recovery,416,412,"20, 46.5-48.5 (62, 416)",20,46.5,48.5,416,416,NA,NA,416,"416, 462 (PP)",416,462,NA,NA,462
+63,P,dry,snow,snowfence recovery,414,463,"25, 40-41 (63, 414)",25,40,41,414,414,NA,NA,414,"414, 463, 399 (PP)",414,463,399,NA,463
+64,P,dry,snow,snowfence recovery,412,453,"45, 50-52 (64, 412)",45,50,52,412,412,NA,NA,412,"412, 453 (PP)",412,453,NA,NA,453
+65,C,mesic,snow,in snowfence area,900,476,"5, 21-23 (65, 885)",5,21,23,885,885,NA,NA,885,"885, 476 (CC)",885,476,NA,NA,476
+66,C,mesic,snow,in snowfence area,398,474,"15, 16-18 (66, 883)",15,16,18,883,883,NA,NA,883,"883, 474 (CC)",883,474,NA,NA,474
+67,C,mesic,snow,in snowfence area,882,NA,"15, 22-23 (67, 882)",15,22,23,882,882,NA,NA,882,"882, 475 (CC)",882,475,NA,NA,882
+68,C,mesic,snow,in snowfence area,NA,473,"38, 11-13 (68, 887)",38,11,13,887,887,NA,NA,887,"887, 473 (CC)",887,473,NA,NA,473
+69,N,mesic,snow,snowfence recovery,NA,878,"5, 38-40 (69, 875)",5,38,40,875,875,NA,NA,875,875 (NN),875,NA,NA,NA,878
+70,N,mesic,snow,in snowfence area,884,484,"10, 14-16 (70, 884)",10,14,16,884,884,NA,NA,884,"884, 484 (NN)",884,484,NA,NA,484
+71,N,mesic,snow,in snowfence area,419,483,"10, 33-35 (71, 419)",10,33,35,419,419,NA,NA,419,"419, 483 (NN)",419,483,NA,NA,483
+72,N,mesic,snow,in snowfence area,880,470,"15, 28-30 (72, 880)",15,28,30,880,880,NA,NA,880,"880, 470 (NN)",880,470,NA,NA,470
+73,N+P,mesic,snow,in snowfence area,879,471,"5, 29.5-31.5 (73, 877)",5,29.5,31.5,877,877,NA,NA,877,"877, 471 (NP)",877,471,NA,NA,471
+74,N+P,mesic,snow,snowfence recovery,873,481,"10, 45.5-47.5 (74, 873)",10,45.5,47.5,873,873,NA,NA,873,"873, 481 (NP)",873,481,NA,NA,481
+75,N+P,mesic,snow,snowfence recovery,871,NA,"15, 51-53 (75, 871)",15,51,53,871,871,NA,NA,871,871 (NP),871,NA,NA,NA,871
+76,N+P,mesic,snow,snowfence recovery,NA,468,"25, 9-10 (76, 886)",25,9,10,886,886,NA,NA,886,"886, 468 (NP)",886,468,NA,NA,468
+77,P,mesic,snow,snowfence recovery,420,478,"5, 35-37 (77, 420)",5,35,37,420,420,NA,NA,420,"420, 478 (PP)",420,478,NA,NA,478
+78,P,mesic,snow,snowfence recovery,418,482,"10, 43.5-45.5 (78, 418)",10,43.5,45.5,418,418,NA,NA,418,"418, 482 (PP)",418,482,NA,NA,482
+79,P,mesic,snow,snowfence recovery,NA,480,"10, 53-55 (79, 872)",10,53,55,872,872,NA,NA,872,"872, 480 (PP)",872,480,NA,NA,480
+80,P,mesic,snow,in snowfence area,881,469,"20, 21-23 (80, 881)",20,21,23,881,881,NA,NA,881,"881, 469 (PP)",881,469,NA,NA,469
+81,C,mesic,snow,snowfence recovery,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,97
+82,C,mesic,snow,snowfence recovery,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,98
+83,C,mesic,snow,snowfence recovery,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,99
+84,C,dry,snow,snowfence recovery,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,100
+85,C,dry,snow,snowfence recovery,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,228
+86,C,dry,snow,snowfence recovery,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,874
+NA,N,dry,snow,NA,NA,NA,NA,NA,NA,NA,NA,NA,286,NA,NA,NA,NA,NA,NA,NA,NA

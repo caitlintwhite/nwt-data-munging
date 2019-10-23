@@ -103,22 +103,32 @@ for(i in 1:length(jgs_richness_sheets)){
   names(jgs_rich)[i] <- jgs_richness_sheets[i]
 }  
 
+# text metadata for 1996/97 ANPP + richness sdl dataset
+metadat96 <- readLines("http://nwt.colorado.edu/meta_data/saddferb.ts.meta.txt")
+
+
 
 
 # -- REVIEW DATA -----
 # nutnet
 glimpse(nutnet13) # wide form, hits
+glimpse(nn13_sce) # date is a character
 glimpse(nutnet17) # long-form, summarized (rel and abs cov)
-glimpse(nutnet17raw) # long form, raw hits at each grid pt (need to be summed to plot level)
-glimpse(nn17_b3p7) # same as nutnet17_raw
+glimpse(nutnet17raw) # long form, raw hits at each grid pt (need to be summed to plot level), date as string, no dashes
+glimpse(nn17_b3p7) # same as nutnet17_raw, date as string, no dashes
 glimpse(sdlS97) # need to correct cols to numeric
 # checks to see which cols are truly all numeric
 sapply(sdlS97, function(x)sort(unique(x))) # plot has XX1 and XX2
 sdlS97 <- mutate_at(sdlS97, vars(colnames(sdlS97)[!grepl("plot|trt|loc", colnames(sdlS97))]), as.numeric) %>%
   arrange(yr, trt, loc, plot)
 
+# correct nn13sce and nn17 dates
+nn13_sce$Date <- as.Date(nn13_sce$Date)
+nutnet17raw <- mutate(nutnet17raw, date = as.Date(paste(substr(date,1,1), substr(date,2,3), "2017", sep = "-"), format = "%m-%d-%Y"))
+nn17_b3p7 <- mutate(nn17_b3p7, date = as.Date(paste(substr(date,1,1), substr(date,2,3), "2017", sep = "-"), format = "%m-%d-%Y"))
+
 # sdl
-glimpse(sdl1997) # date read in as integer, long form total hits
+glimpse(sdl1997) # date read in as numeric string (format is yymmdd), long form total hits
 glimpse(sdl2012) # no date, total hits, long form
 glimpse(sdl2016) # no hits, just presence (spp noted at grid point) -- only top hits
 glimpse(sdl12sce) # includes presence for richness!.. lots of unknowns too
@@ -127,7 +137,8 @@ glimpse(sffert_info)
 glimpse(jgs_cover)
 glimpse(jgs_rich) # date is in second row, 5 sheets total
 
-
+# correct 1997 date
+sdl1997 <- mutate(sdl1997, date = as.Date(paste(substr(date,3,4), substr(date,5,6), "1997", sep = "-"), format = "%m-%d-%Y"))
 
 # note: nmds must be reduced to top hit only if comparing trends in all so it's a fair comparison
 # to be sure, what is sum of total hits in each plot, per dataset?
@@ -184,10 +195,17 @@ nn13_tidy <- nutnet13 %>%
   dplyr::select(yr, plotID, Block:trt, nutnet_code, clean_code2, hits) %>%
   grouped_df(colnames(.)[1:10]) %>%
   summarise(hits = sum(hits)) %>%
+  ungroup() %>%
+  # bring in date (strip B from block to join)
+  mutate(Block = parse_number(Block)) %>%
+  left_join(distinct(nn13_sce[c("Date", "Block", "Plot")])) %>%
   arrange(Block, Plot, clean_code2) %>%
+  # add B back to block
+  mutate(Block = paste0("B", Block)) %>%
   # lower case all colnames
   rename_all(~ casefold(.)) %>%
-  ungroup() %>%
+  #reorder cols
+  dplyr::select(yr, date, plotid:hits) %>%
   data.frame()
 
 # build nutnet plot lookup table
@@ -243,7 +261,7 @@ nn17_tidy <- nn17_tidy %>%
   # add in nutnet_code to preserve distinct unks (there is only unk1 and 2FORB in 2017 entered data.. will assume they are different)
   mutate(nutnet_code = ifelse(species == "unk1", "UNK1", clean_code2)) %>%
   dplyr::select(colnames(nn13_tidy)) %>%
-  grouped_df(colnames(.)[1:10]) %>%
+  grouped_df(colnames(.)[!names(.) == "hits"]) %>%
   summarise(hits = sum(hits)) %>%
   ungroup() %>%
   arrange(block, plot, clean_code2)
@@ -338,8 +356,8 @@ sdl_plots <- full_join(sdl_plots, sffert_info, by = c("plot" = "plot_num_tag")) 
                 snow97LT:notes16.2, snowfence_PDF,
                 trt97LT, trt97, fert12TS, trt16, fert16.2, ferttrt_PDF) # PDF meadow data are the best ones, and match up with 2016 data (tim-dbl check plot data also alighn with 2016), 2012 bad data entry
 
-# write out for tim to review
-write_csv(sdl_plots, "alpine_addnuts/output_data/sdl_plots_lookup_trblshoot.csv")
+# write out for tim to review -- [resolved oct 2019]
+# write_csv(sdl_plots, "alpine_addnuts/output_data/sdl_plots_lookup_trblshoot.csv")
 
 
 # after manually checking data, don't trust sdl12 and sdl16 trt info from TS (16.2 okay, 16 not, is inconsistent with PDF)
@@ -350,10 +368,21 @@ write_csv(sdl_plots, "alpine_addnuts/output_data/sdl_plots_lookup_trblshoot.csv"
 sdl_plots2 <- left_join(sdl_plots, sdl97_plotinfo, by = "plot") %>%
   #append source colname
   rename_at(vars(colnames(sdl97_plotinfo)[!names(sdl97_plotinfo) == "plot"]), function(x) paste0(x, "_edi138"))
+
+# prep 96 plots to add in
+sdl96_sites <- distinct(sdlS97[sdlS97$yr == 1996, c("plot", "loc", "trt")]) %>%
+  rename_all(function(x) paste0(x, "96")) %>%
+  # add col to translate plot nums to 97 codes per metadata (all same except XX plots)
+  # also correct typo for plot 283 (should be 083 per metadata and sdl03 info)
+  mutate(plot97 = recode(plot96, XX1 = "870", XX2 = "397", `283` = "83"))
+
+# append 1996 plot codes to master site lookup
+sdl_plots2 <- merge(sdl_plots2, sdl96_sites, by.x = as.character("old_plot_edi138"), by.y = "plot97", all = T)
+  
 # how well does 97 metadata match other cols?
-split(sdl_plots2[colnames(sdl_plots2)[grepl("meadow", colnames(sdl_plots2)) & !grepl("138", colnames(sdl_plots2))]], sdl_plots2$meadow_edi138) # all same, wet = snowbed = moist
+split(sdl_plots2[colnames(sdl_plots2)[grepl("meadow|loc", colnames(sdl_plots2)) & !grepl("138", colnames(sdl_plots2))]], sdl_plots2$meadow_edi138) # all same, wet = snowbed = moist
 split(sdl_plots2[colnames(sdl_plots2)[grepl("trt", colnames(sdl_plots2)) & !grepl("138", colnames(sdl_plots2))]], sdl_plots2$trt_edi138) # all same
-split(sdl_plots2[colnames(sdl_plots2)[grepl("snow", colnames(sdl_plots2)) & !grepl("138", colnames(sdl_plots2))]], sdl_plots2$snow_edi138) # same except for sdl12 data, but don't trust that source anyway
+split(sdl_plots2[colnames(sdl_plots2)[grepl("snow|loc", colnames(sdl_plots2)) & !grepl("138", colnames(sdl_plots2))]], sdl_plots2$snow_edi138) # same except for sdl12 data, but don't trust that source anyway
 
 # clean up
 # select plot and treatment from sdl (choose edi meta, then, pdf data, then sdl 16.2 bc that is most recent info from TS)
@@ -361,6 +390,7 @@ sdl_plots2 <- sdl_plots2 %>%
   mutate(trt = ifelse(is.na(trt_edi138), ferttrt_PDF, trt_edi138),
          trt = ifelse(is.na(trt), fert16.2, trt),
          trt = ifelse(is.na(trt), trt97, trt),
+         #trt = ifelse(is.na(trt), trt96, trt),
          trt = recode(trt, "NN" = "N", "CC" = "C", "CONTROL" = "C",
                       "PP" = "P", "NP" = "N+P"),
          snow = ifelse(is.na(snow_edi138), snowfence_PDF, snow_edi138),
@@ -377,15 +407,18 @@ sdl_plots2 <- sdl_plots2 %>%
          meadow = ifelse(is.na(meadow),meadow16, meadow),
          meadow = ifelse(is.na(meadow), site97, meadow),
          meadow = recode(meadow, ND = "dry", SD = "dry")) %>%
+  # rename plot96 to old_plot
+  rename(old_plot96 = plot96) %>%
   #retain reference cols for analysis only
-  dplyr::select(plot, old_plot_edi138, old_plot97LT, replace_tag_2002_edi138, old_plot16:plot_sw_tag_PDF, trt, meadow, snow, snow_notes) %>%
-  # remove 96 and 0 plots because 0s are only for 0 descae, and 96 = 296, will have only mystery 286 plot from 1997
+  dplyr::select(plot, old_plot_edi138, old_plot96, old_plot97LT, replace_tag_2002_edi138, old_plot16:plot_sw_tag_PDF, trt, meadow, snow, snow_notes) %>%
+  # remove0 plots because 0s are only for 0 descae, will have only mystery 286 plot from 1997
   filter(!old_plot97LT %in% c(0, 96)) %>%
+  # sort by plot
+  arrange(plot) %>%
   data.frame()
 
 
 # evaluate SCE 2012 and EDI 1997 datasets
-
 # join 2012 plot data from SCE
 sdl12sce_sites <- dplyr::select(sdl12sce, tmt_code:old_plot_num) %>% distinct()
 # which column matches old plot in sdl12 sce best?
@@ -398,30 +431,50 @@ sapply(sdl_plots2, function(x) summary(x == 283)) #so far no..
 sdl_plots2[sdl_plots2$plot == 30,] #edi num is 83.. could be that 283 is typo? is mesic, P, no snow
 sdl12sce_sites[sdl12sce_sites$plot_num == 30, ] # yes, also mm, no snow and P
 
-# join sdl 97 richness plot codes
-sdl97S_sites <- distinct(sdlS97[c("plot", "loc", "trt")])
-# does sdl 1997 agree with sdl97 richness? (if so, maybe plot codes is a bad file..)
-sdl97_sites <- distinct(sdl1997[c("old_plot", "site", "trt")]) %>%
-  # change 96 to 296 and remove 0
-  mutate(old_plot = ifelse(old_plot == 96, 296, old_plot),
-         old_plot = as.character(old_plot)) %>%
-  filter(!old_plot == 0) %>% distinct()
-sdl97S_check <- left_join(sdl97S_sites, sdl97_sites, by = c("plot" = "old_plot")) # only 11/16 from spp comp matched
-# mutate(trt = recode(trt, NN = "N", PP = "P", NP = "N+P", CC = "C"),
-#          meadow = ifelse(grepl("D", loc), "dry", 
-#                          ifelse(grepl("M", loc), "mesic",
-#                                 ifelse(grepl("WT", loc), "snowbed", NA))),
-#          snow = ifelse(grepl("S|W", loc), "snow", "no snow"))
-# which column matches old plot in sdl12 sce best?
-sapply(sdl_plots2, function(x) summary(x %in% sdl97S_sites$plot)) # pairs best on edi num, then sw tag
-sdl97S_check <- rename(sdl97S_sites, plot97 = plot) %>%
-  merge(sdl_plots2, by.x = "plot97", by.y = as.character("old_plot_edi138"), all.x = T) %>%
-  # join tim's plot codes
-  merge(plot_codes, by.x = "plot", by.y = as.character("old_plot"), all.x =T)
-  
-# plots that don't agree btwn tim plot codes and sdl 97 codes are 6,9,11 and 13..
+# preserve spatial info for sites, just in case anyone ever wanted it
+# id where plot info starts
+sfpos <- grep("Dry sites.*Mesic sites", metadat96) # first is non snowfence, second is snowfence
+sbedpos <- grep("Wet Meadow", metadat96) + 1 # sites start one slot after descrip
 
+sfen <- metadat96[sfpos[1]:sbedpos]
+sfen <- sfen[!grepl("[a-z]", sfen)]
+sfen <- strsplit(sfen, "  ")
+xydat <- data.frame()
+for(i in 1:length(sfen)){
+  tempdat <- data.frame(info = sfen[[i]]) %>% filter(!info == "") %>%
+  mutate(x = str_extract(info, "[0-9]+,"),
+         x = parse_number(x),
+         y = str_extract(info, "[0-9]{0,3}.{0,1}[0-9]+[-][0-9]+.{0,1}[0-9]{0,3}"),
+         plot = str_extract(info, "[(][0-9]+"),
+         plot = parse_number(plot)) %>%
+    separate(y, c("ymin", "ymax"), "-") %>%
+    mutate(trt = info[1])
+  # clean up
+  tempdat <- subset(tempdat, info != unique(trt)) %>%
+    mutate(trt = recode(trt, NN = "N", PP = "P", CC = "C", NP = "N+P"))
+  # add to master
+  xydat <- rbind(xydat, tempdat)
+}
+# clean up problem plots
+goodxy <- xydat[complete.cases(xydat),]
+problemxy <- anti_join(xydat, goodxy) %>%
+  # remove any empty cells
+  filter(nchar(info)>1)
+# need to pair every two rows
+for(i in seq(2,nrow(problemxy),2)){
+  problemxy$info[i-1] <- paste(problemxy$info[i-1],problemxy$info[i])
+  problemxy$plot[i-1] <- problemxy$plot[i]
+}
+# clean up
+problemxy <- problemxy[complete.cases(problemxy),]
+goodxy <- rbind(goodxy, problemxy)
+goodxy$info <- trimws(goodxy$info)
+goodxy <- mutate_at(goodxy, c("x", "ymin", "ymax", "plot"), as.numeric)
+# to be sure, are all extracted numbers in the info col?
 
+# no snowbed spatial info, only new plot number and old plot number
+# pair spatial info to master sdl site LT
+sdl_plots2 <- left_join(sdl_plots2, goodxy, by = c("plot", "trt")) 
 
 
 # -- tidy jgs sdl 05 spp comp + richness ----
@@ -615,7 +668,7 @@ summary(jgs_sitematch) # no more NAs in plot
 
 
 # clean up environment (remove unneeded)
-rm(temppres, temprow, tempdat, sdlne, num2, temptrt)
+rm(temppres, temprow, tempdat, sdlne, num2)
 
 
 
@@ -664,22 +717,25 @@ sdl2003_tidy <- left_join(sdl2003_tidy, sdl03_sites[c("plot_2003", "plot", "trt"
   dplyr::select(date, plot_2003, plot, trt, meadow, snow, clean_code2, hit)
 
 
-# finalize sdl lookup table
+# -- finalize sdl lookup table -----
 sdl_sitesLT <- sdl_plots2 %>%
   full_join(jgs_sitematch[c("plot", "jgs_plot", "plot_num1", "plot_num2", "plot_num3", "plot_num4")]) %>%
   rename_at(names(jgs_sitematch)[grepl("_num[0-9]", names(jgs_sitematch))], function(x) paste0("jgs_",x)) %>%
   # join sdl 2003
   full_join(sdl03_sites[c("plot", "plot_2003")]) %>%
   #reorder cols
-  dplyr::select(plot, trt, meadow, snow, snow_notes, plot_sw_tag_PDF, plot_ne_tag_PDF, old_plot_edi138:replace_tag_2002_edi138, plot_2003, jgs_plot:jgs_plot_num4, old_plot16)
+  dplyr::select(plot, trt, meadow, snow, snow_notes, plot_sw_tag_PDF, plot_ne_tag_PDF, info, x, ymin, ymax, old_plot_edi138:replace_tag_2002_edi138, plot_2003, jgs_plot:jgs_plot_num4, old_plot16) %>%
+  rename(metadata_edi138 = info)
 # 286 still needs to be resolved..
 
 # clean up environment
-rm(jgs_sitematch, sdl03_sites, sce12_x_sffert, sdl_plots, plots2016, jgstemp, sdl12sce_sites, sdl97S_check, sdl97_sites)
+rm(sce12_x_sffert, sdl_plots, plots2016, jgstemp, sdl97_sites, sfen, xydat, trtcheck, problemxy)
 
 
 
 # -- PREP SDL PLANT DATA WITHOUT TRT INFO IN MATRICES (just plot num) -----
+# > keep survey date info if available!
+
 ## 1997 -- deal with 999 (present but not hit), no unknowns
 sdl97_tidy <- sdl1997 %>%
   # remove spp present but not hit and spp not hit
@@ -720,14 +776,18 @@ S97 <- richness97 %>%
 # .. i have no idea how sppS in the EDI dataset was calculated, i've tried different ways to calcuate (i.e. not as cleanly, including non-veg) and still don't get as high of numbers as in EDI dataset
 # i would maybe not post those data?
 # still can't figure out what 286 matches up to..
-
+# check which plot codes are missing from 96/97 dataset that match NN trt (286 is supposed to be snow and dry meadow, but maybe-misentered?)
+checkNN <- sort(sdl97_plotinfo$old_plot[!sdl97_plotinfo$old_plot %in% S97$old_plot & sdl97_plotinfo$trt == "NN"])
+# what are spp abundances in 286?
+sdl1997[sdl1997$old_plot == 286,] %>%
+  arrange(hits)
 
 # > *keep* 286 and press on with reorganizing cols for standardization
 # > drop site descrip cols until tim gets back to me on correct site descriptions
 sdl97_tidy <- mutate(sdl97_tidy, plot = ifelse(is.na(plot), old_plot, plot)) %>%
-  dplyr::select(yr, plot, clean_code2, hits) %>%
+  dplyr::select(yr, date, plot, clean_code2, hits) %>%
   # sum hits by clean spp code
-  grouped_df(colnames(.)[1:3]) %>%
+  grouped_df(colnames(.)[1:4]) %>%
   summarise(hits = sum(hits)) %>%
   arrange(plot, clean_code2) %>%
   ungroup()
@@ -738,9 +798,10 @@ sdl12_tidy <- sdl2012 %>%
   # remove spp present only or spp absent
   subset(hits >= 1) %>%
   left_join(spplt[c("code", "clean_code2")], by = c("species" = "code")) %>%
-  # add col for yr
-  mutate(yr = 2012) %>%
-  group_by(yr, plot, clean_code2) %>%
+  # add col for yr and date (NA, no info)
+  mutate(yr = 2012, 
+         date = NA) %>%
+  group_by(yr, date, plot, clean_code2) %>%
   summarise(hits = sum(hits)) %>%
   ungroup()
 
@@ -760,27 +821,26 @@ sdl12sce_tidy$clean_code2[sdl12sce_tidy$code == "2SCATE"] <- "2SCAT"
 sdl12sce_tidy$clean_code2[sdl12sce_tidy$code == "DROCH"] <- "DROC"
 sdl12sce_tidy$clean_code2[sdl12sce_tidy$code == "CARSCS2"] <- unique(spplt$clean_code2[spplt$code == "CARSCO"])
 # everything else can stay the same
-sdl12sce_tidy2 <- mutate(sdl12sce_tidy, clean_code2 = ifelse(is.na(clean_code2), code, clean_code2)) %>%
+sdl12sce_tidy <- mutate(sdl12sce_tidy, clean_code2 = ifelse(is.na(clean_code2), code, clean_code2)) %>%
 group_by(yr, plot, old_plot_num, tmt_code, veg_class, snow, clean_code2) %>%
   summarise(hits = sum(hits)) %>%
   ungroup() %>%
   mutate(plot = as.numeric(plot)) %>%
   arrange(plot, clean_code2)
 
-check2012 <- full_join(sdl12sce_tidy2, sdl12_tidy, by = c("yr", "plot", "clean_code2")) %>%
+check2012 <- full_join(sdl12sce_tidy, sdl12_tidy, by = c("yr", "plot", "clean_code2")) %>%
   mutate(diff = hits.x - hits.y) %>%
   arrange(plot, clean_code2) # in manual scan, pretty much the same (all unk careces became juncus)
-# just triage site trt code differences since site info brought over from raw data (i.e. sce dataset)
-check2012 <- sdl12sce_sites %>%
-  mutate(plot_num = as.numeric(plot_num)) %>%
-  left_join(distinct(sdl2012[c("plot", "fert", "meadow", "snow")]), by = c("plot_num" = "plot")) %>%
-  # check sdl_plots info
-  left_join(sffert_info[,c(1:3, 6,8,9)], by = c("plot_num" = "plot_num_tag"))
-check2012 <- mutate(check2012, checknum = ifelse(old_plot_num == plot_sw_tag, TRUE,
-                                                 ifelse(old_plot_num == plot_ne_tag, TRUE, FALSE)))
-
-okay2012 <- check2012$plot_num[check2012$checknum]
-review2012 <- sort(check2012$plot_num[!check2012$checknum | is.na(check2012$checknum)])
+# double check that plot codes match up
+check2012_plots <- distinct(sdl12sce[c("plot_num", "old_plot_num")]) %>%
+  rename(plot = plot_num, old_plot12 = old_plot_num) %>%
+  mutate(plot = as.numeric(plot)) %>%
+  left_join(sdl_sitesLT)
+# does it match edi 138 numbers?
+summary(check2012_plots$old_plot12 == check2012_plots$old_plot_edi138) #1 false.. 
+subset(check2012_plots, old_plot12 != old_plot_edi138) # which is 283 (typo for 83), so all okay
+# clean up
+rm(check2012, check2012_plots)
 
 
 # sdl 2016 -- no unknowns
@@ -790,13 +850,29 @@ sdl16_tidy <- sdl2016 %>%
   left_join(spplt[c("code", "clean_code2")], by = c("species" = "code")) %>%
   # add col for hit count
   mutate(hits = 1,
-         # add col for yr
-         yr = 2016) %>%
-  group_by(yr, plot, clean_code2) %>%
+         # add col for yr and date (NA)
+         yr = 2016,
+         date = NA) %>%
+  group_by(yr, date, plot, clean_code2) %>%
   summarise(hits = sum(hits)) %>%
   ungroup()
 
 
+
+# -- CLEAN UP EXTRA SDL 2003 AND 2005 DATASETS ----
+jgs_clean <- rename(jgs_master2, jgs_plot = plot, date = surveydate) %>%
+  mutate(yr = 2005) %>%
+  dplyr::select(jgs_plot, yr, date, clean_code2, hits) %>%
+  left_join(sdl_sitesLT[c("plot", "jgs_plot", "trt", "meadow", "snow")]) %>%
+  mutate(site = "sdl") %>%
+  dplyr::select(site, yr, date, plot, jgs_plot, trt:snow, clean_code2, hits) %>%
+  arrange(plot, clean_code2)
+
+sdl03_clean <- sdl2003_tidy %>%
+  mutate(site = "sdl", yr = 2013) %>%
+  rename(hits = hit) %>%
+  dplyr::select(site, yr, date, plot, plot_2003, trt:snow, clean_code2, hits) %>%
+  arrange(plot, clean_code2)
 
 
 # -- STANDARDIZE NN + SDL DATS, STACK, AND SEPARATE PLANT FROM SITE INFO -----
@@ -806,10 +882,12 @@ sdl16_tidy <- sdl2016 %>%
 ## 2 unk forbs and 2 unk grasses in nn13 data never in same plot so okay to use usda codes only
 
 master_plant <- rbind(dplyr::select(nn13_tidy, -nutnet_code), dplyr::select(nn17_tidy, -nutnet_code)) %>%
-  dplyr::select(yr, plotid, clean_code2, hits) %>%
+  dplyr::select(yr, date, plotid, clean_code2, hits) %>%
   rename(plot = plotid) %>%
   mutate(site = "nutnet") %>%
   rbind(rbind(cbind(sdl97_tidy, site = "sdl"),
+              jgs_clean[c(names(sdl97_tidy), "site")],
+              sdl03_clean[c(names(sdl97_tidy), "site")],
               cbind(sdl12_tidy, site = "sdl"),
               cbind(sdl16_tidy, site = "sdl"))) %>%
   dplyr::select(site, yr:ncol(.)) %>%
@@ -819,21 +897,11 @@ master_plant <- rbind(dplyr::select(nn13_tidy, -nutnet_code), dplyr::select(nn17
 
 # be sure no duplicates in the dataset
 checkdups <- master_plant %>%
-  grouped_df(colnames(.)[1:4]) %>%
+  grouped_df(colnames(.)[names(.)!= "hits"]) %>%
   summarise(nobs = length(hits))
 summary(checkdups$nobs) # all 1s -- each spp only has one entry per plot. good! ready to write out
 
 
-# review sdl 2012 plots that may be mismatched (6, 11, 16.. also 29, 69.. not reviewing all 25)
-View(subset(master_plant, plotid == "69")) # seems like spp comp mostly agrees over the years
-# do not use trt info from 2012 dataset tim sent
-# need to match 3 unk plots in sdl 05, 03 and plot 286 in 1997 manually
-# quick look at spp comp on half of needs review plots..
-ggplot(subset(master_plant, plotid %in% review2012[1:12]), aes(clean_code2, hits, col = as.factor(yr))) +
-  geom_point(alpha = 0.3) +
-  facet_wrap(~plotid, scales = "free_x") +
-  theme(axis.text.x = element_text(angle = 90),
-        legend.position = "none") # i guess it looks okay? just go by current plot numbers in sdl 2012 data from tim and sarah
 
 
 
@@ -843,13 +911,11 @@ ggplot(subset(master_plant, plotid %in% review2012[1:12]), aes(clean_code2, hits
 nn17_wvert <- nutnet17raw %>%
   # rbind block 3 plot 7 data
   rbind(nn17_b3p7) %>%
-  # remove date
-  dplyr::select(-date) %>%
   mutate(block = paste0("B", block),
          yr = 2017) %>%
   #join treatment info
   left_join(nutnet_plots) %>%
-  dplyr::select(site, yr, plotid, block, plot, n:trt, point, hit, species) %>%
+  dplyr::select(site, yr, date, plotid, block, plot, n:trt, point, hit, species) %>%
   filter(!species == "O") %>%
   # replace species with USDA_code
   left_join(spplt, by = c("species" = "code")) %>%
@@ -877,8 +943,9 @@ sdl16_wvert <- dplyr::select(sdl2016, -c(meadow, trt, sfcode)) %>%
   # join plot info
   left_join(dplyr::select(sdl_plots2, plot, trt, meadow, snow, snow_notes)) %>%
   mutate(site = "SDL",
-         yr = 2016) %>%
-  dplyr::select(site, yr, plot, snow, snow_notes, meadow, trt, point, hit, clean_code2, simple_name, Common_Name, Category, Family, Growth_Habit, fxnl_grp, nutnet_grp) %>%
+         yr = 2016, 
+         date = NA) %>%
+  dplyr::select(site, yr, date, plot, snow, snow_notes, meadow, trt, point, hit, clean_code2, simple_name, Common_Name, Category, Family, Growth_Habit, fxnl_grp, nutnet_grp) %>%
   arrange(plot, point, hit)
 
 
@@ -911,7 +978,8 @@ sdlpres12 <- subset(sdl2012, hits <1 & hits>0) %>% #to be sure no typos with 0.1
   mutate(hits = 0.25,
          # add site and year
          site = "sdl",
-         yr = 2012) %>%
+         yr = 2012,
+         date = NA) %>%
   left_join(sdl_plots2) %>%
   left_join(spplt[c("code", "clean_code2")], by = c("species" = "code")) %>%
   # rename plot colname to match master
@@ -945,7 +1013,7 @@ master_plant <- rbind(master_plant, sdlpres97, sdlpres12, nnpres13) %>%
   # remove block and plot (only keep plotid)
   dplyr::select(-c(block, plot))
 # warning sign that NAs introduced, but no NAs introduces
-
+summary(master_plant) #2012 and 2016 don't have dates, so NAs there okay
 
 # be sure spp present were not also recorded as hit
 group_by(master_plant, site, yr, plotid, clean_code2) %>%
@@ -953,22 +1021,7 @@ group_by(master_plant, site, yr, plotid, clean_code2) %>%
   summary() # obs per sp per site/yr/plot is always 1 (no species recorded as hit and present-only)
 
 
-# -- CLEAN UP EXTRA SDL 2003 AND 2005 DATASETS ----
-jgs_clean <- rename(jgs_master2, jgs_plot = plot) %>%
-  dplyr::select(jgs_plot, surveydate, clean_code2, hits) %>%
-  left_join(jgs_sitematch) %>%
-  mutate(site = "sdl") %>%
-  dplyr::select(site, surveydate, plot, jgs_plot, trt:snow, clean_code2, hits) %>%
-  arrange(plot, clean_code2)
 
-sdl03_clean <- sdl2003_tidy %>%
-  mutate(site = "sdl") %>%
-  rename(surveydate = date,
-         hits = hit) %>%
-  dplyr::select(site, surveydate, plot, plot_2003, trt:snow, clean_code2, hits) %>%
-  arrange(plot, clean_code2)
-  
-  
 # -- FINISHING -----
 # write out cleaned master plant dataset and site lookup datasets
 # plant dats
@@ -976,14 +1029,12 @@ write_csv(master_plant, "alpine_addnuts/output_data/sdl_nutnet_plantcom_allyrs.c
 # nutnet site lookup
 write_csv(nutnet_plots, "alpine_addnuts/output_data/nutnet_plot_lookup.csv")
 # sdl site lookup
-write_csv(sdl_plots2, "alpine_addnuts/output_data/sdl_plot_lookup.csv")
+write_csv(sdl_sitesLT, "alpine_addnuts/output_data/sdl_plot_lookup.csv")
 # cleaned up vertical hits datasets
 write_csv(nn17_wvert, "alpine_addnuts/output_data/nutnet2017_vertical_sppcomp.csv")
 write_csv(sdl16_wvert, "alpine_addnuts/output_data/sdl2016_vertical_sppcomp.csv")
 # extra 2003 and 2005 datasets
 write_csv(jgs_clean, "alpine_addnuts/output_data/sdl_2005_jgs_sppcomp.csv")
-write_csv(jgs_sitematch, "alpine_addnuts/output_data/sdl_2005_jgs_sites.csv")
 write_csv(sdl03_clean, "alpine_addnuts/output_data/sdl_2003_sppcomp.csv")
-write_csv(sdl03_sites, "alpine_addnuts/output_data/sdl_2003_sites.csv")
 # write out knb-lter-nwt.138 site info metadata
 write_csv(sdl97_plotinfo, "alpine_addnuts/output_data/sffert_knb138_sites.csv")
