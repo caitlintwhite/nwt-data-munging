@@ -353,14 +353,14 @@ glimpse(plantcomTS)
 
 
 # write out
-write_csv(plantcomTS, "alpine_addnuts/output_data/forTS/sdl_nutnet_sppcomp_1997-ongoing.csv")
-write_csv(coarse_summaryTS, "alpine_addnuts/output_data/forTS/sdl_nutnet_fxnl_biodiv_anpp_1997-ongoing.csv")
+# write_csv(plantcomTS, "alpine_addnuts/output_data/forTS/sdl_nutnet_sppcomp_1997-ongoing.csv")
+# write_csv(coarse_summaryTS, "alpine_addnuts/output_data/forTS/sdl_nutnet_fxnl_biodiv_anpp_1997-ongoing.csv")
 
 
 # -- Fig 1 and 2: FORBS VS GRASSES (Figs 1 + 2) ----
 # (out of curiosity make similar time since exp onset plot to compare forb shift over time by site by trt)
 # split out sdl and nutnet so can average C and N+P+K
-sdl_coarse <- subset(coarse_cover, site == "sdl") %>%
+sdl_coarse <- subset(coarse_summary, site == "sdl") %>%
   # select only dry meadow plots consistently sampled
   # subset to dry meadow plots surveyed across all years only (corresponds to what was surveyed in 1997)
   ## should be plots 1-16
@@ -371,10 +371,11 @@ sdl_coarse <- subset(coarse_cover, site == "sdl") %>%
   arrange(yr, plotid) %>%
   left_join(unique(sdlplots[c("plot", "trt", "meadow", "snow")]), by = c("plotid" = "plot")) %>%
   # make treatment a factor
-  mutate(trt = factor(trt, levels = c("C", "N", "P", "N+P")))
+  mutate(trt = factor(trt, levels = c("C", "N", "P", "N+P"))) %>%
+  dplyr::select(site, yr, plotid, trt:snow, Forb:ncol(.))
 
 # stack for anova
-sdl_coarse_tall <- gather(sdl_coarse, met, val, Forb: Geum_rel)
+sdl_coarse_tall <- gather(sdl_coarse, met, val, Forb: ncol(sdl_coarse))
 
 # run anova
 fg_anova_global <- aov(val ~ trt * met * yr, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel")))
@@ -421,7 +422,7 @@ ggplot(data= subset(sdl_coarse_means, grp != "Geum_rel"), aes(trt, meancov, fill
 
 # nutnet
 ## need to average N+P and C by block first (2 reps per block)
-nn_coarse_blockmeans <- subset(coarse_cover, site == "nutnet") %>% 
+nn_coarse_blockmeans <- subset(coarse_summary, site == "nutnet") %>% 
   # select only plots consistently sampled both years
   #subset(plotid %in% c(nn_common, nn_Pplots)) %>% 
   # join site data

@@ -2,11 +2,13 @@
 title: "Alpine dry meadow fertilization results"
 author: "Caitlin White"
 date: "22/10/2019"
-output: html_document
+output: 
+  html_document: 
+    fig_caption: yes
 ---
 
-```{r setup, include=FALSE, warning = F, message = F}
-knitr::opts_chunk$set(echo = FALSE)
+```{r setup, include=FALSE, warning = F, message = F, echo = F}
+knitr::opts_chunk$set(echo = FALSE, message = F, warning = F)
 # note: this script copies over script worked out in other R scripts for the sole purpose of exporting statistical results, tables and figures for Tim Seastedt (to avoid exporting a bunch of figs and tables as CVSs from R)
 # see R scripts replicat_ts_results.R, analyze_ts_dats.R, and addnuts_figs.R for lengthier scripts that go through the analysis weeds
 # addnuts_figs.R contains figure generation for NWT poster for self-study (ms contains slightly different NMDS figs [earlier versions])
@@ -16,29 +18,422 @@ knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(vegan)
 library(cowplot)
-source("edi_functions.R")
 na_vals <- c("", " ", NA, "NA", "NaN", NaN, ".")
 options(stringsAsFactors = F, strip.white = T, na.strings = na_vals)
 theme_set(theme_bw())
 
+
+# read in needed datasets
+coarse_summary <- read.csv("alpine_addnuts/output_data/forTS/sdl_nutnet_fxnl_biodiv_anpp_1997-ongoing.csv")
+plantcom <- read.csv("alpine_addnuts/output_data/forTS/sdl_nutnet_sppcomp_1997-ongoing.csv")
+sdlplots <- read.csv("alpine_addnuts/output_data/sdl_plot_lookup.csv") 
+nnplots <- read.csv("alpine_addnuts/output_data/nutnet_plot_lookup.csv")
+spplist <- read.csv("alpine_addnuts/output_data/sdl_nutnet_spplookup.csv")
+
+# review read in as expected
+glimpse(coarse_summary)
+glimpse(plantcom)
+
+# prep site info
+# id nutnet plots and sdl plots sampled across all yrs
+# sdl limited by sdl dry meadow non-snofence plots surveyed in 1997
+# nutnet limitd by plots surveyed in 2017 (fewer than in 2013)
+sdl_common <- unique(sdlplots$plot[!is.na(sdlplots$old_plot97LT) & sdlplots$snow == "no snow"])
+nn_common <- unique(plantcom$plotid[plantcom$site == "nutnet" & plantcom$yr == 2017])
+#to be sure, are these plots in 2013?
+summary(nn_common %in% unique(plantcom$plotid[plantcom$site == "nutnet" & plantcom$yr == 2013])) # yup
+# pull out P plots from nn too
+nn_Pplots <- unique(nnplots$plotid[nnplots$trt == "P"])
+#ts found no effect of +k, condense +k into other treatments (e.g. n+p+k to n+p; k to control)
+# in previous ordination analysis, k plots overlay similar treatments without k (e.g. n+p and n+p+k hulls overlap on nmds) 
+nnplots$trt2 <- gsub("[+]K", "", nnplots$trt)
+nnplots$trt2 <- gsub("K", "C", nnplots$trt2)
+
+
+# prep spp list
+#make simple lifeform grp
+spplist <- spplist %>%
+  mutate(simple_lifeform = ifelse(Family == "Fabaceae", "N-fixer",
+                                  ifelse(grepl("Shrub", Growth_Habit), "Shrub",
+                                         ifelse(Growth_Habit == "Graminoid", "Grass", 
+                                                ifelse(grep("Forb", Growth_Habit), "Forb", "Ground cover")))),
+         # change Dryas to forb from shrub (is listed as subshrub/shrub/forb)
+         simple_lifeform = ifelse(simple_name == "Dryas octopetala", "Forb", simple_lifeform),
+         # fill in simple lifeform for 2FORB and 2GRAM
+         simple_lifeform = ifelse(clean_code2 == "2FORB", "Forb",ifelse(clean_code2 == "2GRAM", "Grass", simple_lifeform)),
+         # ground cover doesn't assign (maybe won't work on NA values of growth)
+         simple_lifeform = ifelse(grepl("^2", clean_code2) & is.na(simple_lifeform), "Ground cover", simple_lifeform)) %>%
+  # add alternative lifeform group where N-fixer lumped into forb group
+  mutate(simple_lifeform2 = ifelse(simple_lifeform == "N-fixer", "Forb", simple_lifeform),
+         # add nutnet grouping (Selaginella densa [spikemoss] = ground cover, not forb)
+         nutnet_grp = ifelse(clean_code2 == "SEDES", "Ground cover", simple_lifeform2))
+
 ```
 
-## R Markdown
+## Temporal trend in alpine dry meadow forb and grass relative abundance
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r import d}
-summary(cars)
+```{r Fig 1 and ANOVA tables}
+# split out sdl and nutnet so can average C and N+P+K
+sdl_coarse <- subset(coarse_summary, site == "sdl") %>%
+  # select only dry meadow plots consistently sampled
+  # subset to dry meadow plots surveyed across all years only (corresponds to what was surveyed in 1997)
+  ## should be plots 1-16
+  subset(plotid %in% sdl_common) %>%
+  # make treatment a factor
+  mutate(trt = factor(trt, levels = c("C", "N", "P", "N+P")))
+
+# stack for anova
+sdl_coarse_tall <- gather(sdl_coarse, met, val, ForbHits:ncol(sdl_coarse))
+
+# run anova
+fg_anova_global <- aov(val ~ trt * met * yr, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel")))
+summary(fg_anova_global)
+TukeyHSD(fg_anova_global)
+
+# anovas by year
+fg_anova97 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 1997))
+fg_anova03 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 2003))
+fg_anova05 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 2005))
+fg_anova12 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 2012))
+fg_anova16 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 2016))
+
+summary(fg_anova97)
+TukeyHSD(fg_anova97)
+summary(fg_anova03)
+TukeyHSD(fg_anova03)
+summary(fg_anova05)
+TukeyHSD(fg_anova05)
+summary(fg_anova12)
+TukeyHSD(fg_anova12)
+summary(fg_anova16)
+TukeyHSD(fg_anova16)
+
+# average by treatment
+sdl_coarse_means <- dplyr::select(sdl_coarse, site, yr, plotid, trt, meadow, snow, Forb_rel, Grass_rel, Geum_rel) %>%
+  gather(grp, relcov, Forb_rel:Geum_rel) %>%
+  group_by(site, yr, trt, meadow, snow, grp) %>%
+  summarise(meancov = mean(relcov),
+            secov = sd(relcov)/sqrt(length(relcov)),
+            nobs = length(relcov)) %>%
+  ungroup() %>%
+  # calculate yrs passed since start of exp
+  mutate(post_yrs = yr - 1993)
+sdl_coarse_means
+
+# visualize
+ggplot(data= subset(sdl_coarse_means, grp != "Geum_rel"), aes(trt, meancov, fill = grp)) +
+  geom_errorbar(aes(ymax = meancov + secov, ymin = meancov-secov, col = grp), width = 0.1, position = position_dodge(width = 0.6)) +
+  geom_col(color = "grey30", position = position_dodge(width = 0.6), width = 0.5) +
+  scale_color_grey(name = "Group", labels = c("Forb", "Grass")) +
+  scale_fill_grey(name = "Group", labels = c("Forb", "Grass")) +
+  labs(y = "Mean relative cover (%)",x = "Treatment") +
+  theme(legend.position = c(0.8,0.3),
+        legend.title = element_text(size = 10)) +
+  facet_wrap(~yr, nrow = 2)
+
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r Fig 2 and ANOVA tables}
+# nutnet
+## need to average N+P and C by block first (2 reps per block)
+nn_coarse_blockmeans <- subset(coarse_summary, site == "nutnet") %>% 
+  # select only plots consistently sampled both years
+  #subset(plotid %in% c(nn_common, nn_Pplots)) %>% 
+  # modify N+K plot to N in 2017 so block 4 has a 4th N trtment
+  mutate(trt = ifelse(yr == 2017 & grepl("B4", plotid) & trt == "N+K", "N", trt)) %>%
+  gather(met, val, ForbHits:ncol(.)) %>%
+  # average reps in C and N+P+K by block
+  group_by(site, yr, block, trt, trt2, met) %>%
+  summarise(blockmean = mean(val),
+            # to verify 2 obs per C and N+P+K per block
+            nobs = length(val)) %>% # yes (checked manually)
+  ungroup()
+
+# subset to just C, N and N+P for fig2 and anova
+nn_fg_dat <- subset(nn_coarse_blockmeans, met %in% c("Forb_rel", "Grass_rel", "Geum_rel") & trt %in% c("C", "N", "P", "N+P")) %>%
+  mutate(trt2 = factor(trt2, levels = c("C", "N", "P", "N+P")))
+
+# run anova of forbs and grass rel cov, using C, N and N+P only (so 4 reps per trt) [i.e. ignore K, N+P+K]
+nn_fg_anova_global <- aov(blockmean ~ trt2 * met * yr, data = subset(nn_fg_dat, met != "Geum_rel" & trt2 != "P"))
+summary(nn_fg_anova_global)
+TukeyHSD(nn_fg_anova_global)
+
+nn_fg_anova13 <- aov(blockmean ~ trt2 * met, data = subset(nn_fg_dat, yr == 2013 & met != "Geum_rel"))
+nn_fg_anova17 <- aov(blockmean ~ trt2 * met, data = subset(nn_fg_dat, yr == 2017 & met != "Geum_rel" & trt2 != "P"))
+
+summary(nn_fg_anova13)
+TukeyHSD(nn_fg_anova13)
+summary(nn_fg_anova17)
+TukeyHSD(nn_fg_anova17)
+
+# calculate table of means and ses
+nn_fg_means <- data.frame(nn_fg_dat) %>%
+  group_by(site, yr, trt2, met) %>%
+  summarise(meancov = mean(blockmean),
+            secov = sd(blockmean)/sqrt(length(blockmean)),
+            nobs = length(blockmean)) %>%
+  ungroup() %>%
+  # calculate yrs passed since start of exp
+  mutate(post_yrs = yr - 2008) %>%
+  as.data.frame()
+nn_fg_means
+
+# visualize
+ggplot(data= subset(nn_fg_means, met != "Geum_rel"), aes(trt2, meancov, fill = met)) +
+  geom_errorbar(aes(ymax = meancov + secov, ymin = meancov-secov, col = met), width = 0.1, position = position_dodge(width = 0.6)) +
+  geom_col(color = "grey30", position = position_dodge(width = 0.6), width = 0.5) +
+  scale_color_grey(name = "Group", labels = c("Forb", "Grass")) +
+  scale_fill_grey(name = "Group", labels = c("Forb", "Grass")) +
+  labs(y = "Mean relative cover (%)", x = "Treatment") +
+  theme(legend.title = element_text(size = 10)) +
+  facet_wrap(~yr, ncol = 2)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r all together}
+# stack sdl and nutnet to plot means and ses by yr since trts initiated
+all_fg_means <- rename(nn_fg_means, trt = trt2, grp = met) %>%
+  rbind(dplyr::select(sdl_coarse_means, -c(meadow, snow)))
+
+
+# plot means by time since experiment onset
+mutate(all_fg_means, grp = factor(grp, levels = c("Forb_rel", "Grass_rel", "Geum_rel"), labels = c("All forbs", "All grasses", "G. rossii"))) %>%
+  ggplot(aes(post_yrs, meancov, grp = site)) +
+  geom_errorbar(aes(ymax = meancov + secov, ymin = meancov - secov), width = 0) +
+  geom_point(aes(shape = site), fill = "white") +
+  #geom_line(aes(col = site)) +
+  #scale_color_manual(name = "Site", values = c("salmon", "darkred"), labels = c("NutNet", "Saddle")) +
+  scale_shape_manual(name = "Site", values = c(21,19), labels = c("NutNet", "Saddle")) +
+  labs(y = "Mean relative cover (%)",
+       x = "Years since experiment onset") +
+  theme(legend.title = element_text(size = 10)) +
+  facet_grid(grp~trt, scales = "free_y")
+```
+
+
+
+```{r nutnet biodiversity tables}
+# collapse K (micro) into otherwise similar treatments (n = 8 per group)
+# summarise 2013
+nn_biodiv13_means <- subset(nn_coarse_blockmeans, yr == 2013) %>%
+  group_by(site, yr, trt2, met) %>%
+  summarise(meancov = mean(blockmean),
+            secov = sd(blockmean)/sqrt(length(blockmean)),
+            nobs = length(blockmean)) %>%
+  ungroup() %>%
+  # calculate yrs passed since start of exp
+  mutate(post_yrs = yr - 2008) %>%
+  as.data.frame()
+
+# visualize
+ggplot(nn_biodiv13_means, aes(trt2, meancov)) +
+  geom_errorbar(aes(ymax = secov + meancov, ymin = meancov - secov), width = 0.1) +
+  geom_point() +
+  facet_wrap(~met, scales = "free_y")
+
+# summarise 2017
+nn_biodiv17_means <- subset(nn_coarse_blockmeans, yr == 2017) %>%
+  group_by(site, yr, trt, met) %>%
+  summarise(meancov = mean(blockmean),
+            secov = sd(blockmean)/sqrt(length(blockmean)),
+            nobs = length(blockmean)) %>%
+  ungroup() %>%
+  filter(!is.na(meancov)) %>%
+  # calculate yrs passed since start of exp
+  mutate(post_yrs = yr - 2008) %>%
+  as.data.frame()
+
+# visualize
+ggplot(nn_biodiv17_means, aes(trt, meancov)) +
+  geom_errorbar(aes(ymax = secov + meancov, ymin = meancov - secov), width = 0.1) +
+  geom_point() +
+  facet_wrap(~met, scales = "free_y")
+
+```
+
+
+```{r sdl biodiversity}
+sdl_biodiv_means <- subset(sdl_coarse_tall, yr %in% unique(sdl_coarse_tall$yr[sdl_coarse_tall$met == "H" & !is.na(sdl_coarse_tall$val)])) %>%
+  group_by(site, yr, trt, met) %>%
+  summarise(meancov = mean(val),
+            secov = sd(val)/sqrt(length(val)),
+            nobs = length(val)) %>%
+  ungroup() %>%
+  filter(!is.na(meancov)) %>%
+  # calculate yrs passed since start of exp
+  mutate(post_yrs = yr - 1993) %>%
+  as.data.frame()
+
+# visualize
+ggplot(sdl_biodiv_means, aes(trt, meancov, col = yr)) +
+  geom_errorbar(aes(ymax = secov + meancov, ymin = meancov - secov), width = 0.1) +
+  geom_point() +
+  facet_wrap(~met, scales = "free_y")
+```
+
+
+```{r abundant forbs in nutnet}
+abundance <- subset(plantcom, hits > 0.25 & simple_lifeform != "Ground cover") %>%
+  dplyr::select(site, yr, plotid, block, plot, trt, trt2, clean_code2, hits)
+# make wide form
+abundance_wide <- spread(abundance, clean_code2, hits, fill = 0) %>%
+  unite(rowid, site, yr, plotid, sep = "_", remove = F)
+
+# relativize -- some sites will have extra spp because spread out all plantcom data from both sites
+relabundance <- abundance_wide
+rownames(relabundance) <- abundance_wide$rowid
+# plantdat begins after trt2
+relabundance <- decostand(relabundance[,(which(names(relabundance) == "trt2")+1):ncol(relabundance)], "total")
+# multiple by 100 to get % relative cover value
+relabundance <- relabundance*100
+
+# id forbs with >2% average cover
+nn17abundance <- relabundance[grepl("2017", rownames(relabundance)),]
+# remove any spp that were never in any sites in 2017 (colsum == 1)
+nn17abundance <- nn17abundance[,apply(nn17abundance, 2, sum)>0]
+# double check all still sums to 100
+apply(nn17abundance, 1, sum) # yes
+nn17abundance <- nn17abundance %>%
+  mutate(rowid = rownames(.)) %>%
+  left_join(dplyr::select(abundance_wide, rowid:trt2)) %>%
+  dplyr::select(rowid:trt2, names(.)[1]:ncol(.)) %>%
+  gather(clean_code2, relcov, (grep("trt2", names(.))+1):ncol(.)) %>%
+  # take average abundances of C and N+P+K by block
+  group_by(site, yr, block, trt, trt2, clean_code2) %>%
+  summarise(blockmean = (mean(relcov)),
+            nobs = length(relcov)) %>%
+  ungroup()
+
+# average
+nn17abund_means <- nn17abundance %>%
+  mutate(trt = recode(trt, "N+K" = "N")) %>%
+  group_by(site, yr, trt, trt2, clean_code2) %>%
+  summarise(mean_relcov = round(mean(blockmean),2),
+            se_relcov = round(sd(blockmean)/sqrt(length(blockmean)),2),
+            nobs = length(blockmean)) %>%
+  ungroup()
+
+#id spp that have 0.2 or greater relcov (should be multiplied by 100 for final table)
+keepspp <- sort(unique(nn17abund_means$clean_code2[nn17abund_means$mean_relcov >= 2]))
+keepspp
+
+table_nn17spp <- subset(nn17abund_means, clean_code2 %in% keepspp) %>%
+  dplyr::select(-c(trt2)) %>%
+  gather(met, val, mean_relcov, se_relcov) %>%
+  unite(grp, trt, met) %>%
+  spread(grp, val) %>%
+  left_join(distinct(spplist[c("clean_code2", "simple_name", "simple_lifeform2")])) %>%
+  # clean up colnames
+  rename_all(function(x) gsub("_relcov", "", x)) %>%
+  #recorder cols
+  dplyr::select(site, yr, nobs, clean_code2, simple_name, simple_lifeform2, C_mean:ncol(.))
+
+table_nn17spp
+
+```
+
+
+```{r sdl multivariate analysis nmds, permanova, and betadisper}
+# get all relativized sdl data
+sdlabundance <- relabundance[grepl("sdl", rownames(relabundance)),]
+# remove any spp that were never in any sites in 2017 (colsum == 1)
+sdlabundance <- sdlabundance[,apply(sdlabundance, 2, sum)>0]
+sdlabundance <- sdlabundance %>%
+  mutate(rowid = rownames(.)) %>%
+  # join trt info
+  left_join(dplyr::select(abundance_wide, rowid:plotid, trt)) %>%
+  # select plots commonly sampled across yrs
+  filter(plotid %in% sdl_common)
+
+# initiate empty dfs for storing nmds results
+sdlsppmds <- data.frame()
+sdlplotmds <- data.frame()
+# initiate empty list for storing nmds objects, and other stats objects
+sdlmds <- list()
+# iterate through years for multivar analysis
+for(i in unique(sdlabundance$yr)){
+  tempmatrix <- subset(sdlabundance, yr == i) %>%
+    dplyr::select(c(colnames(.)[colnames(.) %in% unique(spplist$clean_code2)],rowid))
+  # assign rowid
+  rownames(tempmatrix) <- tempmatrix$rowid
+  # remove rowid
+  tempmatrix <- tempmatrix[,!colnames(tempmatrix) == "rowid"]
+  # remove any cols that sum to 0 (spp not present in any plot)
+  tempmatrix <- tempmatrix[,apply(tempmatrix, 2, sum)>0] 
+  # run metamds
+  tempmds <- metaMDS(tempmatrix, trymax = 100)
+  # scrape results into dfs
+  temppoints <- data.frame(tempmds$points) %>%
+    rownames_to_column("rowid") %>%
+    left_join(dplyr::select(abundance_wide, rowid:trt)) %>%
+    # join f2g ratio for envfit
+    left_join(dplyr::select(coarse_summary, site:plot,F2G_ratio))
+  tempspp <- data.frame(tempmds$species) %>%
+    rownames_to_column("clean_code2") %>%
+    left_join(distinct(spplist[c("clean_code2", "simple_name", "simple_lifeform", "simple_lifeform2")])) %>%
+    mutate(site = unique(temppoints$site),
+           yr = i)
+  # gather hulls
+  
+  # bind nmds dat to masters
+  sdlplotmds <- rbind(sdlplotmds, temppoints)
+  sdlsppmds <- rbind(sdlsppmds, tempspp)
+  
+  # run permanova, betadisper, envfit
+  # store list pos
+  pos <- which(unique(sdlabundance$yr) == i)
+  ## calculate CB distance
+  tempbray <- vegdist(tempmatrix)
+  # store all multivar in list
+  sdlmds[[pos]] <- list(tempmds,
+                        envfit(tempmds, temppoints[c("trt", "F2G_ratio")], perm = 1000),
+                        anosim(tempbray, grouping = temppoints$trt, permutations = 1000),
+                        mrpp(tempmatrix,  grouping = temppoints$trt, distance = "bray"),
+                        adonis(tempmatrix ~ trt, data = temppoints, permutations = 1000, method = "bray"),
+                        betadisper(tempbray, temppoints$trt),
+                        anova(betadisper(tempbray, temppoints$trt)))
+  # assign names
+  names(sdlmds)[pos] <- paste0("sdl", i)
+  names(sdlmds[[pos]]) <- c("nmds", "envfit", "anosim", "mrpp", "adonis", "betadisper", "anova_disper")
+}
+
+
+```
+
+
+```{r plot sdl nmds}
+
+ggplot(sdlplotmds, aes(MDS1, MDS2, fill = trt, grp = trt)) +
+  geom_area() +
+  facet_wrap(~yr)
+```
+
+
+```{r nutnet multivariate analysis nmds, permanova, and betadisper}
+
+# 2013 -- all plots
+
+# 2017 -- groups separate +K (4 per group) [supplemental fig?]
+nn17blockmatrix <- dplyr::select(nn17abundance, -nobs) %>%
+  spread(clean_code2, blockmean) %>%
+  unite(rowid, site, yr, block, trt, remove = F)
+nn17_envmatrix <- dplyr::select(nn17blockmatrix, rowid:trt2)
+
+nn17mds <- metaMDS(dplyr::select(nn17blockmatrix, `2FORB`:ncol(nn17blockmatrix)), trymax = 100)
+ordiplot(nn17mds, main = "NN17")
+with (nn17_envmatrix, ordihull(nn17mds, trt, col=1:6, label = T))
+
+ordiplot(nn17mds, main = "NN 17")
+with (nn17_envmatrix, 
+      ordiellipse(nn17mds, trt, kind="se", conf=0.95, col=1:6, label = T))
+
+# 2013 and 2017 -- C, N, P, and N+P only (4 per group), common plots only
+
+
+```
+
