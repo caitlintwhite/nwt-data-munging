@@ -280,7 +280,7 @@ ggplot(sdl_biodiv_means, aes(trt, meancov, col = yr)) +
 ```{r abundant forbs in nutnet}
 abundance <- subset(plantcom, hits > 0.25 & simple_lifeform != "Ground cover") %>%
   dplyr::select(site, yr, plotid, block, plot, trt, trt2, clean_code2, hits)
-  
+
 # make wide form
 abundance_wide <- spread(abundance, clean_code2, hits, fill = 0) %>%
   unite(rowid, site, yr, plotid, sep = "_", remove = F)
@@ -343,10 +343,10 @@ table_nn17spp
 
 # create function for storing ellipse (from: https://stackoverflow.com/questions/13794419/plotting-ordiellipse-function-from-vegan-package-onto-nmds-plot-created-in-ggplo)
 veganCovEllipse<-function (cov, center = c(0, 0), scale = 1, npoints = 100){
-    theta <- (0:npoints) * 2 * pi/npoints
-    Circle <- cbind(cos(theta), sin(theta))
-    t(center + scale * t(Circle %*% chol(cov)))
-  }
+  theta <- (0:npoints) * 2 * pi/npoints
+  Circle <- cbind(cos(theta), sin(theta))
+  t(center + scale * t(Circle %*% chol(cov)))
+}
 
 # procedure:
 ## subset data to common plots only so can compare across yrs
@@ -469,12 +469,15 @@ for(i in unique(relstack$tracker)){
   
   # store nmds ellipse
   ## > note: ordiellipse call throws a warning about invalid graphics state but it's okay, don't care about rendering it in graphics window right now
-  tempord <- ordiellipse(tempmds, temppoints$trt, display = "sites", kind = "se", conf = 0.95, label = T)
+  #tempord <- ordiellipse(tempmds, temppoints$trt, display = "sites", kind = "se", conf = 0.95, label = T)
   tempell <- data.frame()
   temphulls <- data.frame()
   for(t in unique(temppoints$trt)){
-    tempell <- rbind(tempell, cbind(as.data.frame(with(temppoints[temppoints$trt==t,],                                                veganCovEllipse(tempord[[t]]$cov,tempord[[t]]$center,tempord[[t]]$scale)))
-                                  ,trt = t, trackerdf))
+    # ordiellipse for trt t
+    tempell <- rbind(tempell, cbind(as.data.frame(with(temppoints[temppoints$trt==t,],
+                    veganCovEllipse(cov.wt(cbind(MDS1,MDS2),wt=rep(1/length(MDS1),length(MDS1)))$cov,center=c(mean(MDS1),mean(MDS2)))))
+                    ,trt=t, trackerdf))
+    # ordihulls for trt t
     trthulls <-rbind(data.frame(temppoints[temppoints$trt == t, ][chull(temppoints[temppoints$trt == t, c("MDS1", "MDS2")]),])) # hull values for grp t
     # append to temphulls
     temphulls <- rbind(temphulls, trthulls)
@@ -512,7 +515,7 @@ for(i in unique(relstack$tracker)){
 ggplot(alpplotmds, aes(MDS1, MDS2)) +
   geom_point(data = alpsppmds, aes(MDS1, MDS2, shape = simple_lifeform), alpha = 0.5) +
   #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
-  geom_polygon(data=alpells, aes(x=NMDS1, y=NMDS2,fill=trt), alpha = 0.5) +
+  geom_polygon(data=alpells, aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
   geom_point(aes(col = trt)) +
   facet_wrap(~tracker)
 ```
@@ -523,7 +526,7 @@ ggplot(alpplotmds, aes(MDS1, MDS2)) +
 ggplot(subset(alpplotmds, site == "sdl" & iter == "main"), aes(MDS1, MDS2)) +
   geom_point(data = subset(alpsppmds, site == "sdl" & iter == "main"), aes(MDS1, MDS2, shape = simple_lifeform), alpha = 0.5) +
   #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
-  geom_polygon(data=subset(alpells, site == "sdl" & iter == "main"), aes(x=NMDS1, y=NMDS2,fill=trt), alpha = 0.5) +
+  geom_polygon(data=subset(alpells, site == "sdl" & iter == "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
   geom_point(aes(col = trt)) +
   facet_wrap(~yr)
 
@@ -531,7 +534,7 @@ ggplot(subset(alpplotmds, site == "sdl" & iter == "main"), aes(MDS1, MDS2)) +
 ggplot(subset(alpplotmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2)) +
   geom_point(data = subset(alpsppmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2, shape = simple_lifeform), alpha = 0.5) +
   #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
-  geom_polygon(data=subset(alpells, site == "nutnet" & iter == "main"), aes(x=NMDS1, y=NMDS2,fill=trt), alpha = 0.5) +
+  geom_polygon(data=subset(alpells, site == "nutnet" & iter == "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
   geom_point(aes(col = trt)) +
   facet_wrap(~yr)
 
@@ -539,15 +542,15 @@ ggplot(subset(alpplotmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2)) +
 ggplot(subset(alpplotmds, yr == 2013 & iter != "main"), aes(MDS1, MDS2)) +
   geom_point(data = subset(alpsppmds, yr == 2013 & iter != "main"), aes(MDS1, MDS2, shape = simple_lifeform), alpha = 0.5) +
   geom_polygon(data=subset(alphulls, yr == 2013 & iter != "main"), aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
-  #geom_polygon(data=subset(alpells, yr == 2013 & iter != "main"), aes(x=NMDS1, y=NMDS2,fill=trt), alpha = 0.5) +
+  #geom_polygon(data=subset(alpells, yr == 2013 & iter != "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
   geom_point(aes(col = trt)) +
   facet_wrap(~yr)
 
 # 2017
 ggplot(subset(alpplotmds, yr == 2017 & iter != "main"), aes(MDS1, MDS2)) +
   geom_point(data = subset(alpsppmds, yr == 2017 & iter != "main"), aes(MDS1, MDS2, shape = simple_lifeform), alpha = 0.5) +
-   geom_polygon(data=subset(alphulls, yr == 2017 & iter != "main"), aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
-  #geom_polygon(data=subset(alpells, yr == 2017 & iter != "main"), aes(x=NMDS1, y=NMDS2,fill=trt), alpha = 0.5) +
+  geom_polygon(data=subset(alphulls, yr == 2017 & iter != "main"), aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
+  #geom_polygon(data=subset(alpells, yr == 2017 & iter != "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
   geom_point(aes(col = trt)) +
   facet_wrap(~yr)
 
