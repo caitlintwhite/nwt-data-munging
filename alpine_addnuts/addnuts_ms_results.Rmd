@@ -3,9 +3,9 @@ title: "Alpine dry meadow fertilization results"
 author: "Caitlin White"
 date: "22/10/2019"
 output:
+  word_document: default
   html_document:
     fig_caption: yes
-  word_document: default
 ---
 
 ```{r setup, include=FALSE, warning = F, message = F, echo = F, }
@@ -71,11 +71,14 @@ spplist <- spplist %>%
 
 ```
 
-## Temporal trend in alpine dry meadow forb and grass relative abundance
+### Temporal trend in alpine dry meadow forb and grass relative abundance
+
+As a double check, these are the replicated figures and tables I get following methods described in the manuscript draft. For the most part, numbers are very similar and may be slightly different due to old species codes being consolidated into the same USDA species code. I did find a number of typos in old species codes, which maybe could result in slight variation to diversity or richness numbers. The biggest difference in NutNet results here vs. what's shown in the manuscript is in at least 2013 *Selaginella densa* was classed and surveyed as ground cover (non-vegetation hits). That is, I can replicate 2013 numbers when I also class *S. densa* as gound cover. In other surveys, however, S. densa was not necessarily surveyed as ground cover (for example, recorded below grass hits at a given point, or a in few cases, other plants were recorded as hit below S. densa at the top). S. densa is a vascular plant, and is relatively abundant in some plots, so I treated it as plant cover across all years and sites.
+
+With that, here are the updated figures and tables I get using the cleaned datasets, along with some additional figure panels, tables, or figures using new data added to the time-series dataset (e.g. 2003 and 2005 saddle sffert data). The 2003 and 2005 saddle data are REU data (2003 = Colin Tucker, REU with Bill Bowman; 2005 = Jane Griffin Smith, REU with Tim Seastedt), so not sure if data quality (specifically plant ID) is sufficient enough to want to include in the ms analyses, but at minimum *Geum rossi* numbers align with the rest of the Saddle *Geum rossi* time-series data and I think would be interesting data points to include.
 
 
-
-```{r Fig 1 and ANOVA tables}
+```{r Prep sdl mean forb and grass rel cover and ANOVA tables}
 # split out sdl and nutnet so can average C and N+P+K
 sdl_coarse <- subset(coarse_summary, site == "sdl") %>%
   # select only dry meadow plots consistently sampled
@@ -90,8 +93,6 @@ sdl_coarse_tall <- gather(sdl_coarse, met, val, ForbHits:ncol(sdl_coarse))
 
 # run anova
 fg_anova_global <- aov(val ~ trt * met * yr, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel")))
-summary(fg_anova_global)
-
 
 # iterate through anovas by year
 anova_df <- data.frame()
@@ -121,7 +122,10 @@ sdl_coarse_means <- dplyr::select(sdl_coarse, site, yr, plotid, trt, meadow, sno
   ungroup() %>%
   # calculate yrs passed since start of exp
   mutate(post_yrs = yr - 1993)
+```
 
+
+```{r Fig 1 and ANOVA, fig.cap="Fig 1. Mean relative forb and grass cover, Saddle, 1997-2016"}
 # visualize
 ggplot(data= subset(sdl_coarse_means, grp != "Geum_rel"), aes(trt, meancov, fill = grp)) +
   geom_errorbar(aes(ymax = meancov + secov, ymin = meancov-secov, col = grp), width = 0.1, position = position_dodge(width = 0.6)) +
@@ -132,18 +136,32 @@ ggplot(data= subset(sdl_coarse_means, grp != "Geum_rel"), aes(trt, meancov, fill
   theme(legend.position = c(0.8,0.3),
         legend.title = element_text(size = 10)) +
   facet_wrap(~yr, nrow = 2)
+```
 
+
+```{r Fig 1 related SDL means table}
 kable(dplyr::select(sdl_coarse_means, site, yr, trt, grp, meancov, secov) %>%
         filter(grp != "Geum_rel") %>%
         rename(fxnlgrp = grp) %>%
         mutate(fxnlgrp = gsub("_rel", "", fxnlgrp)) %>%
         gather(cat, val, meancov, secov) %>%
         mutate(cat = gsub("cov", "", cat)) %>%
-        unite(grp, trt, cat) %>%
-        spread(grp, val))
+        unite(grp, trt, cat, sep = " ") %>%
+        spread(grp, val), digits = 2, label = "Table S1. Mean relative forb and grass cover, Saddle, 1997-2016. Means, 1 standard error, n = 4 per treatment.")
+```
 
-kable(anova_df)
+You'll notice standard errors are hte same per treatment per year (e.g. 5.72 for both Forb and Grass in Control in 1997). I think this happens because Grass relative cover is 100-Forb relative cover, and so they will have a comparable amount of deviation (i.e. standard deviation is the same), and the sample size for both is 4.
 
+I did throw everything in a global ANOVA just to see if there are any significant effects or interactions between treatment, functional group, and time. "Met" here is short for metric, but standard for functional group (forb or grass). Mean cover between forb and grass overall is statistically distinct, and there is an interaction between functional group and treatment, with a small statistically significant interaction between treatment, functional group, and time.
+
+```{r Fig 1 global ANOVA}
+summary(fg_anova_global)
+```
+
+By year, here are the ANOVA results. Functional group is significant in all years but 1997, treatment never is (because it would be the mean by treatment.. which always averages to 50).. and the interaction between functional group and treatment always is!
+
+```{r Fig 1 related SDL ANOVA results}
+kable(anova_df, label = "Table S2. ANOVA results for saddle, effects of treatment and functional group (forb or grass) on mean relative cover. Separate ANOVAs were run by year, n=4 per treatment, per functional group.")
 ```
 
 
@@ -214,8 +232,8 @@ kable(nn_fg_means[nn_fg_means$met != "Geum_rel",1:6] %>%
         mutate(fxnlgrp = gsub("_rel", "", fxnlgrp)) %>%
         gather(cat, val, meancov, secov) %>%
         mutate(cat = gsub("cov", "", cat)) %>%
-        unite(grp, trt2, cat) %>%
-        spread(grp, val))
+        unite(grp, trt2, cat, sep = " ") %>%
+        spread(grp, val), digits = 2)
 
 kable(nn_anova_df)
 
