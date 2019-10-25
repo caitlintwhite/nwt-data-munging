@@ -474,7 +474,7 @@ for(i in unique(relstack$tracker)){
   temphulls <- data.frame()
   for(t in unique(temppoints$trt)){
     tempell <- rbind(tempell, cbind(as.data.frame(with(temppoints[temppoints$trt==t,],                                                veganCovEllipse(tempord[[t]]$cov,tempord[[t]]$center,tempord[[t]]$scale)))
-                                  ,trackerdf))
+                                  ,trt = t, trackerdf))
     trthulls <-rbind(data.frame(temppoints[temppoints$trt == t, ][chull(temppoints[temppoints$trt == t, c("MDS1", "MDS2")]),])) # hull values for grp t
     # append to temphulls
     temphulls <- rbind(temphulls, trthulls)
@@ -507,36 +507,49 @@ for(i in unique(relstack$tracker)){
 ```
 
 
-```{r plot sdl nmds}
-ggplot(sdlplotmds, aes(MDS1, MDS2)) +
-  geom_point(data = sdlsppmds, aes(MDS1, MDS2, shape = simple_lifeform), alpha = 0.5) +
+```{r plot nmds}
+# all together!
+ggplot(alpplotmds, aes(MDS1, MDS2)) +
+  geom_point(data = alpsppmds, aes(MDS1, MDS2, shape = simple_lifeform), alpha = 0.5) +
   #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
-  geom_polygon(data=sdlells, aes(x=NMDS1, y=NMDS2,fill=trt), alpha = 0.5) +
+  geom_polygon(data=alpells, aes(x=NMDS1, y=NMDS2,fill=trt), alpha = 0.5) +
   geom_point(aes(col = trt)) +
-  facet_wrap(~yr)
+  facet_wrap(~tracker)
 ```
 
 
-```{r nutnet multivariate analysis nmds, permanova, and betadisper}
+```{r main text nmds figs}
 
-# 2013 -- all plots
+ggplot(subset(alpplotmds, site == "sdl" & iter == "main"), aes(MDS1, MDS2)) +
+  geom_point(data = subset(alpsppmds, site == "sdl" & iter == "main"), aes(MDS1, MDS2, shape = simple_lifeform), alpha = 0.5) +
+  #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
+  geom_polygon(data=subset(alpells, site == "sdl" & iter == "main"), aes(x=NMDS1, y=NMDS2,fill=trt), alpha = 0.5) +
+  geom_point(aes(col = trt)) +
+  facet_wrap(~yr)
 
-# 2017 -- groups separate +K (4 per group) [supplemental fig?]
-nn17blockmatrix <- dplyr::select(nn17abundance, -nobs) %>%
-  spread(clean_code2, blockmean) %>%
-  unite(rowid, site, yr, block, trt, remove = F)
-nn17_envmatrix <- dplyr::select(nn17blockmatrix, rowid:trt2)
 
-nn17mds <- metaMDS(dplyr::select(nn17blockmatrix, `2FORB`:ncol(nn17blockmatrix)), trymax = 100)
-ordiplot(nn17mds, main = "NN17")
-with (nn17_envmatrix, ordihull(nn17mds, trt, col=1:6, label = T))
+ggplot(subset(alpplotmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2)) +
+  geom_point(data = subset(alpsppmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2, shape = simple_lifeform), alpha = 0.5) +
+  #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
+  geom_polygon(data=subset(alpells, site == "nutnet" & iter == "main"), aes(x=NMDS1, y=NMDS2,fill=trt), alpha = 0.5) +
+  geom_point(aes(col = trt)) +
+  facet_wrap(~yr)
 
-ordiplot(nn17mds, main = "NN 17")
-with (nn17_envmatrix, 
-      ordiellipse(nn17mds, trt, kind="se", conf=0.95, col=1:6, label = T))
+# 2013
+ggplot(subset(alpplotmds, yr == 2013 & iter != "main"), aes(MDS1, MDS2)) +
+  geom_point(data = subset(alpsppmds, yr == 2013 & iter != "main"), aes(MDS1, MDS2, shape = simple_lifeform), alpha = 0.5) +
+  geom_polygon(data=subset(alphulls, yr == 2013 & iter != "main"), aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
+  #geom_polygon(data=subset(alpells, yr == 2013 & iter != "main"), aes(x=NMDS1, y=NMDS2,fill=trt), alpha = 0.5) +
+  geom_point(aes(col = trt)) +
+  facet_wrap(~yr)
 
-# 2013 and 2017 -- C, N, P, and N+P only (4 per group), common plots only
-
+# 2017
+ggplot(subset(alpplotmds, yr == 2017 & iter != "main"), aes(MDS1, MDS2)) +
+  geom_point(data = subset(alpsppmds, yr == 2017 & iter != "main"), aes(MDS1, MDS2, shape = simple_lifeform), alpha = 0.5) +
+   geom_polygon(data=subset(alphulls, yr == 2017 & iter != "main"), aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
+  #geom_polygon(data=subset(alpells, yr == 2017 & iter != "main"), aes(x=NMDS1, y=NMDS2,fill=trt), alpha = 0.5) +
+  geom_point(aes(col = trt)) +
+  facet_wrap(~yr)
 
 ```
 
