@@ -280,6 +280,7 @@ ggplot(sdl_biodiv_means, aes(trt, meancov, col = yr)) +
 ```{r abundant forbs in nutnet}
 abundance <- subset(plantcom, hits > 0.25 & simple_lifeform != "Ground cover") %>%
   dplyr::select(site, yr, plotid, block, plot, trt, trt2, clean_code2, hits)
+  
 # make wide form
 abundance_wide <- spread(abundance, clean_code2, hits, fill = 0) %>%
   unite(rowid, site, yr, plotid, sep = "_", remove = F)
@@ -338,31 +339,118 @@ table_nn17spp
 ```
 
 
-```{r sdl multivariate analysis nmds, permanova, and betadisper}
+```{r multivariate analysis nmds, permanova, and betadisper}
+
+# create function for storing ellipse (from: https://stackoverflow.com/questions/13794419/plotting-ordiellipse-function-from-vegan-package-onto-nmds-plot-created-in-ggplo)
+veganCovEllipse<-function (cov, center = c(0, 0), scale = 1, npoints = 100){
+    theta <- (0:npoints) * 2 * pi/npoints
+    Circle <- cbind(cos(theta), sin(theta))
+    t(center + scale * t(Circle %*% chol(cov)))
+  }
+
+# procedure:
+## subset data to common plots only so can compare across yrs
+## sdl data can be run through as they are (C, N, P, N+P)
+## nutnet data need to be block-averaged (2 reps of C and N+P+K in each block)
+## then different iterations of nutnet run:
+## 1) C, N, P and N+P only
+## 2) all trts (+K)
+## 3) K-collapsed trts (e.g. N+P+K becomes N+P) [this pertains to 2013 in particular bc no K added then, just micronuts]
+# prep abundance data to feed through for loop by site, add on a col to keep track of iteration, then feed through for-loop
+
+# make block-averaged nn abundance dat
+nnabundance <- relabundance[grepl("nutnet", rownames(relabundance)),] %>%
+  rownames_to_column("rowid") %>%
+  left_join(dplyr::select(abundance_wide, rowid:trt2)) %>%
+  dplyr::select(rowid,site:trt2, colnames(.)[colnames(.) %in% unique(spplist$clean_code2)]) %>%
+  gather(clean_code2, relcov, colnames(.)[colnames(.) %in% unique(spplist$clean_code2)]) %>%
+  group_by(site, yr, block, trt, trt2, clean_code2) %>%
+  summarise(rcblockmean = mean(relcov),
+            nobs = length(relcov)) %>%
+  ungroup() %>%
+  # add iteration
+  mutate(iter = "suppl") %>%
+  # recode 2017 N+K to N so has 4 N reps that yr
+  mutate(trt = ifelse(yr == 2017 & trt == "N+K", "N", trt)) %>%
+  # join F2G ratio from coarse means
+  left_join(subset(nn_coarse_blockmeans, met == "F2G_ratio")) %>%
+  # change block to id and drop nobs
+  rename(id = block,
+         F2G_ratio = blockmean) %>%
+  dplyr::select(-c(trt2, met)) %>%
+  #make wideform
+  spread(clean_code2, rcblockmean) %>%
+  # add rowid
+  unite(rowid, site, yr, id, trt, iter, remove = F)
+
+#subset common plots nn abundance
+nnabund_comm <- relabundance[grepl("nutnet", rownames(relabundance)),] %>%
+  rownames_to_column("rowid") %>%
+  left_join(dplyr::select(abundance_wide, rowid:trt2)) %>%
+  filter(plotid %in% nn_common) %>%
+  dplyr::select(rowid,site:trt2, colnames(.)[colnames(.) %in% unique(spplist$clean_code2)]) %>%
+  gather(clean_code2, relcov, colnames(.)[colnames(.) %in% unique(spplist$clean_code2)]) %>%
+  group_by(site, yr, block, trt, trt2, clean_code2) %>%
+  summarise(rcblockmean = mean(relcov),
+            nobs = length(relcov)) %>%
+  ungroup() %>%
+  #recode N+K to N so have 4 points 
+  mutate(trt = recode(trt, `N+K` = "N"),
+         # add iteration
+         iter = "main") %>%
+  # recode 2017 N+K to N so has 4 N reps that yr
+  mutate(trt = ifelse(yr == 2017 & trt == "N+K", "N", trt)) %>%
+  # join F2G ratio from coarse means
+  left_join(subset(nn_coarse_blockmeans, met == "F2G_ratio")) %>%
+  # change block to id and drop nobs
+  rename(id = block,
+         F2G_ratio = blockmean) %>%
+  dplyr::select(-c(trt2, met)) %>%
+  spread(clean_code2, rcblockmean) %>%
+  # retain only plots in N, P, C, or N+P
+  filter(trt %in% c("C", "N", "P", "N+P")) %>%
+  # add rowid
+  unite(rowid, site, yr, id, trt, iter, remove = F)
+
+
 # get all relativized sdl data
-sdlabundance <- relabundance[grepl("sdl", rownames(relabundance)),]
-# remove any spp that were never in any sites in 2017 (colsum == 1)
-sdlabundance <- sdlabundance[,apply(sdlabundance, 2, sum)>0]
-sdlabundance <- sdlabundance %>%
+sdlabundance <- relabundance[grepl("sdl", rownames(relabundance)),] %>%
   mutate(rowid = rownames(.)) %>%
   # join trt info
   left_join(dplyr::select(abundance_wide, rowid:plotid, trt)) %>%
   # select plots commonly sampled across yrs
-  filter(plotid %in% sdl_common)
+  filter(plotid %in% sdl_common) %>%
+  # add iteration
+  mutate(iter = "main",
+         nobs = 1) %>%
+  #join F2G ratio
+  left_join(dplyr::select(coarse_summary, site:plotid, F2G_ratio)) %>%
+  #reorder cols (drop rowid to remake)
+  dplyr::select(site:F2G_ratio, colnames(.)[colnames(.) %in% unique(spplist$clean_code2)]) %>%
+  rename(id = plotid) %>%
+  # add rowid
+  unite(rowid, site, yr, id, trt, iter, remove = F)
 
+# stack all
+relstack <- rbind(nnabundance, nnabund_comm, sdlabundance) %>% as.data.frame() %>%
+  # unite yr and iteration to id iterations in for loop
+  unite(tracker, iter,yr, remove = F)
+rownames(relstack) <- relstack$rowid
+envmatrix <- relstack[!colnames(relstack) %in% unique(spplist$clean_code2)]
+
+# add in F2G ratio to envmatrix (must average nn)
 # initiate empty dfs for storing nmds results
-sdlsppmds <- data.frame()
-sdlplotmds <- data.frame()
+alpsppmds <- data.frame()
+alpplotmds <- data.frame()
+alphulls <- data.frame()
+alpells <- data.frame()
 # initiate empty list for storing nmds objects, and other stats objects
-sdlmds <- list()
+alpmds <- list()
+
 # iterate through years for multivar analysis
-for(i in unique(sdlabundance$yr)){
-  tempmatrix <- subset(sdlabundance, yr == i) %>%
-    dplyr::select(c(colnames(.)[colnames(.) %in% unique(spplist$clean_code2)],rowid))
-  # assign rowid
-  rownames(tempmatrix) <- tempmatrix$rowid
-  # remove rowid
-  tempmatrix <- tempmatrix[,!colnames(tempmatrix) == "rowid"]
+for(i in unique(relstack$tracker)){
+  tempmatrix <- subset(relstack, tracker == i) %>%
+    dplyr::select(c(colnames(.)[colnames(.) %in% unique(spplist$clean_code2)]))
   # remove any cols that sum to 0 (spp not present in any plot)
   tempmatrix <- tempmatrix[,apply(tempmatrix, 2, sum)>0] 
   # run metamds
@@ -370,27 +458,40 @@ for(i in unique(sdlabundance$yr)){
   # scrape results into dfs
   temppoints <- data.frame(tempmds$points) %>%
     rownames_to_column("rowid") %>%
-    left_join(dplyr::select(abundance_wide, rowid:trt)) %>%
-    # join f2g ratio for envfit
-    left_join(dplyr::select(coarse_summary, site:plot,F2G_ratio))
+    left_join(envmatrix)
+  # make tracker df info
+  trackerdf <- distinct(temppoints[c("site", "tracker", "yr", "iter")])
+  
   tempspp <- data.frame(tempmds$species) %>%
     rownames_to_column("clean_code2") %>%
     left_join(distinct(spplist[c("clean_code2", "simple_name", "simple_lifeform", "simple_lifeform2")])) %>%
-    mutate(site = unique(temppoints$site),
-           yr = i)
-  # gather hulls
+    cbind(trackerdf)
+  
+  # store nmds ellipse
+  ## > note: ordiellipse call throws a warning about invalid graphics state but it's okay, don't care about rendering it in graphics window right now
+  tempord <- ordiellipse(tempmds, temppoints$trt, display = "sites", kind = "se", conf = 0.95, label = T)
+  tempell <- data.frame()
+  temphulls <- data.frame()
+  for(t in unique(temppoints$trt)){
+    tempell <- rbind(tempell, cbind(as.data.frame(with(temppoints[temppoints$trt==t,],                                                veganCovEllipse(tempord[[t]]$cov,tempord[[t]]$center,tempord[[t]]$scale)))
+                                  ,trackerdf))
+    trthulls <-rbind(data.frame(temppoints[temppoints$trt == t, ][chull(temppoints[temppoints$trt == t, c("MDS1", "MDS2")]),])) # hull values for grp t
+    # append to temphulls
+    temphulls <- rbind(temphulls, trthulls)
+  }
   
   # bind nmds dat to masters
-  sdlplotmds <- rbind(sdlplotmds, temppoints)
-  sdlsppmds <- rbind(sdlsppmds, tempspp)
-  
+  alpplotmds <- rbind(alpplotmds, temppoints)
+  alpsppmds <- rbind(alpsppmds, tempspp)
+  alphulls <- rbind(alphulls, temphulls)
+  alpells <- rbind(alpells, tempell)
   # run permanova, betadisper, envfit
   # store list pos
-  pos <- which(unique(sdlabundance$yr) == i)
+  pos <- which(unique(relstack$tracker) == i)
   ## calculate CB distance
   tempbray <- vegdist(tempmatrix)
   # store all multivar in list
-  sdlmds[[pos]] <- list(tempmds,
+  alpmds[[pos]] <- list(tempmds,
                         envfit(tempmds, temppoints[c("trt", "F2G_ratio")], perm = 1000),
                         anosim(tempbray, grouping = temppoints$trt, permutations = 1000),
                         mrpp(tempmatrix,  grouping = temppoints$trt, distance = "bray"),
@@ -398,8 +499,8 @@ for(i in unique(sdlabundance$yr)){
                         betadisper(tempbray, temppoints$trt),
                         anova(betadisper(tempbray, temppoints$trt)))
   # assign names
-  names(sdlmds)[pos] <- paste0("sdl", i)
-  names(sdlmds[[pos]]) <- c("nmds", "envfit", "anosim", "mrpp", "adonis", "betadisper", "anova_disper")
+  names(alpmds)[pos] <- paste(unique(temppoints$site), i, sep = "_")
+  names(alpmds[[pos]]) <- c("nmds", "envfit", "anosim", "mrpp", "adonis", "betadisper", "anova_disper")
 }
 
 
@@ -407,9 +508,11 @@ for(i in unique(sdlabundance$yr)){
 
 
 ```{r plot sdl nmds}
-
-ggplot(sdlplotmds, aes(MDS1, MDS2, fill = trt, grp = trt)) +
-  geom_area() +
+ggplot(sdlplotmds, aes(MDS1, MDS2)) +
+  geom_point(data = sdlsppmds, aes(MDS1, MDS2, shape = simple_lifeform), alpha = 0.5) +
+  #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
+  geom_polygon(data=sdlells, aes(x=NMDS1, y=NMDS2,fill=trt), alpha = 0.5) +
+  geom_point(aes(col = trt)) +
   facet_wrap(~yr)
 ```
 
