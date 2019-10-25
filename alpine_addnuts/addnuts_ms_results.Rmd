@@ -2,12 +2,13 @@
 title: "Alpine dry meadow fertilization results"
 author: "Caitlin White"
 date: "22/10/2019"
-output: 
-  html_document: 
+output:
+  html_document:
     fig_caption: yes
+  word_document: default
 ---
 
-```{r setup, include=FALSE, warning = F, message = F, echo = F}
+```{r setup, include=FALSE, warning = F, message = F, echo = F, }
 knitr::opts_chunk$set(echo = FALSE, message = F, warning = F)
 # note: this script copies over script worked out in other R scripts for the sole purpose of exporting statistical results, tables and figures for Tim Seastedt (to avoid exporting a bunch of figs and tables as CVSs from R)
 # see R scripts replicat_ts_results.R, analyze_ts_dats.R, and addnuts_figs.R for lengthier scripts that go through the analysis weeds
@@ -17,7 +18,7 @@ knitr::opts_chunk$set(echo = FALSE, message = F, warning = F)
 # setup environment
 library(tidyverse)
 library(vegan)
-library(cowplot)
+library(knitr)
 na_vals <- c("", " ", NA, "NA", "NaN", NaN, ".")
 options(stringsAsFactors = F, strip.white = T, na.strings = na_vals)
 theme_set(theme_bw())
@@ -90,25 +91,25 @@ sdl_coarse_tall <- gather(sdl_coarse, met, val, ForbHits:ncol(sdl_coarse))
 # run anova
 fg_anova_global <- aov(val ~ trt * met * yr, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel")))
 summary(fg_anova_global)
-TukeyHSD(fg_anova_global)
 
-# anovas by year
-fg_anova97 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 1997))
-fg_anova03 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 2003))
-fg_anova05 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 2005))
-fg_anova12 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 2012))
-fg_anova16 <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == 2016))
 
-summary(fg_anova97)
-TukeyHSD(fg_anova97)
-summary(fg_anova03)
-TukeyHSD(fg_anova03)
-summary(fg_anova05)
-TukeyHSD(fg_anova05)
-summary(fg_anova12)
-TukeyHSD(fg_anova12)
-summary(fg_anova16)
-TukeyHSD(fg_anova16)
+# iterate through anovas by year
+anova_df <- data.frame()
+for(i in unique(sdl_coarse$yr)){
+  tempanova <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == i))
+  tempresults <- data.frame(cbind(site = "sdl", yr = i, broom::tidy(tempanova)))
+  anova_df <- rbind(anova_df, tempresults)
+}
+# clean up
+anova_df <- filter(anova_df, !term == "Residuals") %>%
+  dplyr::select(site, yr, term, statistic, p.value) %>%
+  rename(F.stat = statistic) %>%
+  gather(met, val, F.stat, p.value) %>%
+  mutate(term = gsub("met", "fxngrp", term)) %>%
+  mutate(val = round(val, 4)) %>%
+  unite(grp, term, met, sep = "_") %>%
+  spread(grp,val)
+
 
 # average by treatment
 sdl_coarse_means <- dplyr::select(sdl_coarse, site, yr, plotid, trt, meadow, snow, Forb_rel, Grass_rel, Geum_rel) %>%
@@ -120,7 +121,6 @@ sdl_coarse_means <- dplyr::select(sdl_coarse, site, yr, plotid, trt, meadow, sno
   ungroup() %>%
   # calculate yrs passed since start of exp
   mutate(post_yrs = yr - 1993)
-sdl_coarse_means
 
 # visualize
 ggplot(data= subset(sdl_coarse_means, grp != "Geum_rel"), aes(trt, meancov, fill = grp)) +
@@ -132,6 +132,17 @@ ggplot(data= subset(sdl_coarse_means, grp != "Geum_rel"), aes(trt, meancov, fill
   theme(legend.position = c(0.8,0.3),
         legend.title = element_text(size = 10)) +
   facet_wrap(~yr, nrow = 2)
+
+kable(dplyr::select(sdl_coarse_means, site, yr, trt, grp, meancov, secov) %>%
+        filter(grp != "Geum_rel") %>%
+        rename(fxnlgrp = grp) %>%
+        mutate(fxnlgrp = gsub("_rel", "", fxnlgrp)) %>%
+        gather(cat, val, meancov, secov) %>%
+        mutate(cat = gsub("cov", "", cat)) %>%
+        unite(grp, trt, cat) %>%
+        spread(grp, val))
+
+kable(anova_df)
 
 ```
 
@@ -160,27 +171,33 @@ nn_fg_dat <- subset(nn_coarse_blockmeans, met %in% c("Forb_rel", "Grass_rel", "G
 # run anova of forbs and grass rel cov, using C, N and N+P only (so 4 reps per trt) [i.e. ignore K, N+P+K]
 nn_fg_anova_global <- aov(blockmean ~ trt2 * met * yr, data = subset(nn_fg_dat, met != "Geum_rel" & trt2 != "P"))
 summary(nn_fg_anova_global)
-TukeyHSD(nn_fg_anova_global)
 
+# by year
 nn_fg_anova13 <- aov(blockmean ~ trt2 * met, data = subset(nn_fg_dat, yr == 2013 & met != "Geum_rel"))
 nn_fg_anova17 <- aov(blockmean ~ trt2 * met, data = subset(nn_fg_dat, yr == 2017 & met != "Geum_rel" & trt2 != "P"))
 
-summary(nn_fg_anova13)
-TukeyHSD(nn_fg_anova13)
-summary(nn_fg_anova17)
-TukeyHSD(nn_fg_anova17)
+# gather results
+nn_anova_df <- rbind(cbind(site = "nutnet", yr = 2013, broom::tidy(nn_fg_anova13)),
+                     cbind(site = "nutnet", yr = 2017, broom::tidy(nn_fg_anova17))) %>%
+  filter(!term == "Residuals") %>%
+  dplyr::select(site, yr, term, statistic, p.value) %>%
+  rename(F.stat = statistic) %>%
+  gather(met, val, F.stat, p.value) %>%
+  mutate(term = gsub("met", "fxngrp", term)) %>%
+  mutate(val = round(val, 4)) %>%
+  unite(grp, term, met, sep = "_") %>%
+  spread(grp,val)
 
 # calculate table of means and ses
 nn_fg_means <- data.frame(nn_fg_dat) %>%
   group_by(site, yr, trt2, met) %>%
   summarise(meancov = mean(blockmean),
-            secov = sd(blockmean)/sqrt(length(blockmean)),
+            secov = sd(blockmean)/sqrt(4),
             nobs = length(blockmean)) %>%
   ungroup() %>%
   # calculate yrs passed since start of exp
   mutate(post_yrs = yr - 2008) %>%
   as.data.frame()
-nn_fg_means
 
 # visualize
 ggplot(data= subset(nn_fg_means, met != "Geum_rel"), aes(trt2, meancov, fill = met)) +
@@ -191,6 +208,17 @@ ggplot(data= subset(nn_fg_means, met != "Geum_rel"), aes(trt2, meancov, fill = m
   labs(y = "Mean relative cover (%)", x = "Treatment") +
   theme(legend.title = element_text(size = 10)) +
   facet_wrap(~yr, ncol = 2)
+
+kable(nn_fg_means[nn_fg_means$met != "Geum_rel",1:6] %>% 
+        rename(fxnlgrp = met) %>%
+        mutate(fxnlgrp = gsub("_rel", "", fxnlgrp)) %>%
+        gather(cat, val, meancov, secov) %>%
+        mutate(cat = gsub("cov", "", cat)) %>%
+        unite(grp, trt2, cat) %>%
+        spread(grp, val))
+
+kable(nn_anova_df)
+
 ```
 
 
@@ -339,7 +367,7 @@ table_nn17spp
 ```
 
 
-```{r multivariate analysis nmds, permanova, and betadisper}
+```{r multivariate analysis nmds, permanova, and betadisper, include=F}
 
 # create function for storing ellipse (from: https://stackoverflow.com/questions/13794419/plotting-ordiellipse-function-from-vegan-package-onto-nmds-plot-created-in-ggplo)
 veganCovEllipse<-function (cov, center = c(0, 0), scale = 1, npoints = 100){
