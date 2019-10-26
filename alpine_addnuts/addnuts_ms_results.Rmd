@@ -218,7 +218,7 @@ Mean hits by treatment are significantly different from one another in 2012, oth
 
 #### NutNet Trends
 
-```{r Fig 2 and ANOVA tables}
+```{r Fig 2 and ANOVA tables, fig.cap= "Fig 2. NutNet mean forb and grass relative cover, 2013 and 2017"}
 # nutnet
 ## need to average N+P and C by block first (2 reps per block)
 nn_coarse_blockmeans <- subset(coarse_summary, site == "nutnet") %>% 
@@ -235,16 +235,16 @@ nn_coarse_blockmeans <- subset(coarse_summary, site == "nutnet") %>%
   ungroup()
 
 # subset to just C, N and N+P for fig2 and anova
-nn_fg_dat <- subset(nn_coarse_blockmeans, met %in% c("Forb_rel", "Grass_rel", "Geum_rel") & trt %in% c("C", "N", "P", "N+P")) %>%
+nn_fg_dat <- subset(nn_coarse_blockmeans, met %in% c("Forb_rel", "Grass_rel", "Geum_rel", "ForbHits", "GrassHits") & trt %in% c("C", "N", "P", "N+P")) %>%
   mutate(trt2 = factor(trt2, levels = c("C", "N", "P", "N+P")))
 
 # run anova of forbs and grass rel cov, using C, N and N+P only (so 4 reps per trt) [i.e. ignore K, N+P+K]
-nn_fg_anova_global <- aov(blockmean ~ trt2 * met * yr, data = subset(nn_fg_dat, met != "Geum_rel" & trt2 != "P"))
-summary(nn_fg_anova_global)
+nn_fg_anova_global <- aov(blockmean ~ trt2 * met * yr, data = subset(nn_fg_dat, met %in% c("Grass_rel", "Forb_rel") & trt2 != "P"))
+
 
 # by year
-nn_fg_anova13 <- aov(blockmean ~ trt2 * met, data = subset(nn_fg_dat, yr == 2013 & met != "Geum_rel"))
-nn_fg_anova17 <- aov(blockmean ~ trt2 * met, data = subset(nn_fg_dat, yr == 2017 & met != "Geum_rel" & trt2 != "P"))
+nn_fg_anova13 <- aov(blockmean ~ trt2 * met, data = subset(nn_fg_dat, yr == 2013 & met %in% c("Grass_rel", "Forb_rel")))
+nn_fg_anova17 <- aov(blockmean ~ trt2 * met, data = subset(nn_fg_dat, yr == 2017 & met %in% c( "Grass_rel", "Forb_rel") & trt2 != "P"))
 
 # gather results
 nn_anova_df <- rbind(cbind(site = "nutnet", yr = 2013, broom::tidy(nn_fg_anova13)),
@@ -270,7 +270,7 @@ nn_fg_means <- data.frame(nn_fg_dat) %>%
   as.data.frame()
 
 # visualize
-ggplot(data= subset(nn_fg_means, met != "Geum_rel"), aes(trt2, meancov, fill = met)) +
+ggplot(data= subset(nn_fg_means, met %in% c("Grass_rel", "Forb_rel")), aes(trt2, meancov, fill = met)) +
   geom_errorbar(aes(ymax = meancov + secov, ymin = meancov-secov, col = met), width = 0.1, position = position_dodge(width = 0.6)) +
   geom_col(color = "grey30", position = position_dodge(width = 0.6), width = 0.5) +
   scale_color_grey(name = "Group", labels = c("Forb", "Grass")) +
@@ -279,19 +279,68 @@ ggplot(data= subset(nn_fg_means, met != "Geum_rel"), aes(trt2, meancov, fill = m
   theme(legend.title = element_text(size = 10)) +
   facet_wrap(~yr, ncol = 2)
 
-kable(nn_fg_means[nn_fg_means$met != "Geum_rel",1:6] %>% 
+```
+
+```{r NutNet functional group means}
+kable(nn_fg_means[nn_fg_means$met %in% c("Grass_rel", "Forb_rel"),1:6] %>% 
         rename(fxnlgrp = met) %>%
         mutate(fxnlgrp = gsub("_rel", "", fxnlgrp)) %>%
         gather(cat, val, meancov, secov) %>%
         mutate(cat = gsub("cov", "", cat)) %>%
         unite(grp, trt2, cat, sep = " ") %>%
-        spread(grp, val), digits = 2)
-
-kable(nn_anova_df)
+        spread(grp, val), digits = 2, caption = "NutNet mean forb and grass relative cover, by treatment (means, 1 standard error, n = 4 per treatment; 2 reps of C and N+P+K within block averaged before calculating treatment averages across blocks)")
 
 ```
 
+Again, trying everything in a global ANOVA (functional group x treatment x yr), and running two separate ANOVAs for 2013 and 2017. Two replicates for C and N+P+K within block were averaged before running the ANOVA, so that each block only has 1 value of mean grass and 1 value of mean forb per treatment.
 
+```{r NutNet ANOVA tables}
+summary(nn_fg_anova_global)
+kable(nn_anova_df, caption = "NutNet grass vs. forb vs. treatment ANOVA, by year")
+```
+
+Disimilar to Saddle trends, nothing is significant at the NutNet site. 
+
+```{r NutNet hits ANOVA}
+# by year
+nn_fghits_anova13 <- aov(blockmean ~ trt2 * met, data = subset(nn_fg_dat, yr == 2013 & met %in% c("GrassHits", "ForbHits")))
+nn_fghits_anova17 <- aov(blockmean ~ trt2 * met, data = subset(nn_fg_dat, yr == 2017 & met %in% c( "GrassHits", "ForbHits") & trt2 != "P"))
+
+# gather results
+nn_anovahits_df <- rbind(cbind(site = "nutnet", yr = 2013, broom::tidy(nn_fghits_anova13)),
+                     cbind(site = "nutnet", yr = 2017, broom::tidy(nn_fghits_anova17))) %>%
+  filter(!term == "Residuals") %>%
+  dplyr::select(site, yr, term, statistic, p.value) %>%
+  rename(F.stat = statistic) %>%
+  gather(met, val, F.stat, p.value) %>%
+  mutate(term = gsub("met", "fxngrp", term)) %>%
+  mutate(val = round(val, 4)) %>%
+  unite(grp, term, met, sep = "_") %>%
+  spread(grp,val)
+
+# visualize
+ggplot(data= subset(nn_fg_means, met %in% c("GrassHits", "ForbHits")), aes(trt2, meancov, fill = met)) +
+  geom_errorbar(aes(ymax = meancov + secov, ymin = meancov-secov, col = met), width = 0.1, position = position_dodge(width = 0.6)) +
+  geom_col(color = "grey30", position = position_dodge(width = 0.6), width = 0.5) +
+  scale_color_grey(name = "Group", labels = c("Forb", "Grass")) +
+  scale_fill_grey(name = "Group", labels = c("Forb", "Grass")) +
+  labs(y = "Mean hits", x = "Treatment") +
+  theme(legend.title = element_text(size = 10)) +
+  facet_wrap(~yr, ncol = 2)
+
+kable(nn_anovahits_df, digits = 4, caption = "NutNet: ANOVA on mean hits")
+nn13hitstukey <- TukeyHSD(nn_fghits_anova13)
+nn13hits_tk_df <- data.frame(rbind(cbind(comparison = rownames(nn13hitstukey$met), nn13hitstukey$met, grp = "met", yr = 2013),
+                        cbind(comparison = rownames(nn13hitstukey$trt2), nn13hitstukey$trt2, grp = "trt2", yr = 2013),
+                        cbind(comparison = rownames(nn13hitstukey$`trt2:met`), nn13hitstukey$`trt2:met`,grp = "trt2:met", yr = 2013))) %>%
+  mutate_at(c("diff", "lwr", "upr", "p.adj"), as.numeric) %>%
+  filter(p.adj <= 0.05)
+kable(nn13hits_tk_df, digits = 4, caption = "NutNet 2013: Significant differences in mean hits (p < 0.05) between functional groups and treatments, tested with Tukey HSD")
+```
+
+
+
+When everything is plotted together, you can see how the shift in *G. rossii* cover at Saddle is driving the shift in forb cover over time. Plotting both sites together also suggests perhaps NutNet is on a similar trajectory to Saddle in shift to forb dominance over time with N+P additions, but not enough years (and N+P additions) have occurred to confirm that trend.
 
 ```{r all together}
 # stack sdl and nutnet to plot means and ses by yr since trts initiated
@@ -302,8 +351,8 @@ all_fg_means <- rename(nn_fg_means, trt = trt2, grp = met, meanval = meancov, se
 
 # plot means by time since experiment onset
 mutate(all_fg_means, grp = factor(grp, levels = c("Forb_rel", "Grass_rel", "Geum_rel"), labels = c("All forbs", "All grasses", "G. rossii"))) %>%
-  ggplot(aes(post_yrs, meancov, grp = site)) +
-  geom_errorbar(aes(ymax = meancov + secov, ymin = meancov - secov), width = 0) +
+  ggplot(aes(post_yrs, meanval, grp = site)) +
+  geom_errorbar(aes(ymax = meanval + seval, ymin = meanval - seval), width = 0) +
   geom_point(aes(shape = site), fill = "white") +
   #geom_line(aes(col = site)) +
   #scale_color_manual(name = "Site", values = c("salmon", "darkred"), labels = c("NutNet", "Saddle")) +
@@ -314,10 +363,10 @@ mutate(all_fg_means, grp = factor(grp, levels = c("Forb_rel", "Grass_rel", "Geum
   facet_grid(grp~trt, scales = "free_y")
 ```
 
+Finally, here are the tables 1-4 recreated using the cleaned datasets:
 
 
-
-```{r nutnet biodiversity tables}
+```{r nutnet biodiversity tables, include = F}
 # collapse K (micro) into otherwise similar treatments (n = 8 per group)
 # summarise 2013
 nn_biodiv13_means <- subset(nn_coarse_blockmeans, yr == 2013) %>%
@@ -357,23 +406,56 @@ ggplot(nn_biodiv17_means, aes(trt, meancov)) +
 ```
 
 
+```{r Table 1 NutNet 2013 biodiv means}
+
+kable(dplyr::select(nn_biodiv13_means, -post_yrs) %>%
+        gather(cat, val, meancov, secov) %>%
+        filter(met %in% c("S", "H", "PlantCov", "Total_g_m2", "VegHits")) %>%
+        unite(grp, trt2, cat) %>%
+        spread(grp, val) %>%
+        mutate(met = factor(met, levels = c("S", "H", "PlantCov", "Total_g_m2", "VegHits"))) %>%
+        arrange(met) %>%
+        # reorder cols
+        dplyr::select(site:N_secov, P_meancov, P_secov, `N+P_meancov`:ncol(.)) %>%
+        rename(variable = met) %>%
+        rename_all(function(x) trimws(gsub("_|cov", " ",x))), 
+      digits = 2, caption = "Table 1. NN 2013 biodiversity, vegetation complexity, and biomass trends per treatment (means, 1 standard error, nutrient and nutrient+micro treatments pooled (8 per group)")
+
+```
+
+
+```{r}
+kable(dplyr::select(nn_biodiv17_means, -post_yrs) %>%
+        gather(cat, val, meancov, secov) %>%
+        filter(met %in% c("S", "H", "PlantCov", "Total_g_m2", "VegHits")) %>%
+        unite(grp, trt, cat) %>%
+        spread(grp, val) %>%
+        mutate(met = factor(met, levels = c("S", "H", "PlantCov", "Total_g_m2", "VegHits"))) %>%
+        arrange(met) %>%
+        # reorder cols
+        #dplyr::select(site:N_secov, P_meancov, P_secov, `N+P_meancov`:ncol(.)) %>%
+        rename(variable = met) %>%
+        rename_all(function(x) trimws(gsub("_|cov", " ",x))), 
+      digits = 2, caption = "Table 2. NN 2017 biodiversity, and vegetation complexity (biomass not measured) trends per treatment (means, 1 standard error, n = 4 per treatment [C and N+P+K reps averaged within block (2 rep per block) first]")
+```
+
+
+Out of curiosity, I repeated this for Saddle for years where biodiversity or biomass data are available:
+
 ```{r sdl biodiversity}
-sdl_biodiv_means <- subset(sdl_coarse_tall, yr %in% unique(sdl_coarse_tall$yr[sdl_coarse_tall$met == "H" & !is.na(sdl_coarse_tall$val)])) %>%
-  group_by(site, yr, trt, met) %>%
-  summarise(meancov = mean(val),
-            secov = sd(val)/sqrt(length(val)),
-            nobs = length(val)) %>%
-  ungroup() %>%
-  filter(!is.na(meancov)) %>%
-  # calculate yrs passed since start of exp
-  mutate(post_yrs = yr - 1993) %>%
-  as.data.frame()
+sdl_biodiv_means <- #subset(sdl_coarse_means, yr %in% unique(sdl_coarse_tall$yr[sdl_coarse_tall$met == "H" & !is.na(sdl_coarse_tall$val)])) %>%
+  sdl_coarse_means %>%
+  filter(grp %in% c("S", "H", "PlantCov", "Total_g_m2", "VegHits")) %>%
+  filter(!is.na(meanval))
+  
 
 # visualize
-ggplot(sdl_biodiv_means, aes(trt, meancov, col = yr)) +
-  geom_errorbar(aes(ymax = secov + meancov, ymin = meancov - secov), width = 0.1) +
-  geom_point() +
-  facet_wrap(~met, scales = "free_y")
+ggplot(sdl_biodiv_means, aes(post_yrs, meanval, col = trt)) +
+  geom_errorbar(aes(ymax = seval + meanval, ymin = meanval - seval), width = 0.1, position = position_dodge(width = 0.3)) +
+  geom_line(position = position_dodge(width = 0.3), alpha = 0.75, lty = 2) +
+  geom_point(position = position_dodge(width = 0.3)) +
+  #scale_x_continuous(breaks = c(unique(sdl_biodiv_means$yr))) +
+  facet_wrap(~grp, scales = "free_y")
 ```
 
 
@@ -433,6 +515,7 @@ table_nn17spp <- subset(nn17abund_means, clean_code2 %in% keepspp) %>%
   rename_all(function(x) gsub("_relcov", "", x)) %>%
   #recorder cols
   dplyr::select(site, yr, nobs, clean_code2, simple_name, simple_lifeform2, C_mean:ncol(.))
+table_nn17spp$sortcol <- apply(dplyr::select(table_nn17spp, C_mean,N_mean, K_mean, `N+P_mean`, `N+P+K_mean`),1, sum)
 
 ```
 
@@ -441,7 +524,9 @@ Abundant species in NutNet plots by the final year:
 ```{r}
 kable(rename_all(table_nn17spp, function(x)gsub("_", " ", x)) %>%
         rename(lifeform = `simple lifeform2`,
-               species = `simple name`), caption = "Species with mean abundance >= 2%, n = 4 per treatment group")
+               species = `simple name`) %>%
+        arrange(lifeform, desc(sortcol)) %>%
+        dplyr::select(-sortcol), caption = "Table 4. NutNet 2017, species with mean abundance >= 2% in any treatment, sorted by lifeform and overall mean abundance, n = 4 per treatment group")
 ```
 
 
