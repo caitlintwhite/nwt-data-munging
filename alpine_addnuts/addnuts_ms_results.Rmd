@@ -3,9 +3,9 @@ title: "Alpine dry meadow fertilization results"
 author: "Caitlin White"
 date: "22/10/2019"
 output:
-  word_document: default
   html_document:
     fig_caption: yes
+  word_document: default
 ---
 
 ```{r setup, include=FALSE, warning = F, message = F, echo = F, }
@@ -78,6 +78,8 @@ As a double check, these are the replicated figures and tables I get following m
 With that, here are the updated figures and tables I get using the cleaned datasets, along with some additional figure panels, tables, or figures using new data added to the time-series dataset (e.g. 2003 and 2005 saddle sffert data). The 2003 and 2005 saddle data are REU data (2003 = Colin Tucker, REU with Bill Bowman; 2005 = Jane Griffin Smith, REU with Tim Seastedt), so not sure if data quality (specifically plant ID) is sufficient enough to want to include in the ms analyses, but at minimum *Geum rossi* numbers align with the rest of the Saddle *Geum rossi* time-series data and I think would be interesting data points to include.
 
 
+#### Saddle trends
+
 ```{r Prep sdl mean forb and grass rel cover and ANOVA tables}
 # split out sdl and nutnet so can average C and N+P+K
 sdl_coarse <- subset(coarse_summary, site == "sdl") %>%
@@ -96,10 +98,21 @@ fg_anova_global <- aov(val ~ trt * met * yr, data = subset(sdl_coarse_tall, met 
 
 # iterate through anovas by year
 anova_df <- data.frame()
+tukey_df <- data.frame()
 for(i in unique(sdl_coarse$yr)){
   tempanova <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("Forb_rel", "Grass_rel") & yr == i))
   tempresults <- data.frame(cbind(site = "sdl", yr = i, broom::tidy(tempanova)))
   anova_df <- rbind(anova_df, tempresults)
+  
+  # run tukey test and keep only signif differences
+  temptukey <- TukeyHSD(tempanova)
+  for(n in names(temptukey)){
+    signifdiff <- data.frame(temptukey[[n]]) %>%
+      rownames_to_column("comparison") %>%
+      mutate(term = n,
+             yr = i)
+    tukey_df <- rbind(tukey_df, signifdiff)
+  }
 }
 # clean up
 anova_df <- filter(anova_df, !term == "Residuals") %>%
@@ -110,15 +123,15 @@ anova_df <- filter(anova_df, !term == "Residuals") %>%
   mutate(val = round(val, 4)) %>%
   unite(grp, term, met, sep = "_") %>%
   spread(grp,val)
+tukey_df <- subset(tukey_df, p.adj <= 0.05)
 
-
-# average by treatment
-sdl_coarse_means <- dplyr::select(sdl_coarse, site, yr, plotid, trt, meadow, snow, Forb_rel, Grass_rel, Geum_rel) %>%
-  gather(grp, relcov, Forb_rel:Geum_rel) %>%
+# average by treatment -- average all mets, then subset for figs and tables as needed
+sdl_coarse_means <- sdl_coarse %>%
+  gather(grp, val, ForbHits:ncol(.)) %>%
   group_by(site, yr, trt, meadow, snow, grp) %>%
-  summarise(meancov = mean(relcov),
-            secov = sd(relcov)/sqrt(length(relcov)),
-            nobs = length(relcov)) %>%
+  summarise(meanval = mean(val),
+            seval = sd(val)/sqrt(length(val)),
+            nobs = length(val)) %>%
   ungroup() %>%
   # calculate yrs passed since start of exp
   mutate(post_yrs = yr - 1993)
@@ -127,8 +140,8 @@ sdl_coarse_means <- dplyr::select(sdl_coarse, site, yr, plotid, trt, meadow, sno
 
 ```{r Fig 1 and ANOVA, fig.cap="Fig 1. Mean relative forb and grass cover, Saddle, 1997-2016"}
 # visualize
-ggplot(data= subset(sdl_coarse_means, grp != "Geum_rel"), aes(trt, meancov, fill = grp)) +
-  geom_errorbar(aes(ymax = meancov + secov, ymin = meancov-secov, col = grp), width = 0.1, position = position_dodge(width = 0.6)) +
+ggplot(data= subset(sdl_coarse_means, grp  %in% c("Forb_rel", "Grass_rel")), aes(trt, meanval, fill = grp)) +
+  geom_errorbar(aes(ymax = meanval + seval, ymin = meanval-seval, col = grp), width = 0.1, position = position_dodge(width = 0.6)) +
   geom_col(color = "grey30", position = position_dodge(width = 0.6), width = 0.5) +
   scale_color_grey(name = "Group", labels = c("Forb", "Grass")) +
   scale_fill_grey(name = "Group", labels = c("Forb", "Grass")) +
@@ -140,12 +153,12 @@ ggplot(data= subset(sdl_coarse_means, grp != "Geum_rel"), aes(trt, meancov, fill
 
 
 ```{r Fig 1 related SDL means table}
-kable(dplyr::select(sdl_coarse_means, site, yr, trt, grp, meancov, secov) %>%
-        filter(grp != "Geum_rel") %>%
+kable(dplyr::select(sdl_coarse_means, site, yr, trt, grp, meanval, seval) %>%
+        filter(grp %in% c("Forb_rel", "Grass_rel")) %>%
         rename(fxnlgrp = grp) %>%
         mutate(fxnlgrp = gsub("_rel", "", fxnlgrp)) %>%
-        gather(cat, val, meancov, secov) %>%
-        mutate(cat = gsub("cov", "", cat)) %>%
+        gather(cat, val, meanval, seval) %>%
+        mutate(cat = gsub("val", "", cat)) %>%
         unite(grp, trt, cat, sep = " ") %>%
         spread(grp, val), digits = 2, label = "Table S1. Mean relative forb and grass cover, Saddle, 1997-2016. Means, 1 standard error, n = 4 per treatment.")
 ```
@@ -161,10 +174,49 @@ summary(fg_anova_global)
 By year, here are the ANOVA results. Functional group is significant in all years but 1997, treatment never is (because it would be the mean by treatment.. which always averages to 50).. and the interaction between functional group and treatment always is!
 
 ```{r Fig 1 related SDL ANOVA results}
-kable(anova_df, label = "Table S2. ANOVA results for saddle, effects of treatment and functional group (forb or grass) on mean relative cover. Separate ANOVAs were run by year, n=4 per treatment, per functional group.")
+kable(anova_df, caption = "Table S2. ANOVA results for saddle, effects of treatment and functional group (forb or grass) on mean relative cover. Separate ANOVAs were run by year, n=4 per treatment, per functional group.")
+
+kable(arrange(tukey_df, yr, term, comparison), digits = 4, caption = "Saddle: Tukey HSD, significant differences (p<=0.05), ANOVAs run separately for each year")
 ```
 
+Out of curiosity, and acknowledging differences in sampling methods in certain years (e.g. top hits only in 1997, 50-point subset in 2005) is there a treatment effect and grass and forb hits (not relatived cover) within year?
 
+```{r}
+# visualize
+ggplot(data= subset(sdl_coarse_means, grp  %in% c("ForbHits", "GrassHits")), aes(trt, meanval, fill = grp)) +
+  geom_errorbar(aes(ymax = meanval + seval, ymin = meanval-seval, col = grp), width = 0.1, position = position_dodge(width = 0.6)) +
+  geom_col(color = "grey30", position = position_dodge(width = 0.6), width = 0.5) +
+  scale_color_grey(name = "Group", labels = c("Forb", "Grass")) +
+  scale_fill_grey(name = "Group", labels = c("Forb", "Grass")) +
+  labs(y = "Mean hits",x = "Treatment") +
+  theme(legend.position = c(0.8,0.3),
+        legend.title = element_text(size = 10)) +
+  facet_wrap(~yr, nrow = 2)
+
+# iterate through anovas by year
+anova_df_hits <- data.frame()
+for(i in unique(sdl_coarse$yr)){
+  tempanova <- aov(val ~ trt * met, data = subset(sdl_coarse_tall, met %in% c("ForbHits", "GrassHits") & yr == i))
+  tempresults <- data.frame(cbind(site = "sdl", yr = i, broom::tidy(tempanova)))
+  anova_df_hits <- rbind(anova_df_hits, tempresults)
+}
+# clean up
+anova_df_hits <- filter(anova_df_hits, !term == "Residuals") %>%
+  dplyr::select(site, yr, term, statistic, p.value) %>%
+  rename(F.stat = statistic) %>%
+  gather(met, val, F.stat, p.value) %>%
+  mutate(term = gsub("met", "fxngrp", term)) %>%
+  mutate(val = round(val, 4)) %>%
+  unite(grp, term, met, sep = "_") %>%
+  spread(grp,val)
+
+kable(anova_df_hits)
+```
+
+Mean hits by treatment are significantly different from one another in 2012, otherwise no major differences in what's significant each year using hits only compared to relativized cover. 
+
+
+#### NutNet Trends
 
 ```{r Fig 2 and ANOVA tables}
 # nutnet
@@ -243,8 +295,9 @@ kable(nn_anova_df)
 
 ```{r all together}
 # stack sdl and nutnet to plot means and ses by yr since trts initiated
-all_fg_means <- rename(nn_fg_means, trt = trt2, grp = met) %>%
-  rbind(dplyr::select(sdl_coarse_means, -c(meadow, snow)))
+all_fg_means <- rename(nn_fg_means, trt = trt2, grp = met, meanval = meancov, seval = secov) %>%
+  rbind(dplyr::select(sdl_coarse_means, -c(meadow, snow))) %>%
+  filter(grp %in% c("Forb_rel", "Grass_rel", "Geum_rel"))
 
 
 # plot means by time since experiment onset
@@ -260,6 +313,7 @@ mutate(all_fg_means, grp = factor(grp, levels = c("Forb_rel", "Grass_rel", "Geum
   theme(legend.title = element_text(size = 10)) +
   facet_grid(grp~trt, scales = "free_y")
 ```
+
 
 
 
@@ -323,7 +377,7 @@ ggplot(sdl_biodiv_means, aes(trt, meancov, col = yr)) +
 ```
 
 
-```{r abundant forbs in nutnet}
+```{r abundant forbs in nutnet, include = F}
 abundance <- subset(plantcom, hits > 0.25 & simple_lifeform != "Ground cover") %>%
   dplyr::select(site, yr, plotid, block, plot, trt, trt2, clean_code2, hits)
 
@@ -380,9 +434,19 @@ table_nn17spp <- subset(nn17abund_means, clean_code2 %in% keepspp) %>%
   #recorder cols
   dplyr::select(site, yr, nobs, clean_code2, simple_name, simple_lifeform2, C_mean:ncol(.))
 
-table_nn17spp
-
 ```
+
+Abundant species in NutNet plots by the final year:
+
+```{r}
+kable(rename_all(table_nn17spp, function(x)gsub("_", " ", x)) %>%
+        rename(lifeform = `simple lifeform2`,
+               species = `simple name`), caption = "Species with mean abundance >= 2%, n = 4 per treatment group")
+```
+
+
+#### Multivariate analyses
+Considering the same plots analyzed above, what can we learn from multivariate analyses about shifts in forb and grass relative abundances by treatment overtime at each site?
 
 
 ```{r multivariate analysis nmds, permanova, and betadisper, include=F}
