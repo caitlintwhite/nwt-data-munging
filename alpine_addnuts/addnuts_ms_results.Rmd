@@ -867,13 +867,33 @@ for(i in unique(relstack$tracker)){
     rownames_to_column("met") %>%
     filter(!is.na(F.Model))
   alpperm <- rbind(alpperm, tempperm)
-  alpstress <- rbind(alpstress, cbind(data.frame(t(alpmds[[names(alpmds)[pos]]]$nmds[c("stress", "tries")])), trackerdf))
+  alpstress <- rbind(alpstress, data.frame(stress = alpmds[[names(alpmds)[pos]]]$nmds$stress,
+                                           tries = alpmds[[names(alpmds)[pos]]]$nmds$tries,
+                                           trackerdf))
 }
 
 # combine allspp with trait info
 alpsppmds <- left_join(alpsppmds, sppscores[c("clean_code2", "resource_grp", "PC1", "PC2")]) %>%
   mutate(resource_grp = ifelse(is.na(resource_grp), "Unknown", resource_grp))
 
+# add signif symbol to stat test dfs for plotting
+# envfit -- also add plotting x,y for label if signif
+alpenv <- mutate(alpenv, signif = ifelse(pval <= 0.001, "***", ifelse(pval <= 0.01, "**", ifelse(pval <= 0.05, "*", ifelse(pval <= 0.1, ".", "n.s")))),
+                 label_x = ifelse(NMDS1 >= 0, NMDS1+0.05, NMDS1-0.05),
+                 label_y = ifelse(NMDS2 >= 0, NMDS2+0.05, NMDS2-0.05))
+
+# permanova 
+alpperm$signif <- with(alpperm, ifelse(`Pr..F.` <= 0.001, "***", ifelse(`Pr..F.` <= 0.01, "**", ifelse(`Pr..F.` <= 0.05, "*", ifelse(`Pr..F.` <= 0.1, ".", "n.s")))))
+
+# iterate through spp nmds df to extra plotting points for stress
+alpstress<- mutate(alpstress, plotx_hi = NA, plotx_lo = NA, ploty_hi = NA, ploty_lo = NA)
+for(i in alpstress$tracker){
+  alpstress[alpstress$tracker == i, c("plotx_hi", "plotx_lo", "ploty_hi", "ploty_lo")] <- c(
+    max(alpsppmds$MDS1[alpsppmds$tracker == i]),
+    min(alpsppmds$MDS1[alpsppmds$tracker == i]),
+    max(alpsppmds$MDS2[alpsppmds$tracker == i]),
+    min(alpsppmds$MDS2[alpsppmds$tracker == i]))
+}
 ```
 
 
@@ -891,10 +911,11 @@ if(any(alpenv$pval[alpenv$site == "sdl" & alpenv$grp == "vectors"] <= 0.05)){
   sdlnmds <- sdlnmds + geom_segment(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
                                     arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
     # add label to envfit arrow
-    geom_text(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05),aes(x=NMDS1-0.02,y=NMDS2, label = "F:G"), col = "black", size = plottext, fontface = "italic", hjust = 1)
+    geom_text(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic")
 }
 
-sdlnmds
+# annotate stress and trt signif
+sdlnmds + geom_text(data = subset(alpstress, site == "sdl"), aes(plotx_hi, ploty_hi, label = paste("stress:", round(stress,3))), size = plottext, hjust = 1)
 ```
 
 
