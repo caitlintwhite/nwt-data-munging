@@ -97,6 +97,66 @@ traitcols <- c("Acquisitive" = "deeppink2", "Conservative" = "darkred", "Unknown
 
 ```
 
+
+```{r prep fxnl trait data, include = F}
+
+# subset dry meadow spp
+traits_dm <- subset(traitdat, Exp == "SAD" & TRT == "DRY") %>%
+  arrange(Year_Collected, USDA.Code, Rep)
+
+# specify traits to use
+trts <- colnames(traits_dm)[c(20, 25, 27, 29:33)] # 16 = Oheight, 23 = dry weight -- not keeping bc using logged vars
+trts 
+
+# average dm trait vals and run through pca just to see..
+meantraits <- traits_dm %>%
+  # log transform physical traits
+  mutate(ln_ohgt = log(OHeight),
+         ln_drywgt = log(DryWeight)) %>%
+  dplyr::select(Latin.name:Code, trts, ln_ohgt, ln_drywgt) %>%
+  gather(met, val, CCAvg:ncol(.)) %>%
+  filter(!is.na(val)) %>%
+  group_by(USDA.Code, met) %>%
+  summarise(meanval = mean(val)) %>%
+  spread(met, meanval) %>%
+  as.data.frame()
+
+# specify spp as rownames
+rownames(meantraits) <- meantraits$USDA.Code
+# center and standardize trait vals
+scaletraits <- scale(meantraits[,2:ncol(meantraits)])
+# run pca
+traitpc <- rda(scaletraits)
+summary(traitpc) # copy paste results in console into excel spreadsheet for tim
+biplot(traitpc, scaling = 2)
+
+
+# extract pc scores to plot in treatment nmds plots 
+sppscores <- data.frame(scores(traitpc)$sites) %>%
+  mutate(USDA.Code = rownames(.)) %>%
+  #bring in latin names from marko and soren's dataset
+  left_join(distinct(traits_dm[c("USDA.Code", "Latin.name")])) %>%
+  #join spp list data
+  left_join(distinct(spplist[,2:ncol(spplist)]), by = c("Latin.name" = "simple_name")) %>%
+  #clarify USDA Code
+  rename(Marko.Code = USDA.Code) %>%
+  mutate(resource_grp = ifelse(PC1 <= 0, "Conservative", "Acquisitive"))
+
+varscores <- data.frame(scores(traitpc, display = "species"))
+varscores$varnames <- rownames(varscores)
+# assign abbreviated intelligible varnames for plot
+varscores <- mutate(varscores, abbr = varnames) %>%
+  mutate(abbr = recode(abbr,
+                       CCAvg = "Chl",
+                       CN_ratio = "C:N",
+                       ln_drywgt = "Dry weight",
+                       ln_ohgt = "Height",
+                       Percent_C = "%C",
+                       Percent_N = "%N"))
+
+```
+
+
 ### Temporal trend in alpine dry meadow forb and grass relative abundance
 
 As a double check, these are the replicated figures and tables I get following methods described in the manuscript draft. For the most part, numbers are very similar and may be slightly different due to old species codes being consolidated into the same USDA species code. I did find a number of typos in old species codes, which maybe could result in slight variation to diversity or richness numbers. The biggest difference in NutNet results here vs. what's shown in the manuscript is in at least 2013 *Selaginella densa* was classed and surveyed as ground cover (non-vegetation hits). That is, I can replicate 2013 numbers in the current draft ms when I also class *S. densa* as ground cover. In other surveys, however, *S. densa* was not necessarily surveyed as ground cover (for example, it was recorded below grass at a given point, or a in few cases, other plants were recorded as hit below *S. densa* at the top). *S. densa* is a vascular plant, and is relatively abundant in some plots, so I treated it as plant cover across all years and sites in results presented here.
@@ -562,10 +622,13 @@ table_nn17spp <- subset(nn17abund_means, clean_code2 %in% keepspp) %>%
   unite(grp, trt, met) %>%
   spread(grp, val) %>%
   left_join(distinct(spplist[c("clean_code2", "simple_name", "simple_lifeform2")])) %>%
+  # join resource grp info
+  left_join(sppscores[c("clean_code2", "resource_grp")]) %>%
+  mutate(resource_grp = ifelse(is.na(resource_grp), "Unknown", resource_grp)) %>%
   # clean up colnames
   rename_all(function(x) gsub("_relcov", "", x)) %>%
   #recorder cols
-  dplyr::select(site, yr, nobs, clean_code2, simple_name, simple_lifeform2, C_mean:ncol(.))
+  dplyr::select(site, yr, nobs, clean_code2, simple_name, simple_lifeform2, resource_grp, C_mean:ncol(.))
 table_nn17spp$sortcol <- apply(dplyr::select(table_nn17spp, C_mean,N_mean, K_mean, `N+P_mean`, `N+P+K_mean`),1, sum)
 
 ```
@@ -584,66 +647,7 @@ kable(rename_all(table_nn17spp, function(x)gsub("_", " ", x)) %>%
 #### Multivariate analyses
 Considering the same plots analyzed above for forb and grass relative cover, what can we learn from multivariate analyses about shifts in forb and grass species abundances by treatment overtime at each site?
 
-```{r prep fxnl trait data, include = F}
-
-# subset dry meadow spp
-traits_dm <- subset(traitdat, Exp == "SAD" & TRT == "DRY") %>%
-  arrange(Year_Collected, USDA.Code, Rep)
-
-# specify traits to use
-trts <- colnames(traits_dm)[c(20, 25, 27, 29:33)] # 16 = Oheight, 23 = dry weight -- not keeping bc using logged vars
-trts 
-
-# average dm trait vals and run through pca just to see..
-meantraits <- traits_dm %>%
-  # log transform physical traits
-  mutate(ln_ohgt = log(OHeight),
-         ln_drywgt = log(DryWeight)) %>%
-  dplyr::select(Latin.name:Code, trts, ln_ohgt, ln_drywgt) %>%
-  gather(met, val, CCAvg:ncol(.)) %>%
-  filter(!is.na(val)) %>%
-  group_by(USDA.Code, met) %>%
-  summarise(meanval = mean(val)) %>%
-  spread(met, meanval) %>%
-  as.data.frame()
-
-# specify spp as rownames
-rownames(meantraits) <- meantraits$USDA.Code
-# center and standardize trait vals
-scaletraits <- scale(meantraits[,2:ncol(meantraits)])
-# run pca
-traitpc <- rda(scaletraits)
-summary(traitpc) # copy paste results in console into excel spreadsheet for tim
-biplot(traitpc, scaling = 2)
-
-
-# extract pc scores to plot in treatment nmds plots 
-sppscores <- data.frame(scores(traitpc)$sites) %>%
-  mutate(USDA.Code = rownames(.)) %>%
-  #bring in latin names from marko and soren's dataset
-  left_join(distinct(traits_dm[c("USDA.Code", "Latin.name")])) %>%
-  #join spp list data
-  left_join(distinct(spplist[,2:ncol(spplist)]), by = c("Latin.name" = "simple_name")) %>%
-  #clarify USDA Code
-  rename(Marko.Code = USDA.Code) %>%
-  mutate(resource_grp = ifelse(PC1 <= 0, "Conservative", "Acquisitive"))
-
-varscores <- data.frame(scores(traitpc, display = "species"))
-varscores$varnames <- rownames(varscores)
-# assign abbreviated intelligible varnames for plot
-varscores <- mutate(varscores, abbr = varnames) %>%
-  mutate(abbr = recode(abbr,
-                       CCAvg = "Chl",
-                       CN_ratio = "C:N",
-                       ln_drywgt = "Dry weight",
-                       ln_ohgt = "Height",
-                       Percent_C = "%C",
-                       Percent_N = "%N"))
-
-
-```
-
-```{r trait pca, fig.cap = "PCA of functional traits for available Saddle dry meadow species in Spasojevic and Weber (2019)"}
+```{r trait pca, fig.cap = "Fig 3. PCA of functional traits for available Saddle dry meadow species in Spasojevic and Weber (2019)"}
 # specify species text size
 plottext <- 3
 pointsize <- 2
@@ -889,8 +893,8 @@ alpperm$signif <- with(alpperm, ifelse(`Pr..F.` <= 0.001, "***", ifelse(`Pr..F.`
 alpstress<- mutate(alpstress, plotx_hi = NA, plotx_lo = NA, ploty_hi = NA, ploty_lo = NA)
 for(i in alpstress$tracker){
   alpstress[alpstress$tracker == i, c("plotx_hi", "plotx_lo", "ploty_hi", "ploty_lo")] <- c(
-   # choose whichever value is the extreme hi/lo between spp and site ordinations
-     max(c(max(alpsppmds$MDS1[alpsppmds$tracker == i]), max(alpplotmds$MDS1[alpplotmds$tracker == i]))),
+    # choose whichever value is the extreme hi/lo between spp and site ordinations
+    max(c(max(alpsppmds$MDS1[alpsppmds$tracker == i]), max(alpplotmds$MDS1[alpplotmds$tracker == i]))),
     min(c(min(alpsppmds$MDS1[alpsppmds$tracker == i]),min(alpplotmds$MDS1[alpplotmds$tracker == i]))),
     max(c(max(alpsppmds$MDS2[alpsppmds$tracker == i]),max(alpplotmds$MDS2[alpplotmds$tracker == i]))),
     min(c(min(alpsppmds$MDS2[alpsppmds$tracker == i]),min(alpplotmds$MDS2[alpplotmds$tracker == i]))))
@@ -911,10 +915,13 @@ permtrt <- subset(alpperm, met == "trt") %>%
 # join to alpstress
 alpstress <- left_join(alpstress, envfac) %>% left_join(permtrt)
 
+# clean up environment
+rm(tempell, tempenv, temphulls, tempanova, tempperm, temppoints, tempresults, tempspp, tempmatrix, tempmds)
+
 ```
 
 
-```{r main saddle nmds fig, fig.cap = "Saddle dry meadow NMDS, arrayed by year. Species (cirlce points) colored by PCA resource group. Sites (diamond points), with 95% confidence ellipses shaded, colored by nutrient treatment (n = 4 sites per treatment)."}
+```{r main saddle nmds fig, fig.cap = "Fig 4. Saddle dry meadow NMDS, arrayed by year. Species (circle points) colored by PCA resource group. Sites (diamond points), with 95% confidence ellipses shaded, colored by nutrient treatment (n = 4 sites per treatment)."}
 sdlnmds <- ggplot(subset(alpplotmds, site == "sdl" & iter == "main"), aes(MDS1, MDS2)) +
   geom_point(aes(fill = trt), size = 1.75, shape = 23, color = "transparent") +
   #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
@@ -922,7 +929,12 @@ sdlnmds <- ggplot(subset(alpplotmds, site == "sdl" & iter == "main"), aes(MDS1, 
   geom_point(data = subset(alpsppmds, site == "sdl" & iter == "main"), aes(MDS1, MDS2, col = resource_grp), alpha = 0.75) +
   scale_fill_manual(name = "Treatment", values = trtcols) +
   scale_color_manual(name = "Resource\nstrategy", values = traitcols) +
-  facet_wrap(~yr, scales = "free")
+  facet_wrap(~yr, scales = "free") +
+  # make legend keys side by side
+  theme(legend.box = "horizontal",
+        legend.position = c(0.85, 0.3),
+        legend.background = element_blank(),
+        legend.title = element_text(size = 10))
 
 if(any(alpenv$pval[alpenv$site == "sdl" & alpenv$grp == "vectors"] <= 0.05)){
   sdlnmds <- sdlnmds + geom_segment(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
@@ -937,7 +949,7 @@ sdlnmds + geom_text(data = subset(alpstress, site == "sdl"), aes(plotx_hi, ploty
 ```
 
 
-```{r sdl multivariate stats for main text, echo = T}
+```{r sdl multivariate stats for main text, include = F}
 # multivariate stats for Saddle dry meadow sites (only plots 1-16 surveyed across all years, n = 4 per treatment group)
 ## 1997
 # test treatment groups and F2G ratio as explanatory factory
@@ -967,7 +979,7 @@ alpmds$sdl_main_2016$betadisper; anova(alpmds$sdl_main_2016$betadisper) # varian
 ```
 
 
-```{r main nutnet nmds fig, fig.cap = "NutNet dry meadow NMDS, arrayed by year. Species (cirlce points) colored by PCA resource group. Sites (diamond points), with 95% confidence ellipses shaded, colored by nutrient treatment (n = 4 sites per treatment)."}
+```{r main nutnet nmds fig, fig.cap = "Fig 5. NutNet dry meadow NMDS, arrayed by year. Species (circle points) colored by PCA resource group. Sites (diamond points), with 95% confidence ellipses shaded, colored by nutrient treatment (n = 4 sites per treatment)."}
 nnnmds <- ggplot(subset(alpplotmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2)) +
   geom_point(aes(fill = trt), size = 1.75, shape = 23, color = "transparent") +
   #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
@@ -992,7 +1004,7 @@ nnnmds + geom_text(data = subset(alpstress, site == "nutnet" & grepl("main", tra
 ```
 
 
-```{r nutnet multivariate stats for main text, echo = T}
+```{r nutnet multivariate stats for main text, include = F}
 # multivariate stats
 ## 2013 -- C, N and N+P only (n = 4 per group)
 # test treatment groups and F2G ratio as explanatory factory
@@ -1006,10 +1018,9 @@ alpmds$nutnet_main_2017$adonis; alpmds$nutnet_main_2017$envfit # trt signif in p
 alpmds$nutnet_main_2017$betadisper; anova(alpmds$nutnet_main_2017$betadisper) # variances not distinct
 ```
 
-
 ### Supplemental multivariate analyses
 
-```{r 2013 nmds with all treatments, fig.caption = "Fig S1. NutNet 2013 NMDS, all treatments (n = 4 per treatment). Species (cirlce points) colored by PCA resource group. Plots (diamond points) colored by nutrient treatment, with 95% confidence ellipses shaded."}
+```{r 2013 nmds with all treatments}
 # 2013
 nns2013_nmds <- ggplot(subset(alpplotmds, yr == 2013 & iter != "main"), aes(MDS1, MDS2)) +
   geom_point(aes(fill = trt), color = "transparent", size = 1.7, pch = 23) +
@@ -1023,19 +1034,20 @@ nns2013_nmds <- ggplot(subset(alpplotmds, yr == 2013 & iter != "main"), aes(MDS1
 # add FG arrows if any significant
 if(any(with(alpenv, pval[site == "nutnet" & tracker == "suppl_2013" & grp == "vectors"]) <= 0.05)){
   nns2013_nmds <- nns2013_nmds + geom_segment(data=subset(alpenv, grp == "vectors" & tracker == "suppl_2013" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
-                                  arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
+                                              arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
     # add label to envfit arrow
     geom_text(data=subset(alpenv, grp == "vectors" & tracker == "suppl_2013" & pval <= 0.05),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic")
 }
 
 # annotate stress and trt signif
 nns2013_nmds + geom_text(data = subset(alpstress, site == "nutnet" & tracker == "suppl_2013"), aes(plotx_hi, ploty_hi, label = paste("Stress:", round(stress,3))), size = plottext, hjust = 1) +
-  geom_text(data = subset(alpstress, tracker == "suppl_2013"), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1)
+  geom_text(data = subset(alpstress, tracker == "suppl_2013"), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1) +
+  labs(caption = "Fig S1. NutNet 2013 NMDS, all treatments (n = 4 per treatment). Treatment hulls drawn for sites.")
 
 ```
 
 
-```{r nutnet 2013 multivariate stats for supplemental text, echo = T}
+```{r nutnet 2013 multivariate stats for supplemental text, include = F}
 # multivariate stats
 ## 2013 -- all treatment groups
 # test treatment groups and F2G ratio as explanatory factory
@@ -1045,7 +1057,7 @@ alpmds$nutnet_suppl_2013$betadisper; anova(alpmds$nutnet_suppl_2013$betadisper) 
 
 
 
-```{r nn 2017 nmds all trts, fig.caption = "Fig S2. NutNet 2017 NMDS, all treatments (n = 4 per treatment group). Species (cirlce points) colored by PCA resource group. Plots (diamond points) colored by nutrient treatment, with 95% confidence ellipses shaded."}
+```{r nn 2017 nmds all trts}
 # 2017
 nns2017_nmds <- ggplot(subset(alpplotmds, yr == 2017 & iter != "main"), aes(MDS1, MDS2)) +
   geom_polygon(data=subset(alphulls, yr == 2017 & iter != "main"), aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
@@ -1059,25 +1071,76 @@ nns2017_nmds <- ggplot(subset(alpplotmds, yr == 2017 & iter != "main"), aes(MDS1
 # add FG arrows if any significant
 if(any(with(alpenv, pval[site == "nutnet" & tracker == "suppl_2017" & grp == "vectors"]) <= 0.05)){
   nns2017_nmds <- nns2017_nmds + geom_segment(data=subset(alpenv, grp == "vectors" & tracker == "suppl_2017" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
-                                  arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
+                                              arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
     # add label to envfit arrow
     geom_text(data=subset(alpenv, grp == "vectors" & tracker == "suppl_2017" & pval <= 0.05),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic")
 }
 
 # annotate stress and trt signif
 nns2017_nmds + geom_text(data = subset(alpstress, site == "nutnet" & tracker == "suppl_2017"), aes(plotx_hi, ploty_hi, label = paste("Stress:", round(stress,3))), size = plottext, hjust = 1) +
-  geom_text(data = subset(alpstress, tracker == "suppl_2017"), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1)
+  geom_text(data = subset(alpstress, tracker == "suppl_2017"), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1) +
+  labs(caption = "Fig S2. NutNet 2017 NMDS, all treatments (n = 4 per treatment group). Treatment hulls drawn for sites.")
 
 ```
 
 
-```{r nutnet 2017 multivariate stats for supplemental text, echo = T}
+```{r nutnet 2017 multivariate stats for supplemental text, include = F}
 # multivariate stats
 ## 2017 -- all treatment groups
 # test treatment groups and F2G ratio as explanatory factory
 alpmds$nutnet_suppl_2017$adonis; alpmds$nutnet_suppl_2017$envfit # all signif
 # test variances among treatment groups
 alpmds$nutnet_suppl_2017$betadisper; anova(alpmds$nutnet_suppl_2017$betadisper) # variances not distinct (same as in main text results)
+```
+
+
+
+```{r table of permanova and betadisper results for main nmds figs}
+# pull out trts
+suppl13trts <- unique(alphulls$trt[alphulls$tracker == "suppl_2013"])
+suppl17trts <- unique(alphulls$trt[alphulls$tracker == "suppl_2017"])
+nnmaintrts <- unique(alphulls$trt[alphulls$iter == "main" & alphulls$site == "nutnet"])
+sdlmaintrts <- sort(unique(alphulls$trt[alphulls$iter == "main" & alphulls$site == "sdl"]))
+
+permtable <- dplyr::select(alpperm, tracker, site, yr, iter, met, F.Model:`Pr..F.`, signif) %>%
+  rename(`Pr.F`= `Pr..F.`) %>%
+  mutate(trt = ifelse(site == "sdl", str_flatten(sdlmaintrts, collapse = ", "),
+                      ifelse(site == "nutnet" & iter == "main", str_flatten(nnmaintrts, collapse = ", "),
+                             ifelse(yr == 2013 & iter == "suppl", str_flatten(suppl13trts, collapse = ", "),
+                                    #otherwise will be 2017 suppl
+                                    str_flatten(suppl17trts, collapse= ", "))))) %>%
+  rename(fig = iter) %>%
+  #reorder cols
+  dplyr::select(tracker, site, yr, fig, trt, met, R2, F.Model:signif) %>%
+  mutate_at(vars(R2, F.Model), function(x)round(x, 3)) %>%
+  #R2 = round(R2, 2)) %>%
+  unite(F.Stat, F.Model, signif, sep = " ") %>%
+  # drop pval
+  dplyr::select(-`Pr.F`) %>%
+  gather(stat, val, R2, F.Stat) %>%
+  unite(cat, met, stat, sep = " ") %>%
+  spread(cat, val) %>%
+  arrange(desc(site), fig, yr)
+
+# gather betadisper results
+alpdisp <- data.frame()
+for(i in names(alpmds)){
+  tempdisp <- data.frame(alpmds[[i]]$anova_disper) %>%
+    rownames_to_column() %>%
+    filter(rowname == "Groups") %>%
+    mutate(tracker = str_extract(i, "main.*|supp.*"))
+  #site = str_extract(i, "^s[a-z]+|^n[a-z]+"),
+  #yr = parse_number(i))
+  alpdisp <- rbind(alpdisp, tempdisp)
+}
+# add signif symbols
+alpdisp <- rename(alpdisp, pval = "Pr..F.") %>% 
+  mutate(signif = ifelse(pval <= 0.001, "***", ifelse(pval <= 0.01, "**", ifelse(pval <= 0.05, "*", ifelse(pval <= 0.1, ".", "n.s")))))
+permtable <- left_join(permtable, alpdisp[c("tracker", "F.value", "signif")]) %>%
+  mutate(F.value = round(F.value, 3)) %>%
+  unite(`dispersion F.stat`, F.value, signif, sep = " ")
+
+kable(permtable, caption = "Table S1. Permutation statistics (permanova and permdisp) for alpine dry meadow communities, iterations = 1000")
 ```
 
 
