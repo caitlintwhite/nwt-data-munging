@@ -3,9 +3,9 @@ title: "Alpine dry meadow fertilization results"
 author: "CTW"
 date: "`r Sys.Date()`"
 output:
+  word_document: default
   html_document:
     fig_caption: yes
-  word_document: default
 ---
 
 ```{r setup, include=FALSE, warning = F, message = F, echo = F, }
@@ -99,7 +99,7 @@ traitcols <- c("Acquisitive" = "deeppink2", "Conservative" = "darkred", "Unknown
 
 ### Temporal trend in alpine dry meadow forb and grass relative abundance
 
-As a double check, these are the replicated figures and tables I get following methods described in the manuscript draft. For the most part, numbers are very similar and may be slightly different due to old species codes being consolidated into the same USDA species code. I did find a number of typos in old species codes, which maybe could result in slight variation to diversity or richness numbers. The biggest difference in NutNet results here vs. what's shown in the manuscript is in at least 2013 *Selaginella densa* was classed and surveyed as ground cover (non-vegetation hits). That is, I can replicate 2013 numbers when I also class *S. densa* as ground cover. In other surveys, however, *S. densa* was not necessarily surveyed as ground cover (for example, recorded below grass hits at a given point, or a in few cases, other plants were recorded as hit below *S. densa* at the top). *S. densa* is a vascular plant, and is relatively abundant in some plots, so I treated it as plant cover across all years and sites.
+As a double check, these are the replicated figures and tables I get following methods described in the manuscript draft. For the most part, numbers are very similar and may be slightly different due to old species codes being consolidated into the same USDA species code. I did find a number of typos in old species codes, which maybe could result in slight variation to diversity or richness numbers. The biggest difference in NutNet results here vs. what's shown in the manuscript is in at least 2013 *Selaginella densa* was classed and surveyed as ground cover (non-vegetation hits). That is, I can replicate 2013 numbers in the current draft ms when I also class *S. densa* as ground cover. In other surveys, however, *S. densa* was not necessarily surveyed as ground cover (for example, it was recorded below grass at a given point, or a in few cases, other plants were recorded as hit below *S. densa* at the top). *S. densa* is a vascular plant, and is relatively abundant in some plots, so I treated it as plant cover across all years and sites in results presented here.
 
 With that, here are the updated figures and tables I get using the cleaned datasets, along with some additional figure panels, tables, or figures using new data added to the time-series dataset (e.g. 2003 and 2005 saddle sffert data). The 2003 and 2005 saddle data are REU data (2003 = Colin Tucker, REU with Bill Bowman; 2005 = Jane Griffin Smith, REU with Tim Seastedt), so not sure if data quality (specifically plant ID) is sufficient enough to want to include in the ms analyses, but at minimum *Geum rossii* numbers align with the rest of the Saddle *Geum rossii* time-series data and I think would be interesting data points to include.
 
@@ -334,7 +334,7 @@ nn_fghits_anova17 <- aov(blockmean ~ trt2 * met, data = subset(nn_fg_dat, yr == 
 
 # gather results
 nn_anovahits_df <- rbind(cbind(site = "nutnet", yr = 2013, broom::tidy(nn_fghits_anova13)),
-                     cbind(site = "nutnet", yr = 2017, broom::tidy(nn_fghits_anova17))) %>%
+                         cbind(site = "nutnet", yr = 2017, broom::tidy(nn_fghits_anova17))) %>%
   filter(!term == "Residuals") %>%
   dplyr::select(site, yr, term, statistic, p.value) %>%
   rename(F.stat = statistic) %>%
@@ -357,8 +357,8 @@ ggplot(data= subset(nn_fg_means, met %in% c("GrassHits", "ForbHits")), aes(trt2,
 kable(nn_anovahits_df, digits = 4, caption = "NutNet: ANOVA on mean hits")
 nn13hitstukey <- TukeyHSD(nn_fghits_anova13)
 nn13hits_tk_df <- data.frame(rbind(cbind(comparison = rownames(nn13hitstukey$met), nn13hitstukey$met, grp = "met", yr = 2013),
-                        cbind(comparison = rownames(nn13hitstukey$trt2), nn13hitstukey$trt2, grp = "trt2", yr = 2013),
-                        cbind(comparison = rownames(nn13hitstukey$`trt2:met`), nn13hitstukey$`trt2:met`,grp = "trt2:met", yr = 2013))) %>%
+                                   cbind(comparison = rownames(nn13hitstukey$trt2), nn13hitstukey$trt2, grp = "trt2", yr = 2013),
+                                   cbind(comparison = rownames(nn13hitstukey$`trt2:met`), nn13hitstukey$`trt2:met`,grp = "trt2:met", yr = 2013))) %>%
   mutate_at(c("diff", "lwr", "upr", "p.adj"), as.numeric) %>%
   filter(p.adj <= 0.05)
 kable(nn13hits_tk_df, digits = 4, caption = "NutNet 2013: Significant differences in mean hits (p < 0.05) between functional groups and treatments, tested with Tukey HSD")
@@ -472,7 +472,7 @@ Out of curiosity, I repeated this for Saddle for years where data are available:
 sdl_biodiv_means <- sdl_coarse_means %>%
   filter(grp %in% c("S", "H", "PlantCov", "Total_g_m2", "VegHits")) %>%
   filter(!is.na(meanval))
-  
+
 
 # visualize
 ggplot(sdl_biodiv_means, aes(post_yrs, meanval, col = trt)) +
@@ -777,7 +777,10 @@ relstack <- rbind(nnabundance, nnabund_comm, sdlabundance) %>% as.data.frame() %
   # unite yr and iteration to id iterations in for loop
   unite(tracker, iter,yr, remove = F)
 rownames(relstack) <- relstack$rowid
-envmatrix <- relstack[!colnames(relstack) %in% unique(spplist$clean_code2)]
+envmatrix <- relstack[!colnames(relstack) %in% unique(spplist$clean_code2)] %>%
+  # add natural log transformed F2G
+  mutate(lnF2G = log(F2G_ratio))
+
 
 # add in F2G ratio to envmatrix (must average nn)
 # initiate empty dfs for storing nmds results
@@ -787,6 +790,10 @@ alphulls <- data.frame()
 alpells <- data.frame()
 # initiate empty list for storing nmds objects, and other stats objects
 alpmds <- list()
+# initiate empty data frame for storing envfit, permanova, and nmds stress
+alpenv <- data.frame()
+alpperm <- data.frame()
+alpstress <- data.frame()
 
 # iterate through years for multivar analysis
 for(i in unique(relstack$tracker)){
@@ -816,8 +823,8 @@ for(i in unique(relstack$tracker)){
   for(t in unique(temppoints$trt)){
     # ordiellipse for trt t
     tempell <- rbind(tempell, cbind(as.data.frame(with(temppoints[temppoints$trt==t,],
-                    veganCovEllipse(cov.wt(cbind(MDS1,MDS2),wt=rep(1/length(MDS1),length(MDS1)))$cov,center=c(mean(MDS1),mean(MDS2)))))
-                    ,trt=t, trackerdf))
+                                                       veganCovEllipse(cov.wt(cbind(MDS1,MDS2),wt=rep(1/length(MDS1),length(MDS1)))$cov,center=c(mean(MDS1),mean(MDS2)))))
+                                    ,trt=t, trackerdf))
     # ordihulls for trt t
     trthulls <-rbind(data.frame(temppoints[temppoints$trt == t, ][chull(temppoints[temppoints$trt == t, c("MDS1", "MDS2")]),])) # hull values for grp t
     # append to temphulls
@@ -836,15 +843,31 @@ for(i in unique(relstack$tracker)){
   tempbray <- vegdist(tempmatrix)
   # store all multivar in list
   alpmds[[pos]] <- list(tempmds,
-                        envfit(tempmds, temppoints[c("trt", "F2G_ratio")], perm = 1000),
+                        envfit(tempmds, temppoints[c("trt", "lnF2G")], perm = 1000),
                         anosim(tempbray, grouping = temppoints$trt, permutations = 1000),
                         mrpp(tempmatrix,  grouping = temppoints$trt, distance = "bray"),
-                        adonis(tempmatrix ~ trt, data = temppoints, permutations = 1000, method = "bray"),
+                        adonis(tempmatrix ~ trt * lnF2G, data = temppoints, permutations = 1000, method = "bray"),
                         betadisper(tempbray, temppoints$trt),
                         anova(betadisper(tempbray, temppoints$trt)))
   # assign names
   names(alpmds)[pos] <- paste(unique(temppoints$site), i, sep = "_")
   names(alpmds[[pos]]) <- c("nmds", "envfit", "anosim", "mrpp", "adonis", "betadisper", "anova_disper")
+  
+  # capture envfit
+  for(z in c("vectors", "factors")){
+    tempenv <- data.frame(scores(alpmds[[pos]][["envfit"]], display = z)) %>%
+      rownames_to_column("met") %>%
+      mutate(grp = z, pval = alpmds[[pos]][["envfit"]][[z]]$pvals, 
+             r2 = alpmds[[pos]][["envfit"]][[z]]$r) %>%
+      cbind(trackerdf)
+    alpenv <- rbind(alpenv, tempenv)
+  }
+  # capture nmds stress, permanova signif
+  tempperm <- data.frame(cbind(alpmds[[names(alpmds)[pos]]]$adonis$aov.tab, trackerdf)) %>%
+    rownames_to_column("met") %>%
+    filter(!is.na(F.Model))
+  alpperm <- rbind(alpperm, tempperm)
+  alpstress <- rbind(alpstress, cbind(data.frame(t(alpmds[[names(alpmds)[pos]]]$nmds[c("stress", "tries")])), trackerdf))
 }
 
 # combine allspp with trait info
@@ -855,7 +878,7 @@ alpsppmds <- left_join(alpsppmds, sppscores[c("clean_code2", "resource_grp", "PC
 
 
 ```{r main saddle nmds fig, fig.cap = "Saddle dry meadow NMDS, arrayed by year. Species (cirlce points) colored by PCA resource group. Sites (diamond points), with 95% confidence ellipses shaded, colored by nutrient treatment (n = 4 sites per treatment)."}
-ggplot(subset(alpplotmds, site == "sdl" & iter == "main"), aes(MDS1, MDS2)) +
+sdlnmds <- ggplot(subset(alpplotmds, site == "sdl" & iter == "main"), aes(MDS1, MDS2)) +
   geom_point(aes(fill = trt), size = 1.75, shape = 23, color = "transparent") +
   #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
   geom_polygon(data=subset(alpells, site == "sdl" & iter == "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
@@ -864,6 +887,14 @@ ggplot(subset(alpplotmds, site == "sdl" & iter == "main"), aes(MDS1, MDS2)) +
   scale_color_manual(name = "Resource\nstrategy", values = traitcols) +
   facet_wrap(~yr, scales = "free")
 
+if(any(alpenv$pval[alpenv$site == "sdl" & alpenv$grp == "vectors"] <= 0.05)){
+  sdlnmds <- sdlnmds + geom_segment(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
+                                    arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
+    # add label to envfit arrow
+    geom_text(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05),aes(x=NMDS1-0.02,y=NMDS2, label = "F:G"), col = "black", size = plottext, fontface = "italic", hjust = 1)
+}
+
+sdlnmds
 ```
 
 
@@ -871,7 +902,7 @@ ggplot(subset(alpplotmds, site == "sdl" & iter == "main"), aes(MDS1, MDS2)) +
 # multivariate stats for Saddle dry meadow sites (only plots 1-16 surveyed across all years, n = 4 per treatment group)
 ## 1997
 # test treatment groups and F2G ratio as explanatory factory
-alpmds$sdl_main_1997$adonis; alpmds$sdl_main_1997$envfit # trt signif, F2G ratio not
+alpmds$sdl_main_1997$adonis; alpmds$sdl_main_1997$envfit # trt and F2G signif
 alpmds$sdl_main_1997$betadisper; anova(alpmds$sdl_main_1997$betadisper) # marginally statistically signif (P variance different from others)
 
 ## 2003
@@ -881,31 +912,40 @@ alpmds$sdl_main_2003$betadisper; anova(alpmds$sdl_main_2003$betadisper) # varian
 
 ## 2005
 # test treatment groups and F2G ratio as explanatory factory
-alpmds$sdl_main_2005$adonis; alpmds$sdl_main_2005$envfit #trt signif, F2G not
+alpmds$sdl_main_2005$adonis; alpmds$sdl_main_2005$envfit #trt and F2G signif in both
 alpmds$sdl_main_2005$betadisper; anova(alpmds$sdl_main_2005$betadisper) # variance not distinct
 
 ## 2012
 # test treatment groups and F2G ratio as explanatory factory
-alpmds$sdl_main_2012$adonis; alpmds$sdl_main_2012$envfit # trt signif, F2G not
+alpmds$sdl_main_2012$adonis; alpmds$sdl_main_2012$envfit # trt signif in both, F2G not
 alpmds$sdl_main_2012$betadisper; anova(alpmds$sdl_main_2012$betadisper) # variances not distinct
 
 ## 2016
 # test treatment groups and F2G ratio as explanatory factory
-alpmds$sdl_main_2016$adonis; alpmds$sdl_main_2016$envfit # trt signif, F2G marginally
+alpmds$sdl_main_2016$adonis; alpmds$sdl_main_2016$envfit # trt and F2G signif in both
 # test variances among treatment groups
 alpmds$sdl_main_2016$betadisper; anova(alpmds$sdl_main_2016$betadisper) # variances not distinct
 ```
 
 
 ```{r main nutnet nmds fig, fig.cap = "NutNet dry meadow NMDS, arrayed by year. Species (cirlce points) colored by PCA resource group. Sites (diamond points), with 95% confidence ellipses shaded, colored by nutrient treatment (n = 4 sites per treatment)."}
-ggplot(subset(alpplotmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2)) +
-   geom_point(aes(fill = trt), size = 1.75, shape = 23, color = "transparent") +
+nnnmds <- ggplot(subset(alpplotmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2)) +
+  geom_point(aes(fill = trt), size = 1.75, shape = 23, color = "transparent") +
   #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
   geom_polygon(data=subset(alpells, site == "nutnet" & iter == "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
   geom_point(data = subset(alpsppmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2, col = resource_grp), alpha = 0.75) +
   scale_fill_manual(name = "Treatment", values = trtcols) +
   scale_color_manual(name = "Resource\nstrategy", values = traitcols) +
   facet_wrap(~yr)
+
+if(any(with(alpenv, pval[site == "nutnet" & grepl("main", tracker) & grp == "vectors"]) <= 0.05)){
+  nnnmds <- nnnmds + geom_segment(data=subset(alpenv, grp == "vectors" & grepl("main", tracker) & site == "nutnet" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
+                                  arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
+    # add label to envfit arrow
+    geom_text(data=subset(alpenv, grp == "vectors" & site == "nutnet" & grepl("main", tracker) & pval <= 0.05),aes(x=NMDS1-0.02,y=NMDS2, label = "F:G"), col = "black", size = plottext, fontface = "italic", hjust = 1)
+}
+
+nnnmds
 ```
 
 
@@ -918,7 +958,7 @@ alpmds$nutnet_main_2013$betadisper; anova(alpmds$nutnet_main_2013$betadisper) # 
 
 ## 2017 -- C, N and N+P only (n = 4 per group)
 # test treatment groups and F2G ratio as explanatory factory
-alpmds$nutnet_main_2017$adonis; alpmds$nutnet_main_2017$envfit # trt signif, F2G not
+alpmds$nutnet_main_2017$adonis; alpmds$nutnet_main_2017$envfit # trt signif in permanova but not envfit, F2G signif in both
 # test variances among treatment groups
 alpmds$nutnet_main_2017$betadisper; anova(alpmds$nutnet_main_2017$betadisper) # variances not distinct
 ```
