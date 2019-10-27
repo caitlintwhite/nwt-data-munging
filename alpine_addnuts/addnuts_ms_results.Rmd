@@ -3,9 +3,9 @@ title: "Alpine dry meadow fertilization results"
 author: "CTW"
 date: "`r Sys.Date()`"
 output:
-  word_document: default
   html_document:
     fig_caption: yes
+  word_document: default
 ---
 
 ```{r setup, include=FALSE, warning = F, message = F, echo = F, }
@@ -889,11 +889,28 @@ alpperm$signif <- with(alpperm, ifelse(`Pr..F.` <= 0.001, "***", ifelse(`Pr..F.`
 alpstress<- mutate(alpstress, plotx_hi = NA, plotx_lo = NA, ploty_hi = NA, ploty_lo = NA)
 for(i in alpstress$tracker){
   alpstress[alpstress$tracker == i, c("plotx_hi", "plotx_lo", "ploty_hi", "ploty_lo")] <- c(
-    max(alpsppmds$MDS1[alpsppmds$tracker == i]),
-    min(alpsppmds$MDS1[alpsppmds$tracker == i]),
-    max(alpsppmds$MDS2[alpsppmds$tracker == i]),
-    min(alpsppmds$MDS2[alpsppmds$tracker == i]))
+   # choose whichever value is the extreme hi/lo between spp and site ordinations
+     max(c(max(alpsppmds$MDS1[alpsppmds$tracker == i]), max(alpplotmds$MDS1[alpplotmds$tracker == i]))),
+    min(c(min(alpsppmds$MDS1[alpsppmds$tracker == i]),min(alpplotmds$MDS1[alpplotmds$tracker == i]))),
+    max(c(max(alpsppmds$MDS2[alpsppmds$tracker == i]),max(alpplotmds$MDS2[alpplotmds$tracker == i]))),
+    min(c(min(alpsppmds$MDS2[alpsppmds$tracker == i]),min(alpplotmds$MDS2[alpplotmds$tracker == i]))))
 }
+
+# add envfit info for factors
+envfac <- subset(alpenv, grp == "factors") %>%
+  as.data.frame() %>%
+  dplyr::select(site:signif, pval) %>% distinct() %>%
+  rename(env_trt_signif = signif,
+         env_pval = pval)
+# gather trt signif from permanova
+permtrt <- subset(alpperm, met == "trt") %>%
+  dplyr::select(site:signif, `Pr..F.`) %>%
+  rename(adon_trt_signif = signif,
+         adon_trt_pval = `Pr..F.`)
+
+# join to alpstress
+alpstress <- left_join(alpstress, envfac) %>% left_join(permtrt)
+
 ```
 
 
@@ -915,7 +932,8 @@ if(any(alpenv$pval[alpenv$site == "sdl" & alpenv$grp == "vectors"] <= 0.05)){
 }
 
 # annotate stress and trt signif
-sdlnmds + geom_text(data = subset(alpstress, site == "sdl"), aes(plotx_hi, ploty_hi, label = paste("stress:", round(stress,3))), size = plottext, hjust = 1)
+sdlnmds + geom_text(data = subset(alpstress, site == "sdl"), aes(plotx_hi, ploty_hi, label = paste("Stress:", round(stress,3))), size = plottext, hjust = 1) +
+  geom_text(data = subset(alpstress, site == "sdl"), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1)
 ```
 
 
@@ -957,16 +975,20 @@ nnnmds <- ggplot(subset(alpplotmds, site == "nutnet" & iter == "main"), aes(MDS1
   geom_point(data = subset(alpsppmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2, col = resource_grp), alpha = 0.75) +
   scale_fill_manual(name = "Treatment", values = trtcols) +
   scale_color_manual(name = "Resource\nstrategy", values = traitcols) +
-  facet_wrap(~yr)
+  facet_wrap(~yr, scales = "free")
 
+# add FG arrows if any significant
 if(any(with(alpenv, pval[site == "nutnet" & grepl("main", tracker) & grp == "vectors"]) <= 0.05)){
   nnnmds <- nnnmds + geom_segment(data=subset(alpenv, grp == "vectors" & grepl("main", tracker) & site == "nutnet" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
                                   arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
     # add label to envfit arrow
-    geom_text(data=subset(alpenv, grp == "vectors" & site == "nutnet" & grepl("main", tracker) & pval <= 0.05),aes(x=NMDS1-0.02,y=NMDS2, label = "F:G"), col = "black", size = plottext, fontface = "italic", hjust = 1)
+    geom_text(data=subset(alpenv, grp == "vectors" & site == "nutnet" & grepl("main", tracker) & pval <= 0.05),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic")
 }
 
-nnnmds
+# annotate stress and trt signif
+nnnmds + geom_text(data = subset(alpstress, site == "nutnet" & grepl("main", tracker)), aes(plotx_hi, ploty_hi, label = paste("Stress:", round(stress,3))), size = plottext, hjust = 1) +
+  geom_text(data = subset(alpstress, site == "nutnet" & grepl("main", tracker)), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1)
+
 ```
 
 
@@ -989,7 +1011,7 @@ alpmds$nutnet_main_2017$betadisper; anova(alpmds$nutnet_main_2017$betadisper) # 
 
 ```{r 2013 nmds with all treatments, fig.caption = "Fig S1. NutNet 2013 NMDS, all treatments (n = 4 per treatment). Species (cirlce points) colored by PCA resource group. Plots (diamond points) colored by nutrient treatment, with 95% confidence ellipses shaded."}
 # 2013
-ggplot(subset(alpplotmds, yr == 2013 & iter != "main"), aes(MDS1, MDS2)) +
+nns2013_nmds <- ggplot(subset(alpplotmds, yr == 2013 & iter != "main"), aes(MDS1, MDS2)) +
   geom_point(aes(fill = trt), color = "transparent", size = 1.7, pch = 23) +
   geom_polygon(data=subset(alphulls, yr == 2013 & iter != "main"), aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
   #geom_polygon(data=subset(alpells, yr == 2013 & iter != "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
@@ -997,6 +1019,18 @@ ggplot(subset(alpplotmds, yr == 2013 & iter != "main"), aes(MDS1, MDS2)) +
   scale_fill_manual(name = "Treatment", values = trtcols) +
   scale_color_manual(name = "Resource\nstrategy", values = traitcols) +
   facet_wrap(~yr)
+
+# add FG arrows if any significant
+if(any(with(alpenv, pval[site == "nutnet" & tracker == "suppl_2013" & grp == "vectors"]) <= 0.05)){
+  nns2013_nmds <- nns2013_nmds + geom_segment(data=subset(alpenv, grp == "vectors" & tracker == "suppl_2013" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
+                                  arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
+    # add label to envfit arrow
+    geom_text(data=subset(alpenv, grp == "vectors" & tracker == "suppl_2013" & pval <= 0.05),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic")
+}
+
+# annotate stress and trt signif
+nns2013_nmds + geom_text(data = subset(alpstress, site == "nutnet" & tracker == "suppl_2013"), aes(plotx_hi, ploty_hi, label = paste("Stress:", round(stress,3))), size = plottext, hjust = 1) +
+  geom_text(data = subset(alpstress, tracker == "suppl_2013"), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1)
 
 ```
 
@@ -1013,7 +1047,7 @@ alpmds$nutnet_suppl_2013$betadisper; anova(alpmds$nutnet_suppl_2013$betadisper) 
 
 ```{r nn 2017 nmds all trts, fig.caption = "Fig S2. NutNet 2017 NMDS, all treatments (n = 4 per treatment group). Species (cirlce points) colored by PCA resource group. Plots (diamond points) colored by nutrient treatment, with 95% confidence ellipses shaded."}
 # 2017
-ggplot(subset(alpplotmds, yr == 2017 & iter != "main"), aes(MDS1, MDS2)) +
+nns2017_nmds <- ggplot(subset(alpplotmds, yr == 2017 & iter != "main"), aes(MDS1, MDS2)) +
   geom_polygon(data=subset(alphulls, yr == 2017 & iter != "main"), aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
   #geom_polygon(data=subset(alpells, yr == 2017 & iter != "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
   geom_point(aes(fill = trt), pch = 21, color = "transparent", size = 1.7) +
@@ -1021,6 +1055,18 @@ ggplot(subset(alpplotmds, yr == 2017 & iter != "main"), aes(MDS1, MDS2)) +
   scale_fill_manual(name = "Treatment", values = trtcols) +
   scale_color_manual(name = "Resource\nstrategy", values = traitcols) +
   facet_wrap(~yr)
+
+# add FG arrows if any significant
+if(any(with(alpenv, pval[site == "nutnet" & tracker == "suppl_2017" & grp == "vectors"]) <= 0.05)){
+  nns2017_nmds <- nns2017_nmds + geom_segment(data=subset(alpenv, grp == "vectors" & tracker == "suppl_2017" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
+                                  arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
+    # add label to envfit arrow
+    geom_text(data=subset(alpenv, grp == "vectors" & tracker == "suppl_2017" & pval <= 0.05),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic")
+}
+
+# annotate stress and trt signif
+nns2017_nmds + geom_text(data = subset(alpstress, site == "nutnet" & tracker == "suppl_2017"), aes(plotx_hi, ploty_hi, label = paste("Stress:", round(stress,3))), size = plottext, hjust = 1) +
+  geom_text(data = subset(alpstress, tracker == "suppl_2017"), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1)
 
 ```
 
