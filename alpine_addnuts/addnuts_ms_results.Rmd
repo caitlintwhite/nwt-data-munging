@@ -157,6 +157,118 @@ varscores <- mutate(varscores, abbr = varnames) %>%
 ```
 
 
+```{r alternate PCA, include = F}
+# try expanding sites allowed (outside SDL DM) to allow more spp in analyses
+# subset traitdat by species in Marko and Soren's dataset
+# what matches the best?
+summary(unique(traitdat$USDA.Code) %in% spplist$code)
+summary(unique(traitdat$Species) %in% spplist$code)
+summary(unique(traitdat$Latin.name) %in% spplist$simple_name) #bingo
+
+traits_allsites <- left_join(traitdat, spplist[c("simple_name", "clean_code2")], by = c("Latin.name" = "simple_name"))
+# pull out spp that didn't match
+needs_match <- subset(traits_allsites, is.na(clean_code2)) %>%
+  dplyr::select(Latin.name, Species, USDA.Code) %>% distinct()
+# who is it?
+sort(unique(needs_match$Latin.name))
+# whose in spplist?
+sort(unique(spplist$simple_name))
+# what matches on NWT spp code
+summary(unique(needs_match$Species) %in% spplist$code) #2..
+unique(needs_match$Species)[unique(needs_match$Species) %in% spplist$code]
+# what matches on Marko's USDA code?
+summary(unique(needs_match$USDA.Code) %in% spplist$code)
+unique(needs_match$USDA.Code)[(unique(needs_match$USDA.Code) %in% spplist$code)] # same ones
+# match it by Species
+for(i in unique(needs_match$Species)[unique(needs_match$Species) %in% spplist$code]){
+  traits_allsites$clean_code2[traits_allsites$Species == i] <- spplist$clean_code2[spplist$code == i]
+}
+# match by USDA Code
+for(i in unique(needs_match$USDA.Code)[unique(needs_match$USDA.Code) %in% spplist$code]){
+  traits_allsites$clean_code2[traits_allsites$USDA.Code == i] <- spplist$clean_code2[spplist$code == i]
+}
+
+# check once more that didn't match
+unique(traits_allsites$Latin.name[is.na(traits_allsites$clean_code2)]) #ok, move on
+# remove spp that didn't match
+traits_allsites <- subset(traits_allsites, !is.na(clean_code2))
+# how many unique spp are there?
+length(unique(traits_allsites$clean_code2)) #69 spp..
+# where were these collected?
+sapply(split(traits_allsites$TRT, traits_allsites$clean_code2), function(x)unique(x))
+# look at variation in traits vals for a few spp collected across all sites (TRPAP, ERSI3, POBI6, MIOB2, GERO2, DECE)
+subset(traits_allsites, clean_code2 %in% c("TRPAP", "ERSI3", "POBI6", "MIOB2", "GERO2", "DECE")) %>%
+  dplyr::select(-Time, Lat, Long) %>%
+  gather(met, val, SoilMoisture:CN_ratio) %>%
+  mutate(TRT = ifelse(is.na(TRT), "Z", TRT)) %>%
+  filter(met %in% c("SLA", "OHeight", "LMA")) %>%
+  filter(!is.na(val) & Exp != "ITEX") %>%
+  ggplot(aes(clean_code2,val)) +
+  geom_boxplot() +
+  geom_jitter(aes(col = TRT), alpha = 0.5) +
+  facet_wrap(~met,scales = "free_y")
+
+summary(is.na(traits_allsites)) # leaf area, SLA, LMA and OHeight have the most data
+
+# let' just run everything and see what happens (if resource grp changes)
+
+
+# average dm trait vals and run through pca just to see..
+meantraits_allsites <- traits_allsites %>%
+  # log transform physical traits
+  mutate(ln_ohgt = log(OHeight),
+         ln_drywgt = log(DryWeight)) %>%
+  dplyr::select(clean_code2, VegHeight, OHeight, CCAvg:ln_drywgt) %>%
+  gather(met, val, VegHeight:ncol(.)) %>%
+  filter(!is.na(val)) %>%
+  group_by(clean_code2, met) %>%
+  summarise(meanval = mean(val, na.rm = T)) %>%
+  spread(met, meanval) %>%
+  as.data.frame()
+
+# specify spp as rownames
+rownames(meantraits_allsites) <- meantraits_allsites$clean_code2
+
+# test pca using most variables possible
+test1 <- na.omit(meantraits_allsites)
+# run pca
+traitpc_allsites_mostvars <- rda(scale(test1[,2:ncol(test1)]))
+summary(traitpc_allsites_mostvars) # PC1 explains 35% variation
+biplot(traitpc_allsites_mostvars, scaling = 2)
+
+# test pca using as many spp as possible (lowest common denom of vars with data available)
+hasdata <- apply(meantraits_allsites, 2, function(x) sum(!is.na(x)))
+test2 <- meantraits_allsites[,hasdata>60] %>%
+  na.omit() %>%
+  dplyr::select(-OHeight)
+# run pca
+traitpc_allsites_mostspp <- rda(scale(test2[,2:ncol(test2)]))
+summary(traitpc_allsites_mostspp) # PC1 explains about 40% variation
+biplot(traitpc_allsites_mostspp, scaling = 2)
+
+
+# extract pc scores to plot in treatment nmds plots 
+sppscores_mostspp <- data.frame(scores(traitpc_allsites_mostspp)$sites) %>%
+  mutate(clean_code2 = rownames(.)) %>%
+  mutate(resource_grp_mostspp = ifelse(PC1 <= 0, "Acquisitive", "Conservative"),
+         #try alternate grouping where spp in middle range are neutral,
+         resource_grp_mostspp2  =ifelse(PC1 <= -0.2, "Acquisitive", ifelse(PC1 >= 0.2, "Conservative", "Neutral")))
+
+varscores_mostspp <- data.frame(scores(traitpc_allsites_mostspp, display = "species"))
+varscores_mostspp$varnames <- rownames(varscores_mostspp)
+# assign abbreviated intelligible varnames for plot
+varscores_mostspp <- mutate(varscores_mostspp, abbr = varnames) %>%
+  mutate(abbr = recode(abbr,
+                       CCAvg = "Chl",
+                       CN_ratio = "C:N",
+                       ln_drywgt = "Dry weight",
+                       ln_ohgt = "Height",
+                       Percent_C = "%C",
+                       Percent_N = "%N"))
+
+```
+
+
 ### Temporal trend in alpine dry meadow forb and grass relative abundance
 
 As a double check, these are the replicated figures and tables I get following methods described in the manuscript draft. For the most part, numbers are very similar and may be slightly different due to old species codes being consolidated into the same USDA species code. I did find a number of typos in old species codes, which maybe could result in slight variation to diversity or richness numbers. The biggest difference in NutNet results here vs. what's shown in the manuscript is in at least 2013 *Selaginella densa* was classed and surveyed as ground cover (non-vegetation hits). That is, I can replicate 2013 numbers in the current draft ms when I also class *S. densa* as ground cover. In other surveys, however, *S. densa* was not necessarily surveyed as ground cover (for example, it was recorded below grass at a given point, or a in few cases, other plants were recorded as hit below *S. densa* at the top). *S. densa* is a vascular plant, and is relatively abundant in some plots, so I treated it as plant cover across all years and sites in results presented here.
@@ -647,7 +759,11 @@ kable(rename_all(table_nn17spp, function(x)gsub("_", " ", x)) %>%
 #### Multivariate analyses
 Considering the same plots analyzed above for forb and grass relative cover, what can we learn from multivariate analyses about shifts in forb and grass species abundances by treatment overtime at each site?
 
-```{r trait pca, fig.cap = "Fig 3. PCA of functional traits for available Saddle dry meadow species in Spasojevic and Weber (2019)"}
+```{r trait pca, fig.cap = "Fig 3. PCA of functional traits for available Saddle dry meadow species in Spasojevic and Weber (2018)"}
+# gather proportional importance for axes labels
+PCexplain <- data.frame(summary(traitpc)$cont$importance) %>%
+  rownames_to_column()
+
 # specify species text size
 plottext <- 3
 pointsize <- 2
@@ -665,8 +781,8 @@ pcfig <- ggplot() +
   # plot height separately
   geom_text(data = subset(varscores, abbr == "Height"), aes(PC1, PC2, label = abbr), check_overlap = T, vjust = -0.5, hjust = 0.7, size = plottext) +
   geom_text(data = subset(varscores, abbr %in% c("D15N", "Chl")), aes(PC1, PC2, label = abbr), check_overlap = F, vjust = 0, hjust = -0.1, size = plottext) +
-  labs(x = "PC1 (41% variance explained)",
-       y = "PC2 (20% variance explained)") +
+  labs(x = paste0("PC1 (",round(PCexplain$PC1[grepl("^Prop", PCexplain$rowname)],2)*100, "% variance explained)"),
+       y = paste0("PC2 (",round(PCexplain$PC2[grepl("^Prop", PCexplain$rowname)],2)*100, "% variance explained)")) +
   # describe axes
   geom_segment(aes(x=0.1,xend=2,y=(min(sppscores$PC2)-0.18),yend=(min(sppscores$PC2)-0.18)),
                arrow = arrow(length = unit(0.25, "cm")),colour="grey40", alpha = 0.4, lwd = 1) +
@@ -1144,4 +1260,143 @@ kable(permtable, caption = "Table S1. Permutation statistics (permanova and perm
 ```
 
 
+Marko and Soren's trait dataset overlaps much more with the NutNet/Saddle snowfence fert experiment species list if we allow trait data collected outside Saddle dry meadow sites. Here is the PCA and select NMDS figures remade with alternate resource grouping, along with a table of species and their resource grouping designation derived from dry-meadow only PCA vs. all sites PCA. Whether I select dry meadow only or use trait data from more sites, the resource grouping designation is the same except for 3 species: *Deschampsia cespitosa*, *Tetraneuris grandiflora*, and *Trifolium dasyphyllum*.
+
+```{r alternate PCA fig}
+# gather proportional importance
+altPCexplain <- data.frame(summary(traitpc_allsites_mostspp)$cont$importance) %>%
+  rownames_to_column()
+#specify plotting cols for 
+traitcols2 <- c(traitcols, Neutral = "coral")
+
+pcfig2 <- ggplot() +
+  geom_vline(aes(xintercept = 0), lty = 2, col = "grey") +
+  geom_hline(aes(yintercept = 0), lty = 2, col = "grey") +
+  geom_segment(data=varscores_mostspp,aes(x=0,xend=PC1,y=0,yend=PC2),
+               arrow = arrow(length = unit(0.25, "cm")),colour="grey40") + 
+  geom_point(data = sppscores_mostspp, aes(PC1, PC2, col = resource_grp_mostspp2), size = pointsize) +
+  geom_text(data = subset(varscores_mostspp, PC1 <=0 & !grepl("D13", abbr)), aes(PC1, PC2, label = abbr), check_overlap = T, hjust = 1, nudge_x = -0.02, size = plottext) +
+  # plot D13c separately
+  geom_text(data = subset(varscores_mostspp,abbr == "D13C"), aes(PC1, PC2, label = abbr), check_overlap = T, hjust = 0.2, nudge_y = -0.1, size = plottext) +
+  geom_text(data = subset(varscores_mostspp, PC1 >0 & !grepl("D15|Chl|Hei", abbr)), aes(PC1, PC2, label = abbr), check_overlap = T, hjust = -0.1, size = plottext) +
+  geom_text(data = subset(varscores_mostspp, abbr %in% c("D15N", "Chl")), aes(PC1, PC2, label = abbr), check_overlap = F, vjust = 0, hjust = -0.1, size = plottext) +
+  labs(x = paste0("PC1 (",round(altPCexplain$PC1[grepl("^Prop", altPCexplain$rowname)],2)*100, "% variance explained)"),
+       y = paste0("PC2 (",round(altPCexplain$PC2[grepl("^Prop", altPCexplain$rowname)],2)*100, "% variance explained)")) +
+  # describe axes
+  geom_segment(aes(x=0.1,xend=2,y=(min(sppscores_mostspp$PC2)-0.18),yend=(min(sppscores_mostspp$PC2)-0.18)),
+               arrow = arrow(length = unit(0.25, "cm")),colour="grey40", alpha = 0.4, lwd = 1) +
+  geom_segment(aes(x=-0.1,xend=-1.5,y=(min(sppscores_mostspp$PC2)-0.18),yend=(min(sppscores_mostspp$PC2)-0.18)),
+               arrow = arrow(length = unit(0.25, "cm")),colour="grey40", alpha = 0.4, lwd = 1) +
+  geom_text(aes(2, (min(sppscores_mostspp$PC2)-0.08), label = "Resource conservative"), fontface = "italic", col = "grey20", size = plottext, hjust = 1) +
+  geom_text(aes(-1.5, (min(sppscores_mostspp$PC2)-0.08), label = "Resource acquisitive"), fontface = "italic", col = "grey20", size = plottext, hjust = 0) +
+  coord_fixed() +
+  scale_color_manual(values = traitcols2, guide = FALSE)
+#theme(axis.text = element_text(size = 16),
+#  axis.title = element_text(size = 18))
+
+pcfig2 + labs(caption = "Alternate PCA using traits from all sites available in Spasojevic and Weber (2018) to maximize species with resource grouping value")
+```
+
+
+
+```{r suppl saddle nmds fig with alternate PC resource grp scores}
+# join alternate resource designations to spp nmds data frame
+alpsppmds2 <- left_join(alpsppmds, sppscores_mostspp[c("clean_code2", "resource_grp_mostspp", "resource_grp_mostspp2", "PC1")], by = "clean_code2") %>%
+  mutate(resource_grp_mostspp2 = ifelse(is.na(resource_grp_mostspp2), "Unknown", resource_grp_mostspp2))
+
+
+sdlnmds2 <- ggplot(subset(alpplotmds, site == "sdl" & iter == "main"), aes(MDS1, MDS2)) +
+  geom_point(aes(fill = trt), size = 1.75, shape = 23, color = "transparent") +
+  #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
+  geom_polygon(data=subset(alpells, site == "sdl" & iter == "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
+  geom_point(data = subset(alpsppmds2, site == "sdl" & iter == "main"), aes(MDS1, MDS2, col = resource_grp_mostspp2), alpha = 0.75) +
+  scale_fill_manual(name = "Treatment", values = trtcols) +
+  scale_color_manual(name = "Resource\nstrategy", values = traitcols2) +
+  #scale_color_distiller(palette = "Reds") +
+  facet_wrap(~yr, scales = "free") +
+  # make legend keys side by side
+  theme(legend.box = "horizontal",
+        legend.position = c(0.85, 0.3),
+        legend.background = element_blank(),
+        legend.title = element_text(size = 10))
+
+if(any(alpenv$pval[alpenv$site == "sdl" & alpenv$grp == "vectors"] <= 0.05)){
+  sdlnmds2 <- sdlnmds2 + geom_segment(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
+                                    arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
+    # add label to envfit arrow
+    geom_text(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic")
+}
+
+# annotate stress and trt signif
+sdlnmds2 + geom_text(data = subset(alpstress, site == "sdl"), aes(plotx_hi, ploty_hi, label = paste("Stress:", round(stress,3))), size = plottext, hjust = 1) +
+  geom_text(data = subset(alpstress, site == "sdl"), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1) +
+  labs(caption = "Saddle NMDS main figure with alternate PCA resource grouping for species points. 95% confidence ellpises drawns for treatments.")
+```
+
+
+
+```{r main nutnet nmds fig with alternate resource grp}
+nnnmds2 <- ggplot(subset(alpplotmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2)) +
+  geom_point(aes(col = trt), pch = 8) +
+  #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
+  geom_polygon(data=subset(alpells, site == "nutnet" & iter == "main"), aes(x=MDS1, y=MDS2, col=trt), alpha = 0.5, fill = "transparent", lty = 2) +
+  geom_point(data = subset(alpsppmds2, site == "nutnet" & iter == "main"), aes(MDS1, MDS2, fill = resource_grp_mostspp2), alpha = 0.75, size = 3, shape = 21, color = "transparent") +
+  scale_color_manual(name = "Treatment", values = trtcols) +
+  scale_fill_manual(name = "Resource\nstrategy", values = traitcols2) +
+  facet_wrap(~yr, scales = "free")
+
+# add FG arrows if any significant
+if(any(with(alpenv, pval[site == "nutnet" & grepl("main", tracker) & grp == "vectors"]) <= 0.05)){
+  nnnmds2 <- nnnmds2 + geom_segment(data=subset(alpenv, grp == "vectors" & grepl("main", tracker) & site == "nutnet" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
+                                  arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
+    # add label to envfit arrow
+    geom_text(data=subset(alpenv, grp == "vectors" & site == "nutnet" & grepl("main", tracker) & pval <= 0.05),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic")
+}
+
+# annotate stress and trt signif
+nnnmds2 + geom_text(data = subset(alpstress, site == "nutnet" & grepl("main", tracker)), aes(plotx_hi, ploty_hi, label = paste("Stress:", round(stress,3))), size = plottext, hjust = 1) +
+  geom_text(data = subset(alpstress, site == "nutnet" & grepl("main", tracker)), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1) +
+  labs(caption = "Nutnet NMDS main figure with alternate PCA resource grouping for species points. 95% confidence ellpises drawns for treatments.")
+
+```
+
+
+
+
+```{r nn 2017 nmds all trts with alternate resource grp}
+# 2017
+nns2017_nmds2 <- ggplot(subset(alpplotmds, yr == 2017 & iter != "main"), aes(MDS1, MDS2)) +
+  geom_polygon(data=subset(alphulls, yr == 2017 & iter != "main"), aes(MDS1, MDS2, col = trt), alpha = 0.5, lty = 2, fill = "transparent") +
+  #geom_polygon(data=subset(alpells, yr == 2017 & iter != "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
+  geom_point(aes(col = trt), pch = 8) +
+  geom_point(data = subset(alpsppmds2, yr == 2017 & iter != "main"), aes(MDS1, MDS2, fill = resource_grp_mostspp2), alpha = 0.75,  pch = 21, color = "transparent", size =3) +
+  scale_color_manual(name = "Treatment", values = trtcols) +
+  scale_fill_manual(name = "Resource\nstrategy", values = traitcols2) +
+  facet_wrap(~yr)
+
+# add FG arrows if any significant
+if(any(with(alpenv, pval[site == "nutnet" & tracker == "suppl_2017" & grp == "vectors"]) <= 0.05)){
+  nns2017_nmds2 <- nns2017_nmds2 + geom_segment(data=subset(alpenv, grp == "vectors" & tracker == "suppl_2017" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
+                                              arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
+    # add label to envfit arrow
+    geom_text(data=subset(alpenv, grp == "vectors" & tracker == "suppl_2017" & pval <= 0.05),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic")
+}
+
+# annotate stress and trt signif
+nns2017_nmds2 + geom_text(data = subset(alpstress, site == "nutnet" & tracker == "suppl_2017"), aes(plotx_hi, ploty_hi, label = paste("Stress:", round(stress,3))), size = plottext, hjust = 1) +
+  geom_text(data = subset(alpstress, tracker == "suppl_2017"), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1) +
+  labs(caption = "NutNet 2017 NMDS supplemental figure, with alternate PCA resource grouping. Treatment hulls drawn for sites.")
+```
+
+
+```{r print table of resource grouping}
+kable(dplyr::select(alpsppmds2, clean_code2, simple_name, simple_lifeform2, resource_grp, resource_grp_mostspp, resource_grp_mostspp2) %>%
+  filter(resource_grp_mostspp2 != "Unknown") %>%
+    rename(`DM-only group`= resource_grp,
+           `All sites grp1` = resource_grp_mostspp,
+           `All sites grp2` = resource_grp_mostspp2) %>%
+    arrange(`All sites grp2`, simple_name) %>%
+    distinct(),
+  caption = "Species resource grouping designations based on PCA (dry meadow-only traits vs all sites traits)")
+```
 
