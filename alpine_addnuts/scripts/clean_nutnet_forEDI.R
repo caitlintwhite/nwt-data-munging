@@ -64,6 +64,11 @@ for(i in 1:length(nnfiles)){
 ## read in from NWT FTP (to be sure most current df, altho in manual review same as what's on EDI)
 nnanpp_2007 <- read.csv("http://nwt.colorado.edu/data_csvs/aboveground_biomass_nutnet.ts.data.csv")
 
+# read in CTW-cleaned 2017 data (vertical), and raw for original spp codes
+ctw2017 <- read.csv("alpine_addnuts/output_data/nutnet2017_vertical_sppcomp.csv") 
+raw2017 <- read.csv("../../Documents/nwt_lter/unpub_data/dry_meado_fert/nut_net17raw.csv")
+# block 3 plot 7 not included in raw
+rawb3p7 <- read.csv("../../Documents/nwt_lter/unpub_data/dry_meado_fert/b3_p7.csv")
 
 
 # -- REVIEW ANPP ----
@@ -516,7 +521,112 @@ sppcomp.2013.final <- as.data.frame(sppcomp.simple) %>%
   mutate(Micro = `K+`,
          `K+` = 0) %>%
   filter(Hits > 0) %>%
-  dplyr::select(Site:P, Micro, `K+`, Code:Hits, USDA_Symbol:ncol(.))
+  dplyr::select(Site:P, Micro, `K+`, Code:Hits, USDA_Symbol:ncol(.)) %>%
+  # drop nativity
+  dplyr::select(-USDA_Native_Status)
+
+
+# -- PREP 2017 VERTICAL SPP COMP FOR EDI -----
+# stack tim's rawdat and remove no hits
+rawstack <- rename(rawb3p7, K = `K.`) %>%
+  rbind(raw2017) %>%
+  mutate(species = trimws(species)) %>%
+  # assign vert hits
+  group_by(block, plot, point) %>%
+  mutate(hit = seq(1,length(species), 1)) %>%
+  ungroup() %>%
+  filter(nchar(species) > 2)
+
+# view tim's codes, compare with Eve's to see if can use her names
+sort(unique(rawstack$species))
+summary(unique(rawstack$species) %in% sppcomp.2013.final$Code) #oye..
+# what agrees?
+unique(rawstack$species)[unique(rawstack$species) %in% sppcomp.2013.final$Code]
+# 2017 codes not in 2013
+sort(unique(rawstack$species)[!unique(rawstack$species) %in% sppcomp.2013.final$Code])
+# 2013 not in 2017
+sort(unique(sppcomp.2013.final$Code)[!unique(sppcomp.2013.final$Code) %in% unique(rawstack$species)])
+
+# > ctw decides, not going to match name because codes do not agree between years; tim didn't provide name for codes so not including
+# just going to clean up tim codes so no typos
+View(data.frame(code = unique(rawstack$species)) %>% left_join(sdlnnLUT))
+# the rule is, if first 4 letter matches another code, keep the longer code (e.g. has a number as final character)
+clean_ts_codes <- data.frame(code = unique(rawstack$species)) %>% left_join(sdlnnLUT[c("code", "clean_code2")]) %>%
+  mutate(check = substr(code,1,4),
+         chars = nchar(code),
+         final_ts = NA)
+# iterate through to assign final code based on nchar (can't figure out how to do in dplyr)  
+for(i in unique(clean_ts_codes$clean_code2)){
+  tempname <- subset(clean_ts_codes, clean_code2 == i) %>%
+    filter(chars == max(chars))
+  clean_ts_codes$final_ts[clean_ts_codes$clean_code2 == i] <- tempname$code[1]
+}
+View(clean_ts_codes) # looks good
+
+# now replace codes in tsrawdat, then append to ctw cleaned vert data
+rawstack <- left_join(rawstack, clean_ts_codes, by = c("species" = "code")) %>%
+  left_join(distinct(sppcomp.2013.final[c("Code", "Name")]), by = c("final_ts" = "Code")) %>%
+  mutate(block = paste0("B", block))
+# join with ctw cleaned as check to be sure clean codes match up properly
+
+sppcomp.2017.final <- left_join(ctw2017, dplyr::select(rawstack, block, plot, point, hit, clean_code2, species, final_ts, Name))
+summary(is.na(sppcomp.2017.final)) # yay everything matched, just need to fill in nutnet names
+# can I fill in with simple name?
+needsmatch <- subset(sppcomp.2017.final, is.na(Name)) %>%
+       dplyr::select(clean_code2, simple_name, final_ts, Name) %>%
+       distinct() # everything in simple name is appropriate for infilling
+# OR pull Names using clean code in 2013 dataset (duh)
+names2013 <- dplyr::select(sppcomp.2013.final, USDA_Symbol, Name, Code) %>%distinct()
+# infill with 2013 names
+for(i in needsmatch$clean_code2){
+  # remove any numbers if it was an unk forb or grass
+  infillval <- unique(gsub("[0-9]+", "", names2013$Name[names2013$USDA_Symbol == i])) %>% trimws()
+  # infill ts 2017
+  if(length(infillval) > 0){
+  needsmatch$Name[needsmatch$clean_code2 == i] <- infillval
+  }
+}
+# infill the rest with the simple name
+needsmatch <- mutate(needsmatch, Name = ifelse(is.na(Name), simple_name, Name))
+# now infill main set then clean up
+for(i in needsmatch$final_ts){
+  sppcomp.2017.final$Name[sppcomp.2017.final$final_ts == i] <- needsmatch$Name[needsmatch$final_ts == i]
+}
+
+summary(is.na(sppcomp.2017.final)) # nothing NA anymore
+sppcomp.2017.final <- rename(sppcomp.2017.final, Code = final_ts,
+                             USDA_Symbol = clean_code2,
+                             Vertical = hit) %>%
+  rename_all(function(x) paste0(casefold(substr(x,1,1),upper = T), substr(x,2,nchar(x)))) %>%
+  mutate(Micro = K,
+         Hits = 1,
+         Site = unique(sppcomp.2013.final$Site),
+         Block = parse_number(Block)) %>%
+  rename(`K+` = K) %>%
+  dplyr::select(Site, Date, Block:P, Micro, `K+`, Point, Vertical, Code, Name, Hits, USDA_Symbol) %>%
+  arrange(Block, Plot, Point, Vertical) %>%
+  # join usda data (don't include nativity)
+  left_join(distinct(dplyr::select(sdlnnLUT, clean_code2, Scientific_Name_x:Growth_Habit)), by = c("USDA_Symbol" = "clean_code2")) %>%
+  # prefix USDA_ to usda dats  
+  rename_at(vars(names(.)[names(.) %in% names(sdlnnLUT)]), function(x) paste0("USDA_",x))
+# remove _x from SciName
+names(sppcomp.2017.final) <- gsub("_x", "", names(sppcomp.2017.final))
+  
+# final check that N thu Micro trts = N thru Micro treats for 2013
+trt2017 <- distinct(dplyr::select(sppcomp.2017.final, Block:Micro)) %>%
+  # if everything matches, can join a column from sppcomp 2013 based on all cols and there won't be NAs
+  left_join(distinct(dplyr::select(sppcomp.2013.final, Block:Micro, Site)))
+summary(is.na(trt2017)) # yay! everything joined well
+
+
+# append survey to code and name so data users know those were Eve/Tim's taxa units
+sppcomp.2013.final <- rename_at(sppcomp.2013.final, vars("Code", "Name"), function(x)paste0("Field",x))
+sppcomp.2017.final <- rename_at(sppcomp.2017.final, vars("Code", "Name"), function(x)paste0("Field",x))
+
+# final check
+glimpse(sppcomp.2013.final)
+glimpse(sppcomp.2017.final)
+
 
 
 # -- WRITE OUT FINAL DATASETS -----
@@ -532,6 +642,8 @@ write.csv(stack_anpp, paste0(outpath, "NWTnutnet_anpp_2007ongoing.csv"), row.nam
 write.csv(sppcomp.long.final, paste0(outpath, "nutnet2013_sppcomp_long.csv"), row.names = F)
 write.csv(sppcomp.wide.final, paste0(outpath, "nutnet2013_sppcomp_wide.csv"), row.names = F)
 write.csv(sppcomp.2013.final, paste0(outpath, "NWTnutnet_sppcomp2013_forEDI.csv"), row.names = F)
+write.csv(sppcomp.2017.final, paste0(outpath, "NWTnutnet_sppcomp2017_forEDI.csv"), row.names = F)
+
 
 # aggregate metrics, long form only
 write.csv(biodiv, paste0(outpath, "nutnet2013_aggregate_and_biodiversity.csv"), row.names = F)
@@ -550,6 +662,10 @@ drive_upload(media = paste0(outpath, "NWTnutnet_anpp_2007ongoing.csv"),
 drive_upload(media = paste0(outpath, "NWTnutnet_sppcomp2013_forEDI.csv"),
              path = gdrive418[grep("clean", gdrive418$name),], 
              name = "sppcomp2013_nutnet.ts.data.csv", overwrite = T)
+## > write 2017 sppcomp data separately (has vertical info)
+drive_upload(media = paste0(outpath, "NWTnutnet_sppcomp2017_forEDI.csv"),
+             path = gdrive418[grep("clean", gdrive418$name),], 
+             name = "sppcomp2017_nutnet.ts.data.csv", overwrite = T)
 # write richness
 # give it name similar to anpp dataset
 drive_upload(media = paste0(outpath, "NWTnutnet_sppcomp_2013ongoing_long.csv"),
