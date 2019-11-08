@@ -70,6 +70,12 @@ raw2017 <- read.csv("../../Documents/nwt_lter/unpub_data/dry_meado_fert/nut_net1
 # block 3 plot 7 not included in raw
 rawb3p7 <- read.csv("../../Documents/nwt_lter/unpub_data/dry_meado_fert/b3_p7.csv")
 
+# read in richness data (already cleaned and verified by CTW for TS ms)
+## this is for sdl sffert and nutnet
+all_biodiv <- read.csv("alpine_addnuts/output_data/forTS/sdl_nutnet_fxnl_biodiv_anpp_1997-ongoing.csv")
+
+
+
 
 # -- REVIEW ANPP ----
 # which dfs are ANPP?
@@ -628,6 +634,31 @@ glimpse(sppcomp.2013.final)
 glimpse(sppcomp.2017.final)
 
 
+# -- PREP RICHNESS DATS -----
+# provide 2013 for convenience I guess?
+# use prepped sdl nutnet richness dat (from ms) and append sampling dates, fix trt cols
+nnS <-subset(all_biodiv, site == "nutnet") %>%
+  dplyr::select(site:plot, trt, S) %>%
+  mutate(block = parse_number(block),
+         site = unique(sppcomp.2013.final$Site)) %>%
+  rename_all(function(x)paste0(casefold(substr(x,1,1), upper = T), substr(x, 2, nchar(x)))) %>%
+  left_join(distinct(dplyr::select(sppcomp.2013.final, Date, Block:`K+`))) %>%
+  #reorder cols
+  dplyr::select(Site, Yr, Date, Block, Plot, N:`K+`, S) %>%
+  rename(N_spp_present = S,
+         Date2013 = Date) %>%
+  # change K+ to 1 if yr = 2017
+  mutate(`K+` = ifelse(Yr == 2017, Micro, `K+`)) %>%
+  # join 2017 dates
+  left_join(distinct(dplyr::select(sppcomp.2017.final, Date, Block:`K+`))) %>%
+  rename(Date2017 = Date) %>%
+  mutate(Date2013 = as.character(Date2013)) %>%
+  mutate(Date = ifelse(Yr == 2013, Date2013, Date2017)) %>%
+  mutate(Date = as.Date(Date, format = "%Y-%m-%d")) %>%
+  dplyr::select(Site, Date, Block:N_spp_present)
+
+
+
 
 # -- WRITE OUT FINAL DATASETS -----
 # specify pathway for writing out final datasets
@@ -644,6 +675,8 @@ write.csv(sppcomp.wide.final, paste0(outpath, "nutnet2013_sppcomp_wide.csv"), ro
 write.csv(sppcomp.2013.final, paste0(outpath, "NWTnutnet_sppcomp2013_forEDI.csv"), row.names = F)
 write.csv(sppcomp.2017.final, paste0(outpath, "NWTnutnet_sppcomp2017_forEDI.csv"), row.names = F)
 
+# richness (no 2007 available)
+write.csv(nnS, paste0(outpath, "NWTnutnet_sppS_2013ongoing_forEDI.csv"), row.names = F)
 
 # aggregate metrics, long form only
 write.csv(biodiv, paste0(outpath, "nutnet2013_aggregate_and_biodiversity.csv"), row.names = F)
@@ -668,7 +701,7 @@ drive_upload(media = paste0(outpath, "NWTnutnet_sppcomp2017_forEDI.csv"),
              name = "sppcomp2017_nutnet.ts.data.csv", overwrite = T)
 # write richness
 # give it name similar to anpp dataset
-drive_upload(media = paste0(outpath, "NWTnutnet_sppcomp_2013ongoing_long.csv"),
+drive_upload(media = paste0(outpath, "NWTnutnet_sppS_2013ongoing_forEDI.csv"),
              path = gdrive418[grep("clean", gdrive418$name),], 
              name = "spprichness_nutnet.ts.data.csv", overwrite = T)
 
