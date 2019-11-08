@@ -1,6 +1,11 @@
 # clean nutnet data
 
-# nutnet 2013:
+# purpose (this script evolved over time: 
+# 1) [original script purpose] review bulk motherlode of 2013 nn files sent to sarah (e.g. are they different? all the same?)
+# 2) [update nov 2019] use data cleaned in this script plus other year dat CTW cleaned for TS manuscript to prep/format all nutnet data for EDI publication
+# > writes out EDI-ready datasets to Anna and Sarah's GDrive PKG 418 folder using 'googledrive' R package
+
+# nutnet 2013 (sent to Sarah [from Amy C?]):
 # ANPP
 # richness
 # spp comp
@@ -9,10 +14,20 @@
 
 # update (2019-10-07): CTW and SCE decided just to post basic, cleaned nutnet data to EDI: anpp (Forb, Grass and Legum), and spp comp
 # data users can dervice other metrics (e.g. aggregate cover, species richness and diversity) if they want, but on their own
-# don't be fussy about same formatting at nutnet protocol
+# don't be fussy about same formatting out nutnet protocol
 
-# update 2019-10-08: SCE and CTW decided to indicates 1s and 0s for trt cols *as applied at time of sampling*
-# and to only use original spp codes *IF* they are typo free (currently not)
+# update 2019-11-08: SCE and CTW decided to indicates 1s and 0s for trt cols *as applied at time of sampling*
+# and to only include original spp codes *IF* they are typo free (CTW fixes them in this script, it's not too bad); standardized USDA codes also provided with USDA Plant DB descriptive info
+
+
+# final outputs for EDI:
+# stacked time series ANPP dataset
+# 2013 spp comp dataset (total hits per species per plot, spp present included as 0.25)
+# 2017 spp comp dataset (vertical data preserved (e.g. top hit, secondary, terciary, etc.), spp present IDs not available)
+# stacked time series spp richness (only way to preserve total spp richness and calculate diversity using spp present for 2017; include 2013 just.. so it's complete i guess, but data users could also calculate 2013 from the sppcomp dataset bc includes spp present)
+# > note for richness: 2007 richness exist.. SCE and CTW cannot find them anywhere though. they are published in Adler et al. 2011 science paper on productivity and richness nutnet study
+
+
 
 # -- SETUP ----
 rm(list = ls())
@@ -636,6 +651,7 @@ glimpse(sppcomp.2017.final)
 
 # -- PREP RICHNESS DATS -----
 # provide 2013 for convenience I guess?
+# 2017 total richness is all that currently exists.. ts did not provide spp IDs for spp present, so only have tallies
 # use prepped sdl nutnet richness dat (from ms) and append sampling dates, fix trt cols
 nnS <-subset(all_biodiv, site == "nutnet") %>%
   dplyr::select(site:plot, trt, S) %>%
@@ -652,7 +668,9 @@ nnS <-subset(all_biodiv, site == "nutnet") %>%
   # join 2017 dates
   left_join(distinct(dplyr::select(sppcomp.2017.final, Date, Block:`K+`))) %>%
   rename(Date2017 = Date) %>%
+  # make character bc otherwise will not play nicely with 2017 dates (R converts all to numeric. boo!)
   mutate(Date2013 = as.character(Date2013)) %>%
+  # choose final date .. if 2013, 2013 date, if 2017.. 2017 date..
   mutate(Date = ifelse(Yr == 2013, Date2013, Date2017)) %>%
   mutate(Date = as.Date(Date, format = "%Y-%m-%d")) %>%
   dplyr::select(Site, Date, Block:N_spp_present)
@@ -678,7 +696,7 @@ write.csv(sppcomp.2017.final, paste0(outpath, "NWTnutnet_sppcomp2017_forEDI.csv"
 # richness (no 2007 available)
 write.csv(nnS, paste0(outpath, "NWTnutnet_sppS_2013ongoing_forEDI.csv"), row.names = F)
 
-# aggregate metrics, long form only
+# aggregate metrics, long form only <-- these aggs mark selaginella dense as ground cover in order to verify 2013 richness and diversity numbers in TS's first ms draft
 write.csv(biodiv, paste0(outpath, "nutnet2013_aggregate_and_biodiversity.csv"), row.names = F)
 
 # write to google drive for Anna
