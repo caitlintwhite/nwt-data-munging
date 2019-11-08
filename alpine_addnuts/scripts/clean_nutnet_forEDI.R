@@ -546,9 +546,10 @@ drive_upload(media = paste0(outpath, "NWTnutnet_anpp_2007ongoing.csv"),
              name = "aboveground_biomass_nutnet.ts.data.csv", overwrite = T)
 # write spp comp
 # give it name similar to anpp dataset
-drive_upload(media = paste0(outpath, "NWTnutnet_sppcomp_2013ongoing_long.csv"),
+## > write 2013 data separately bc in different data format than 2017 data
+drive_upload(media = paste0(outpath, "NWTnutnet_sppcomp2013_forEDI.csv"),
              path = gdrive418[grep("clean", gdrive418$name),], 
-             name = "sppcomp_nutnet.ts.data.csv", overwrite = T)
+             name = "sppcomp2013_nutnet.ts.data.csv", overwrite = T)
 # write richness
 # give it name similar to anpp dataset
 drive_upload(media = paste0(outpath, "NWTnutnet_sppcomp_2013ongoing_long.csv"),
