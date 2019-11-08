@@ -11,12 +11,15 @@
 # data users can dervice other metrics (e.g. aggregate cover, species richness and diversity) if they want, but on their own
 # don't be fussy about same formatting at nutnet protocol
 
+# update 2019-10-08: SCE and CTW decided to indicates 1s and 0s for trt cols *as applied at time of sampling*
+# and to only use original spp codes *IF* they are typo free (currently not)
 
 # -- SETUP ----
 rm(list = ls())
 library(tidyverse)
 library(readxl)
 library(vegan)
+library(googledrive)
 options(stringsAsFactors = F)
 
 # read in CTW spp lookup table for nutnet and saddle grid (made for Tim's ms)
@@ -161,29 +164,43 @@ rm(anpp1, anpp1.1, anpp1.2, anpp2, anpp2.long, anpp3)
 # clean up long-form for EDI (per discussion with SCE), standardize biomass, and stack 2007 data
 stack_anpp <- subset(anpp.long, Group != "Total") %>%  # remove derived bmass 
   # standardize bmass (is g/0.1m^2) (20x50cm clip)
-  mutate(ANPP_g_per_m2 = ANPP_g * 10) %>%
+   mutate(ANPP_g_per_m2 = ANPP_g * 10) %>%
   #append Subplot and Subsubplot to stack with 2007 data
   mutate(Subplot = NA, #no info available
          Subsubplot = NA, #no info available
          DataType = "Post-treatment (Experimental)",
          Date = as.Date("2013-08-02"), # last date of spp comp sampling (but not exactly sure when bmass clipped)
-         Site = "NWT NutNet") %>%
-  dplyr::select(Site, Date, DataType, Block, Plot, Subplot, Subsubplot,N:Group, ANPP_g_per_m2)
+         Site = "NWT NutNet",
+          Micro = `K+`,
+         # change K+ to 0 since not applied yet in 2013 (added to micro plots in 2016)
+         `K+` = 0,
+         # recode grass to graminoid
+         Group = recode(Group, Grass = "Graminoid")) %>%
+  # rename ANPP to reflect area
+  rename(ANPPg_0.1m2 = ANPP_g) %>%
+  dplyr::select(Site, Date, DataType, Block, Plot, Subplot, Subsubplot,N,P,Micro, `K+`, Group, ANPPg_0.1m2)
 
 anpp2007.long <- nnanpp_2007 %>%
   gather(Group, ANPP_g, live_gram:trifolium) %>%
   # standardize bmass (is g/0.1m^2) (20x50cm clip)
   mutate(ANPP_g_per_m2 = ANPP_g * 10) %>%
   # add treatment columns
-  left_join(distinct(anpp.long[c("Block", "Plot", "N", "P", "K+", "FullTreatment")]), by = c("block" = "Block", "exp_unit" = "Plot")) %>%
+  # left_join(distinct(anpp.long[c("Block", "Plot", "N", "P", "Micro", "K+")]), by = c("block" = "Block", "exp_unit" = "Plot")) %>%
   # recode groups
-  mutate(Group = recode(Group, live_gram = "Grass", live_forb = "Forb",  dead_gram = "Dead grass", trifolium = "Legume")) %>%
+  mutate(Group = recode(Group, live_gram = "Graminoid", live_forb = "Forb",  dead_gram = "Dead graminoid", trifolium = "Legume")) %>%
   rename_at(vars(names(nnanpp_2007)[1:5]), function(x) paste0(casefold(substr(x,1,1), upper = T), substr(x, 2, nchar(x)))) %>%
-  rename(Plot = Exp_unit) %>%
+  rename(Plot = Exp_unit,
+         # also rename ANPP
+         ANPPg_0.1m2 = ANPP_g) %>%
   mutate(DataType = "Pre-treatment (Baseline)",
-         Site = "NWT NutNet") %>%
+         Site = "NWT NutNet",
+         # add in 0 data for trt cols since nothing applied yet
+         N = 0,
+         P = 0,
+         Micro = 0,
+         `K+` = 0) %>%
   # reorder cols
-  dplyr::select(Site, Date, DataType, Block:Subsubplot, N:FullTreatment, Group, ANPP_g_per_m2)
+  dplyr::select(names(stack_anpp))
 
 stack_anpp <- rbind(stack_anpp, anpp2007.long) %>%
   # sort by date, block, plot and group
@@ -495,6 +512,10 @@ write.csv(anpp.long, paste0(outpath, "nutnet2013_anpp_long.csv"), row.names = F)
 write.csv(anpp2.wide, paste0(outpath, "nutnet2013_anpp_wide.csv"), row.names = F)
 write.csv(stack_anpp, paste0(outpath, "NWTnutnet_anpp_2007ongoing.csv"), row.names = F)
 
+# write to google drive for Anna
+drive_upload(
+  overwrite = TRUE
+)
 # spp comp, long and wide form, and simplified long-form spp comp
 write.csv(sppcomp.long.final, paste0(outpath, "nutnet2013_sppcomp_long.csv"), row.names = F)
 write.csv(sppcomp.wide.final, paste0(outpath, "nutnet2013_sppcomp_wide.csv"), row.names = F)
