@@ -685,7 +685,7 @@ outpath <- "alpine_addnuts/output_data/nutnet2013_alldats/"
 # anpp, long and wide form + stacked for EDI
 write.csv(anpp.long, paste0(outpath, "nutnet2013_anpp_long.csv"), row.names = F)
 write.csv(anpp2.wide, paste0(outpath, "nutnet2013_anpp_wide.csv"), row.names = F)
-write.csv(stack_anpp, paste0(outpath, "NWTnutnet_anpp_2007ongoing.csv"), row.names = F)
+write.csv(stack_anpp, paste0(outpath, "NWTnutnet_anpp_2007ongoing_forEDI.csv"), row.names = F)
 
 # spp comp, long and wide form, and simplified long-form spp comp
 write.csv(sppcomp.long.final, paste0(outpath, "nutnet2013_sppcomp_long.csv"), row.names = F)
