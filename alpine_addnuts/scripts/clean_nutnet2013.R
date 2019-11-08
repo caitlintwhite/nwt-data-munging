@@ -21,6 +21,7 @@ library(readxl)
 library(vegan)
 library(googledrive)
 options(stringsAsFactors = F)
+source("EDI_functions.R")
 
 # read in CTW spp lookup table for nutnet and saddle grid (made for Tim's ms)
 sdlnnLUT <- read.csv("alpine_addnuts/output_data/sdl_nutnet_spplookup.csv")
@@ -296,10 +297,13 @@ summary(sppcomp.long$Symbol == sppcomp.long$Accepted_Symbol_x) # yes, NAs are 2x
 # clean up data frame for final product
 # i.e. remove redudant colnames.. perhaps indicate certain cols as from USDA (could also indicate in EML to avoid long names)
 sppcomp.long.final <- dplyr::select(sppcomp.long,Block:FullTreatment, Code, Spp, Group, Hits, Present, clean_code2, Scientific_Name_x:ncol(sppcomp.long)) %>%
-  rename(USDA_Symbol = clean_code2,
-         Scientific_Name = Scientific_Name_x,
-         Name = Spp) %>%
-  arrange(Block, Plot, Code)
+  rename(Name = Spp,
+         USDA_Symbol = clean_code2) %>%
+  # prefix all cols from USDA plants db with "USDA_"
+  rename_at(vars(names(.)[names(.) %in% names(sdlnnLUT)]), function(x) paste0("USDA_", x)) %>%
+  arrange(Block, Plot, Code) %>%
+  #remove _x from SciName
+  rename_all(function(x) gsub("_x$", "", x))
 # Code and Name correspond to values used by NutNet, all other descriptive cols are from USDA Plants DB (except Group, specified by CTW)
 
 # > there are a few unk forbs and grasses.. check to see if these were counted separately in richness
@@ -425,9 +429,7 @@ biodiv$Shannon_diversity <- Sdiv
 # simplify long-form dataset for SCE (remove Nutnet grouping) + add site info and dates
 sppcomp.simple <- sppcomp.long.final %>%
   mutate(Site = "NWT NutNet") %>%
-  dplyr::select(Site, Block:Name, Hits:ncol(.)) %>%
-  # append USDA to USDA cols
-  rename_at((grep("USDA", names(.))+1):ncol(.), function(x)paste("USDA", x, sep = "_"))
+  dplyr::select(Site, Block:Name, Hits:ncol(.))
 
 # each block-workbook has the survey dates for spp comp.. need to iterate through and scrap those
 blockdats <- grep("_block", names(nnlist))
@@ -497,10 +499,24 @@ sppcomp.simple <- sppcomp.simple %>%
 
 # clean up "(ERIMEL?)" in spp Name
 sppcomp.simple <- mutate(sppcomp.simple, Name = ifelse(grepl("Erig.* melano", Name),
-                                                       str_extract(unique(sppcomp.simple$Name), "^.* melanocephalus"),Name))
+                                                       str_extract(unique(sppcomp.simple$Name), "^.* melanocephalus"),Name),
+                         # remove extra double space from Carex spp
+                         Name = trimws(gsub("  ", " ", Name)))
 # check names
 sort(unique(sppcomp.simple$Name))
+# check codes
+sort(unique(sppcomp.simple$Code))
+View(distinct(sppcomp.simple[c("Code", "Name", "USDA_Symbol")]))
 
+
+# clean up 2013 for EDI 
+# correct trt cols (micro, K+), remove spp not 0 and presence/absence col
+sppcomp.2013.final <- as.data.frame(sppcomp.simple) %>%
+  ungroup() %>%
+  mutate(Micro = `K+`,
+         `K+` = 0) %>%
+  filter(Hits > 0) %>%
+  dplyr::select(Site:P, Micro, `K+`, Code:Hits, USDA_Symbol:ncol(.))
 
 
 # -- WRITE OUT FINAL DATASETS -----
@@ -512,14 +528,30 @@ write.csv(anpp.long, paste0(outpath, "nutnet2013_anpp_long.csv"), row.names = F)
 write.csv(anpp2.wide, paste0(outpath, "nutnet2013_anpp_wide.csv"), row.names = F)
 write.csv(stack_anpp, paste0(outpath, "NWTnutnet_anpp_2007ongoing.csv"), row.names = F)
 
-# write to google drive for Anna
-drive_upload(
-  overwrite = TRUE
-)
 # spp comp, long and wide form, and simplified long-form spp comp
 write.csv(sppcomp.long.final, paste0(outpath, "nutnet2013_sppcomp_long.csv"), row.names = F)
 write.csv(sppcomp.wide.final, paste0(outpath, "nutnet2013_sppcomp_wide.csv"), row.names = F)
-write.csv(sppcomp.simple, paste0(outpath, "NWTnutnet_sppcomp_2013ongoing_long.csv"), row.names = F)
+write.csv(sppcomp.2013.final, paste0(outpath, "NWTnutnet_sppcomp2013_forEDI.csv"), row.names = F)
 
 # aggregate metrics, long form only
 write.csv(biodiv, paste0(outpath, "nutnet2013_aggregate_and_biodiversity.csv"), row.names = F)
+
+# write to google drive for Anna
+## get 418 folder
+gdrive418 <- drive_find(pattern = "PKG_418", n = 30) %>% drive_ls()
+# write anpp dataset
+# rename anpp dat to datname on EDI (aboveground_biomass_nutnet_baseline.ts.data.csv -- but SCE says take out baseline)
+drive_upload(media = paste0(outpath, "NWTnutnet_anpp_2007ongoing.csv"),
+             path = gdrive418[grep("clean", gdrive418$name),], 
+             name = "aboveground_biomass_nutnet.ts.data.csv", overwrite = T)
+# write spp comp
+# give it name similar to anpp dataset
+drive_upload(media = paste0(outpath, "NWTnutnet_sppcomp_2013ongoing_long.csv"),
+             path = gdrive418[grep("clean", gdrive418$name),], 
+             name = "sppcomp_nutnet.ts.data.csv", overwrite = T)
+# write richness
+# give it name similar to anpp dataset
+drive_upload(media = paste0(outpath, "NWTnutnet_sppcomp_2013ongoing_long.csv"),
+             path = gdrive418[grep("clean", gdrive418$name),], 
+             name = "spprichness_nutnet.ts.data.csv", overwrite = T)
+
