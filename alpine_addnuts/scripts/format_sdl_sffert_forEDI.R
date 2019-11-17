@@ -105,43 +105,8 @@ sdlcomp$simple_name[sdlcomp$USDA_Symbol == "2SCAT"] <- "Scat"
 
 
 
-# -- PREP 1996-1997 RICHNESS DATA (from nwt website) ----
-# compare richness in 1997 to ctw-calculated richness
-richness97 <- full_join(subset(all_biodiv, yr == 1997), subset(anpp_2014, year < 1998), by = c("plot" = "plot_num", "yr" ="year")) %>%
-  filter(veg_class == "DM" & snow.y == "no_snow") %>%
-  dplyr::select(plot, yr, S, spp_rich) %>%
-  gather(met, val, S:spp_rich)
-  # infill richness for 96 so can plot connecting lines
-richness97$val[richness97$met == "S" & richness97$yr == 1996] <- richness97$val[richness97$met == "spp_rich" & richness97$yr == 1996]
-richness97 <- mutate(richness97, met = recode(met, S = "CTW 97 richness", spp_rich = "EDI 97 richness"))
-
-compareyrs <- ggplot(richness97, aes(as.factor(yr), val)) +
-  geom_line(aes(group = plot), col = "lightsalmon", alpha = 0.8) +
-  geom_point(col = "indianred3", size = 2) +
-  geom_point(data = subset(richness97, grepl("CTW", met) & yr == 1997), aes(as.factor(yr), val), col = "black", size = 2) +
-  #geom_point(data = subset(richness97, !grepl("CTW", met) & yr == 1997), aes(as.factor(yr), val), col = "mediumpurple2") +
-  scale_y_continuous(breaks = seq(6,28, 4), limits = c(6,28)) +
-  labs(y = "Spp richness", x = "Year") +
-  facet_wrap(~met)
-
-comparetime <- subset(all_biodiv, plot <17 & site == "sdl" & !is.na(S)) %>%
-  mutate(met = "All years, red = EDI, black = CTW") %>%
-  ggplot(aes(yr, S)) +
-  geom_line(aes(group = plotid), col = "grey50", alpha = 0.8) +
-  geom_point(size = 2) +
-  labs(y = NULL, x = "Year") +
-  #geom_line(data = subset(anpp_2014, plot_num < 17), aes(year, spp_rich, group = plot_num), col = "orchid", alpha = 0.5, position = position_dodge(width = 0.1)) +
-  geom_point(data = subset(anpp_2014, plot_num < 17), aes(year, spp_rich), col = "indianred3", alpha = 0.6, position = position_dodge(width = 0.1), size =2) +
-  scale_y_continuous(breaks = seq(6,28, 4), limits = c(6,28)) +
-  scale_x_continuous(breaks = seq(1996, 2012,4)) +
-  facet_wrap(~met)
-
-cowplot::plot_grid(compareyrs, comparetime)
-# write out plot for Tim to decide what to do with spp richness in 96,97
-
-
 # -- PREP ANPP ----
-# write anpp separately..
+# write anpp separately from richness..
 sffert_anpp <- dplyr::select(anpp_2014, -spp_rich) %>%
   # specify 0 for gram and total weight where forb weight present
   mutate(wt_gr1 = ifelse(!is.na(wt_fb1) & is.na(wt_gr1), 0, wt_gr1),
@@ -173,15 +138,114 @@ ggplot(subset(sffert_anpp, group == "Total" & rep == 1), aes(as.factor(year), an
   geom_point() +
   facet_grid(fert~snow)
 # still seems a bit high...
-ggplot(subset(sffert_anpp, group == "Total"), aes(as.factor(plot_num), anpp_g, col = as.factor(year))) +
-  geom_point() +
-  scale_color_viridis_d() +
-  facet_grid(fert~snow, scales = "free_x")
+subset(sffert_anpp, group == "Total") %>%
+  mutate(snow = recode(snow, '1' = "Snow", '0' = "No snow")) %>%
+  ggplot(aes(as.factor(plot_num), anpp_g, col = as.factor(year), shape = veg_class)) +
+  geom_point(size = 2, alpha = 0.7) +
+  ggtitle("SDL snowfence ANPP, by snow and fertilization treatment, colored by year, symbol by meadow") +
+  labs(y = "g per 0.04 m^2", x = "plot") +
+  scale_color_brewer(palette = "Set2", name = "Year") +
+  scale_shape(name = "Meadow") +
+  theme(axis.text.x = element_text(angle = 90),
+        plot.title = element_text(size = 11.5)) +
+  facet_grid(fert~ snow, scales = "free_x")
+# write out plot for Tim to review
+ggsave("alpine_addnuts/figures/SFFERT_review_anpp.pdf", width = 8, height = 6)
 
 # check anpp values
 sapply(sffert_anpp, function(x) sort(unique(x))) # looks fine
 
 
+
+# -- PREP 1996-1997 RICHNESS DATA (from nwt website) ----
+# compare richness in 1997 to ctw-calculated richness
+richness97 <- full_join(subset(all_biodiv, yr == 1997), subset(anpp_2014, year < 1998), by = c("plot" = "plot_num", "yr" ="year")) %>%
+  filter(veg_class == "DM" & snow.y == "no_snow") %>%
+  dplyr::select(plot, yr, S, spp_rich) %>%
+  gather(met, val, S:spp_rich)
+# infill richness for 96 so can plot connecting lines
+richness97$val[richness97$met == "S" & richness97$yr == 1996] <- richness97$val[richness97$met == "spp_rich" & richness97$yr == 1996]
+richness97 <- mutate(richness97, met = recode(met, S = "CTW 97 richness", spp_rich = "EDI 97 richness"))
+
+compareyrs <- ggplot(richness97, aes(as.factor(yr), val)) +
+  geom_line(aes(group = plot), col = "lightsalmon", alpha = 0.8) +
+  geom_point(col = "indianred3", size = 2) +
+  geom_point(data = subset(richness97, grepl("CTW", met) & yr == 1997), aes(as.factor(yr), val), col = "black", size = 2) +
+  #geom_point(data = subset(richness97, !grepl("CTW", met) & yr == 1997), aes(as.factor(yr), val), col = "mediumpurple2") +
+  scale_y_continuous(breaks = seq(6,28, 4), limits = c(6,28)) +
+  labs(y = "Spp richness", x = "Year") +
+  facet_wrap(~met)
+
+comparetime <- subset(all_biodiv, plot <17 & site == "sdl" & !is.na(S)) %>%
+  mutate(met = "All years, red = EDI, black = CTW") %>%
+  ggplot(aes(yr, S)) +
+  geom_line(aes(group = plotid), col = "grey50", alpha = 0.8) +
+  geom_point(size = 2) +
+  labs(y = NULL, x = "Year") +
+  #geom_line(data = subset(anpp_2014, plot_num < 17), aes(year, spp_rich, group = plot_num), col = "orchid", alpha = 0.5, position = position_dodge(width = 0.1)) +
+  geom_point(data = subset(anpp_2014, plot_num < 17), aes(year, spp_rich), col = "indianred3", alpha = 0.6, position = position_dodge(width = 0.1), size =2) +
+  scale_y_continuous(breaks = seq(6,28, 4), limits = c(6,28)) +
+  scale_x_continuous(breaks = seq(1996, 2012,4)) +
+  facet_wrap(~met)
+
+cowplot::plot_grid(compareyrs, comparetime)
+# write out plot for Tim to decide what to do with spp richness in 96,97
+
+# tim says still post richness data from 1996, 1997, we'll just add a note about count differences with rest of dataset
+# format 96, 97 richness data for EDI
+## bc plot codes in ANPP match, okay to go for richness
+sffert_rich <- dplyr::select(anpp_2014, year:collect_date, spp_rich) %>%
+  filter(!is.na(spp_rich)) %>%
+  mutate(snow = recode(snow, no_snow = 0, snow = 1)) %>%
+  rename(fert = fert_tmt) %>%
+  # add site
+  mutate(LTER_site = "Niwot Ridge LTER", local_site = "SDL snowfence",
+         snow_recovery = 0) %>%
+  #reorder cols
+  dplyr::select(LTER_site, local_site, year, plot_num, old_plot_num, veg_class, fert, snow, snow_recovery, spp_rich) %>%
+  arrange(year, plot_num)
+
+# double check plot designations
+anpp_plots <- distinct(dplyr::select(sffert_anpp, plot_num:snow)) %>%
+  left_join(sdlLT, by = c("plot_num" = "plot", "snow", "fert", "veg_class"))
+
+
+
 # -- WRITE OUT DATA -----
-write.csv(sdlcomp, "alpine_addnuts/output_data/forEDI/sffert_sppcomp_1997ongoing_forEDI.csv", row.names = F)
-write.csv(sffert_anpp, "alpine_addnuts/output_data/forEDI/sffert_anpp_1996ongoing_forEDI.csv", row.names = F)
+# specify outpath for writing data
+outpath <- "alpine_addnuts/output_data/forEDI/"
+write.csv(sdlcomp, paste0(outpath, "sffert_sppcomp_1997ongoing_forEDI.csv"), row.names = F)
+write.csv(sdlcomp, paste0(outpath, "sffert_sppcomp_2016vert_forEDI.csv"), row.names = F)
+write.csv(sffert_anpp, paste0(outpath, "sffert_anpp_1996ongoing_forEDI.csv"), row.names = F)
+write.csv(sdlcomp, paste0(outpath, "sffert_spprich_19961997_forEDI.csv"), row.names = F)
+write.csv(sdlcomp, paste0(outpath, "sffert_plotlookup_forEDI.csv"), row.names = F)
+
+
+# write to gdrive for Anna
+# write to google drive for Anna
+## get 418 folder
+gdrive138 <- drive_find(pattern = "PKG_138", n = 30) %>% drive_ls()
+# write anpp dataset
+# rename anpp dat to datname on EDI
+drive_upload(media = paste0(outpath, "sffert_anpp_1996ongoing_forEDI.csv"),
+             path = gdrive138[grep("clean", gdrive138$name, ignore.case = T),], 
+             name = "saddferb.ts.data.csv", overwrite = T)
+# write spp comp
+## > write all years, hits summed by spp by plot
+drive_upload(media = paste0(outpath, "sffert_sppcomp_1997ongoing_forEDI.csv"),
+             path = gdrive138[grep("clean", gdrive138$name, ignore.case = T),], 
+             name = "saddfert.ts.data.csv", overwrite = T)
+## > write 2016 vertical sppcomp data 
+drive_upload(media = paste0(outpath, "sffert_vertcomp_forEDI.csv"),
+             path = gdrive138[grep("clean", gdrive138$name, ignore.case = T),], 
+             name = "saddferv.ts.data.csv", overwrite = T)
+# write spp richness
+# give it name similar to other datasets
+drive_upload(media = paste0(outpath, "sffert_spprich_19961997_forEDI.csv"),
+             path = gdrive138[grep("clean", gdrive138$name, ignore.case = T),], 
+             name = "saddferr.ts.data.csv", overwrite = T)
+# write plot lookup table
+# give it name similar to other datasets
+drive_upload(media = paste0(outpath, "sffert_plotlookup_forEDI.csv"),
+             path = gdrive138[grep("clean", gdrive138$name, ignore.case = T),], 
+             name = "saddfert.ts.sitelut.csv", overwrite = T)
