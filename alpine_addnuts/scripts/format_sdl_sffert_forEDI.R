@@ -14,7 +14,7 @@
 rm(list = ls())
 library(tidyverse)
 library(googledrive)
-options(stringsAsFactors = F, strip.white = T)
+options(stringsAsFactors = F, strip.white = T, na.strings = c("NA", NA, "NaN", NaN, "."))
 theme_set(theme_bw())
 source("EDI_functions.R")
 
@@ -33,7 +33,7 @@ sdlsites <- read.csv("alpine_addnuts/output_data/sdl_plot_lookup.csv")
 anpp <- read.csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.138.3&entityid=754715ae8d14748faaa98f48e178fb83",
                  na.strings = c("NA", NA, NaN, "NaN"), header = FALSE)
 anpp_meta <- readLines("http://nwt.colorado.edu/meta_data/saddferb.ts.meta.txt")
-anpp_2014 <- read.csv("http://nwt.colorado.edu/data_csvs/saddferb.ts.data.csv")
+anpp_2014 <- read.csv("http://nwt.colorado.edu/data_csvs/saddferb.ts.data.csv", na.strings = c("NaN", NA, "NA", NaN))
 
 
 # check that everything read in as expected
@@ -41,6 +41,26 @@ str(anpp)
 str(anpp_2014)
 str(all_sppcomp)
 str(all_biodiv)
+
+# infill plot number for XX controls in anpp 2014 dataset
+anpp_2014$plot_num[anpp_2014$old_plot_num == "XX1"] <- 17 # from metadata
+anpp_2014$plot_num[anpp_2014$old_plot_num == "XX2"] <- 29 # from metadata
+
+# -- PREP SF SITES ----
+#wet meadow = no snow, recode snow and snowfence recovery to binary
+# plot 76 should NOT be a snowfence recovery plot (entered incorrectly)
+
+sdlLT <- sdlsites %>%
+  mutate(snow = ifelse(meadow == "wet", "no snow", snow),
+         snow = recode(snow, `no snow` = 0, snow = 1),
+         meadow = recode(meadow, dry = "DM", wet = "WM", mesic ="MM"),
+         trt = recode(trt, N="NN", C ="CC", P = "PP", `N+P` = "NP"),
+         snow_notes = ifelse(plot == 76, "in snowfence area", snow_notes),
+         snow_recovery = ifelse(grepl("recovery", snow_notes), 1, 0)) %>%
+  rename(fert = trt,
+         veg_class = meadow) %>%
+  #drop plot 286 from 1997
+  filter(!is.na(plot))
 
 
 
@@ -50,18 +70,42 @@ sdlcomp <- subset(all_sppcomp, site == "sdl") %>%
   dplyr::select(-c(plotid, block, trt2, simple_lifeform, simple_lifeform2)) %>%
   # convert codes to match anpp and richness dats
   mutate(meadow = recode(meadow, dry = "DM", wet = "WM", mesic = "MM"),
-         trt = recode(trt, C = "CC", N = "NN", P = "PP", `N+P` = "NP")) %>%
+         trt = recode(trt, C = "CC", N = "NN", P = "PP", `N+P` = "NP"),
+         # recode snow and recovery field
+         snow = recode(snow, `no snow` = 0, snow = 1),
+         # correct plot 76 for recovery -- Tim coded as recovered but isn't
+         snow_notes = ifelse(plot == 76, "in snowfence area",snow_notes),
+         # code recovery as yr 2016 and later, if recovery noted
+         snow_notes = ifelse((grepl("recov", snow_notes)& yr >= 2016), 1, 0),
+         site = "SDL snowfence") %>%
   rename(USDA_Symbol = clean_code2,
-         SnowNotes2016 = snow_notes,
-         SimpleName = simple_name) %>%
+         snow_revoery = snow_notes,
+         fert = trt,
+         veg_class = meadow,
+         snow_recovery = snow_notes,
+         local_site = site,
+         collect_date = date,
+         plot_num = plot,
+         year = yr)  %>%
   rename_at(grep("Scien", names(.)):ncol(.), function(x) paste0("USDA_", x)) %>%
-  rename_all(function(x) paste0(casefold(substr(x,1,1), upper = T), substr(x, 2, nchar(x)))) %>%
+  #rename_all(function(x) paste0(casefold(substr(x,1,1), upper = T), substr(x, 2, nchar(x)))) %>%
   #remove _x from SciName  
-  rename_all(function(x) gsub("_x", "", x))
+  rename_all(function(x) gsub("_x", "", x)) %>%
+  # add in LTER site
+  mutate(LTER_site = "Niwot Ridge LTER") %>%
+  dplyr::select(LTER_site, local_site:ncol(.))
+
+# to be sure recovered coded correctly
+sapply(split(sdlcomp$snow_recovery, sdlcomp$year), unique) # looks good
+sapply(split(sdlcomp$plot_num, sdlcomp$snow_recovery), function(x) length(unique(x))) # looks good
+# final check
+sapply(sdlcomp, function(x) sort(unique(x)))
+# infill 2Scat with  elk scat
+sdlcomp$simple_name[sdlcomp$USDA_Symbol == "2SCAT"] <- "Scat"
 
 
 
-# -- PREP ANPP AND RICHNESS DATA (from nwt website) ----
+# -- PREP 1996-1997 RICHNESS DATA (from nwt website) ----
 # compare richness in 1997 to ctw-calculated richness
 richness97 <- full_join(subset(all_biodiv, yr == 1997), subset(anpp_2014, year < 1998), by = c("plot" = "plot_num", "yr" ="year")) %>%
   filter(veg_class == "DM" & snow.y == "no_snow") %>%
@@ -96,13 +140,48 @@ cowplot::plot_grid(compareyrs, comparetime)
 # write out plot for Tim to decide what to do with spp richness in 96,97
 
 
+# -- PREP ANPP ----
 # write anpp separately..
-sffert_anpp <- dplyr::select(anpp_2014, year:wt_tot2) %>%
-  # infill obs that had a wgt for forb or grass but not the other and total (should be 0) -- happens in 2014
-  mutate(wt_gr1 = ifelse(!is.na(wt_fr1) & wt_gr1 == "NaN", 0, wt_gr1))
-  gather(Group, ANPP_g_per_0.4m2, wt_gr1:ncol(.))
-  
+sffert_anpp <- dplyr::select(anpp_2014, -spp_rich) %>%
+  # specify 0 for gram and total weight where forb weight present
+  mutate(wt_gr1 = ifelse(!is.na(wt_fb1) & is.na(wt_gr1), 0, wt_gr1),
+         wt_tot1 = ifelse(!is.na(wt_fb1) & is.na(wt_tot1), wt_fb1, wt_tot1)) %>%
+  gather(group, anpp_g, wt_gr1:ncol(.)) %>%
+  filter(!is.na(anpp_g)) %>%
+  mutate(rep = parse_number(group),
+         group = gsub("wt_|[0-9]", "", group),
+         group = recode(group, fb = "Forb", gr = "Graminoid", tot = "Total"),
+         snow = recode(snow, no_snow = 0, snow = 1)) %>%
+  rename(fert = fert_tmt) %>%
+  # add site
+  mutate(LTER_site = "Niwot Ridge LTER", local_site = "SDL snowfence",
+         snow_recovery = 0) %>%
+  #reorder cols
+  dplyr::select(LTER_site, local_site, year, collect_date, plot_num, old_plot_num, veg_class, fert, snow, snow_recovery, group, rep, anpp_g) %>%
+  arrange(year, plot_num, rep, group)
+ 
+# double check plot designations
+anpp_plots <- distinct(dplyr::select(sffert_anpp, plot_num:snow)) %>%
+  left_join(sdlLT, by = c("plot_num" = "plot", "snow", "fert", "veg_class"))
+# check that no snow_notes cols are NA (shouldn't be if everything matched correctly)
+summary(is.na(anpp_plots$snow_notes))
+# manually checked that all plot nums match up with various cols in CTW LT and do
+
+# plot out to check numbers (2014 seems high compared to earlier years)
+ggplot(subset(sffert_anpp, group == "Total" & rep == 1), aes(as.factor(year), anpp_g, group = plot_num)) +
+  geom_line() +
+  geom_point() +
+  facet_grid(fert~snow)
+# still seems a bit high...
+ggplot(subset(sffert_anpp, group == "Total"), aes(as.factor(plot_num), anpp_g, col = as.factor(year))) +
+  geom_point() +
+  scale_color_viridis_d() +
+  facet_grid(fert~snow, scales = "free_x")
+
+# check anpp values
+sapply(sffert_anpp, function(x) sort(unique(x))) # looks fine
+
 
 # -- WRITE OUT DATA -----
-write.csv(sdlcomp, "alpine_addnuts/output_data/sdl_sppcomp_1997ongoing_forEDI.csv", row.names = F)
-
+write.csv(sdlcomp, "alpine_addnuts/output_data/forEDI/sffert_sppcomp_1997ongoing_forEDI.csv", row.names = F)
+write.csv(sffert_anpp, "alpine_addnuts/output_data/forEDI/sffert_anpp_1996ongoing_forEDI.csv", row.names = F)
