@@ -58,9 +58,10 @@ sdlLT <- sdlsites %>%
          snow_notes = ifelse(plot == 76, "in snowfence area", snow_notes),
          snow_recovery = ifelse(grepl("recovery", snow_notes), 1, 0)) %>%
   rename(fert = trt,
-         veg_class = meadow) %>%
+         veg_class = meadow,
+         plot_num = plot) %>%
   #drop plot 286 from 1997
-  filter(!is.na(plot))
+  filter(!is.na(plot_num))
 
 
 
@@ -71,6 +72,8 @@ sdlcomp <- subset(all_sppcomp, site == "sdl") %>%
   # convert codes to match anpp and richness dats
   mutate(meadow = recode(meadow, dry = "DM", wet = "WM", mesic = "MM"),
          trt = recode(trt, C = "CC", N = "NN", P = "PP", `N+P` = "NP"),
+         # change wet meadow to no snow
+         snow = ifelse(meadow == "WM", "no snow", snow),
          # recode snow and recovery field
          snow = recode(snow, `no snow` = 0, snow = 1),
          # correct plot 76 for recovery -- Tim coded as recovered but isn't
@@ -79,7 +82,6 @@ sdlcomp <- subset(all_sppcomp, site == "sdl") %>%
          snow_notes = ifelse((grepl("recov", snow_notes)& yr >= 2016), 1, 0),
          site = "SDL snowfence") %>%
   rename(USDA_Symbol = clean_code2,
-         snow_revoery = snow_notes,
          fert = trt,
          veg_class = meadow,
          snow_recovery = snow_notes,
@@ -102,6 +104,43 @@ sapply(split(sdlcomp$plot_num, sdlcomp$snow_recovery), function(x) length(unique
 sapply(sdlcomp, function(x) sort(unique(x)))
 # infill 2Scat with  elk scat
 sdlcomp$simple_name[sdlcomp$USDA_Symbol == "2SCAT"] <- "Scat"
+
+
+# -- PREP VERT SPP COMP ----
+# for 2016 only
+sffert_vert2016 <- mutate(vert2016, LTER_site = "Niwot Ridge LTER",
+                   site = "SDL Snowfence",
+                   # recode meadow and fertilization
+                   meadow = recode(meadow, dry = "DM", mesic = "MM", wet = "WM"),
+                   trt = recode(trt, N = "NN", P = "PP", C = "CC", `N+P`= "NP"),
+                   date = "m") %>%
+  # drop functional groups -- rejoin USDA plant info bc sciname missing
+  dplyr::select(LTER_site, site:simple_name) %>%
+  rename(local_site = site,
+         snow_recovery = snow_notes,
+         veg_class = meadow,
+         fert = trt,
+         plot_num = plot,
+         vertical = hit,
+         year = yr,
+         collect_date = date,
+         USDA_Symbol = clean_code2) %>%
+  # recode
+  ## change plot 76 to no snow recovery
+  ## wet meadow needs to be no snow
+  mutate(snow_recovery = ifelse(plot_num == 76, "in snowfence area", snow_recovery),
+         #wm is no snow (but also not sampled in 2016)
+         snow = ifelse(veg_class == "WM", "no snow", snow),
+         snow = recode(snow, `no snow` = 0, snow = 1),
+         snow_recovery = ifelse(grepl("recov", snow_recovery), 1, 0)) %>%
+  # prefix USDA_ to usda plants db cols
+  left_join(distinct(dplyr::select(sdlcomp, USDA_Symbol, USDA_Scientific_Name:USDA_Growth_Habit))) %>%
+  # be sure ordered by plot, point, vertical order
+  arrange(plot_num, point, vertical)
+
+# double check plots match sdlLT
+vertcheck <- distinct(dplyr::select(sffert_vert2016, plot_num:fert)) %>%
+  left_join(sdlLT) # everything checks out (manually looked)
 
 
 
@@ -215,10 +254,10 @@ anpp_plots <- distinct(dplyr::select(sffert_anpp, plot_num:snow)) %>%
 # specify outpath for writing data
 outpath <- "alpine_addnuts/output_data/forEDI/"
 write.csv(sdlcomp, paste0(outpath, "sffert_sppcomp_1997ongoing_forEDI.csv"), row.names = F)
-write.csv(sdlcomp, paste0(outpath, "sffert_sppcomp_2016vert_forEDI.csv"), row.names = F)
+write.csv(sffert_vert2016, paste0(outpath, "sffert_sppcomp_2016vert_forEDI.csv"), row.names = F)
 write.csv(sffert_anpp, paste0(outpath, "sffert_anpp_1996ongoing_forEDI.csv"), row.names = F)
-write.csv(sdlcomp, paste0(outpath, "sffert_spprich_19961997_forEDI.csv"), row.names = F)
-write.csv(sdlcomp, paste0(outpath, "sffert_plotlookup_forEDI.csv"), row.names = F)
+write.csv(sffert_rich, paste0(outpath, "sffert_spprich_19961997_forEDI.csv"), row.names = F)
+write.csv(sdlLT, paste0(outpath, "sffert_plotlookup_forEDI.csv"), row.names = F)
 
 
 # write to gdrive for Anna
@@ -236,7 +275,7 @@ drive_upload(media = paste0(outpath, "sffert_sppcomp_1997ongoing_forEDI.csv"),
              path = gdrive138[grep("clean", gdrive138$name, ignore.case = T),], 
              name = "saddfert.ts.data.csv", overwrite = T)
 ## > write 2016 vertical sppcomp data 
-drive_upload(media = paste0(outpath, "sffert_vertcomp_forEDI.csv"),
+drive_upload(media = paste0(outpath, "sffert_sppcomp_2016vert_forEDI.csv"),
              path = gdrive138[grep("clean", gdrive138$name, ignore.case = T),], 
              name = "saddferv.ts.data.csv", overwrite = T)
 # write spp richness
