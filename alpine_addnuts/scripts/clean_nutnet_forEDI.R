@@ -681,20 +681,21 @@ nnS <-subset(all_biodiv, site == "nutnet") %>%
 # -- WRITE OUT FINAL DATASETS -----
 # specify pathway for writing out final datasets
 outpath <- "alpine_addnuts/output_data/nutnet2013_alldats/"
+outpathEDI <- "alpine_addnuts/output_data/forEDI/"
 
 # anpp, long and wide form + stacked for EDI
 write.csv(anpp.long, paste0(outpath, "nutnet2013_anpp_long.csv"), row.names = F)
 write.csv(anpp2.wide, paste0(outpath, "nutnet2013_anpp_wide.csv"), row.names = F)
-write.csv(stack_anpp, paste0(outpath, "NWTnutnet_anpp_2007ongoing_forEDI.csv"), row.names = F)
+write.csv(stack_anpp, paste0(outpathEDI, "NWTnutnet_anpp_2007ongoing_forEDI.csv"), row.names = F)
 
 # spp comp, long and wide form, and simplified long-form spp comp
 write.csv(sppcomp.long.final, paste0(outpath, "nutnet2013_sppcomp_long.csv"), row.names = F)
 write.csv(sppcomp.wide.final, paste0(outpath, "nutnet2013_sppcomp_wide.csv"), row.names = F)
-write.csv(sppcomp.2013.final, paste0(outpath, "NWTnutnet_sppcomp2013_forEDI.csv"), row.names = F)
-write.csv(sppcomp.2017.final, paste0(outpath, "NWTnutnet_sppcomp2017_forEDI.csv"), row.names = F)
+write.csv(sppcomp.2013.final, paste0(outpathEDI, "NWTnutnet_sppcomp2013_forEDI.csv"), row.names = F)
+write.csv(sppcomp.2017.final, paste0(outpathEDI, "NWTnutnet_sppcomp2017_forEDI.csv"), row.names = F)
 
 # richness (no 2007 available)
-write.csv(nnS, paste0(outpath, "NWTnutnet_sppS_2013ongoing_forEDI.csv"), row.names = F)
+write.csv(nnS, paste0(outpathEDI, "NWTnutnet_sppS_2013ongoing_forEDI.csv"), row.names = F)
 
 # aggregate metrics, long form only <-- these aggs mark selaginella dense as ground cover in order to verify 2013 richness and diversity numbers in TS's first ms draft
 write.csv(biodiv, paste0(outpath, "nutnet2013_aggregate_and_biodiversity.csv"), row.names = F)
@@ -704,22 +705,22 @@ write.csv(biodiv, paste0(outpath, "nutnet2013_aggregate_and_biodiversity.csv"), 
 gdrive418 <- drive_find(pattern = "PKG_418", n = 30) %>% drive_ls()
 # write anpp dataset
 # rename anpp dat to datname on EDI (aboveground_biomass_nutnet_baseline.ts.data.csv -- but SCE says take out baseline)
-drive_upload(media = paste0(outpath, "NWTnutnet_anpp_2007ongoing.csv"),
+drive_upload(media = paste0(outpathEDI, "NWTnutnet_anpp_2007ongoing_forEDI.csv"),
              path = gdrive418[grep("clean", gdrive418$name),], 
              name = "aboveground_biomass_nutnet.ts.data.csv", overwrite = T)
 # write spp comp
 # give it name similar to anpp dataset
 ## > write 2013 data separately bc in different data format than 2017 data
-drive_upload(media = paste0(outpath, "NWTnutnet_sppcomp2013_forEDI.csv"),
+drive_upload(media = paste0(outpathEDI, "NWTnutnet_sppcomp2013_forEDI.csv"),
              path = gdrive418[grep("clean", gdrive418$name),], 
              name = "sppcomp2013_nutnet.ts.data.csv", overwrite = T)
 ## > write 2017 sppcomp data separately (has vertical info)
-drive_upload(media = paste0(outpath, "NWTnutnet_sppcomp2017_forEDI.csv"),
+drive_upload(media = paste0(outpathEDI, "NWTnutnet_sppcomp2017_forEDI.csv"),
              path = gdrive418[grep("clean", gdrive418$name),], 
              name = "sppcomp2017_nutnet.ts.data.csv", overwrite = T)
 # write richness
 # give it name similar to anpp dataset
-drive_upload(media = paste0(outpath, "NWTnutnet_sppS_2013ongoing_forEDI.csv"),
+drive_upload(media = paste0(outpathEDI, "NWTnutnet_sppS_2013ongoing_forEDI.csv"),
              path = gdrive418[grep("clean", gdrive418$name),], 
              name = "spprichness_nutnet.ts.data.csv", overwrite = T)
 
