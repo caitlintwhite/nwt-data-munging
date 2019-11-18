@@ -46,6 +46,12 @@ str(all_biodiv)
 anpp_2014$plot_num[anpp_2014$old_plot_num == "XX1"] <- 17 # from metadata
 anpp_2014$plot_num[anpp_2014$old_plot_num == "XX2"] <- 29 # from metadata
 
+# read in metadata with old plots numbers
+oldsites <- readLines("http://nwt.colorado.edu/meta_data/saddfert.ts.meta.txt")
+# metadata with current plot numbers
+oldsites_current <- readLines("http://nwt.colorado.edu/meta_data/saddferb.ts.meta.txt")
+
+
 # -- PREP SF SITES ----
 #wet meadow = no snow, recode snow and snowfence recovery to binary
 # plot 76 should NOT be a snowfence recovery plot (entered incorrectly)
@@ -56,12 +62,167 @@ sdlLT <- sdlsites %>%
          meadow = recode(meadow, dry = "DM", wet = "WM", mesic ="MM"),
          trt = recode(trt, N="NN", C ="CC", P = "PP", `N+P` = "NP"),
          snow_notes = ifelse(plot == 76, "in snowfence area", snow_notes),
-         snow_recovery = ifelse(grepl("recovery", snow_notes), 1, 0)) %>%
+         snow_recovery = ifelse(grepl("recovery", snow_notes), 1, 0),
+         # add in site info
+         LTER_site = "Niwot Ridge LTER",
+         local_site = "SDL snowfence") %>%
   rename(fert = trt,
          veg_class = meadow,
          plot_num = plot) %>%
   #drop plot 286 from 1997
-  filter(!is.na(plot_num))
+  filter(plot_num != 286)
+
+# extract old tags in anpp metadata on server to be sure all info in there
+sitepos <- grep("^Treatment", oldsites)
+sfsites <- data.frame(dat =oldsites[sitepos[1]:(sitepos[1]+16)]) %>%
+  separate(dat, into = paste0("col", 1:15), sep = " +")
+names(sfsites) <- c("fert", "dry_x", "dry_y", "dry", "mesic_x", "mesic_y", "mesic")
+#drop any cols that are all NA
+sfsites <- sfsites[2:nrow(sfsites),!sapply(sfsites, function(x) all (is.na(x)))]
+sfsites <- separate(sfsites, dry_y, c("dry_ymin", "dry_ymax"), sep = "[-]") %>%
+  separate(mesic_y, c("mesic_ymin", "mesic_ymax"), sep = "[-]") %>%
+  mutate(dry_2004 = str_extract(dry, "[0-9]{3}[+]"),
+         mesic_2004 = str_extract(mesic, "[0-9]{3}[+]"),
+         dry = substr(dry, 2, 4),
+         mesic = substr(mesic, 2, 4)) %>%
+  # make all that should be numeric, numeric (remove non-number chars)
+  mutate_at(vars(names(.)[2:ncol(.)]), parse_number)
+# split up
+drysf <- sfsites[,grep("fert|dry", names(sfsites))] %>%
+  mutate(veg_class = "DM",
+         snow = 1) %>%
+  rename_all(function(x) gsub("dry_", "", x)) %>%
+  rename(tag_sw_orig = dry,
+         tag_sw_2004 = `2004`)
+mesicsf <- sfsites[,grep("fert|mes", names(sfsites))] %>%
+  mutate(veg_class = "MM",
+         snow = 1) %>%
+  rename_all(function(x) gsub("mesic_", "", x)) %>%
+  rename(tag_sw_orig = mesic,
+         tag_sw_2004 = `2004`)
+# stack snowfence sites
+sfsites_meta <- rbind(drysf, mesicsf) 
+rm(drysf, mesicsf, sfsites)
+
+# non snowfence
+nsfsites <- data.frame(dat =oldsites[sitepos[2]:(sitepos[2]+16)]) %>%
+  separate(dat, into = paste0("col", 1:15), sep = " +") %>%
+  #clean up whitespace
+  mutate_all(function(x) ifelse(x == "", NA, x))
+names(nsfsites) <- c("fert", "dry_x", "dry_y", "dry", "mesic_x", "mesic_y", "mesic")
+#drop any cols that are all NA
+nsfsites <- nsfsites[2:nrow(nsfsites),!sapply(nsfsites, function(x) all (is.na(x)))]
+# correct a few errors from lack of space
+nsfsites$mesic[is.na(nsfsites$mesic)] <- nsfsites$mesic_y[is.na(nsfsites$mesic)]
+nsfsites$mesic_y[nsfsites$mesic_y == nsfsites$mesic] <- str_extract(nsfsites$mesic_x[grepl("-", nsfsites$mesic_x)], ",[0-9].+")
+nsfsites$mesic_x <- gsub(",.+", "", nsfsites$mesic_x)
+nsfsites <- separate(nsfsites, dry_y, c("dry_ymin", "dry_ymax"), sep = "[-]") %>%
+  separate(mesic_y, c("mesic_ymin", "mesic_ymax"), sep = "[-]") %>%
+  separate(dry, c("dry", "dry_2002"), sep = ",") %>%
+  mutate(mesic_tag_sw_orig = substr(mesic, 2,5),
+         mesic_tag_ne_orig = str_extract(mesic, ",[0-9]{3}[*]{0,1}[)]"),
+         mesic_tag_sw_2002 = ifelse(grepl("[)][(][0-9]{3},", mesic), str_extract(mesic, "[)][(][0-9]{3},"), str_extract(mesic, ",[0-9]{3},")),
+         mesic_tag_sw_2004 = str_extract(mesic, "[(][0-9]{3}[+]."),
+         mesic_tag_ne_2004 = str_extract(mesic, ",[0-9]{3}[+][+]"))
+        
+  
+# split up
+drynsf <- nsfsites[,grep("fert|dry", names(nsfsites))] %>%
+  mutate(veg_class = "DM",
+         snow = 0) %>%
+  rename_all(function(x) gsub("dry_", "", x)) %>%
+  rename(tag_sw_orig = dry,
+         tag_sw_2002 = `2002`) %>%
+  # make all that should be numeric, numeric (remove non-number chars)
+  mutate_at(vars("x", "ymin", "ymax", "tag_sw_orig", "tag_sw_2002"), parse_number) %>%
+  #add tag_sw_2004
+  mutate(tag_sw_2004 = NA,
+         tag_ne_orig = NA,
+         tag_ne_2004 = NA)
+mesicnsf <- nsfsites[,grep("fert|mes", names(nsfsites))] %>%
+  mutate(veg_class = "MM",
+         snow = 0) %>%
+  rename_all(function(x) gsub("mesic_", "", x)) %>%
+  # make all that should be numeric, numeric (remove non-number chars)
+  mutate_at(vars("x", "ymin", "ymax", names(.)[grepl("tag", names(.))]), parse_number) %>%
+  # drop mesic
+  dplyr::select(-mesic)
+         
+# stack snowfence sites
+nsfsites_meta <- rbind(drynsf[,names(mesicnsf)], mesicnsf) 
+rm(drynsf, mesicnsf, nsfsites)
+
+# stack all sites
+sffert_meta <- sfsites_meta %>%
+  # add colnames in meta non snowfence sites
+  mutate(tag_ne_orig = NA, tag_sw_2002 = NA, tag_ne_2004 = NA) %>%
+  dplyr::select(names(nsfsites_meta)) %>%
+  rbind(nsfsites_meta)
+
+# review non-wet meadow sites
+checkLUTnwm <- left_join(sdlLT, sffert_meta) %>%
+  filter(veg_class != "WM") %>%
+  # reorg cols
+  dplyr::select(LTER_site, local_site, plot_num, fert, veg_class, snow, snow_recovery, x, ymin, ymax, 
+                plot_sw_tag_PDF:ncol(.))
+
+
+
+
+
+# -- review wet meadow ----
+# get wet meadow
+wm <- oldsites[grep("Wet Meadow", oldsites)] %>%
+  str_extract(., "[0-9]{3}[(].*") %>%
+  str_split(.,",") %>% unlist() %>% trimws()
+wm_sites <- data.frame(plot_tag_orig = wm, veg_class = "WM", snow = 0) %>%
+  mutate(fert = str_extract(plot_tag_orig, "[A-Z]{2}"),
+         plot_tag_orig = parse_number(plot_tag_orig)) 
+
+# read in old metadata with current numbers
+oldnew_pos <- grep("^Treatment", oldsites_current)
+wm_oldnew <- oldsites_current[(grep("^Wet Meadow", oldsites_current)+1):(grep("^Wet Meadow", oldsites_current)+16)] %>% 
+  as.data.frame() %>% rename(fert='.') %>%
+  mutate(plot_num = parse_number(str_extract(fert, "[0-9]{2},")),
+         plot_tag_orig = parse_number(str_extract(fert, ", [0-9]{3}")),
+         fert = str_extract(fert, "[A-Z]{2}"),
+         veg_class = "WM",
+         snow = 0)
+#check old and oldnew line up
+wm_sites <- left_join(wm_sites, wm_oldnew) # yes, no NAs
+
+checkLUTwm <- left_join(sdlLT, wm_sites) %>%
+  filter(veg_class == "WM") %>% # numbers from PDF don't match up with some.. maybe they were tags later replaced in 2004?
+  # add in N and E directions (based on description in metadata and orientation in PDF)
+  mutate(wm_y = ifelse(plot_num %in% c(33,46,47,39), 1,
+                       ifelse(plot_num %in% c(37, 42, 38, 36), 2,
+                       ifelse(plot_num %in% c(45, 34, 48, 40), 3, 4))),
+         wm_x = ifelse(plot_num %in% c(33,37,45,41), 1,
+                       ifelse(plot_num %in% c(46, 42, 34, 43), 2,
+                              ifelse(plot_num %in% c(47, 38, 48, 35), 3, 4))))
+# winnow down
+wm_final <- checkLUTwm %>%
+  #rename x and ymin ymax to indicate for snowfence
+  rename(tag_sw_orig = plot_tag_orig) %>%
+  dplyr::select(LTER_site, local_site, plot_num, fert, veg_class, snow, snow_recovery, x, ymin, ymax, wm_x, wm_y, plot_sw_tag_PDF:ncol(.))
+# remove any cols that don't have values
+wm_final <- wm_final[,!sapply(wm_final, function(x) all(is.na(x)))]
+# manually reviewed.. all SW numbers the same except for 240 as PDF sw tag.. will leave in as backup SW number. No NEs numbers ever used, but exist on PDF
+wm_final <- wm_final %>%
+  # add snow x, ymin and ymax back in (have no value bc wet meadow sites not in snowfence area)
+  mutate(snow_x = NA, snow_ymin = NA, snow_ymax = NA) %>%
+  dplyr::select(LTER_site:snow_recovery, snow_x, snow_ymin, snow_ymax, wm_x, wm_y, tag_sw_orig, plot_ne_tag_PDF, plot_sw_tag_PDF) %>%
+  rename(tag_ne_orig = plot_ne_tag_PDF,
+         tag_sw_backup = plot_sw_tag_PDF) %>%
+  mutate(tag_sw_backup = ifelse(tag_sw_backup != tag_sw_orig, tag_sw_backup, NA))
+# clean up
+rm(checkLUTwm, wm_sites, wm_oldnew)
+
+
+# -- combine final for write-out -----
+# combine dm, mm, and wm site LUTs
+
+
 
 
 
@@ -95,7 +256,12 @@ sdlcomp <- subset(all_sppcomp, site == "sdl") %>%
   rename_all(function(x) gsub("_x", "", x)) %>%
   # add in LTER site
   mutate(LTER_site = "Niwot Ridge LTER") %>%
-  dplyr::select(LTER_site, local_site:ncol(.))
+  dplyr::select(LTER_site, local_site:ncol(.)) %>%
+  # add m to collect_date for missing
+  mutate(collect_date = ifelse(is.na(collect_date), "m", collect_date)) %>%
+  # drop 286 from 1997 since can't match it to anything and supposedly only dry meadow non-snowfence sampled anyway
+  filter(plot_num != 286)
+  
 
 # to be sure recovered coded correctly
 sapply(split(sdlcomp$snow_recovery, sdlcomp$year), unique) # looks good
@@ -106,10 +272,11 @@ sapply(sdlcomp, function(x) sort(unique(x)))
 sdlcomp$simple_name[sdlcomp$USDA_Symbol == "2SCAT"] <- "Scat"
 
 
+
 # -- PREP VERT SPP COMP ----
 # for 2016 only
 sffert_vert2016 <- mutate(vert2016, LTER_site = "Niwot Ridge LTER",
-                   site = "SDL Snowfence",
+                   site = "SDL snowfence",
                    # recode meadow and fertilization
                    meadow = recode(meadow, dry = "DM", mesic = "MM", wet = "WM"),
                    trt = recode(trt, N = "NN", P = "PP", C = "CC", `N+P`= "NP"),
@@ -141,6 +308,9 @@ sffert_vert2016 <- mutate(vert2016, LTER_site = "Niwot Ridge LTER",
 # double check plots match sdlLT
 vertcheck <- distinct(dplyr::select(sffert_vert2016, plot_num:fert)) %>%
   left_join(sdlLT) # everything checks out (manually looked)
+
+# double check final vals
+sapply(sffert_vert2016, function(x)sort(unique(x)))
 
 
 
@@ -248,6 +418,8 @@ sffert_rich <- dplyr::select(anpp_2014, year:collect_date, spp_rich) %>%
 anpp_plots <- distinct(dplyr::select(sffert_anpp, plot_num:snow)) %>%
   left_join(sdlLT, by = c("plot_num" = "plot", "snow", "fert", "veg_class"))
 
+# final check
+sapply(sffert_rich, function(x) sort(unique(x)))
 
 
 # -- WRITE OUT DATA -----
