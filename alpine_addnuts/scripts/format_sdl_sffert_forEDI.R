@@ -148,9 +148,9 @@ for(i in tagcols){
   # iterate through each row
   for(n in 1:nrow(checkLUTsf)){
     if(checkLUTsf[n,i] %in% checkLUTsf[n, c("tag_sw_orig", "tag_ne_orig")]){  #tagcols[tagcols!=i],   
-    checkLUTsf[n,i] <- NA
+      checkLUTsf[n,i] <- NA
     }
-    }
+  }
 }
 # there are some clear typos in the data (e.g. 451 for 459, 412 for 462).. manual corrections where needed
 # assign 462 as ne tag
@@ -204,7 +204,7 @@ rm(drysf, mesicsf, sfsites_meta, sfsites, new_controls, checkLUTsf)
 
 
 # -- review non snowfence ----
-nsfsites <- data.frame(dat =oldsites[sitepos[2]:(sitepos[2]+16)]) %>%
+nsfsites <- data.frame(dat = oldsites[sitepos[2]:(sitepos[2]+16)]) %>%
   separate(dat, into = paste0("col", 1:15), sep = " +") %>%
   #clean up whitespace
   mutate_all(function(x) ifelse(x == "", NA, x))
@@ -223,8 +223,8 @@ nsfsites <- separate(nsfsites, dry_y, c("dry_ymin", "dry_ymax"), sep = "[-]") %>
          mesic_tag_sw_2002 = ifelse(grepl("[)][(][0-9]{3},", mesic), str_extract(mesic, "[)][(][0-9]{3},"), str_extract(mesic, ",[0-9]{3},")),
          mesic_tag_sw_2004 = str_extract(mesic, "[(][0-9]{3}[+]."),
          mesic_tag_ne_2004 = str_extract(mesic, ",[0-9]{3}[+][+]"))
-        
-  
+
+
 # split up
 drynsf <- nsfsites[,grep("fert|dry", names(nsfsites))] %>%
   mutate(veg_class = "DM",
@@ -247,7 +247,7 @@ mesicnsf <- nsfsites[,grep("fert|mes", names(nsfsites))] %>%
   mutate_at(vars("x", "ymin", "ymax", names(.)[grepl("tag", names(.))]), parse_number) %>%
   # drop mesic
   dplyr::select(-mesic)
-         
+
 # stack non snowfence sites
 nsfsites_meta <- rbind(drynsf[,names(mesicnsf)], mesicnsf) 
 rm(drynsf, mesicnsf, nsfsites)
@@ -278,9 +278,9 @@ for(i in names(checkLUTnsf)[!names(checkLUTnsf) %in% c("tag_ne_orig", "tag_ne_20
 
 # infill original ne tags, if PSF tag matches last old plot num (2016) then assign
 checkLUTnsf <- mutate(checkLUTnsf, 
-                     tag_ne_orig = ifelse(is.na(tag_ne_orig) & plot_ne_tag_PDF == old_plot16, plot_ne_tag_PDF, tag_ne_orig),
-                     # use jgs plotnum2 for ne tag if number used
-                     tag_ne_orig = ifelse(is.na(tag_ne_orig) & tag_sw_2004 == jgs_plot_num2, jgs_plot_num2, tag_ne_orig))
+                      tag_ne_orig = ifelse(is.na(tag_ne_orig) & plot_ne_tag_PDF == old_plot16, plot_ne_tag_PDF, tag_ne_orig),
+                      # use jgs plotnum2 for ne tag if number used
+                      tag_ne_orig = ifelse(is.na(tag_ne_orig) & tag_sw_2004 == jgs_plot_num2, jgs_plot_num2, tag_ne_orig))
 
 # go through tag cols and eliminate any numbers that are accounted for
 tagcols <- c("old_plot_edi138", "old_plot96", "old_plot97LT", "plot_sw_tag_PDF", "tag_sw_2004", "jgs_plot","jgs_plot_num2","jgs_plot_num3", "jgs_plot_num4","plot_ne_tag_PDF","plot_2003","old_plot2012", "old_plot16")
@@ -303,6 +303,11 @@ checkLUTnsf <- mutate(checkLUTnsf, tag_other = gsub("NA, |, NA|NA", "", paste(ol
 # 26 August 1993, except 397 which was established in the summer of 1997. 
 # The control plots were established in the summer of 1996, exception of 870 which was established in the summer of 1997
 checkLUTnsf$date_est <- as.Date("1993-08-26") #26 August 1993
+# remove cols not needed anymore
+checkLUTnsf <- dplyr::select(checkLUTnsf, LTER_site:plot_num, date_est, fert:ymax, tag_sw_orig:tag_sw_2002, tag_ne_orig, tag_ne_2004, tag_other) %>%
+  # add notes col to rbind with control below
+  mutate(notes = NA)
+
 
 # triage control plots (XX1, XX2)
 # metadata say XX1 and XX2 were relocated to new plots.. not sure why they're described as associated with 17 and 29 if originally went in the same spot
@@ -317,11 +322,9 @@ checkLUT_xx[4, ] <- checkLUT_xx[3, ]
 checkLUT_xx[3,c("plot_num", "old_plot96", "fert", "x", "ymin", "ymax")] <- c("XX1", "XX1", "CC", 17, 84, 86)
 checkLUT_xx[4,c("plot_num", "old_plot96", "fert", "x", "ymin", "ymax")] <- c("XX2", "XX2", "PP", 15, 77, 79)
 # add date col
-checkLUT_xx$date_est <- c(NA, NA, rep("1993-08-26", 2)) # assume XX plots were still established in 1993 with the others since once is a phosphorus plot
-# add yr est (because not sure of date for any)
-checkLUT_xx$yr_est <- c(1997, 1997, 1996, 1996)
+checkLUT_xx$date_est <-  as.Date(c("1997-08-01", "1997-08-01","1993-08-26", "1993-08-26")) # assume XX plots were still established in 1993 with the others since once is a phosphorus plot
 # add notes col
-checkLUT_xx$notes <- c(NA, NA, "relocated to current plot 17 in 1997 (different location)", "relocated to current plot 29 in 1997 (different location)")
+checkLUT_xx$notes <- c(rep("established summer 1997, exact date unknown, estimate provided",2), "relocated to current plot 17 in 1997 (different location)", "relocated to current plot 29 in 1997 (different location)")
 # finally, clean up numbers for plots 17 and 29
 # remove any instances of 872, 875, 876 in the control plot set (PDF wrong)
 checkLUT_xx <- data.frame(sapply(checkLUT_xx, function(x) ifelse(x %in% c(872, 875, 876), NA, x)))
@@ -329,7 +332,7 @@ checkLUT_xx <- data.frame(sapply(checkLUT_xx, function(x) ifelse(x %in% c(872, 8
 checkLUT_xx <- mutate(checkLUT_xx, tag_ne_orig = ifelse(is.na(tag_ne_orig), tag_sw_2004, tag_ne_orig))
 
 # go through tag cols and eliminate any numbers that are accounted for
-tagcols <- c("old_plot_edi138", "old_plot96", "old_plot97LT", "plot_sw_tag_PDF", "tag_sw_2004", "jgs_plot","jgs_plot_num2","jgs_plot_num3", "jgs_plot_num4","plot_ne_tag_PDF","plot_2003","old_plot2012", "old_plot16")
+tagcols <- c("old_plot_edi138", "old_plot96", "old_plot97LT", "plot_sw_tag_PDF", "tag_sw_2004", "jgs_plot","jgs_plot_num1", "jgs_plot_num2","jgs_plot_num3", "jgs_plot_num4","plot_ne_tag_PDF","plot_2003","old_plot2012", "old_plot16")
 for(i in tagcols){
   # iterate through each row
   for(n in 1:nrow(checkLUT_xx)){
@@ -340,19 +343,20 @@ for(i in tagcols){
 }
 # remove any cols that are all NA
 checkLUT_xx <- checkLUT_xx[,!sapply(checkLUT_xx, function(x)all(is.na(x)))]
+# add colnames in nonsnowfence data frame to rbind
+checkLUT_xx <- mutate(checkLUT_xx, tag_ne_2004 = NA, tag_other = NA)
 
 #combine all non-snowfence plots
-sdlLT_nsf_final <- rbind(checkLUTnsf, checkLUT_xx) %>%
+sdlLT_nsf_final <- rbind(checkLUTnsf,checkLUT_xx[,names(checkLUTnsf)]) %>%
   # add in spatial cols for wet meadow grid
   mutate(wm_x = NA, wm_y = NA) %>%
   #reorder cols
-  dplyr::select(LTER_site:plot_num, date_est, fert:ymax, wm_x, wm_y, tag_sw_orig, tag_ne_orig, tag_sw_2002, tag_ne_2004, tag_other) %>%
+  dplyr::select(LTER_site:plot_num, date_est, fert:ymax, wm_x, wm_y, tag_sw_orig, tag_ne_orig, tag_sw_2002, tag_ne_2004, tag_other, notes) %>%
   #rename spatial cols to reflect snowfence spatial
   rename_at(vars("x", "ymin", "ymax"), function(x) paste0("snow_",x))
 
 # clean up environment
-rm(drysf, mesicsf, sfsites_meta, sfsites, new_controls, checkLUTsf)
-
+rm(tagcols,checkLUTnsf, checkLUT_xx)
 
 
 
@@ -382,7 +386,7 @@ checkLUTwm <- left_join(sdlLT, wm_sites) %>%
   # add in N and E directions (based on description in metadata and orientation in PDF)
   mutate(wm_y = ifelse(plot_num %in% c(33,46,47,39), 1,
                        ifelse(plot_num %in% c(37, 42, 38, 36), 2,
-                       ifelse(plot_num %in% c(45, 34, 48, 40), 3, 4))),
+                              ifelse(plot_num %in% c(45, 34, 48, 40), 3, 4))),
          wm_x = ifelse(plot_num %in% c(33,37,45,41), 1,
                        ifelse(plot_num %in% c(46, 42, 34, 43), 2,
                               ifelse(plot_num %in% c(47, 38, 48, 35), 3, 4))))
@@ -396,21 +400,32 @@ wm_final <- wm_final[,!sapply(wm_final, function(x) all(is.na(x)))]
 # manually reviewed.. all SW numbers the same except for 240 as PDF sw tag.. will leave in as backup SW number. No NEs numbers ever used, but exist on PDF
 wm_final <- wm_final %>%
   # add snow x, ymin and ymax back in (have no value bc wet meadow sites not in snowfence area)
-  mutate(snow_x = NA, snow_ymin = NA, snow_ymax = NA) %>%
-  dplyr::select(LTER_site:snow_recovery, snow_x, snow_ymin, snow_ymax, wm_x, wm_y, tag_sw_orig, plot_ne_tag_PDF, plot_sw_tag_PDF) %>%
+  mutate(snow_x = NA, snow_ymin = NA, snow_ymax = NA,
+         # add date established (26 August 1993)
+         date_est = as.Date("1993-08-26")) %>%
+  dplyr::select(LTER_site:plot_num, date_est, fert:snow_recovery, snow_x, snow_ymin, snow_ymax, wm_x, wm_y, tag_sw_orig, plot_ne_tag_PDF, plot_sw_tag_PDF) %>%
   rename(tag_ne_orig = plot_ne_tag_PDF,
-         tag_sw_backup = plot_sw_tag_PDF) %>%
-  mutate(tag_sw_backup = ifelse(tag_sw_backup != tag_sw_orig, tag_sw_backup, NA))
+         tag_other = plot_sw_tag_PDF) %>%
+  mutate(tag_other = ifelse(tag_other != tag_sw_orig, tag_other, NA))
 # clean up
 rm(checkLUTwm, wm_sites, wm_oldnew)
 
 
 
-
 # -- combine final for write-out -----
 # combine dm, mm, and wm site LUTs
-
-
+names(wm_final)
+names(sdlLT_sf_final)
+names(sdlLT_nsf_final)
+# first two are the same, can bind those, add in cols from third that are needed then bind third
+sdlLT_final <- rbind(wm_final, sdlLT_sf_final) %>%
+  mutate(tag_sw_2002= NA, tag_ne_2004 = NA, notes = NA) %>%
+  dplyr::select(names(sdlLT_nsf_final)) %>%
+  rbind(sdlLT_nsf_final) %>%
+  mutate_at(vars(names(.)[grepl("snow|_sw|_ne", names(.))]), as.numeric) %>%
+  mutate(plot_sort = factor(plot_num, levels = c("XX1", "XX2", 1:86))) %>%
+  arrange(plot_sort) %>%
+  dplyr::select(-plot_sort)
 
 
 
@@ -448,8 +463,10 @@ sdlcomp <- subset(all_sppcomp, site == "sdl") %>%
   # add m to collect_date for missing
   mutate(collect_date = ifelse(is.na(collect_date), "m", collect_date)) %>%
   # drop 286 from 1997 since can't match it to anything and supposedly only dry meadow non-snowfence sampled anyway
-  filter(plot_num != 286)
-  
+  filter(plot_num != 286) %>%
+  # reorder cols
+  dplyr::select(LTER_site:plot_num, fert, veg_class:ncol(.))
+
 
 # to be sure recovered coded correctly
 sapply(split(sdlcomp$snow_recovery, sdlcomp$year), unique) # looks good
@@ -464,11 +481,11 @@ sdlcomp$simple_name[sdlcomp$USDA_Symbol == "2SCAT"] <- "Scat"
 # -- PREP VERT SPP COMP ----
 # for 2016 only
 sffert_vert2016 <- mutate(vert2016, LTER_site = "Niwot Ridge LTER",
-                   site = "SDL snowfence",
-                   # recode meadow and fertilization
-                   meadow = recode(meadow, dry = "DM", mesic = "MM", wet = "WM"),
-                   trt = recode(trt, N = "NN", P = "PP", C = "CC", `N+P`= "NP"),
-                   date = "m") %>%
+                          site = "SDL snowfence",
+                          # recode meadow and fertilization
+                          meadow = recode(meadow, dry = "DM", mesic = "MM", wet = "WM"),
+                          trt = recode(trt, N = "NN", P = "PP", C = "CC", `N+P`= "NP"),
+                          date = "m") %>%
   # drop functional groups -- rejoin USDA plant info bc sciname missing
   dplyr::select(LTER_site, site:simple_name) %>%
   rename(local_site = site,
@@ -490,12 +507,15 @@ sffert_vert2016 <- mutate(vert2016, LTER_site = "Niwot Ridge LTER",
          snow_recovery = ifelse(grepl("recov", snow_recovery), 1, 0)) %>%
   # prefix USDA_ to usda plants db cols
   left_join(distinct(dplyr::select(sdlcomp, USDA_Symbol, USDA_Scientific_Name:USDA_Growth_Habit))) %>%
+  # reorder cols to be in same order as other dats
+  dplyr::select(LTER_site:plot_num, fert, veg_class, snow:ncol(.)) %>%
   # be sure ordered by plot, point, vertical order
   arrange(plot_num, point, vertical)
 
 # double check plots match sdlLT
-vertcheck <- distinct(dplyr::select(sffert_vert2016, plot_num:fert)) %>%
-  left_join(sdlLT) # everything checks out (manually looked)
+vertcheck <- distinct(dplyr::select(sffert_vert2016, plot_num:snow_recovery)) %>% 
+  mutate(plot_num = as.character(plot_num)) %>%
+  left_join(sdlLT_final) # everything checks out (manually looked)
 
 # double check final vals
 sapply(sffert_vert2016, function(x)sort(unique(x)))
@@ -506,6 +526,7 @@ sapply(sffert_vert2016, function(x)sort(unique(x)))
 # write anpp separately from richness..
 # update 2019-11-18: TS says 2014 data are actually from 2012. Need to change 2014 in date and year column to 2012.
 # also ANPP in 2012 was collected in 20x50cm frames, so convert 1996 and 1997 and 2012 to g per meter squared
+
 sffert_anpp <- dplyr::select(anpp_2014, -spp_rich) %>%
   # specify 0 for gram and total weight where forb weight present
   mutate(wt_gr1 = ifelse(!is.na(wt_fb1) & is.na(wt_gr1), 0, wt_gr1),
@@ -522,13 +543,19 @@ sffert_anpp <- dplyr::select(anpp_2014, -spp_rich) %>%
          snow_recovery = 0) %>%
   #reorder cols
   dplyr::select(LTER_site, local_site, year, collect_date, plot_num, old_plot_num, veg_class, fert, snow, snow_recovery, group, rep, anpp_g) %>%
-  arrange(year, plot_num, rep, group)
- 
+  # replace XX1x plot_nums with XXx
+  mutate(plot_num = ifelse(grepl("XX", old_plot_num), old_plot_num, plot_num),
+         # correct 29.5 to 29 (based on 397)
+         plot_num = recode(plot_num, `29.5` = "29"),
+         # change 2014 to 2012
+         year = ifelse(year == 2014, 2012, year),
+         collect_date = ifelse(is.na(collect_date), "m", gsub("2014", "2012", as.character(collect_date))))
+
 # double check plot designations
 anpp_plots <- distinct(dplyr::select(sffert_anpp, plot_num:snow)) %>%
-  left_join(sdlLT, by = c("plot_num" = "plot", "snow", "fert", "veg_class"))
+  left_join(sdlLT_final)
 # check that no snow_notes cols are NA (shouldn't be if everything matched correctly)
-summary(is.na(anpp_plots$snow_notes))
+summary(is.na(anpp_plots$snow_recovery))
 # manually checked that all plot nums match up with various cols in CTW LT and do
 
 # plot out to check numbers (2014 seems high compared to earlier years)
@@ -550,6 +577,63 @@ subset(sffert_anpp, group == "Total") %>%
   facet_grid(fert~ snow, scales = "free_x")
 # write out plot for Tim to review
 ggsave("alpine_addnuts/figures/SFFERT_review_anpp.pdf", width = 8, height = 6)
+
+
+# convert all biomass to g per m2 and look at values
+clip97 <- 0.2*0.2 #96 and 97 were 20x20cm per NWT metadata
+clip12 <- 0.2*0.5 #tim thinks 2012 was 20x50cm bc that's what they used for nutnet
+
+sffert_anpp <- mutate(sffert_anpp, 
+                      g_per_m2 = ifelse(year == 2012, anpp_g/clip12, anpp_g/clip97))
+# plot out again to compare..
+# still seems a bit high...
+subset(sffert_anpp, group == "Total") %>%
+  mutate(snow = recode(snow, '1' = "Snow", '0' = "No snow")) %>%
+  ggplot(aes(as.factor(plot_num), g_per_m2, col = as.factor(year), shape = veg_class)) +
+  geom_point(size = 2, alpha = 0.7) +
+  ggtitle("SDL snowfence ANPP, by snow and fertilization treatment, colored by year, symbol by meadow") +
+  labs(y = "g per 0.04 m^2", x = "plot") +
+  scale_color_brewer(palette = "Set2", name = "Year") +
+  scale_shape(name = "Meadow") +
+  theme(axis.text.x = element_text(angle = 90),
+        plot.title = element_text(size = 11.5)) +
+  facet_grid(fert~ snow, scales = "free_x") # i don't think 20x50 is right in this case.. suggests trt had no effect. going with what's written in metadata (20x20cm all years) and leaving raw data as they are
+
+
+# remove converted anpp and reorder cols by yr, plot, rep and group)
+sffert_anpp <- mutate(sffert_anpp,
+                      # make sorting col for plot since not numeric
+                      plot_sort = factor(plot_num, levels = c("XX1", "XX2", 1:80))) %>%
+  arrange(year, plot_sort, rep, group) %>%
+  # rearrange cols
+  dplyr::select(LTER_site:old_plot_num, fert, veg_class, snow:anpp_g) %>%
+  # sounds like tim doesn't like anpp (said it's standing crop mass not true aboveground biomass..)
+  rename(mass_g = anpp_g)
+
+# plot forb and gram only just to check for any funny values
+subset(sffert_anpp, group == "Forb") %>%
+  mutate(snow = recode(snow, '1' = "Snow", '0' = "No snow")) %>%
+  ggplot(aes(as.factor(plot_num), mass_g, col = as.factor(year), shape = veg_class)) +
+  geom_point(size = 2, alpha = 0.7) +
+  ggtitle("SDL snowfence forb ANPP, by snow and fertilization treatment, colored by year, symbol by meadow") +
+  labs(y = "g per 0.04 m^2", x = "plot") +
+  scale_color_brewer(palette = "Set2", name = "Year") +
+  scale_shape(name = "Meadow") +
+  theme(axis.text.x = element_text(angle = 90),
+        plot.title = element_text(size = 11.5)) +
+  facet_grid(fert~ snow, scales = "free_x") 
+
+subset(sffert_anpp, group == "Graminoid") %>%
+  mutate(snow = recode(snow, '1' = "Snow", '0' = "No snow")) %>%
+  ggplot(aes(as.factor(plot_num), mass_g, col = as.factor(year), shape = veg_class)) +
+  geom_point(size = 2, alpha = 0.7) +
+  ggtitle("SDL snowfence forb ANPP, by snow and fertilization treatment, colored by year, symbol by meadow") +
+  labs(y = "g per 0.04 m^2", x = "plot") +
+  scale_color_brewer(palette = "Set2", name = "Year") +
+  scale_shape(name = "Meadow") +
+  theme(axis.text.x = element_text(angle = 90),
+        plot.title = element_text(size = 11.5)) +
+  facet_grid(fert~ snow, scales = "free_x") 
 
 # check anpp values
 sapply(sffert_anpp, function(x) sort(unique(x))) # looks fine
@@ -595,18 +679,25 @@ cowplot::plot_grid(compareyrs, comparetime)
 ## bc plot codes in ANPP match, okay to go for richness
 sffert_rich <- dplyr::select(anpp_2014, year:collect_date, spp_rich) %>%
   filter(!is.na(spp_rich)) %>%
-  mutate(snow = recode(snow, no_snow = 0, snow = 1)) %>%
-  rename(fert = fert_tmt) %>%
-  # add site
-  mutate(LTER_site = "Niwot Ridge LTER", local_site = "SDL snowfence",
+  mutate(snow = recode(snow, no_snow = 0, snow = 1),
+         # recode XXxand 29.5  plots
+         plot_num = ifelse(grepl("XX", old_plot_num), old_plot_num, plot_num),
+         # correct 29.5 to 29 (based on 397)
+         plot_num = recode(plot_num, `29.5` = "29"),
+         # add site
+         LTER_site = "Niwot Ridge LTER", local_site = "SDL snowfence",
+         # nothing in recovery yet
          snow_recovery = 0) %>%
+  rename(fert = fert_tmt) %>%
+  # sort by year and plot num (add sort col then remove)
+  mutate(plot_sort = factor(plot_num, levels = c("XX1", "XX2", 1:80))) %>%
+  arrange(year, plot_sort) %>%
   #reorder cols
-  dplyr::select(LTER_site, local_site, year, plot_num, old_plot_num, veg_class, fert, snow, snow_recovery, spp_rich) %>%
-  arrange(year, plot_num)
+  dplyr::select(LTER_site, local_site, year, plot_num, old_plot_num, fert, veg_class, snow, snow_recovery, spp_rich)
 
 # double check plot designations
-anpp_plots <- distinct(dplyr::select(sffert_anpp, plot_num:snow)) %>%
-  left_join(sdlLT, by = c("plot_num" = "plot", "snow", "fert", "veg_class"))
+rich_plots <- distinct(dplyr::select(sffert_rich, plot_num:snow)) %>%
+  left_join(sdlLT_final) # all checks out
 
 # final check
 sapply(sffert_rich, function(x) sort(unique(x)))
@@ -619,7 +710,7 @@ write.csv(sdlcomp, paste0(outpath, "sffert_sppcomp_1997ongoing_forEDI.csv"), row
 write.csv(sffert_vert2016, paste0(outpath, "sffert_sppcomp_2016vert_forEDI.csv"), row.names = F)
 write.csv(sffert_anpp, paste0(outpath, "sffert_anpp_1996ongoing_forEDI.csv"), row.names = F)
 write.csv(sffert_rich, paste0(outpath, "sffert_spprich_19961997_forEDI.csv"), row.names = F)
-write.csv(sdlLT, paste0(outpath, "sffert_plotlookup_forEDI.csv"), row.names = F)
+write.csv(sdlLT_final, paste0(outpath, "sffert_plotlookup_forEDI.csv"), row.names = F)
 
 
 # write to gdrive for Anna

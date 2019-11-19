@@ -1,0 +1,89 @@
+"LTER_site","local_site","plot_num","date_est","fert","veg_class","snow","snow_recovery","snow_x","snow_ymin","snow_ymax","wm_x","wm_y","tag_sw_orig","tag_ne_orig","tag_sw_2002","tag_ne_2004","tag_other","notes"
+"Niwot Ridge LTER","SDL snowfence","XX1",1993-08-26,"CC","MM",0,0,17,84,86,NA,NA,NA,NA,NA,NA,NA,"relocated to current plot 17 in 1997 (different location)"
+"Niwot Ridge LTER","SDL snowfence","XX2",1993-08-26,"PP","MM",0,0,15,77,79,NA,NA,NA,NA,NA,NA,NA,"relocated to current plot 29 in 1997 (different location)"
+"Niwot Ridge LTER","SDL snowfence","1",1993-08-26,"CC","DM",0,0,70,44,42,NA,NA,710,490,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","2",1993-08-26,"CC","DM",0,0,72,16,18,NA,NA,712,497,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","3",1993-08-26,"CC","DM",0,0,77,25,27,NA,NA,709,494,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","4",1993-08-26,"CC","DM",0,0,78,15,18,NA,NA,711,499,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","5",1993-08-26,"NN","DM",0,0,67,50,52,NA,NA,262,488,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","6",1993-08-26,"NN","DM",0,0,73,45,47,NA,NA,409,489,NA,NA,"291, 870",NA
+"Niwot Ridge LTER","SDL snowfence","7",1993-08-26,"NN","DM",0,0,73,54,56,NA,NA,292,486,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","8",1993-08-26,"NN","DM",0,0,80,29,31,NA,NA,99,493,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","9",1993-08-26,"NP","DM",0,0,67,53,55,NA,NA,408,487,NA,NA,"263",NA
+"Niwot Ridge LTER","SDL snowfence","10",1993-08-26,"NP","DM",0,0,75,18,19,NA,NA,290,495,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","11",1993-08-26,"NP","DM",0,0,75,30,32,NA,NA,410,492,NA,NA,"300, 869",NA
+"Niwot Ridge LTER","SDL snowfence","12",1993-08-26,"NP","DM",0,0,78,18,20,NA,NA,261,498,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","13",1993-08-26,"PP","DM",0,0,75,16,18,NA,NA,411,496,NA,NA,"285",NA
+"Niwot Ridge LTER","SDL snowfence","14",1993-08-26,"PP","DM",0,0,75,33,35,NA,NA,287,491,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","15",1993-08-26,"PP","DM",0,0,77,2,4,NA,NA,289,500,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","16",1993-08-26,"PP","DM",0,0,80,26,28,NA,NA,296,485,NA,NA,"407",NA
+"Niwot Ridge LTER","SDL snowfence","17",1997-08-01,"CC","MM",0,0,0,89,91,NA,NA,870,230,NA,NA,NA,"established summer 1997, exact date unknown, estimate provided"
+"Niwot Ridge LTER","SDL snowfence","18",1993-08-26,"CC","MM",0,0,8,64,66,NA,NA,268,437,436,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","19",1993-08-26,"CC","MM",0,0,10,82,84,NA,NA,267,444,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","20",1993-08-26,"CC","MM",0,0,15,82,84,NA,NA,266,445,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","21",1993-08-26,"NN","MM",0,0,5,72,74,NA,NA,294,440,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","22",1993-08-26,"NN","MM",0,0,10,73,75,NA,NA,295,448,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","23",1993-08-26,"NN","MM",0,0,15,84,86,NA,NA,279,NA,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","24",1993-08-26,"NN","MM",0,0,32,64,66,NA,NA,264,452,NA,NA,"877",NA
+"Niwot Ridge LTER","SDL snowfence","25",1993-08-26,"NP","MM",0,0,0,76,78,NA,NA,298,442,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","26",1993-08-26,"NP","MM",0,0,8,70,72,NA,NA,281,439,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","27",1993-08-26,"NP","MM",0,0,10,65,67,NA,NA,403,450,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","28",1993-08-26,"NP","MM",0,0,10,78,80,NA,NA,293,404,210,220,NA,NA
+"Niwot Ridge LTER","SDL snowfence","29",1997-08-01,"PP","MM",0,0,0,65,67,NA,NA,397,438,435,NA,NA,"established summer 1997, exact date unknown, estimate provided"
+"Niwot Ridge LTER","SDL snowfence","30",1993-08-26,"PP","MM",0,0,0,73,75,NA,NA,283,441,NA,NA,"83, 871",NA
+"Niwot Ridge LTER","SDL snowfence","31",1993-08-26,"PP","MM",0,0,15,73,75,NA,NA,280,449,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","32",1993-08-26,"PP","MM",0,0,17,69,71,NA,NA,406,451,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","33",1993-08-26,"CC","WM",0,0,NA,NA,NA,1,1,395,434,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","34",1993-08-26,"CC","WM",0,0,NA,NA,NA,2,3,394,428,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","35",1993-08-26,"CC","WM",0,0,NA,NA,NA,3,4,389,423,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","36",1993-08-26,"CC","WM",0,0,NA,NA,NA,4,2,396,421,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","37",1993-08-26,"NN","WM",0,0,NA,NA,NA,1,2,269,433,NA,NA,"240",NA
+"Niwot Ridge LTER","SDL snowfence","38",1993-08-26,"NN","WM",0,0,NA,NA,NA,3,2,297,425,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","39",1993-08-26,"NN","WM",0,0,NA,NA,NA,4,1,278,422,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","40",1993-08-26,"NN","WM",0,0,NA,NA,NA,4,3,299,390,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","41",1993-08-26,"NP","WM",0,0,NA,NA,NA,1,4,393,427,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","42",1993-08-26,"NP","WM",0,0,NA,NA,NA,2,2,274,429,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","43",1993-08-26,"NP","WM",0,0,NA,NA,NA,2,4,392,431,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","44",1993-08-26,"NP","WM",0,0,NA,NA,NA,4,4,272,391,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","45",1993-08-26,"PP","WM",0,0,NA,NA,NA,1,3,270,432,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","46",1993-08-26,"PP","WM",0,0,NA,NA,NA,2,1,275,430,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","47",1993-08-26,"PP","WM",0,0,NA,NA,NA,3,1,277,426,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","48",1993-08-26,"PP","WM",0,0,NA,NA,NA,3,3,276,424,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","49",1993-08-17,"CC","DM",1,0,25,11,13,NA,NA,888,458,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","50",1993-08-17,"CC","DM",1,0,30,11,13,NA,NA,889,459,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","51",1993-08-17,"CC","DM",1,0,30,15,17,NA,NA,890,460,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","52",1993-08-17,"CC","DM",1,0,40,19,21,NA,NA,891,457,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","53",1993-08-17,"NN","DM",1,0,20,31,32,NA,NA,417,465,NA,NA,"863, 899",NA
+"Niwot Ridge LTER","SDL snowfence","54",1993-08-17,"NN","DM",1,0,25,33,34,NA,NA,415,464,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","55",1993-08-17,"NN","DM",1,0,40,8,10,NA,NA,864,472,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","56",1993-08-17,"NN","DM",1,0,45,17,19,NA,NA,413,455,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","57",1993-08-17,"NP","DM",1,0,25,17,19,NA,NA,868,466,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","58",1993-08-17,"NP","DM",1,0,30,19,20,NA,NA,894,461,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","59",1993-08-17,"NP","DM",1,0,45,7.5,8.5,NA,NA,866,456,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","60",1993-08-17,"NP","DM",1,0,45,27,29,NA,NA,869,454,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","61",1993-08-17,"PP","DM",1,0,10,25,27,NA,NA,400,467,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","62",1993-08-17,"PP","DM",1,1,20,46.5,48.5,NA,NA,416,462,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","63",1993-08-17,"PP","DM",1,1,25,40,41,NA,NA,414,463,NA,NA,"399",NA
+"Niwot Ridge LTER","SDL snowfence","64",1993-08-17,"PP","DM",1,1,45,50,52,NA,NA,412,453,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","65",1993-08-17,"CC","MM",1,0,5,21,23,NA,NA,885,476,NA,NA,"900",NA
+"Niwot Ridge LTER","SDL snowfence","66",1993-08-17,"CC","MM",1,0,15,16,18,NA,NA,883,474,NA,NA,"398",NA
+"Niwot Ridge LTER","SDL snowfence","67",1993-08-17,"CC","MM",1,0,15,22,23,NA,NA,882,475,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","68",1993-08-17,"CC","MM",1,0,38,11,13,NA,NA,887,473,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","69",1993-08-17,"NN","MM",1,1,5,38,40,NA,NA,875,878,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","70",1993-08-17,"NN","MM",1,0,10,14,16,NA,NA,884,484,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","71",1993-08-17,"NN","MM",1,0,10,33,35,NA,NA,419,483,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","72",1993-08-17,"NN","MM",1,0,15,28,30,NA,NA,880,470,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","73",1993-08-17,"NP","MM",1,0,5,29.5,31.5,NA,NA,877,471,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","74",1993-08-17,"NP","MM",1,1,10,45.5,47.5,NA,NA,873,481,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","75",1993-08-17,"NP","MM",1,1,15,51,53,NA,NA,871,NA,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","76",1993-08-17,"NP","MM",1,0,25,9,10,NA,NA,886,468,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","77",1993-08-17,"PP","MM",1,1,5,35,37,NA,NA,420,478,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","78",1993-08-17,"PP","MM",1,1,10,43.5,45.5,NA,NA,418,482,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","79",1993-08-17,"PP","MM",1,1,10,53,55,NA,NA,872,480,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","80",1993-08-17,"PP","MM",1,0,20,21,23,NA,NA,881,469,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","81",2016-06-16,"CC","MM",1,1,12,51,53,NA,NA,81,97,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","82",2016-06-16,"CC","MM",1,1,20,52,54,NA,NA,82,98,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","83",2016-06-16,"CC","MM",1,1,16,45.5,47.5,NA,NA,83,99,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","84",2016-06-16,"CC","DM",1,1,41.3,54,56,NA,NA,84,100,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","85",2016-06-16,"CC","DM",1,1,41.5,52,54,NA,NA,85,228,NA,NA,NA,NA
+"Niwot Ridge LTER","SDL snowfence","86",2016-06-16,"CC","DM",1,1,42,42,44,NA,NA,86,874,NA,NA,NA,NA
