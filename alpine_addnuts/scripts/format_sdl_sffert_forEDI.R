@@ -461,12 +461,13 @@ sdlcomp <- subset(all_sppcomp, site == "sdl") %>%
   mutate(LTER_site = "Niwot Ridge LTER") %>%
   dplyr::select(LTER_site, local_site:ncol(.)) %>%
   # add m to collect_date for missing
-  mutate(collect_date = ifelse(is.na(collect_date), "m", collect_date)) %>%
+  mutate(collect_date = ifelse(is.na(collect_date), "m", collect_date),
+         # change 0.25 present value to 0.1
+         hits = ifelse(hits == 0.25, 0.1, hits)) %>%
   # drop 286 from 1997 since can't match it to anything and supposedly only dry meadow non-snowfence sampled anyway
   filter(plot_num != 286) %>%
   # reorder cols
   dplyr::select(LTER_site:plot_num, fert, veg_class:ncol(.))
-
 
 # to be sure recovered coded correctly
 sapply(split(sdlcomp$snow_recovery, sdlcomp$year), unique) # looks good
