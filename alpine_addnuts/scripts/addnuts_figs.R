@@ -23,9 +23,9 @@
 # -- SETUP -----
 rm(list = ls())
 library(tidyverse)
-library(ggnewscale)
+#library(ggnewscale)
 library(vegan)
-library(indicspecies)
+#library(indicspecies)
 library(cowplot)
 options(stringsAsFactors = F)
 theme_set(theme_bw())
@@ -155,10 +155,9 @@ pairs(traits_dm[,c(15:20, 22:ncol(traits_dm))])
 # LMDC and LWC linearly related
 
 # > decide to log transform physical measurements: wgt measurements, leaf area, height measurements
-# > also, after lit review and looking at marko + soren's metadata, decide to use the  
 
 # specify traits to use
-trts <- colnames(traits_dm)[c(20, 25, 27, 29:33)] # 16 = Oheight, 23 = dry weight -- not keeping bc using logged vars
+trts <- colnames(traits_dm)[c(20, 25, 27:33)] # 16 = Oheight, 23 = dry weight -- not keeping bc using logged vars
 trts 
 
 # average dm trait vals and run through pca just to see..
@@ -245,12 +244,12 @@ matrix_nn2013 <- subset(plantcom, yr == 2013 & plotid %in% nncommon$plotid) %>%
 # calculate forb to grass ratio
 fgrat_nn2013 <- subset(plantcom_fg, plotid %in% matrix_nn2013$plotid & yr == 2013)
 
-sitematrix_nn2013 <- matrix_nn2013[,1:4] %>%
+sitematrix_nn2013 <- matrix_nn2013[,1:5] %>%
   left_join(nnplots) %>%
   left_join(fgrat_nn2013)
 
 row.names(matrix_nn2013) <- matrix_nn2013$rowid
-matrix_nn2013 <- matrix_nn2013[!colnames(matrix_nn2013) %in% c("rowid", "site", "yr", "plotid")]
+matrix_nn2013 <- matrix_nn2013[!colnames(matrix_nn2013) %in% c("rowid", "site", "yr", "plotid", "date")]
 
 # relativize data
 matrix_nn2013_rel <- vegan::decostand(matrix_nn2013, method = "total")
