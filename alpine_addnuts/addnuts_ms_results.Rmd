@@ -101,7 +101,9 @@ j_theme <- theme(axis.text = element_text(size = 10, family = "Arial"),
                  axis.title = element_text(size = 12, family = "Arial"),
                  legend.text = element_text(size = 10, family = "Arial"),
                  legend.title = element_text(size = 10, family = "Arial"),
-                 strip.text = element_text(size = 10, family = "Arial"))
+                 strip.text = element_text(size = 10, family = "Arial"),
+                 panel.grid = element_blank(),
+                 strip.background = element_rect(fill = "transparent"))
 
 ```
 
@@ -349,7 +351,7 @@ sdl_coarse_means <- sdl_coarse %>%
 
 ```{r Fig 1 and ANOVA, fig.cap="Fig 1. Mean relative forb and grass cover, Saddle, 1997-2016"}
 # visualize
-ggplot(data= subset(sdl_coarse_means, grp  %in% c("Forb_rel", "Grass_rel")), aes(trt, meanval, fill = grp)) +
+sdl_meancov_fig <- ggplot(data= subset(sdl_coarse_means, grp  %in% c("Forb_rel", "Grass_rel")), aes(trt, meanval, fill = grp)) +
   geom_errorbar(aes(ymax = meanval + seval, ymin = meanval-seval, col = grp), width = 0.25, position = position_dodge(width = 0.6)) +
   geom_col(color = "grey30", position = position_dodge(width = 0.6), width = 0.5) +
   scale_color_grey(name = "Group", labels = c("Forb", "Grass")) +
@@ -359,12 +361,13 @@ ggplot(data= subset(sdl_coarse_means, grp  %in% c("Forb_rel", "Grass_rel")), aes
   theme(legend.position = c(0.78,0.35),
         legend.justification = c(0.78, 0.35),
         legend.key.size = unit(9, "pt"),
-        legend.background = element_blank()) +
+        legend.background = element_blank(),
+        strip.background = element_rect(fill = "transparent")) +
   j_theme +
   facet_wrap(~yr, nrow = 2)
 
 # write out tif
-ggsave("alpine_addnuts/figures/journal_figs/sdl_meancov.tiff", dpi = 320,
+ggsave("alpine_addnuts/figures/journal_figs/sdl_meancov.tiff", sdl_meancov_fig, dpi = 320,
        width = 6, height = 4, units = "in")
 ```
 
@@ -487,7 +490,7 @@ nn_fg_means <- data.frame(nn_fg_dat) %>%
   as.data.frame()
 
 # visualize
-ggplot(data= subset(nn_fg_means, met %in% c("Grass_rel", "Forb_rel")), aes(trt2, meancov, fill = met)) +
+nn_relcov_fig <- ggplot(data= subset(nn_fg_means, met %in% c("Grass_rel", "Forb_rel")), aes(trt2, meancov, fill = met)) +
   geom_errorbar(aes(ymax = meancov + secov, ymin = meancov-secov, col = met), width = 0.25, position = position_dodge(width = 0.6)) +
   geom_col(color = "grey30", position = position_dodge(width = 0.6), width = 0.5) +
   scale_color_grey(name = NULL, labels = c("Forb", "Grass")) +
@@ -498,12 +501,13 @@ ggplot(data= subset(nn_fg_means, met %in% c("Grass_rel", "Forb_rel")), aes(trt2,
         legend.justification = c(-0.05, 1.05),
         legend.background = element_blank(),
         legend.key.size = unit(9, "pt"),
-        legend.direction = "horizontal") +
+        legend.direction = "horizontal",
+        strip.background = element_rect(fill = "transparent")) +
   j_theme +
   facet_wrap(~yr, ncol = 2)
 
 # save tiff
-ggsave("alpine_addnuts/figures/journal_figs/nn_meancov.tiff", dpi= 320,
+ggsave("alpine_addnuts/figures/journal_figs/nn_meancov.tiff", nn_relcov_fig, dpi= 320,
        width = 4, height = 2.2, units = "in")
 
 ```
@@ -804,14 +808,12 @@ pcfig <- ggplot() +
   geom_segment(data=varscores,aes(x=0,xend=PC1,y=0,yend=PC2),
                arrow = arrow(length = unit(0.25, "cm")),colour="grey40") + 
   geom_point(data = sppscores, aes(PC1, PC2, col = resource_grp), size = pointsize) +
-  geom_text(data = subset(varscores, PC1 <=0 & !grepl("D13", abbr)), aes(PC1, PC2, label = abbr), check_overlap = T, hjust = 1, nudge_x = -0.02, size = plottext) +
-  # plot D13c separately
-  geom_text(data = subset(varscores,abbr == "D13C"), aes(PC1, PC2, label = abbr), check_overlap = T, hjust = 0.5, nudge_y = -0.1, size = plottext) +
-  geom_text(data = subset(varscores, PC1 >0 & !grepl("D15|Chl", abbr)), aes(PC1, PC2, label = abbr), check_overlap = T, hjust = -0.1, size = plottext) +
-  # plot leaf area separately
-  geom_text(data = subset(varscores, abbr == "Leaf area"), aes(PC1, PC2, label = abbr), size = plottext) +
-  # D15N and Chl
-  geom_text(data = subset(varscores, abbr %in% c("D15N", "Chl")), aes(PC1, PC2, label = abbr), check_overlap = F, vjust = 0, hjust = -0.1, size = plottext) +
+  geom_text(data = subset(varscores, PC1 <= 0), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 1, nudge_x = -0.02, size = plottext) +
+    geom_text(data = subset(varscores, PC1 > 0 & !grepl("%N|Leaf|Dry", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_x = 0.02, size = plottext) +
+  geom_text(data = subset(varscores, PC1 > 0 & grepl("Dry", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_y = +0.05, size = plottext) +
+    geom_text(data = subset(varscores, PC1 > 0 & grepl("Leaf", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_y = -0.06,nudge_x = 0.02, size = plottext) +
+  geom_text(data = subset(varscores,abbr == "%N"), aes(PC1, PC2, label = abbr), check_overlap = T, hjust = 0.5, nudge_y = -0.1, size = plottext) +
+  # add axis labels with % variance displayed
   labs(x = paste0("PC1 (",round(PCexplain$PC1[grepl("^Prop", PCexplain$rowname)],2)*100, "% variance explained)"),
        y = paste0("PC2 (",round(PCexplain$PC2[grepl("^Prop", PCexplain$rowname)],2)*100, "% variance explained)")) +
   # describe axes
@@ -830,6 +832,68 @@ pcfig <- ggplot() +
 pcfig
 
 ggsave("alpine_addnuts/figures/journal_figs/pca_nospp.tiff", dpi = 320,
+       width = 4, height = 4, units = "in")
+
+
+
+## PCA with spp labels
+# specify transparency for non-spp labels
+fade <- 0.3
+plottext_pca <- 2.5
+
+pcfig_wspp <- ggplot() +
+  geom_vline(aes(xintercept = 0), lty = 2, col = "grey") +
+  geom_hline(aes(yintercept = 0), lty = 2, col = "grey") +
+  geom_segment(data=varscores,aes(x=0,xend=PC1,y=0,yend=PC2),
+               arrow = arrow(length = unit(0.25, "cm")),colour="grey40", alpha = fade) + 
+   geom_point(data = sppscores, aes(PC1, PC2, col = resource_grp)) +
+  # add spp labels
+  ## spp on positive x, positive y
+  geom_text(data = subset(sppscores, PC1 >0 & PC2 > 0 & !grepl("Tetra", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3) +
+   geom_text(data = subset(sppscores, PC1 >0 & PC2 > 0 & grepl("Tetra", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3, nudge_x = -0.1) +
+    ## spp on positive x, negative y
+  geom_text(data = subset(sppscores, PC1 >0 & PC2 <= 0 & grepl("Poly", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = 1.3, nudge_x = -0.1) +
+  ## plot ARTSCO separately (+,-)
+  geom_text(data = subset(sppscores, PC1 >0 & PC2 <= 0 & grepl("Artem", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 0, vjust = -0.3) +
+    ## plot TRIDAS (+,-) separately
+  geom_text(data = subset(sppscores, grepl("dasyph", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 0, vjust = 1.3) +
+  ## spp on neg x, pos y
+  geom_text(data = subset(sppscores, PC1 <= 0 & PC2 > 0 & !grepl("Festuca|Kobre", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, nudge_x = -0.05, hjust = 1) +
+  ## plot Festuca separately (-,+)
+   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 > 0 & grepl("Festuca", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, nudge_x = 0.1, vjust = -0.3) +
+  ## plot Festuca separately (-,+)
+   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 > 0 & grepl("Kobre", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3, hjust = 1) +
+    ## spp on negative x, neg y
+  geom_text(data = subset(sppscores, PC1 <= 0 & PC2 < 0 & !grepl("Silene|Lloyd|Tetra", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = 1.3) +
+    ## adjust Lloydi and Tetraneuris left (-,-)
+    geom_text(data = subset(sppscores, PC1 <= 0 & PC2 < 0 & grepl("Lloy|Tetr", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 1, nudge_x = -0.05) +
+     ## plot silene (-,-) separately
+  geom_text(data = subset(sppscores, PC1 <= 0 & PC2 < 0 & grepl("Silene", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3) +
+  # label traits
+  geom_text(data = subset(varscores, PC1 <= 0), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 1, nudge_x = -0.02, size = plottext_pca, alpha = fade) +
+    geom_text(data = subset(varscores, PC1 > 0 & !grepl("%N|Leaf|Dry", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_x = 0.02, size = plottext_pca, alpha = fade) +
+  geom_text(data = subset(varscores, PC1 > 0 & grepl("Dry", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_y = +0.05, size = plottext_pca, alpha = fade) +
+    geom_text(data = subset(varscores, PC1 > 0 & grepl("Leaf", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_y = -0.06,nudge_x = 0.02, size = plottext_pca, alpha = fade) +
+  geom_text(data = subset(varscores,abbr == "%N"), aes(PC1, PC2, label = abbr), check_overlap = T, hjust = 0.5, nudge_y = -0.1, size = plottext_pca, alpha = fade) +
+  # add axis labels with % variance displayed
+  labs(x = paste0("PC1 (",round(PCexplain$PC1[grepl("^Prop", PCexplain$rowname)],2)*100, "% variance explained)"),
+       y = paste0("PC2 (",round(PCexplain$PC2[grepl("^Prop", PCexplain$rowname)],2)*100, "% variance explained)")) +
+  # describe axes
+  geom_segment(aes(x=0.1,xend=2,y=(min(sppscores$PC2)-0.18),yend=(min(sppscores$PC2)-0.18)),
+               arrow = arrow(length = unit(0.25, "cm")),colour="grey40", alpha = 0.4, lwd = 0.75) +
+  geom_segment(aes(x=-0.1,xend=-1.5,y=(min(sppscores$PC2)-0.18),yend=(min(sppscores$PC2)-0.18)),
+               arrow = arrow(length = unit(0.25, "cm")),colour="grey40", alpha = 0.4, lwd = 0.75) +
+  geom_text(aes(2, (min(sppscores$PC2)-0.08), label = "Resource\nacquisitive"), col = "grey20", size = plottext_pca, hjust = 1, vjust = 0, lineheight = 0.75) +
+  geom_text(aes(-1.5, (min(sppscores$PC2)-0.08), label = "Resource\nconservative"), col = "grey20", size = plottext_pca, hjust = 0, vjust = 0, lineheight = 0.75) +
+  #coord_fixed() +
+  theme(panel.grid = element_blank()) +
+  j_theme +
+  scale_color_manual(values = traitcols, guide = FALSE)
+
+
+pcfig_wspp
+
+ggsave("alpine_addnuts/figures/journal_figs/pca_wspp_supp.tiff", dpi = 320,
        width = 4, height = 4, units = "in")
 ```
 
@@ -1033,12 +1097,12 @@ alpsppmds <- left_join(alpsppmds, sppscores[c("clean_code2", "resource_grp", "PC
 
 # add signif symbol to stat test dfs for plotting
 # envfit -- also add plotting x,y for label if signif
-alpenv <- mutate(alpenv, signif = ifelse(pval <= 0.001, "***", ifelse(pval <= 0.01, "**", ifelse(pval <= 0.05, "*", ifelse(pval <= 0.1, ".", "n.s")))),
-                 label_x = ifelse(NMDS1 >= 0, NMDS1+0.05, NMDS1-0.05),
-                 label_y = ifelse(NMDS2 >= 0, NMDS2+0.05, NMDS2-0.05))
+alpenv <- mutate(alpenv, signif = ifelse(pval <= 0.001, "***", ifelse(pval <= 0.01, "**", ifelse(pval <= 0.05, "*", ifelse(pval <= 0.1, ".", "n.s.")))),
+                 label_x = ifelse(NMDS1 >= 0, NMDS1+0.03, NMDS1-0.03),
+                 label_y = ifelse(NMDS2 >= 0, NMDS2+0.03, NMDS2-0.03))
 
 # permanova 
-alpperm$signif <- with(alpperm, ifelse(`Pr..F.` <= 0.001, "***", ifelse(`Pr..F.` <= 0.01, "**", ifelse(`Pr..F.` <= 0.05, "*", ifelse(`Pr..F.` <= 0.1, ".", "n.s")))))
+alpperm$signif <- with(alpperm, ifelse(`Pr..F.` <= 0.001, "***", ifelse(`Pr..F.` <= 0.01, "**", ifelse(`Pr..F.` <= 0.05, "*", ifelse(`Pr..F.` <= 0.1, ".", "n.s.")))))
 
 # iterate through spp nmds df to extra plotting points for stress
 alpstress<- mutate(alpstress, plotx_hi = NA, plotx_lo = NA, ploty_hi = NA, ploty_lo = NA)
@@ -1083,12 +1147,10 @@ sdlnmds <- ggplot(subset(alpplotmds, site == "sdl" & iter == "main"), aes(MDS1, 
   scale_shape_manual(name = "Resource strategy", values = c(19, 19, 21)) +
   facet_wrap(~yr, scales = "free") +
   # make legend keys side by side
-  theme(#legend.box = "horizontal",
-        legend.position = c(0.7, 0.25),
+  theme(legend.position = c(0.7, 0.25),
         legend.justification = "left",
         legend.spacing = unit(0, "pt"),
         legend.background = element_blank(),
-        panel.grid = element_blank(),
         legend.key.size = unit(9, "pt")) +
   j_theme
 
@@ -1096,16 +1158,22 @@ if(any(alpenv$pval[alpenv$site == "sdl" & alpenv$grp == "vectors"] <= 0.05)){
   sdlnmds <- sdlnmds + geom_segment(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
                                     arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
     # add label to envfit arrow
-    geom_text(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic")
+    # for arrows pointing right
+    geom_text(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05 & label_x > 0),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic", hjust = 0) +
+    # for arrows pointing left and down
+     geom_text(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05 & label_x <= 0),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic", vjust = 1)
 }
 
 # annotate stress and trt signif
 ## > to annotate "stress:" paste("Stress:", round(stress,3)))
-sdlnmds + geom_text(data = subset(alpstress, site == "sdl"), aes(plotx_hi, ploty_hi, label = round(stress,3)), size = plottext, hjust = 1) +
+sdlnmds <- sdlnmds + geom_text(data = subset(alpstress, site == "sdl"), aes(plotx_hi, ploty_hi, label = round(stress,3)), size = plottext, hjust = 1) +
   geom_text(data = subset(alpstress, site == "sdl"), aes(plotx_hi, ploty_hi-(plottext/20), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1)
 
+# check plot
+sdlnmds
+
 # write out as tiff
-ggsave("alpine_addnuts/figures/journal_figs/sdl_nmds.tiff", dpi = 320,
+ggsave("alpine_addnuts/figures/journal_figs/sdl_nmds.tiff", sdlnmds, dpi = 320,
        width = 6, height = 4)
 ```
 
@@ -1145,9 +1213,20 @@ nnnmds <- ggplot(subset(alpplotmds, site == "nutnet" & iter == "main"), aes(MDS1
   geom_point(aes(fill = trt), size = 1.75, shape = 23, color = "transparent") +
   #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
   geom_polygon(data=subset(alpells, site == "nutnet" & iter == "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
-  geom_point(data = subset(alpsppmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2, col = resource_grp), alpha = 0.75) +
-  scale_fill_manual(name = "Treatment", values = trtcols) +
-  scale_color_manual(name = "Resource\nstrategy", values = traitcols) +
+  geom_point(data = subset(alpsppmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2, shape = resource_grp, col = resource_grp), alpha = 0.75) +
+  scale_fill_manual(name = NULL, values = trtcols) +
+  scale_color_manual(name = NULL, values = traitcols) +
+  scale_shape_manual(name = NULL, values = c(19, 19, 21)) +
+  j_theme +
+  theme(legend.box = "horizontal", 
+        legend.spacing = unit(0, "pt"),
+        legend.background = element_blank(),
+        legend.key.size = unit(9, "pt"),
+        legend.position = c(0, 0),
+        legend.justification = c(0,0)) +
+  guides(fill = guide_legend(order = 2),
+         color = guide_legend(order = 1),
+         shape = guide_legend(order = 1)) +
   facet_wrap(~yr, scales = "free")
 
 # add FG arrows if any significant
@@ -1159,8 +1238,15 @@ if(any(with(alpenv, pval[site == "nutnet" & grepl("main", tracker) & grp == "vec
 }
 
 # annotate stress and trt signif
-nnnmds + geom_text(data = subset(alpstress, site == "nutnet" & grepl("main", tracker)), aes(plotx_hi, ploty_hi, label = paste("Stress:", round(stress,3))), size = plottext, hjust = 1) +
-  geom_text(data = subset(alpstress, site == "nutnet" & grepl("main", tracker)), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1)
+nnnmds <- nnnmds + geom_text(data = subset(alpstress, site == "nutnet" & grepl("main", tracker)), aes(plotx_hi, ploty_hi, label = round(stress,3)), size = plottext, hjust = 1) +
+  geom_text(data = subset(alpstress, site == "nutnet" & grepl("main", tracker)), aes(plotx_hi, ploty_hi-(plottext/30), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1)
+
+# check figure
+nnnmds
+
+# save as tif
+ggsave("alpine_addnuts/figures/journal_figs/nn_nmds.tiff", nnnmds, dpi = 320,
+       width = 6, height =3, units = "in")
 
 ```
 
@@ -1180,6 +1266,11 @@ alpmds$nutnet_main_2017$betadisper; anova(alpmds$nutnet_main_2017$betadisper) # 
 ```
 
 ### Supplemental multivariate analyses
+
+```{r pca with spp names}
+
+```
+
 
 ```{r 2013 nmds with all treatments}
 # 2013
@@ -1296,7 +1387,7 @@ for(i in names(alpmds)){
 }
 # add signif symbols
 alpdisp <- rename(alpdisp, pval = "Pr..F.") %>% 
-  mutate(signif = ifelse(pval <= 0.001, "***", ifelse(pval <= 0.01, "**", ifelse(pval <= 0.05, "*", ifelse(pval <= 0.1, ".", "n.s")))))
+  mutate(signif = ifelse(pval <= 0.001, "***", ifelse(pval <= 0.01, "**", ifelse(pval <= 0.05, "*", ifelse(pval <= 0.1, ".", "n.s.")))))
 permtable <- left_join(permtable, alpdisp[c("tracker", "F.value", "signif")]) %>%
   mutate(F.value = round(F.value, 3)) %>%
   unite(`dispersion F.stat`, F.value, signif, sep = " ")
