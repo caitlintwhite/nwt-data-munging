@@ -97,11 +97,11 @@ plantcols <- c("N-fixer" = "chocolate4", "Forb" = "grey30", "Grass" = "seagreen4
 traitcols <- c("Acquisitive" = "grey20", "Conservative" = "grey80", "Unknown" = "black")
 
 # create plotting them for journal (target = Plant Ecol)
-j_theme <- theme(axis.text = element_text(size = 10, family = "Arial"),
-                 axis.title = element_text(size = 12, family = "Arial"),
-                 legend.text = element_text(size = 10, family = "Arial"),
-                 legend.title = element_text(size = 10, family = "Arial"),
-                 strip.text = element_text(size = 10, family = "Arial"),
+j_theme <- theme(axis.text = element_text(size = 10),
+                 axis.title = element_text(size = 12),
+                 legend.text = element_text(size = 10),
+                 legend.title = element_text(size = 10),
+                 strip.text = element_text(size = 10),
                  panel.grid = element_blank(),
                  strip.background = element_rect(fill = "transparent"))
 
@@ -366,9 +366,15 @@ sdl_meancov_fig <- ggplot(data= subset(sdl_coarse_means, grp  %in% c("Forb_rel",
   j_theme +
   facet_wrap(~yr, nrow = 2)
 
+sdl_meancov_fig
+
 # write out tif
 ggsave("alpine_addnuts/figures/journal_figs/sdl_meancov.tiff", sdl_meancov_fig, dpi = 320,
        width = 6, height = 4, units = "in")
+# write out as pdf
+ggsave("alpine_addnuts/figures/journal_figs/sdl_meancov.pdf", sdl_meancov_fig, dpi = 320,
+       width = 6, height = 4, units = "in")
+
 ```
 
 
@@ -506,8 +512,13 @@ nn_relcov_fig <- ggplot(data= subset(nn_fg_means, met %in% c("Grass_rel", "Forb_
   j_theme +
   facet_wrap(~yr, ncol = 2)
 
+nn_relcov_fig
+
 # save tiff
 ggsave("alpine_addnuts/figures/journal_figs/nn_meancov.tiff", nn_relcov_fig, dpi= 320,
+       width = 4, height = 2.2, units = "in")
+# save pdf
+ggsave("alpine_addnuts/figures/journal_figs/nn_meancov.pdf", nn_relcov_fig, dpi= 320,
        width = 4, height = 2.2, units = "in")
 
 ```
@@ -830,10 +841,12 @@ pcfig <- ggplot() +
 
 
 pcfig
-
-ggsave("alpine_addnuts/figures/journal_figs/pca_nospp.tiff", dpi = 320,
+# write out as tiff
+ggsave("alpine_addnuts/figures/journal_figs/pca_nospp.tiff", pcfig, dpi = 320,
        width = 4, height = 4, units = "in")
-
+# write out as pdf
+ggsave("alpine_addnuts/figures/journal_figs/pca_nospp.pdf", pcfig, dpi = 320,
+       width = 4, height = 4, units = "in")
 
 
 ## PCA with spp labels
@@ -892,8 +905,11 @@ pcfig_wspp <- ggplot() +
 
 
 pcfig_wspp
-
-ggsave("alpine_addnuts/figures/journal_figs/pca_wspp_supp.tiff", dpi = 320,
+# write out as tiff
+ggsave("alpine_addnuts/figures/journal_figs/pca_wspp_supp.tiff", pcfig_wspp, dpi = 320,
+       width = 4, height = 4, units = "in")
+# write out as pdf
+ggsave("alpine_addnuts/figures/journal_figs/pca_wspp_supp.pdf", pcfig_wspp,dpi = 320,
        width = 4, height = 4, units = "in")
 ```
 
