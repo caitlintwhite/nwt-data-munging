@@ -86,15 +86,15 @@ names(trtcols) <- alltrts
 
 # simplified treatments
 simpletrts <- sort(unique(c(as.character(sdlplots$trt))))
+## cols for trts
 simplecols <- viridis::viridis(n = length(simpletrts))
 names(simplecols) <- simpletrts
 
-# specify plotting cols for lifeform
-plantcols <- c("N-fixer" = "chocolate4", "Forb" = "grey30", "Grass" = "seagreen4", "Shrub" = "orchid")
-
-# choose color scheme here to color in spp in nmds points with..
+# choose color scheme here to color in spp in nmds points with.. subset viridis cols
 #traitcols <- c("Acquisitive" = "deeppink2", "Conservative" = "darkred", "Unknown" = "grey50")
-traitcols <- c("Acquisitive" = "grey20", "Conservative" = "grey80", "Unknown" = "black")
+#traitcols <- c("Acquisitive" = "grey20", "Conservative" = "grey80", "Unknown" = "black")
+traitcols <- c("chocolate4", "#FCA636FF", "grey10") # add dark color for outline of unknown resource spp
+names(traitcols) <- c("Acquisitive", "Conservative", "Unknown")
 
 # create plotting them for journal (target = Plant Ecol)
 j_theme <- theme(axis.text = element_text(size = 10),
@@ -592,18 +592,33 @@ all_fg_means <- rename(nn_fg_means, trt = trt2, grp = met, meanval = meancov, se
 
 
 # plot means by time since experiment onset
-mutate(all_fg_means, grp = factor(grp, levels = c("Forb_rel", "Grass_rel", "Geum_rel"), labels = c("All forbs", "All grasses", "G. rossii"))) %>%
+allcov_fig <- mutate(all_fg_means, grp = factor(grp, levels = c("Forb_rel", "Grass_rel", "Geum_rel"), labels = c("All forbs", "All grasses", "G. rossii"))) %>%
   ggplot(aes(post_yrs, meanval, grp = site)) +
   geom_errorbar(aes(ymax = meanval + seval, ymin = meanval - seval), width = 0) +
   geom_point(aes(shape = site), fill = "white") +
   #geom_line(aes(col = site)) +
-  #scale_color_manual(name = "Site", values = c("salmon", "darkred"), labels = c("NutNet", "Saddle")) +
-  scale_shape_manual(name = "Site", values = c(21,19), labels = c("NutNet", "Saddle")) +
+  scale_y_continuous(breaks = seq(0,80, 10)) +
+  scale_shape_manual(name = NULL, values = c(21,19), labels = c("NutNet", "Saddle")) +
   labs(y = "Mean relative cover (%)",
        x = "Years since experiment onset") +
-  theme(legend.title = element_text(size = 10),
-        axis.title = element_text(size = 12, family = "Arial")) +
+  theme(legend.position = c(0.001, 0.313),
+        legend.justification = c(0,1),
+        legend.margin = margin(0.1,2.5,1.5,2, "pt"),
+        legend.background = element_rect(color = "black"),
+        legend.key = element_blank(),
+        legend.key.size = unit(9, "pt")) +
+  j_theme + 
   facet_grid(grp~trt, scales = "free_y")
+
+allcov_fig
+
+# write out as tiff
+ggsave("alpine_addnuts/figures/journal_figs/all_meancov.tiff", allcov_fig, dpi = 320,
+      width = 5, height = 3.7, units = "in")
+
+# write out as pdf
+ggsave("alpine_addnuts/figures/journal_figs/all_meancov.pdf", allcov_fig, dpi = 320,
+      width = 5, height = 3.7, units = "in")
 ```
 
 Finally, here are the tables 1-4 recreated using the cleaned datasets:
@@ -852,7 +867,7 @@ ggsave("alpine_addnuts/figures/journal_figs/pca_nospp.pdf", pcfig, dpi = 320,
 ## PCA with spp labels
 # specify transparency for non-spp labels
 fade <- 0.3
-plottext_pca <- 2.5
+plottext_pca <- 2.8
 
 pcfig_wspp <- ggplot() +
   geom_vline(aes(xintercept = 0), lty = 2, col = "grey") +
@@ -865,21 +880,22 @@ pcfig_wspp <- ggplot() +
   geom_text(data = subset(sppscores, PC1 >0 & PC2 > 0 & !grepl("Tetra", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3) +
    geom_text(data = subset(sppscores, PC1 >0 & PC2 > 0 & grepl("Tetra", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3, nudge_x = -0.1) +
     ## spp on positive x, negative y
-  geom_text(data = subset(sppscores, PC1 >0 & PC2 <= 0 & grepl("Poly", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = 1.3, nudge_x = -0.1) +
+  geom_text(data = subset(sppscores, PC1 >0 & PC2 <= 0 & grepl("Poly", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = 1.2, nudge_x = -0.17) +
   ## plot ARTSCO separately (+,-)
   geom_text(data = subset(sppscores, PC1 >0 & PC2 <= 0 & grepl("Artem", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 0, vjust = -0.3) +
     ## plot TRIDAS (+,-) separately
   geom_text(data = subset(sppscores, grepl("dasyph", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 0, vjust = 1.3) +
   ## spp on neg x, pos y
-  geom_text(data = subset(sppscores, PC1 <= 0 & PC2 > 0 & !grepl("Festuca|Kobre", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, nudge_x = -0.05, hjust = 1) +
+  geom_text(data = subset(sppscores, PC1 <= 0 & PC2 > 0 & !grepl("Festuca|Kobre", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 1, nudge_x = -0.04) +
   ## plot Festuca separately (-,+)
-   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 > 0 & grepl("Festuca", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, nudge_x = 0.1, vjust = -0.3) +
-  ## plot Festuca separately (-,+)
-   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 > 0 & grepl("Kobre", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3, hjust = 1) +
+   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 > 0 & grepl("Festuca", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3, hjust = 0.2, nudge_x = -0.01) +
+  ## plot Kobresia separately (-,+)
+   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 > 0 & grepl("Kobre", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3, hjust = 1, nudge_x = 0.01) +
     ## spp on negative x, neg y
   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 < 0 & !grepl("Silene|Lloyd|Tetra", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = 1.3) +
     ## adjust Lloydi and Tetraneuris left (-,-)
-    geom_text(data = subset(sppscores, PC1 <= 0 & PC2 < 0 & grepl("Lloy|Tetr", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 1, nudge_x = -0.05) +
+    geom_text(data = subset(sppscores, PC1 <= 0 & PC2 < 0 & grepl("Tetr", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 1, nudge_x = -0.06) +
+   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 < 0 & grepl("Lloy", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 1, nudge_x = -0.1) +
      ## plot silene (-,-) separately
   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 < 0 & grepl("Silene", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3) +
   # label traits
@@ -896,9 +912,9 @@ pcfig_wspp <- ggplot() +
                arrow = arrow(length = unit(0.25, "cm")),colour="grey40", alpha = 0.4, lwd = 0.75) +
   geom_segment(aes(x=-0.1,xend=-1.5,y=(min(sppscores$PC2)-0.18),yend=(min(sppscores$PC2)-0.18)),
                arrow = arrow(length = unit(0.25, "cm")),colour="grey40", alpha = 0.4, lwd = 0.75) +
-  geom_text(aes(2, (min(sppscores$PC2)-0.08), label = "Resource\nacquisitive"), col = "grey20", size = plottext_pca, hjust = 1, vjust = 0, lineheight = 0.75) +
-  geom_text(aes(-1.5, (min(sppscores$PC2)-0.08), label = "Resource\nconservative"), col = "grey20", size = plottext_pca, hjust = 0, vjust = 0, lineheight = 0.75) +
-  #coord_fixed() +
+  geom_text(aes(2, (min(sppscores$PC2)-0.08), label = "Resource\nacquisitive"), col = "grey20", size = 3, hjust = 1, vjust = 0, lineheight = 0.75) +
+  geom_text(aes(-1.5, (min(sppscores$PC2)-0.08), label = "Resource\nconservative"), col = "grey20", size = 3, hjust = 0, vjust = 0, lineheight = 0.75) +
+  coord_fixed() +
   theme(panel.grid = element_blank()) +
   j_theme +
   scale_color_manual(values = traitcols, guide = FALSE)
@@ -1191,6 +1207,9 @@ sdlnmds
 # write out as tiff
 ggsave("alpine_addnuts/figures/journal_figs/sdl_nmds.tiff", sdlnmds, dpi = 320,
        width = 6, height = 4)
+# write out as pdf
+ggsave("alpine_addnuts/figures/journal_figs/sdl_nmds.pdf", sdlnmds, dpi = 320,
+       width = 6, height = 4)
 ```
 
 
@@ -1263,6 +1282,9 @@ nnnmds
 # save as tif
 ggsave("alpine_addnuts/figures/journal_figs/nn_nmds.tiff", nnnmds, dpi = 320,
        width = 6, height =3, units = "in")
+# save as pdf
+ggsave("alpine_addnuts/figures/journal_figs/nn_nmds.pdf", nnnmds, dpi = 320,
+       width = 6, height =3, units = "in")
 
 ```
 
@@ -1282,10 +1304,6 @@ alpmds$nutnet_main_2017$betadisper; anova(alpmds$nutnet_main_2017$betadisper) # 
 ```
 
 ### Supplemental multivariate analyses
-
-```{r pca with spp names}
-
-```
 
 
 ```{r 2013 nmds with all treatments}
