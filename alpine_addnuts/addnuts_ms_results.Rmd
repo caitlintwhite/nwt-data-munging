@@ -1408,6 +1408,7 @@ permtable <- dplyr::select(alpperm, tracker, site, yr, iter, met, F.Model:`Pr..F
   spread(cat, val) %>%
   arrange(desc(site), fig, yr)
 
+
 # gather betadisper results
 alpdisp <- data.frame()
 for(i in names(alpmds)){
@@ -1418,13 +1419,25 @@ for(i in names(alpmds)){
   #site = str_extract(i, "^s[a-z]+|^n[a-z]+"),
   #yr = parse_number(i))
   alpdisp <- rbind(alpdisp, tempdisp)
+  
 }
+
+# append enfit trt and ln f:g ratio r2 and pvals
+alpenv_stats <- dplyr::select(alpenv, grp, tracker, site, yr, grp, r2, pval) %>% distinct() %>%
+  mutate(grp = recode(grp, vectors = "lnF2G", factors = "trt")) %>%
+  gather(met, val, r2, pval) %>%
+  unite(cat, grp, met, sep = ".") %>%
+  mutate(cat = paste("envfit", cat, sep = "."),
+         val = round(val, 3)) %>%
+  spread(cat, val)
+
 # add signif symbols
 alpdisp <- rename(alpdisp, pval = "Pr..F.") %>% 
   mutate(signif = ifelse(pval <= 0.001, "***", ifelse(pval <= 0.01, "**", ifelse(pval <= 0.05, "*", ifelse(pval <= 0.1, ".", "n.s.")))))
 permtable <- left_join(permtable, alpdisp[c("tracker", "F.value", "signif")]) %>%
   mutate(F.value = round(F.value, 3)) %>%
-  unite(`dispersion F.stat`, F.value, signif, sep = " ")
+  unite(`dispersion F.stat`, F.value, signif, sep = " ") %>%
+  left_join(alpenv_stats)
 
 kable(permtable, caption = "Table S1. Permutation statistics (permanova and permdisp) for alpine dry meadow communities, iterations = 1000")
 ```
