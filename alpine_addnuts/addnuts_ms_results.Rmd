@@ -93,7 +93,7 @@ names(simplecols) <- simpletrts
 # choose color scheme here to color in spp in nmds points with.. subset viridis cols
 #traitcols <- c("Acquisitive" = "deeppink2", "Conservative" = "darkred", "Unknown" = "grey50")
 #traitcols <- c("Acquisitive" = "grey20", "Conservative" = "grey80", "Unknown" = "black")
-traitcols <- c("chocolate4", "#FCA636FF", "grey10") # add dark color for outline of unknown resource spp
+traitcols <- c("#FCA636FF", "chocolate4", "grey10") # add dark color for outline of unknown resource spp
 names(traitcols) <- c("Acquisitive", "Conservative", "Unknown")
 
 # create plotting them for journal (target = Plant Ecol)
@@ -614,11 +614,11 @@ allcov_fig
 
 # write out as tiff
 ggsave("alpine_addnuts/figures/journal_figs/all_meancov.tiff", allcov_fig, dpi = 320,
-      width = 5, height = 3.7, units = "in")
+       width = 5, height = 3.7, units = "in")
 
 # write out as pdf
 ggsave("alpine_addnuts/figures/journal_figs/all_meancov.pdf", allcov_fig, dpi = 320,
-      width = 5, height = 3.7, units = "in")
+       width = 5, height = 3.7, units = "in")
 ```
 
 Finally, here are the tables 1-4 recreated using the cleaned datasets:
@@ -835,9 +835,9 @@ pcfig <- ggplot() +
                arrow = arrow(length = unit(0.25, "cm")),colour="grey40") + 
   geom_point(data = sppscores, aes(PC1, PC2, col = resource_grp), size = pointsize) +
   geom_text(data = subset(varscores, PC1 <= 0), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 1, nudge_x = -0.02, size = plottext) +
-    geom_text(data = subset(varscores, PC1 > 0 & !grepl("%N|Leaf|Dry", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_x = 0.02, size = plottext) +
+  geom_text(data = subset(varscores, PC1 > 0 & !grepl("%N|Leaf|Dry", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_x = 0.02, size = plottext) +
   geom_text(data = subset(varscores, PC1 > 0 & grepl("Dry", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_y = +0.05, size = plottext) +
-    geom_text(data = subset(varscores, PC1 > 0 & grepl("Leaf", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_y = -0.06,nudge_x = 0.02, size = plottext) +
+  geom_text(data = subset(varscores, PC1 > 0 & grepl("Leaf", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_y = -0.06,nudge_x = 0.02, size = plottext) +
   geom_text(data = subset(varscores,abbr == "%N"), aes(PC1, PC2, label = abbr), check_overlap = T, hjust = 0.5, nudge_y = -0.1, size = plottext) +
   # add axis labels with % variance displayed
   labs(x = paste0("PC1 (",round(PCexplain$PC1[grepl("^Prop", PCexplain$rowname)],2)*100, "% variance explained)"),
@@ -874,35 +874,35 @@ pcfig_wspp <- ggplot() +
   geom_hline(aes(yintercept = 0), lty = 2, col = "grey") +
   geom_segment(data=varscores,aes(x=0,xend=PC1,y=0,yend=PC2),
                arrow = arrow(length = unit(0.25, "cm")),colour="grey40", alpha = fade) + 
-   geom_point(data = sppscores, aes(PC1, PC2, col = resource_grp)) +
+  geom_point(data = sppscores, aes(PC1, PC2, col = resource_grp)) +
   # add spp labels
   ## spp on positive x, positive y
   geom_text(data = subset(sppscores, PC1 >0 & PC2 > 0 & !grepl("Tetra", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3) +
-   geom_text(data = subset(sppscores, PC1 >0 & PC2 > 0 & grepl("Tetra", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3, nudge_x = -0.1) +
-    ## spp on positive x, negative y
+  geom_text(data = subset(sppscores, PC1 >0 & PC2 > 0 & grepl("Tetra", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3, nudge_x = -0.1) +
+  ## spp on positive x, negative y
   geom_text(data = subset(sppscores, PC1 >0 & PC2 <= 0 & grepl("Poly", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = 1.2, nudge_x = -0.17) +
   ## plot ARTSCO separately (+,-)
   geom_text(data = subset(sppscores, PC1 >0 & PC2 <= 0 & grepl("Artem", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 0, vjust = -0.3) +
-    ## plot TRIDAS (+,-) separately
+  ## plot TRIDAS (+,-) separately
   geom_text(data = subset(sppscores, grepl("dasyph", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 0, vjust = 1.3) +
   ## spp on neg x, pos y
   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 > 0 & !grepl("Festuca|Kobre", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 1, nudge_x = -0.04) +
   ## plot Festuca separately (-,+)
-   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 > 0 & grepl("Festuca", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3, hjust = 0.2, nudge_x = -0.01) +
+  geom_text(data = subset(sppscores, PC1 <= 0 & PC2 > 0 & grepl("Festuca", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3, hjust = 0.2, nudge_x = -0.01) +
   ## plot Kobresia separately (-,+)
-   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 > 0 & grepl("Kobre", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3, hjust = 1, nudge_x = 0.01) +
-    ## spp on negative x, neg y
+  geom_text(data = subset(sppscores, PC1 <= 0 & PC2 > 0 & grepl("Kobre", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3, hjust = 1, nudge_x = 0.01) +
+  ## spp on negative x, neg y
   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 < 0 & !grepl("Silene|Lloyd|Tetra", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = 1.3) +
-    ## adjust Lloydi and Tetraneuris left (-,-)
-    geom_text(data = subset(sppscores, PC1 <= 0 & PC2 < 0 & grepl("Tetr", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 1, nudge_x = -0.06) +
-   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 < 0 & grepl("Lloy", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 1, nudge_x = -0.1) +
-     ## plot silene (-,-) separately
+  ## adjust Lloydi and Tetraneuris left (-,-)
+  geom_text(data = subset(sppscores, PC1 <= 0 & PC2 < 0 & grepl("Tetr", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 1, nudge_x = -0.06) +
+  geom_text(data = subset(sppscores, PC1 <= 0 & PC2 < 0 & grepl("Lloy", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, hjust = 1, nudge_x = -0.1) +
+  ## plot silene (-,-) separately
   geom_text(data = subset(sppscores, PC1 <= 0 & PC2 < 0 & grepl("Silene", Latin.name)), aes(PC1, PC2, label = str_wrap(Latin.name, width = 10)), size = plottext_pca, fontface = "italic", color = "black", lineheight = 0.75, vjust = -0.3) +
   # label traits
   geom_text(data = subset(varscores, PC1 <= 0), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 1, nudge_x = -0.02, size = plottext_pca, alpha = fade) +
-    geom_text(data = subset(varscores, PC1 > 0 & !grepl("%N|Leaf|Dry", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_x = 0.02, size = plottext_pca, alpha = fade) +
+  geom_text(data = subset(varscores, PC1 > 0 & !grepl("%N|Leaf|Dry", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_x = 0.02, size = plottext_pca, alpha = fade) +
   geom_text(data = subset(varscores, PC1 > 0 & grepl("Dry", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_y = +0.05, size = plottext_pca, alpha = fade) +
-    geom_text(data = subset(varscores, PC1 > 0 & grepl("Leaf", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_y = -0.06,nudge_x = 0.02, size = plottext_pca, alpha = fade) +
+  geom_text(data = subset(varscores, PC1 > 0 & grepl("Leaf", abbr)), aes(PC1, PC2, label = abbr), check_overlap = F, hjust = 0, nudge_y = -0.06,nudge_x = 0.02, size = plottext_pca, alpha = fade) +
   geom_text(data = subset(varscores,abbr == "%N"), aes(PC1, PC2, label = abbr), check_overlap = T, hjust = 0.5, nudge_y = -0.1, size = plottext_pca, alpha = fade) +
   # add axis labels with % variance displayed
   labs(x = paste0("PC1 (",round(PCexplain$PC1[grepl("^Prop", PCexplain$rowname)],2)*100, "% variance explained)"),
@@ -1184,6 +1184,7 @@ sdlnmds <- ggplot(subset(alpplotmds, site == "sdl" & iter == "main"), aes(MDS1, 
         legend.spacing = unit(0, "pt"),
         legend.background = element_blank(),
         legend.key.size = unit(9, "pt")) +
+  guides(color = guide_legend(override.aes = list(alpha = 1))) +
   j_theme
 
 if(any(alpenv$pval[alpenv$site == "sdl" & alpenv$grp == "vectors"] <= 0.05)){
@@ -1193,7 +1194,7 @@ if(any(alpenv$pval[alpenv$site == "sdl" & alpenv$grp == "vectors"] <= 0.05)){
     # for arrows pointing right
     geom_text(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05 & label_x > 0),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic", hjust = 0) +
     # for arrows pointing left and down
-     geom_text(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05 & label_x <= 0),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic", vjust = 1)
+    geom_text(data=subset(alpenv, grp == "vectors" & site == "sdl" & pval <= 0.05 & label_x <= 0),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic", vjust = 1)
 }
 
 # annotate stress and trt signif
@@ -1248,7 +1249,7 @@ nnnmds <- ggplot(subset(alpplotmds, site == "nutnet" & iter == "main"), aes(MDS1
   geom_point(aes(fill = trt), size = 1.75, shape = 23, color = "transparent") +
   #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
   geom_polygon(data=subset(alpells, site == "nutnet" & iter == "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
-  geom_point(data = subset(alpsppmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2, shape = resource_grp, col = resource_grp), alpha = 0.75) +
+  geom_point(data = subset(alpsppmds, site == "nutnet" & iter == "main"), aes(MDS1, MDS2, shape = resource_grp, col = resource_grp), alpha = 0.8) +
   scale_fill_manual(name = NULL, values = trtcols) +
   scale_color_manual(name = NULL, values = traitcols) +
   scale_shape_manual(name = NULL, values = c(19, 19, 21)) +
@@ -1260,7 +1261,7 @@ nnnmds <- ggplot(subset(alpplotmds, site == "nutnet" & iter == "main"), aes(MDS1
         legend.position = c(0, 0),
         legend.justification = c(0,0)) +
   guides(fill = guide_legend(order = 2),
-         color = guide_legend(order = 1),
+         color = guide_legend(order = 1, override.aes = list(alpha = 1)),
          shape = guide_legend(order = 1)) +
   facet_wrap(~yr, scales = "free")
 
@@ -1269,7 +1270,8 @@ if(any(with(alpenv, pval[site == "nutnet" & grepl("main", tracker) & grp == "vec
   nnnmds <- nnnmds + geom_segment(data=subset(alpenv, grp == "vectors" & grepl("main", tracker) & site == "nutnet" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
                                   arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
     # add label to envfit arrow
-    geom_text(data=subset(alpenv, grp == "vectors" & site == "nutnet" & grepl("main", tracker) & pval <= 0.05),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic")
+    # for arrows pointing left and up
+    geom_text(data=subset(alpenv, grp == "vectors" & site == "nutnet" & grepl("main", tracker) & pval <= 0.05),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic", hjust = 0.9, vjust = 0)
 }
 
 # annotate stress and trt signif
@@ -1310,11 +1312,12 @@ alpmds$nutnet_main_2017$betadisper; anova(alpmds$nutnet_main_2017$betadisper) # 
 # 2013
 nns2013_nmds <- ggplot(subset(alpplotmds, yr == 2013 & iter != "main"), aes(MDS1, MDS2)) +
   geom_point(aes(fill = trt), color = "transparent", size = 1.7, pch = 23) +
-  geom_polygon(data=subset(alphulls, yr == 2013 & iter != "main"), aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
-  #geom_polygon(data=subset(alpells, yr == 2013 & iter != "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
+  #geom_polygon(data=subset(alphulls, yr == 2013 & iter != "main"), aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+  geom_polygon(data=subset(alpells, yr == 2013 & iter != "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
   geom_point(data = subset(alpsppmds, yr == 2013 & iter != "main"), aes(MDS1, MDS2, col = resource_grp), alpha = 0.75) +
   scale_fill_manual(name = "Treatment", values = trtcols) +
   scale_color_manual(name = "Resource\nstrategy", values = traitcols) +
+  j_theme +
   facet_wrap(~yr)
 
 # add FG arrows if any significant
@@ -1325,10 +1328,13 @@ if(any(with(alpenv, pval[site == "nutnet" & tracker == "suppl_2013" & grp == "ve
     geom_text(data=subset(alpenv, grp == "vectors" & tracker == "suppl_2013" & pval <= 0.05),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic")
 }
 
+
 # annotate stress and trt signif
 nns2013_nmds + geom_text(data = subset(alpstress, site == "nutnet" & tracker == "suppl_2013"), aes(plotx_hi, ploty_hi, label = paste("Stress:", round(stress,3))), size = plottext, hjust = 1) +
   geom_text(data = subset(alpstress, tracker == "suppl_2013"), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1) +
   labs(caption = "Fig S1. NutNet 2013 NMDS, all treatments (n = 4 per treatment). Treatment hulls drawn for sites.")
+
+nns2013_nmds
 
 ```
 
@@ -1346,12 +1352,13 @@ alpmds$nutnet_suppl_2013$betadisper; anova(alpmds$nutnet_suppl_2013$betadisper) 
 ```{r nn 2017 nmds all trts}
 # 2017
 nns2017_nmds <- ggplot(subset(alpplotmds, yr == 2017 & iter != "main"), aes(MDS1, MDS2)) +
-  geom_polygon(data=subset(alphulls, yr == 2017 & iter != "main"), aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
-  #geom_polygon(data=subset(alpells, yr == 2017 & iter != "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
+  #geom_polygon(data=subset(alphulls, yr == 2017 & iter != "main"), aes(MDS1, MDS2, fill = trt), alpha = 0.5) +
+  geom_polygon(data=subset(alpells, yr == 2017 & iter != "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
   geom_point(aes(fill = trt), pch = 21, color = "transparent", size = 1.7) +
   geom_point(data = subset(alpsppmds, yr == 2017 & iter != "main"), aes(MDS1, MDS2, col = resource_grp), alpha = 0.75) +
   scale_fill_manual(name = "Treatment", values = trtcols) +
   scale_color_manual(name = "Resource\nstrategy", values = traitcols) +
+  j_theme() +
   facet_wrap(~yr)
 
 # add FG arrows if any significant
@@ -1364,8 +1371,7 @@ if(any(with(alpenv, pval[site == "nutnet" & tracker == "suppl_2017" & grp == "ve
 
 # annotate stress and trt signif
 nns2017_nmds + geom_text(data = subset(alpstress, site == "nutnet" & tracker == "suppl_2017"), aes(plotx_hi, ploty_hi, label = paste("Stress:", round(stress,3))), size = plottext, hjust = 1) +
-  geom_text(data = subset(alpstress, tracker == "suppl_2017"), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1) +
-  labs(caption = "Fig S2. NutNet 2017 NMDS, all treatments (n = 4 per treatment group). Treatment hulls drawn for sites.")
+  geom_text(data = subset(alpstress, tracker == "suppl_2017"), aes(plotx_hi, ploty_hi-(plottext/25), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1)
 
 ```
 
@@ -1377,6 +1383,55 @@ nns2017_nmds + geom_text(data = subset(alpstress, site == "nutnet" & tracker == 
 alpmds$nutnet_suppl_2017$adonis; alpmds$nutnet_suppl_2017$envfit # all signif
 # test variances among treatment groups
 alpmds$nutnet_suppl_2017$betadisper; anova(alpmds$nutnet_suppl_2017$betadisper) # variances not distinct (same as in main text results)
+```
+
+
+```{r plot nutnet 2013 and 2017 together for supplement}
+
+# rename trtcols so M replaces K (K+ in parentheses)
+nnnmds_supp <- ggplot(subset(alpplotmds, site == "nutnet" & iter == "suppl"), aes(MDS1, MDS2)) +
+  geom_point(aes(fill = trt), size = 1.75, shape = 23, color = "transparent") +
+  #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
+  geom_polygon(data=subset(alpells, site == "nutnet" & iter == "suppl"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
+  geom_point(data = subset(alpsppmds, site == "nutnet" & iter == "suppl"), aes(MDS1, MDS2, shape = resource_grp, col = resource_grp), alpha = 0.8) +
+  scale_fill_manual(name = "Treatment", values = trtcols, labels = gsub("K", "M(K)", names(trtcols))) +
+  scale_color_manual(name = "Resource\nstrategy", values = traitcols) +
+  scale_shape_manual(name = "Resource\nstrategy", values = c(19, 19, 21)) +
+  j_theme +
+  # theme(legend.box = "horizontal", 
+  #       legend.spacing = unit(0, "pt"),
+  #       legend.background = element_blank(),
+  #       legend.key.size = unit(9, "pt"),
+  #       legend.position = c(0, 0),
+  #       legend.justification = c(0,0)) +
+  theme(legend.key.size = unit(9, "pt")) +
+  guides(fill = guide_legend(order = 2),
+         color = guide_legend(order = 1, override.aes = list(alpha = 1)),
+         shape = guide_legend(order = 1)) +
+  facet_wrap(~yr, scales = "free")
+
+# add FG arrows if any significant
+if(any(with(alpenv, pval[site == "nutnet" & grepl("suppl", tracker) & grp == "vectors"]) <= 0.05)){
+  nnnmds_supp <- nnnmds_supp + geom_segment(data=subset(alpenv, grp == "vectors" & grepl("suppl", tracker) & site == "nutnet" & pval <= 0.05),aes(x=0,xend=NMDS1,y=0,yend=NMDS2),
+                                  arrow = arrow(length = unit(0.25, "cm")),colour="black") + 
+    # add label to envfit arrow
+    geom_text(data=subset(alpenv, grp == "vectors" & site == "nutnet" & grepl("suppl", tracker) & pval <= 0.05),aes(x=label_x,y=label_y, label = paste0(signif,"F:G")), col = "black", size = plottext, fontface = "italic", hjust = 1)
+}
+
+# annotate stress and trt signif
+nnnmds_supp <- nnnmds_supp + geom_text(data = subset(alpstress, site == "nutnet" & grepl("suppl", tracker)), aes(plotx_hi, ploty_hi, label = round(stress,3)), size = plottext, hjust = 1) +
+  geom_text(data = subset(alpstress, site == "nutnet" & grepl("suppl", tracker)), aes(plotx_hi, ploty_hi-(plottext/29), label = paste("Trt", env_trt_signif)), size = plottext, hjust = 1)
+
+# check figure
+nnnmds_supp
+
+# save as tif
+ggsave("alpine_addnuts/figures/journal_figs/nn_nmds_supp.tiff", nnnmds_supp, dpi = 320,
+       width = 7, height = 3, units = "in")
+# save as pdf
+ggsave("alpine_addnuts/figures/journal_figs/nn_nmds_supp.pdf", nnnmds_supp, dpi = 320,
+       width = 7, height = 3, units = "in")
+
 ```
 
 
@@ -1431,13 +1486,30 @@ alpenv_stats <- dplyr::select(alpenv, grp, tracker, site, yr, grp, r2, pval) %>%
          val = round(val, 3)) %>%
   spread(cat, val)
 
+# gather similarity stats anosim R and signif, MRPP delta and signif
+alpsim <- data.frame()
+for(i in names(alpmds)){
+  temp.anosim <- alpmds[[i]][["anosim"]]
+  temp.mrpp <- alpmds[[i]][["mrpp"]]
+  tempsim <- data.frame(site = gsub("_.*", "", i),
+                        tracker = gsub("^[a-z]+_", "", i),
+                        yr = parse_number(i),
+                        anosim.R = temp.anosim$statistic,
+                        anosim.pval = temp.anosim$signif,
+                        mrpp.A = temp.mrpp$A,
+                        mrpp.pval = temp.mrpp$Pvalue) %>%
+    mutate_at(names(.)[grepl("anosim|mrpp", names(.))], function(x) round(x,3))
+  alpsim <- rbind(alpsim, tempsim)
+}
+
 # add signif symbols
 alpdisp <- rename(alpdisp, pval = "Pr..F.") %>% 
   mutate(signif = ifelse(pval <= 0.001, "***", ifelse(pval <= 0.01, "**", ifelse(pval <= 0.05, "*", ifelse(pval <= 0.1, ".", "n.s.")))))
 permtable <- left_join(permtable, alpdisp[c("tracker", "F.value", "signif")]) %>%
   mutate(F.value = round(F.value, 3)) %>%
   unite(`dispersion F.stat`, F.value, signif, sep = " ") %>%
-  left_join(alpenv_stats)
+  left_join(alpenv_stats) %>%
+  left_join(alpsim)
 
 kable(permtable, caption = "Table S1. Permutation statistics (permanova and permdisp) for alpine dry meadow communities, iterations = 1000")
 ```
@@ -1581,5 +1653,57 @@ kable(dplyr::select(alpsppmds2, clean_code2, simple_name, simple_lifeform2, reso
         arrange(`All sites grp2`, simple_name) %>%
         distinct(),
       caption = "Species resource grouping designations based on PCA (dry meadow-only traits vs all sites traits)")
+```
+
+```{r indicator species analysis}
+# inititiate list for storing results
+indic_df <- data.frame() #df for multiple grps
+for(r in grep("main", alpenv_stats$tracker)){
+  tempdat <- alpenv_stats[r, c("tracker", "site", "yr")]
+  # filter site, yr, and common plots assessed in nmds through time
+  tempspp <- filter(abundance_wide, site == tempdat$site, yr == tempdat$yr & plotid %in% c(sdl_common, nn_common)) %>% as.data.frame()
+  # create env matrix
+  tempenv <- dplyr::select(tempspp, rowid:trt2)
+  # set rownames for spp matrix, remove env cols and remove any spp not present in any plots
+  rownames(tempspp) <- tempspp$rowid
+  tempspp <- tempspp[,!names(tempspp) %in% names(tempenv)] %>% as.data.frame()
+  tempspp <- tempspp[,sapply(tempspp, function(x) sum(x) > 0)]
+  for(d in c(TRUE, FALSE)){
+    tempindic <- multipatt(tempspp, tempenv$trt, func = "IndVal.g", duleg = d, control = how(nperm = 1000))
+    # store results 
+    tempresults <- data.frame(tempindic$sign, holm.p = p.adjust(tempindic$sign$p.value, method = "holm"), duleg = d) %>%
+      rownames_to_column(var = "clean_code2") %>%
+      subset(p.value <= 0.1) %>%
+      cbind(tempdat)
+    # label signif trt
+    trtnames <- names(tempresults)[grepl("^s[.][A-Z]", names(tempresults))]
+    for(t in trtnames){
+      tempresults[t] <- sapply(tempresults[t], function(x) ifelse(x == 1, gsub("^s[.]", "", t), NA))
+    }
+    #tempresults$trt <- trtcols[tempresults$index]
+    # remove trtcols and index col
+    #tempresults <- dplyr::select(tempresults, -c(trtcols, "index")) %>%
+    tempresults <- unite(tempresults, trts, trtnames, sep = "_") %>%
+      mutate(trts = gsub("NA_|_NA", "", trts),
+             trts = gsub("_", ", ", trts), 
+             trts = trimws(gsub("[.]", "+", trts))) %>%
+      # # clean up treatment 
+      # mutate(trt = gsub("^s[.]", "", trt),
+      #        trt = gsub("[.]", "+", trt)) %>%
+      # append spp name and reorder cols
+      left_join(distinct(spplist[c("clean_code2", "simple_name")])) %>%
+      # join resource acquisition info
+      left_join(sppscores[c("clean_code2", "resource_grp")]) %>%
+      mutate(resource_grp = ifelse(is.na(resource_grp), "Unknown", resource_grp)) %>%
+      dplyr::select(site, yr, duleg, clean_code2, simple_name, resource_grp, trts, stat, p.value, holm.p)
+    # append to master df
+    indic_df <- rbind(indic_df, tempresults)
+  }
+}
+
+# clean up
+indic_df <- arrange(indic_df, duleg, simple_name, site, yr) %>%
+  mutate(site = ifelse(site == "sdl", "Saddle", "NutNet"))
+
 ```
 
