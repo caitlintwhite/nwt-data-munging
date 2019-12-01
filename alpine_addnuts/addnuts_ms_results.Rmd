@@ -1173,7 +1173,7 @@ sdlnmds <- ggplot(subset(alpplotmds, site == "sdl" & iter == "main"), aes(MDS1, 
   geom_point(aes(fill = trt), size = 1.75, shape = 23, color = "transparent") +
   #geom_polygon(data = sdlhulls, aes(MDS1, MDS2, fill = trt, col = trt), alpha = 0.5) +
   geom_polygon(data=subset(alpells, site == "sdl" & iter == "main"), aes(x=MDS1, y=MDS2,fill=trt), alpha = 0.5) +
-  geom_point(data = subset(alpsppmds, site == "sdl" & iter == "main"), aes(MDS1, MDS2, shape = resource_grp, col = resource_grp), fill = "transparent", alpha = 0.8) +
+  geom_point(data = subset(alpsppmds, site == "sdl" & iter == "main"), aes(MDS1, MDS2, shape = resource_grp, col = resource_grp), alpha = 0.8) +
   scale_fill_manual(name = "Treatment", values = trtcols) +
   scale_color_manual(name = "Resource strategy", values = traitcols) +
   scale_shape_manual(name = "Resource strategy", values = c(19, 19, 21)) +
@@ -1184,7 +1184,7 @@ sdlnmds <- ggplot(subset(alpplotmds, site == "sdl" & iter == "main"), aes(MDS1, 
         legend.spacing = unit(0, "pt"),
         legend.background = element_blank(),
         legend.key.size = unit(9, "pt")) +
-  guides(color = guide_legend(override.aes = list(alpha = 1))) +
+  #guides(color = guide_legend(override.aes = list(alpha = 1))) +
   j_theme
 
 if(any(alpenv$pval[alpenv$site == "sdl" & alpenv$grp == "vectors"] <= 0.05)){
@@ -1704,6 +1704,26 @@ for(r in grep("main", alpenv_stats$tracker)){
 # clean up
 indic_df <- arrange(indic_df, duleg, simple_name, site, yr) %>%
   mutate(site = ifelse(site == "sdl", "Saddle", "NutNet"))
+
+```
+
+
+```{r plot geum abundance across whole snowfence exp}
+#look for moisture sensitivity
+
+alldat <- read.csv("alpine_addnuts/output_data/forTS/sdl_nutnet_fxnl_biodiv_anpp_1997-ongoing.csv")
+
+geum_sffert <- ggplot(subset(alldat, site == "sdl"), aes(as.factor(yr), Geum_rel, col = snow)) +
+  #geom_boxplot() +
+  #geom_jitter(aes(col = snow), alpha = 0.7, width = 0.2) +
+  stat_summary(position = position_dodge(width = 0.2)) +
+  labs(y = "Mean relative abundance (%)",
+       x = "Year",
+       subtitle = "Geum rossii abundance in Saddle snowfence fert exp. by meadow type and snow treatment") +
+  facet_grid(trt~meadow)
+
+ggsave("alpine_addnuts/figures/geum_moisturesensitive.pdf", geum_sffert,
+       height = 6, width = 6, units = "in", scale = 1.2)
 
 ```
 
