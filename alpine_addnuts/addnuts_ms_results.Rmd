@@ -1727,3 +1727,12 @@ ggsave("alpine_addnuts/figures/geum_moisturesensitive.pdf", geum_sffert,
 
 ```
 
+
+```{r}
+# write out all multivariate results just in case need to replicate (results can vary slightly (e.g. at hundredths decimal place, some signif if on the border) since results based on permutations)
+
+# saving to my local drive
+write_rds(alpmds, "../../Documents/nwt_lter/sdlfert_ms/add_nuts_multivar.rds")
+
+```
+
