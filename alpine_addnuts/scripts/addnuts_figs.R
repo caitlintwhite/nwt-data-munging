@@ -43,7 +43,7 @@ sdlplots <- read.csv("alpine_addnuts/output_data/sdl_plot_lookup.csv")
 nnplots <- read.csv("alpine_addnuts/output_data/nutnet_plot_lookup.csv")
 
 # full sdl site info table (troublshooting discrpancies, but good to use for plots 1-16 sampled in 1997-2016 in sdl)
-sdlplots_full <- read.csv("alpine_addnuts/output_data/sdl_plots_lookup_trblshoot.csv")
+#sdlplots_full <- read.csv("alpine_addnuts/output_data/sdl_plots_lookup_trblshoot.csv")
 
 # marko and soren's trait dataset -- will just consider saddle spp
 traitdat <- getTabular(500) %>% data.frame()
@@ -215,7 +215,7 @@ sdlcommon <- with(plantcom, plantcom[site == "sdl", c("plotid", "yr")]) %>%
   group_by(plotid) %>%
   summarise(nobs = length(yr)) %>%
   ungroup() %>%
-  subset(nobs == 3)
+  subset(nobs == max(nobs))
 
 nncommon <- subset(plantcom, site == "nutnet") %>%
   dplyr::select(plotid, yr) %>%
@@ -544,6 +544,69 @@ ggplot(testdf, aes(Dim1, Dim2, col = trt2)) +
 # > N+P and N+P+K separate out from the others, as in the NMDS
 
 
+# -- NUTNET ALL YEARS, COMMON PLOTS -----
+matrix_nnall <- subset(plantcom, yr %in% c(2013, 2017) & plotid %in% nncommon$plotid) %>%
+  #remove unknowns and non-veg
+  subset(!grepl("^2", clean_code2)) %>%
+  # create unique row id
+  mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
+  spread(clean_code2, hits, fill = 0) %>%
+  dplyr::select(rowid, site:ncol(.)) %>%
+  as.data.frame()
+
+# calculate forb to grass ratio
+fgrat_nnall <- subset(plantcom_fg, plotid %in% matrix_nnall$plotid & yr %in% c(2013, 2017))
+
+sitematrix_nnall <- matrix_nnall[,1:5] %>%
+  left_join(nnplots) %>%
+  left_join(fgrat_nnall)
+
+row.names(matrix_nnall) <- matrix_nnall$rowid
+matrix_nnall <- matrix_nnall[!colnames(matrix_nnall) %in% c("rowid", "site", "yr", "plotid", "date")]
+
+# relativize data
+matrix_nnall_rel <- vegan::decostand(matrix_nnall, method = "total")
+
+# run nmds
+nmds_nnall <- metaMDS(matrix_nnall_rel, k = 2, trymax = 50)
+nmds_nnall
+plot(nmds_nnall, type = "t")
+
+# environmental fit grass to forb
+# original trts
+fitnnall <- envfit(nmds_nnall, sitematrix_nnall[c("trt", "lnf2gFNF", "yr")], strata = sitematrix_nnall$block, perm = 999)
+fitnnall #trt is signif, forb:grass signif
+
+#original trts
+ordiplot(nmds_nnall, type="n", main = "NutNet all years, all treatments")
+with (sitematrix_nnall, ordiellipse(nmds_nnall, trt, kind="se", conf=0.95, col=1:6))
+with (sitematrix_nnall, ordisurf(nmds_nnall, lnf2gFNF, col="grey50", add = T))
+plot(fitnnall, col = 1:7)
+orditorp (nmds_nnall, display="species", col="grey30", air=0.01)
+
+
+## calculate CB distance
+nnall_rel_bray <- vegdist(matrix_nnall_rel)
+summary(anosim(nnall_rel_bray, grouping = sitematrix_nnall$trt2, strata = sitematrix_nnall$block, permutations = 999))
+mrpp(matrix_nnall_rel,  grouping = sitematrix_nnall$trt2, strata = sitematrix_nnall$block, distance = "bray")
+adonis2(matrix_nnall_rel ~ trt * lnf2gFNF* yr, data = sitematrix_nnall, strata = block, permutations = 999, method = "bray")
+adonis2(matrix_nnall_rel ~ trt * yr, data = sitematrix_nnall, strata = block, permutations = 999, method = "bray")
+# change order of variables
+adonis(nnall_rel ~ lnf2gFNF * trt, data = sitematrix_nnall, strata = sitematrix_nnall$block, permutations = 999, method = "bray")
+# either order of explanatory vars, forb:grass ration and trtment is distinct, but there is no interaction
+
+# test for homogeneity of variances
+nnall_disper.simple <- betadisper(nnall_rel_bray, sitematrix_nnall$trt)
+nnall_disper.simple
+plot(nnall_disper.simple)
+anova(nnall_disper.simple) # no difference in homogeneity of dispersion
+TukeyHSD(nnall_disper.simple)
+boxplot(nnall_disper.simple)
+
+
+plot(betadisper(nnall_rel_bray, as.factor(sitematrix_nnall$yr)))
+plot(betadisper(nnall_rel_bray, as.factor(paste(sitematrix_nnall$trt2, sitematrix_nnall$yr))))
+
 
 ########################
 # -- SDL DRY PLOTS -----
@@ -870,6 +933,76 @@ ggplot(testdf, aes(Dim1, Dim2, col = trt)) +
 # shows the same thing but no pts for species bc based on community diss matrix
 
 
+# SDL ALL, DRY MEADOW PLOTS
+matrix_sdlall <- subset(plantcom, plotid %in%  sdlcommon$plotid) %>%
+  # remove unknowns and non-veg
+  subset(!grepl("^2", clean_code2)) %>%
+  group_by(site, yr, plotid, clean_code2) %>%
+  summarise(hits = sum(hits)) %>% ungroup() %>%
+  mutate(rowid = paste(site, yr, plotid, sep = ".")) %>%
+  spread(clean_code2, hits, fill = 0) %>%
+  dplyr::select(rowid, site:ncol(.)) %>%
+  as.data.frame() %>%
+  # coerce plotid to numeric
+  mutate(plotid = as.numeric(plotid)) %>%
+  arrange(plotid)
+  #filter(yr != 2005)
+
+# calculate forb to grass ratio
+fgrat_sdlall <- subset(plantcom_fg, plotid %in% matrix_sdlall$plotid) %>%
+  # coerce plotid to number to joins with sitematrix
+  mutate(plotid = as.numeric(plotid))
+
+
+sitematrix_sdlall <- matrix_sdlall[,1:4] %>%
+  mutate(plotid = as.numeric(plotid)) %>%
+  left_join(distinct(sdlplots[colnames(sdlplots) != "old_plot"]), by = c("plotid" = "plot")) %>%
+  # join grass forb ratio
+  left_join(fgrat_sdlall)
+
+
+row.names(matrix_sdlall) <- matrix_sdlall$rowid
+matrix_sdlall <- matrix_sdlall[!colnames(matrix_sdlall) %in% c("rowid", "site", "yr", "plotid")]
+
+# relativize data
+sdlall_rel <- decostand(matrix_sdlall[,2:ncol(matrix_sdlall)], method = "total")
+
+# run nmds
+nmds_sdlall <- metaMDS(sdlall_rel, k = 2, trymax = 50)
+nmds_sdlall
+stressplot(nmds_sdlall)
+plot(nmds_sdlall, type = "t")
+
+# add environmental fit of forb to grass ratio
+fitsdlall <- envfit(nmds_sdlall, sitematrix_sdlall[c("trt", "lnf2gFNF", "yr")], perm = 999)
+fitsdlall # trt not signif, f:g is signif
+
+ordiplot(nmds_sdlall, type="n", main = "Saddle all, dry meadow plots 1-16")
+with (sitematrix_sdlall, ordiellipse(nmds_sdlall, trt, kind="se", conf=0.95, col=1:4, lwd = 2))
+with (sitematrix_sdlall, ordisurf(nmds_sdlall, lnf2g, col = "grey50", add = T))
+plot(fitsdlall, col = 1:5)
+orditorp (nmds_sdlall, display="species", col="grey30", air=0.01)
+
+
+## calculate CB distance
+sdlall_rel_bray <- vegdist(sdlall_rel)
+summary(anosim(sdlall_rel_bray, grouping = sitematrix_sdlall$trt, permutations = 999))
+mrpp(sdlall_rel,  grouping = sitematrix_sdlall$trt, distance = "bray")
+adonis2(sdlall_rel ~ trt * lnf2gFNF* yr, data = sitematrix_sdlall, permutations = 999, method = "bray")
+adonis2(sdlall_rel ~ trt * yr, data = sitematrix_sdlall, permutations = 999, method = "bray")
+# change order of variables
+adonis(sdlall_rel ~ yr* lnf2gFNF * trt, data = sitematrix_sdlall, permutations = 999, method = "bray")
+# either order of explanatory vars, forb:grass ration and trtment is distinct, but there is no interaction
+
+# test for homogeneity of variances
+sdlall_disper.simple <- betadisper(sdlall_rel_bray, sitematrix_sdlall$trt)
+sdlall_disper.simple
+anova(sdlall_disper.simple) # no difference in homogeneity of dispersion
+TukeyHSD(sdlall_disper.simple)
+boxplot(sdlall_disper.simple)
+plot(sdlall_disper.simple, add = T)
+
+plot(betadisper(sdlall_rel_bray, as.factor(paste(sitematrix_sdlall$trt, sitematrix_sdlall$yr))))
 
 # -- FIGURES -----
 # specify plotting colors for all treatments
@@ -896,6 +1029,8 @@ pointsize <- 2
 # 1) trait pca -----
 # choose color scheme here to color in spp in nmds points with..
 traitcols <- c("Acquisitive" = "deeppink2", "Conservative" = "darkred", "Unknown" = NA) #springgreen3, slateblue3
+traitcols <- c("#FCA636FF", "chocolate4", "grey10") # add dark color for outline of unknown resource spp
+
 
 pcfig <- ggplot() +
   geom_vline(aes(xintercept = 0), lty = 2, col = "grey") +
@@ -1163,6 +1298,32 @@ nn2017.simple_fig <- ggplot(spp_df_nn17, aes(MDS1, MDS2)) +
     plot.margin = margin(0,1,0,0, unit = "pt"))
 
 
+# 3b) nutnet all years ----
+# original treatments
+plot_df_nnall <- data.frame(nmds_nnall$points) %>%
+  mutate(rowid = row.names(.)) %>%
+  left_join(sitematrix_nnall)
+spp_df_nnall <- data.frame(nmds_nnall$species) %>%
+  mutate(clean_code2 = row.names(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)])) %>%
+  # join trait PC scores
+  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")]) %>%
+  replace_na(list(resource_grp = "Unknown"))
+
+ggplot(spp_df_nnall, aes(MDS1, MDS2)) + 
+  #geom_polygon(data = grpdf_nn17.simple, aes(MDS1, MDS2, fill = trt2, col = trt2), alpha = 0.4) +
+  geom_path(data = plot_df_nnall, aes(MDS1, MDS2, lty = trt2, group = paste(block, plot)), arrow = grid::arrow()) +
+  geom_point(data = plot_df_nnall, aes(MDS1, MDS2, fill = trt2), pch = 24, alpha = 0.65) +
+  geom_text(data= subset(spp_df_nnall, resource_grp != "Unknown" & clean_code2 != "GERO2"), aes(MDS1, MDS2, col = resource_grp, label = clean_code2)) +
+  geom_point(data= subset(spp_df_nnall, resource_grp == "Unknown"), aes(MDS1, MDS2, col = resource_grp), alpha = 0.5, pch = 7) +#size = pointsize, pch = 21
+  geom_text(data= subset(spp_df_nnall, clean_code2 == "GERO2"), aes(MDS1, MDS2, col = resource_grp, label = clean_code2), fontface ="bold", show.legend = FALSE) +
+  scale_color_manual(values = traitcols) +
+  scale_fill_viridis_d() +
+  labs(title = "NWT NutNet plots (consistenly sampled), all years (PRELIM FIG)",
+        subtitle = "Rescource aquisitive spp align with N+P,conservative with other trts; N+P comp shifts in\nmostly consistent direction, C plots shift in same direction as N+P more modestly, N different")
+  ggsave("alpine_addnuts/figures/prelim_figs/nutnetcommon_allyears.png",
+         width = 8, height = 7, units = "in")
+ 
 
 # 4) sdl 1997, dry meadow only ----
 plot_df_sdl97 <- data.frame(nmds_sdl1997$points) %>%
@@ -1337,7 +1498,37 @@ sdl2016_fig <- ggplot(spp_df_sdl16, aes(MDS1, MDS2)) +
         plot.margin = margin(0,1,0,0, unit = "pt"))
 
 
+# 6b) saddle, all years ----
+plot_df_sdlall <- data.frame(nmds_sdlall$points) %>%
+  mutate(rowid = row.names(.)) %>%
+  left_join(sitematrix_sdlall)
 
+spp_df_sdlall <- data.frame(nmds_sdlall$species) %>%
+  mutate(clean_code2 = row.names(.)) %>%
+  left_join(distinct(spplist[,2:ncol(spplist)])) %>%
+  # add trait PC scores
+  left_join(sppscores[c("clean_code2", "PC1", "PC2", "resource_grp")]) %>%
+  mutate(resource_grp = ifelse(is.na(resource_grp), "Unknown", resource_grp))
+
+
+plot_df_sdlall <- group_by(plot_df_sdlall, trt, yr) %>%
+  mutate(plotgrp = 1:4) %>%
+  ungroup()
+ggplot(spp_df_sdlall, aes(MDS1, MDS2)) + 
+  #geom_polygon(data = grpdf_nn17.simple, aes(MDS1, MDS2, fill = trt2, col = trt2), alpha = 0.4) +
+  geom_path(data = plot_df_sdlall, aes(MDS1, MDS2, lty = trt, group = as.factor(plotid)), arrow = grid::arrow()) +
+  geom_point(data = plot_df_sdlall, aes(MDS1, MDS2, fill = trt), size = 2, pch = 24, alpha = 0.65) +
+  #geom_text(data= subset(spp_df_sdlall, resource_grp != "Unknown" & clean_code2 != "GERO2"), aes(MDS1, MDS2, col = resource_grp, label = clean_code2)) +
+  #geom_point(data= subset(spp_df_sdlall, resource_grp == "Unknown"), aes(MDS1, MDS2, col = resource_grp), alpha = 0.5, pch = 7) +#size = pointsize, pch = 21
+  #geom_text(data= subset(spp_df_sdlall, clean_code2 == "GERO2"), aes(MDS1, MDS2, col = resource_grp, label = clean_code2), fontface ="bold", show.legend = FALSE) +
+  scale_fill_viridis_d() +
+  scale_color_viridis_d() +
+  scale_linetype_manual(values = c(4,2,3,1)) +
+  #scale_color_manual(values = c(traitcols)) +
+  labs(title = "Saddle snowfence dry meadow fertilization (plots 1-16), all years (PRELIM FIG)",
+       subtitle = "Rescource aquisitive spp align with N+P,conservative with other trts;\nN+P comp shifts in consistent direction, N fluctuates largely, C changes little, P moderately")
+ggsave("alpine_addnuts/figures/prelim_figs/sdlcommon_allyears.png",
+       width = 8, height = 7, units = "in")
 
 # --panel plots -----
 # 6-panel plot of everything
