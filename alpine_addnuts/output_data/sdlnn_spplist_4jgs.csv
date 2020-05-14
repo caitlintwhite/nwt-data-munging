@@ -1,0 +1,91 @@
+clean_code2,simple_name,Scientific_Name_x
+ACMIA,Achillea millefolium,Achillea millefolium L. var. alpicola (Rydb.) Garrett
+AGME3,Agrostis mertensii,Agrostis mertensii Trin.
+ALGE,Allium geyeri,Allium geyeri S. Watson
+ANSE4,Androsace septentrionalis,Androsace septentrionalis L.
+ANAL4,Antennaria alpina,Antennaria alpina (L.) Gaertn.
+ANME2,Antennaria media,Antennaria media Greene
+ARFEF3,Arenaria fendleri,Arenaria fendleri A. Gray var. fendleri
+ARSC,Artemisia scopulorum,Artemisia scopulorum A. Gray
+CAPU,Calamagrostis purpurascens,Calamagrostis purpurascens R. Br.
+CALE4,Caltha leptosepala,Caltha leptosepala DC.
+CARO2,Campanula rotundifolia,Campanula rotundifolia L.
+CAUN2,Campanula uniflora,Campanula uniflora L.
+CAAL6,Carex albonigra,Carex albonigra Mack.
+CAAQ,Carex aquatilis,Carex aquatilis Wahlenb.
+CAHEC,Carex heteroneura,Carex heteroneura W. Boott var. chalciolepis (T. Holm) F.J. Herm.
+CAHEE,Carex heteroneura,Carex heteroneura W. Boott var. epapillosa (Mack.) F.J. Herm.
+CANI2,Carex nigricans,Carex nigricans C.A. Mey.
+CANO3,Carex nova,Carex nova L.H. Bailey
+CARUD,Carex rupestris,Carex rupestris All. var. drummondiana (Dewey) L.H. Bailey
+CASC12,Carex scopulorum,Carex scopulorum T. Holm
+CAREX,Carex sp.,Carex L.
+CAOC4,Castilleja occidentalis,Castilleja occidentalis Torr.
+CEARS2,Cerastium arvense,Cerastium arvense L. ssp. strictum (L.) Ugborogho
+CHJA,Chionophila jamesii,Chionophila jamesii Benth.
+DAIN,Danthonia intermedia,Danthonia intermedia Vasey
+DECE,Deschampsia cespitosa,Deschampsia cespitosa (L.) P. Beauv.
+DRAU,Draba aurea,Draba aurea Vahl ex Hornem.
+DRBRC,Draba breweri,Draba breweri S. Watson var. cana (Rydb.) Rollins
+DRABA,Draba sp.,Draba L.
+DRST4,Draba streptocarpa,Draba streptocarpa A. Gray
+DROC,Dryas octopetala,Dryas octopetala L.
+ELYMU,Elymus sp.,Elymus L.
+ERME2,Erigeron melanocephalus,Erigeron melanocephalus (A. Nelson) A. Nelson
+ERPI6,Erigeron pinnatisectus,Erigeron pinnatisectus (A. Gray) A. Nelson
+ERSI3,Erigeron simplex,Erigeron simplex Greene
+ERNA,Eritrichium nanum,Eritrichium nanum (Vill.) Schrad. ex Gaudin
+ERCA14,Erysimum capitatum,Erysimum capitatum (Douglas ex Hook.) Greene
+FEBR,Festuca brachyphylla,Festuca brachyphylla Schult. ex Schult. & Schult. f.
+FESTU,Festuca sp.,Festuca L.
+GEAL2,Gentiana algida,Gentiana algida Pall.
+GERO2,Geum rossii,Geum rossii (R. Br.) Ser.
+HEMO3,Helictotrichon mortonianum,Helictotrichon mortonianum (Scribn.) Henr.
+JUNCU,Juncus sp.,Juncus L.
+KOMY,Kobresia myosuroides,Kobresia myosuroides (Vill.) Fiori
+LEPY2,Lewisia pygmaea,Lewisia pygmaea (A. Gray) B.L. Rob.
+LLSE,Lloydia serotina,Lloydia serotina (L.) Salisb. ex Rchb.
+LUSP4,Luzula spicata,Luzula spicata (L.) DC.
+MELA3,Mertensia lanceolata,Mertensia lanceolata (Pursh) DC.
+MIBI9,Minuartia biflora,Minuartia biflora (L.) Schinz & Thell.
+MIOB2,Minuartia obtusiloba,Minuartia obtusiloba (Rydb.) House
+NOFEG,Noccaea fendleri,Noccaea fendleri (A. Gray) Holub ssp. glauca (A. Nelson) Al-Shehbaz & M. Koch
+ORALA,Oreoxis alpina,Oreoxis alpina (A. Gray) J.M. Coult. & Rose ssp. alpina
+PACA15,Packera cana,Packera cana (Hook.) W.A. Weber & Á. Löve
+PAPU2,Paronychia pulvinata,Paronychia pulvinata A. Gray
+PEPA3,Pedicularis parryi,Pedicularis parryi A. Gray
+PHPU5,Phlox pulvinata,Phlox pulvinata (Wherry) Cronquist
+POAL2,Poa alpina,Poa alpina L.
+POARG,Poa arctica,Poa arctica R. Br. ssp. grayana (Vasey) Á. Löve & D. Löve & Kapoor
+POGL,Poa glauca,Poa glauca Vahl
+POA,Poa sp.,Poa L.
+POPU3,Polemonium pulcherrimum,Polemonium pulcherrimum Hook.
+POVI,Polemonium viscosum,Polemonium viscosum Nutt.
+POBI6,Polygonum bistortoides,Polygonum bistortoides Pursh
+POVI3,Polygonum viviparum,Polygonum viviparum L.
+PODI2,Potentilla diversifolia,Potentilla diversifolia Lehm.
+POTEN,Potentilla sp.,Potentilla L.
+PRAN,Primula angustifolia,Primula angustifolia Torr.
+RHIN11,Rhodiola integrifolia,Rhodiola integrifolia Raf.
+RHRH4,Rhodiola rhodantha,Rhodiola rhodantha (A. Gray) H. Jacobsen
+SAGL,Salix glauca,Salix glauca L.
+SANI8,Salix nivalis,Salix nivalis Hook.
+SAPL2,Salix planifolia,Salix planifolia Pursh
+SARH2,Saxifraga rhomboidea,Saxifraga rhomboidea Greene
+SELA,Sedum lanceolatum,Sedum lanceolatum Torr.
+SEDES,Selaginella densa,Selaginella densa Rydb. var. scopulorum (Maxon) R. Tryon
+SENEC,Senecio sp.,Senecio L.
+SIPR,Sibbaldia procumbens,Sibbaldia procumbens L.
+SIACS2,Silene acaulis,Silene acaulis (L.) Jacq. var. subacaulescens (F.N. Williams) Fernald & H. St. John
+SOMU,Solidago multiradiata,Solidago multiradiata Aiton
+SOSIN,Solidago simplex,Solidago simplex Kunth ssp. simplex var. nana (A. Gray) Ringius
+STLO2,Stellaria longipes,Stellaria longipes Goldie
+TEACC,Tetraneuris acaulis,Tetraneuris acaulis (Pursh) Greene var. caespitosa A. Nelson
+TEGR3,Tetraneuris grandiflora,Tetraneuris grandiflora (Torr. & A. Gray ex A. Gray) K.F. Parker
+TOPY,Tonestus pygmaeus,Tonestus pygmaeus (Torr. & A. Gray) A. Nelson
+TRDA2,Trifolium dasyphyllum,Trifolium dasyphyllum Torr. & A. Gray
+TRPAP,Trifolium parryi,Trifolium parryi A. Gray ssp. parryi
+TRSP2,Trisetum spicatum,Trisetum spicatum (L.) K. Richt.
+VIAD,Viola adunca,Viola adunca Sm.
+VILA10,Viola labradorica,Viola labradorica Schrank
+VIOLA,Viola sp.,Viola L.
