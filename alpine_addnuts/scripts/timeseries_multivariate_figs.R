@@ -102,8 +102,8 @@ simpletrts <- sort(unique(c(as.character(sdlplots$trt))))
 simplecols <- viridis::viridis(n = length(simpletrts))
 names(simplecols) <- simpletrts
 ## line types for simple trts
-simplelines <- c("C" = 1 , "N" = 2, "N+P"= 3, "P"= 4)
-# 1 = solid, 2 = dashed, 3 = dotted, 4 = dotdash
+simplelines <- c("C" = 6 , "N" = 3, "N+P"= 1, "P"= 2)
+# 1 = solid, 2 = dashed, 3 = dotted, 4 = dotdash, 6 = doubledash
 
 # choose color scheme here to color in spp in nmds points with.. subset viridis cols
 #traitcols <- c("Acquisitive" = "deeppink2", "Conservative" = "darkred", "Unknown" = "grey50")
@@ -603,8 +603,11 @@ plot(nmds_nnall_simple)
 
 
 # envfit
-env_nnall_simple <- envfit(nmds_nnall_simple, nn_envmatrix_simple[c("trt", "yr", "yrtrt", "lnF2G")], perm = 10000)
+env_nnall_simple <- envfit(nmds_nnall_simple, nn_envmatrix_simple[c("trt", "yr", "yrtrt", "lnF2G")], perm = 1000)
 env_nnall_simple
+# try with strata = block to be sure (there's only 1 obs per block per trt so I don't think it's super critical to stratify)
+env_nnall_simple_blocked <- envfit(nmds_nnall_simple, nn_envmatrix_simple[c("trt", "yr", "yrtrt", "lnF2G")], strata = nn_envmatrix_simple$id, perm = 1000)
+env_nnall_simple_blocked
 
 # extract centroids
 nncentroids_simple <- scores(env_nnall_simple, "factors") %>%
@@ -653,51 +656,77 @@ ymin_nn_simple <- min(c(spp_df_nnall_simple$MDS2, plot_df_nnall_simple$MDS2))
 ymax_nn_simple <- max(c(spp_df_nnall_simple$MDS2, plot_df_nnall_simple$MDS2))
 
 nnplottrend_simple <- ggplot(spp_df_nnall_simple[1,], aes(MDS1, MDS2)) + 
-  geom_polygon(data = subset(nnell_simple, yr %in% max(nnell_simple$yr)), aes(MDS1, MDS2, fill = trt, subgroup = as.factor(yr), lty = trt),col = "black", alpha = 0.4) +
-  geom_path(data = subset(plot_df_nnall_simple), aes(MDS1, MDS2, group = paste(id, trt), lty = trt, col = trt), arrow = grid::arrow(length = unit(10, "pt")), show.legend = F) +
-  geom_point(data = subset(plot_df_nnall_simple), aes(MDS1, MDS2, fill = trt), size = 2, pch = 24, alpha = 0.65) +
+  #geom_polygon(data = subset(nnell_simple, yr %in% max(nnell_simple$yr)), aes(MDS1, MDS2, fill = trt, subgroup = as.factor(yr), lty = trt),col = "black", alpha = 0.4) +
+  geom_point(data = subset(plot_df_nnall_simple, yr == max(plot_df_nnall_simple$yr)), aes(MDS1, MDS2, fill = trt), pch = 21, alpha = 0.7) + #
+  geom_path(data = subset(plot_df_nnall_simple), aes(MDS1, MDS2, group = paste(id, trt), lty = trt, col = trt), arrow = grid::arrow(length = unit(7, "pt"), type = "closed"), show.legend = F) +
+  geom_point(data = subset(plot_df_nnall_simple, yr == min(plot_df_nnall_simple$yr)), aes(MDS1, MDS2, fill = trt), pch = 21, alpha = 0.7) +
   # annotate nmds stress
   geom_text(aes(x = xmin_nn_simple, y = ymin_nn_simple, label = paste("Stress:",  round(nmds_nnall_simple$stress, 3))), hjust = 0) +
   scale_x_continuous(breaks = seq(-1,1, 0.5), limits = c(xmin_nn_simple-0.1,xmax_nn_simple+0.1)) +
   scale_y_continuous(breaks = seq(-1,1, 0.5), limits = c(ymin_nn_simple-0.1, ymax_nn_simple+0.1)) +
   scale_fill_manual(values = trtcols) +
   scale_color_manual(values = trtcols) +
+  scale_linetype_manual(values = simplelines) +
   # remove x title
   xlab(NULL) +
   j_theme +
   theme(legend.position = "none")+
+  # add A
+  geom_text(aes(x = xmin_nn_simple, y = ymax_nn_simple), label = "A", fontface = "bold", size = 5, hjust = 0.5, vjust = 0) +
   facet_wrap(~"NutNet, 2013-2017")
 
-
+nncenttrend_simple <- ggplot(spp_df_nnall_simple[1,], aes(MDS1, MDS2)) + #spp_df_sdlall, aes(MDS1, MDS2)
+  geom_polygon(data = subset(nnell_simple, yr %in% c(min(nnell_simple$yr), max(nnell_simple$yr))), aes(MDS1, MDS2, fill = trt, subgroup = as.factor(yr), lty = trt),col = "black", alpha = 0.4) +
+  geom_point(data = subset(nncentroids_simple, yr == max(nncentroids_simple$yr, na.rm = T)), aes(NMDS1, NMDS2, fill = trt), pch = 21) +
+  geom_path(data = subset(nncentroids_simple, !is.na(yr)), aes(NMDS1, NMDS2, group = trt, lty = trt), arrow = grid::arrow(length = unit(7, "pt"), type = "closed")) +
+  geom_point(data = subset(nncentroids_simple, yr == min(nncentroids_simple$yr, na.rm = T)), aes(NMDS1, NMDS2, fill = trt), pch = 21) +
+  geom_point(data = subset(nncentroids_simple, yr > min(nncentroids_simple$yr, na.rm = T) & yr < max(nncentroids_simple$yr, na.rm = T)), aes(NMDS1, NMDS2), pch = 1) +
+  #geom_polygon(data = subset(nnell, yr %in% c()), aes(MDS1, MDS2, fill = trt, subgroup = as.factor(yr), lty = trt),col = "black", alpha = 0.4) +
+  #geom_path(data = subset(plot_df_nnall), aes(MDS1, MDS2, group = as.factor(plotid), lty = trt, col = trt), arrow = grid::arrow(length = unit(7, "pt")), show.legend = F) +
+  #geom_point(data = subset(plot_df_sdlall), aes(MDS1, MDS2, fill = trt), pch = 24, alpha = 0.65) +
+  scale_x_continuous(breaks = seq(-1,1, 0.5), limits = c(xmin_nn_simple-0.1,xmax_nn_simple+0.1)) +
+  scale_y_continuous(breaks = seq(-1,1, 0.5), limits = c(ymin_nn_simple-0.1, ymax_nn_simple+0.1)) +
+  scale_fill_manual(values = trtcols) +
+  scale_color_manual(values = trtcols) +
+  scale_linetype_manual(values = simplelines) +
+  j_theme +
+  theme(legend.position = "none",
+        axis.text.y = element_blank(),
+        axis.title = element_blank()) +
+  # add B
+  geom_text(aes(x = xmin_nn_simple, y = ymax_nn_simple), label = "B", fontface = "bold", size = 5, hjust = 0.5, vjust = 0) +
+  facet_wrap(~"NutNet, 2013-2017")
 
 nnspptrend_simple <- ggplot(spp_df_nnall_simple[1,], aes(MDS1, MDS2)) + 
-  geom_segment(data = nnvectors_simple, aes(x=0, xend = NMDS1, y = 0, yend= NMDS2, group = factor),  arrow = grid::arrow(length = unit(5, "pt")), col = "grey30", alpha = 0.75, lwd = 1) +
-  geom_path(data = subset(nncentroids_simple, !is.na(yr)), aes(NMDS1, NMDS2, group = trt, lty = trt), arrow = grid::arrow(length = unit(10, "pt"))) +
-  geom_polygon(data = subset(nnell_simple, yr %in% max(nnell_simple$yr)), aes(MDS1, MDS2, fill = trt, subgroup = as.factor(yr), lty = trt),col = "black", alpha = 0.4) +
+  geom_segment(data = nnvectors_simple, aes(x=0, xend = NMDS1, y = 0, yend= NMDS2, group = factor),  arrow = grid::arrow(length = unit(5, "pt")), col = "grey30", alpha = 0.75) +
+  #geom_path(data = subset(nncentroids_simple, !is.na(yr)), aes(NMDS1, NMDS2, group = trt, lty = trt), arrow = grid::arrow(length = unit(10, "pt"))) +
+  #geom_polygon(data = subset(nnell_simple, yr %in% max(nnell_simple$yr)), aes(MDS1, MDS2, fill = trt, subgroup = as.factor(yr), lty = trt),col = "black", alpha = 0.4) +
   #geom_text(data= spp_df_nnall_simple, aes(MDS1, MDS2, col = resource_grp, label = clean_code2)) +
-  geom_point(data= subset(spp_df_nnall_simple), aes(MDS1, MDS2, col = resource_grp, shape = simple_lifeform2), size = 2) +#size = pointsize, pch = 21
-  geom_text(data= subset(spp_df_nnall_simple, clean_code2 == "GERO2"), aes(MDS1, MDS2, col = resource_grp, label = "Geum rossi"), fontface = "bold.italic", family = "Times", vjust = 1.1, show.legend = FALSE, size = 3) +
+  geom_point(data= subset(spp_df_nnall_simple), aes(MDS1, MDS2, col = resource_grp, shape = simple_lifeform2)) +#size = pointsize, pch = 21
+  geom_text(data= subset(spp_df_nnall_simple, clean_code2 == "GERO2"), aes(MDS1, MDS2, col = resource_grp, label = "Geum rossii"), fontface = "bold.italic", family = "Times", vjust = 1.1, show.legend = FALSE, size = 3) +
   # add vector annotations
   geom_text(data = subset(nnvectors_simple, factor == "yr"), aes(NMDS1, NMDS2, label = paste(factor, symbol)), col = "grey30", vjust = 1.2, hjust = 0.3) +
   geom_text(data = subset(nnvectors_simple, factor == "lnF2G"), aes(NMDS1, NMDS2, label = paste(factor, symbol)), col = "grey30", vjust = 1.3, hjust = 0) +
   scale_x_continuous(breaks = seq(-1,1, 0.5), limits = c(xmin_nn_simple-0.1,xmax_nn_simple+0.1)) +
   scale_y_continuous(breaks = seq(-1,1, 0.5), limits = c(ymin_nn_simple-0.1, ymax_nn_simple+0.1)) +
   scale_fill_manual(name = "Treatment", values = trtcols) +
-  scale_linetype(name = "Treatment") +
+  scale_linetype_manual(name = "Treatment", values = simplelines) +
   scale_color_manual(name = "Resource\ngroup", values = c(traitcols)) +
   scale_shape_manual(name = "Lifeform", values = c("Forb" = 4, "Grass" = 15, "Shrub" = 8)) +
   # remove x title
   xlab(NULL) +
   j_theme +
   labs(y = NULL) +
+  # add C
+  geom_text(aes(x = xmin_nn_simple, y = ymax_nn_simple), label = "C", fontface = "bold", size = 5, hjust = 0.5, vjust = 0) +
   theme(axis.text.y = element_blank(),
         legend.position = "none") +
   facet_wrap(~"NutNet, 2013-2017")
 
-nn_simple_panel <- plot_grid(nnplottrend_simple, nnspptrend_simple, ncol = 2,
-          rel_widths = c(1, 0.85),
+nn_simple_panel <- plot_grid(nnplottrend_simple, nncenttrend_simple, nnspptrend_simple, ncol = 3,
+          rel_widths = c(1, 0.85, 0.85),
           align = "h")
-
+nn_simple_panel
 # PERMANOVA
 adonis2(nn_relabundance_simple ~ trt * yr* lnF2G, data = nn_envmatrix_simple, strata = nn_envmatrix_simple$id, ermutations = 1000, method = "bray")
 adonis2(nn_relabundance_simple ~ yr * trt *lnF2G, data = nn_envmatrix_simple, strata = nn_envmatrix_simple$id, permutations = 1000, method = "bray")
@@ -815,7 +844,7 @@ nmds_sdlall
 plot(nmds_sdlall)
 
 # envfit
-env_sdlall <- envfit(nmds_sdlall, sdl_envmatrix[c("trt", "yr", "yrtrt", "lnF2G")], perm = 10000)
+env_sdlall <- envfit(nmds_sdlall, sdl_envmatrix[c("trt", "yr", "yrtrt", "lnF2G")], perm = 1000)
 env_sdlall
 
 # extract centroids
@@ -866,36 +895,65 @@ ymin_sdl <- min(c(spp_df_sdlall$MDS2, plot_df_sdlall$MDS2))
 ymax_sdl <- max(c(spp_df_sdlall$MDS2, plot_df_sdlall$MDS2))
 
 sdlplottrend <- ggplot(spp_df_sdlall[1,], aes(MDS1, MDS2)) + #spp_df_sdlall, aes(MDS1, MDS2)
-  geom_polygon(data = subset(sdlell, yr %in% c(2016)), aes(MDS1, MDS2, fill = trt, subgroup = as.factor(yr), lty = trt),col = "black", alpha = 0.4) +
-  geom_path(data = subset(plot_df_sdlall), aes(MDS1, MDS2, group = as.factor(plotid), lty = trt, col = trt), arrow = grid::arrow(length = unit(7, "pt")), show.legend = F) +
-  geom_point(data = subset(plot_df_sdlall), aes(MDS1, MDS2, fill = trt), pch = 24, alpha = 0.65) +
+  #geom_polygon(data = subset(sdlell, yr %in% c(2016)), aes(MDS1, MDS2, fill = trt, subgroup = as.factor(yr), lty = trt),col = "black", alpha = 0.4) +
+  geom_point(data = subset(plot_df_sdlall, yr == max(plot_df_sdlall$yr, na.rm = T)), aes(MDS1, MDS2, fill = trt), pch = 21, alpha = 0.7) +
+  geom_path(data = subset(plot_df_sdlall), aes(MDS1, MDS2, group = as.factor(plotid), lty = trt, col = trt), arrow = grid::arrow(length = unit(7, "pt"), type = "closed"), show.legend = F) +
+  geom_point(data = subset(plot_df_sdlall, yr == min(plot_df_sdlall$yr, na.rm = T)), aes(MDS1, MDS2, fill = trt), pch = 21, alpha = 0.7) +
+  geom_point(data = subset(plot_df_sdlall, !yr %in% c(min(plot_df_sdlall$yr), max(plot_df_sdlall$yr))), aes(MDS1, MDS2, col = trt), pch = 1, alpha = 0.7) +
   # annotate nmds stress
   geom_text(aes(x = xmin_sdl, y = ymin_sdl,  label = paste("Stress:",  round(nmds_sdlall$stress, 3))), hjust = 0) +
   scale_x_continuous(breaks = seq(-1.5,1, 0.5), limits = c(xmin_sdl-0.1,xmax_sdl+0.1)) +
   scale_y_continuous(breaks = seq(-1,1, 0.5), limits = c(ymin_sdl-0.1,ymax_sdl+0.1)) +
   scale_fill_manual(values = trtcols) +
   scale_color_manual(values = trtcols) +
+  scale_linetype_manual(values = simplelines) +
   j_theme +
   theme(legend.position = "none") +
+  # add C
+  geom_text(aes(x = xmin_sdl, y = ymax_sdl), label = "D", fontface = "bold", size = 5, hjust = 0.5, vjust = 0) +
+  facet_wrap(~"Saddle, 1997-2016")
+
+sdlcenttrend <- ggplot(spp_df_sdlall[1,], aes(MDS1, MDS2)) + #spp_df_sdlall, aes(MDS1, MDS2)
+  geom_polygon(data = subset(sdlell, yr %in% c(min(sdlell$yr), max(sdlell$yr))), aes(MDS1, MDS2, fill = trt, subgroup = as.factor(yr), lty = trt),col = "black", alpha = 0.4) +
+  geom_point(data = subset(sdlcentroids, yr == max(sdlcentroids$yr, na.rm = T)), aes(NMDS1, NMDS2, fill = trt), pch = 21) +
+  geom_path(data = subset(sdlcentroids, !is.na(yr)), aes(NMDS1, NMDS2, group = trt, lty = trt), arrow = grid::arrow(length = unit(7, "pt"), type = "closed")) +
+  geom_point(data = subset(sdlcentroids, yr == min(sdlcentroids$yr, na.rm = T)), aes(NMDS1, NMDS2, fill = trt), pch = 21) +
+  geom_point(data = subset(sdlcentroids, yr > min(sdlcentroids$yr, na.rm = T) & yr < max(sdlcentroids$yr, na.rm = T)), aes(NMDS1, NMDS2), pch = 1) +
+  #geom_polygon(data = subset(sdlell, yr %in% c()), aes(MDS1, MDS2, fill = trt, subgroup = as.factor(yr), lty = trt),col = "black", alpha = 0.4) +
+  #geom_path(data = subset(plot_df_sdlall), aes(MDS1, MDS2, group = as.factor(plotid), lty = trt, col = trt), arrow = grid::arrow(length = unit(7, "pt")), show.legend = F) +
+  #geom_point(data = subset(plot_df_sdlall), aes(MDS1, MDS2, fill = trt), pch = 24, alpha = 0.65) +
+  scale_x_continuous(breaks = seq(-1.5,1, 0.5), limits = c(xmin_sdl-0.1,xmax_sdl+0.1)) +
+  scale_y_continuous(breaks = seq(-1,1, 0.5), limits = c(ymin_sdl-0.1,ymax_sdl+0.1)) +
+  scale_fill_manual(values = trtcols) +
+  scale_color_manual(values = trtcols) +
+  scale_linetype_manual(values = simplelines) +
+  j_theme +
+  theme(legend.position = "none",
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank()) +
+  # add E
+  geom_text(aes(x = xmin_sdl, y = ymax_sdl), label = "E", fontface = "bold", size = 5, hjust = 0.5, vjust = 0) +
   facet_wrap(~"Saddle, 1997-2016")
 
 sdlspptrend_legend <- ggplot(spp_df_sdlall, aes(MDS1, MDS2)) + 
-    geom_segment(data = sdlvectors, aes(x=0, xend = NMDS1, y = 0, yend= NMDS2, group = factor),  arrow = grid::arrow(length = unit(5, "pt")), col = "grey30", alpha = 0.75, lwd = 1) +
-  geom_path(data = subset(sdlcentroids, !is.na(yr)), aes(NMDS1, NMDS2, group = trt, lty = trt), arrow = grid::arrow(length = unit(10, "pt"))) +
+  geom_segment(data = sdlvectors, aes(x=0, xend = NMDS1, y = 0, yend= NMDS2, group = factor), arrow = grid::arrow(length = unit(5, "pt")), col = "grey30", alpha = 0.75, lwd = 1) +
+  geom_path(data = subset(sdlcentroids, !is.na(yr)), aes(NMDS1, NMDS2, group = trt, lty = trt), arrow = grid::arrow(length = unit(7, "pt"))) +
   geom_polygon(data = subset(sdlell, yr %in% c(2016)), aes(MDS1, MDS2, fill = trt, subgroup = as.factor(yr), lty = trt),col = "black", alpha = 0.4) +
   #geom_text(data= spp_df_sdlall, aes(MDS1, MDS2, col = resource_grp, label = clean_code2)) +
   geom_point(data= subset(spp_df_sdlall), aes(MDS1, MDS2, col = resource_grp, shape = simple_lifeform2), size = 2) +#size = pointsize, pch = 21
-  geom_text(data= subset(spp_df_sdlall, clean_code2 == "GERO2"), aes(MDS1, MDS2, col = resource_grp, label = "Geum rossi"), fontface = "bold.italic", family = "Times", vjust = 1.1, show.legend = FALSE) +
+  geom_text(data= subset(spp_df_sdlall, clean_code2 == "GERO2"), aes(MDS1, MDS2, col = resource_grp, label = "Geum rossii"), fontface = "bold.italic", family = "Times", vjust = 1.1, show.legend = FALSE) +
   # add vector annotations
   geom_text(data = sdlvectors, aes(NMDS1, NMDS2, label = paste(factor, symbol)), col = "grey30", hjust = -0.1) +
   scale_x_continuous(breaks = seq(-1.5,1, 0.5), limits = c(xmin_sdl-0.1,xmax_sdl+0.1)) +
   scale_y_continuous(breaks = seq(-1,1, 0.5), limits = c(ymin_sdl-0.1,ymax_sdl+0.1)) +
   scale_fill_manual(name = "Treatment", values = trtcols) +
-  scale_linetype(name = "Treatment") +
+  scale_linetype_manual(name = "Treatment", values = simplelines) +
   scale_color_manual(name = "Resource\ngroup", values = c(traitcols)) +
   scale_shape_manual(name = "Lifeform", values = c("Forb" = 4, "Grass" = 15, "Shrub" = 8)) +
   j_theme +
   labs(y = NULL) +
+  # add D
+  geom_label(aes(x = xmin_sdl, y = ymax_sdl), label = "D", fontface = "bold", size = 5, hjust = 0.5, vjust = 0) +
   theme(axis.text.y = element_blank()) +
   facet_wrap(~"Saddle, 1997-2016")
 
@@ -903,27 +961,29 @@ nmdslegend_simple <- cowplot::get_legend(sdlspptrend_legend)
 
 sdlspptrend <- ggplot(spp_df_sdlall[1,], aes(MDS1, MDS2)) + 
   geom_segment(data = sdlvectors, aes(x=0, xend = NMDS1, y = 0, yend= NMDS2, group = factor),  arrow = grid::arrow(length = unit(5, "pt")), col = "grey30", alpha = 0.75) +
-  geom_path(data = subset(sdlcentroids, !is.na(yr)), aes(NMDS1, NMDS2, group = trt, lty = trt), arrow = grid::arrow(length = unit(7, "pt"))) +
-  geom_polygon(data = subset(sdlell, yr %in% c(2016)), aes(MDS1, MDS2, fill = trt, subgroup = as.factor(yr), lty = trt),col = "black", alpha = 0.4) +
+  #geom_path(data = subset(sdlcentroids, !is.na(yr)), aes(NMDS1, NMDS2, group = trt, lty = trt), arrow = grid::arrow(length = unit(7, "pt"))) +
+  #geom_polygon(data = subset(sdlell, yr %in% c(2016)), aes(MDS1, MDS2, fill = trt, subgroup = as.factor(yr), lty = trt),col = "black", alpha = 0.4) +
   #geom_text(data= spp_df_sdlall, aes(MDS1, MDS2, col = resource_grp, label = clean_code2)) +
   geom_point(data= subset(spp_df_sdlall), aes(MDS1, MDS2, col = resource_grp, shape = simple_lifeform2)) +#size = pointsize, pch = 21
-  geom_text(data= subset(spp_df_sdlall, clean_code2 == "GERO2"), aes(MDS1, MDS2, col = resource_grp, label = "Geum rossi"), fontface = "bold.italic", family = "Times", vjust = 1.1, size = 3, show.legend = FALSE) +
+  geom_text(data= subset(spp_df_sdlall, clean_code2 == "GERO2"), aes(MDS1, MDS2, col = resource_grp, label = "Geum rossii"), fontface = "bold.italic", family = "Times", vjust = 1.1, size = 3, show.legend = FALSE) +
   # add vector annotations
   geom_text(data = sdlvectors, aes(NMDS1, NMDS2, label = paste(factor, symbol)), col = "grey30", hjust = -0.1) +
   scale_x_continuous(breaks = seq(-1.5,1, 0.5), limits = c(xmin_sdl-0.1,xmax_sdl+0.1)) +
   scale_y_continuous(breaks = seq(-1,1, 0.5), limits = c(ymin_sdl-0.1,ymax_sdl+0.1)) +
   scale_fill_manual(name = "Treatment", values = trtcols) +
-  scale_linetype(name = "Treatment") +
+  scale_linetype_manual(name = "Treatment", values = simplelines) +
   scale_color_manual(name = "Resource\ngroup", values = c(traitcols)) +
   scale_shape_manual(name = "Lifeform", values = c("Forb" = 4, "Grass" = 15, "Shrub" = 8)) +
   j_theme +
   labs(y = NULL) +
+  # add F
+  geom_text(aes(x = xmin_sdl, y = ymax_sdl), label = "F", fontface = "bold", size = 5, hjust = 0.5, vjust = 0) +
   theme(axis.text.y = element_blank(),
         legend.position = "none") +
   facet_wrap(~"Saddle, 1997-2016")
 
-sdl_panel <- plot_grid(sdlplottrend, sdlspptrend, ncol = 2,
-          rel_widths = c(1, 0.85),
+sdl_panel <- plot_grid(sdlplottrend, sdlcenttrend, sdlspptrend, ncol = 3,
+          rel_widths = c(1, 0.85, 0.85),
           align = "h")
 
 
@@ -955,14 +1015,14 @@ main_nmdspanel <- plot_grid(nn_simple_panel, sdl_panel,
           nrow = 2,
           rel_heights = c(0.9, 1))
 main_nmdspanel_wlegend <- plot_grid(main_nmdspanel, nmdslegend_simple, ncol = 2,
-          rel_widths = c(1, 0.2))
+          rel_widths = c(1, 0.15))
 
 ggsave("alpine_addnuts/figures/journal_figs/main_nmds_panel.pdf",
        main_nmdspanel_wlegend,
-       width = 8, height = 7, units = "in")
-ggsave("alpine_addnuts/figures/journal_figs/main_nmds_panel.png",
+       width = 10, height = 7, units = "in")
+ggsave("alpine_addnuts/figures/journal_figs/main_nmds_panel.tiff",
        main_nmdspanel_wlegend,
-       width = 8, height = 7, units = "in")
+       width = 10, height = 7, units = "in")
 
 
 # -- NUTNET MULTIVARIATE -----
