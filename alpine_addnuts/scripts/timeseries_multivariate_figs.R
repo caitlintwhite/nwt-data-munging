@@ -355,7 +355,7 @@ all_fg_means <- rename(nn_fg_means, trt = trt2, grp = met, meanval = meancov, se
 allcov_fig <- mutate(all_fg_means, grp = factor(grp, levels = c("Forb_rel", "Grass_rel", "Geum_rel"), labels = c("All forbs", "All grasses", "G. rossii"))) %>%
   ggplot(aes(post_yrs, meanval, grp = site)) +
   geom_errorbar(aes(ymax = meanval + seval, ymin = meanval - seval), width = 0) +
-  geom_point(aes(shape = site), fill = "white") +
+  geom_point(aes(shape = site), fill = "white", size = 2.8) +
   #geom_line(aes(col = site)) +
   scale_y_continuous(breaks = seq(0,80, 10)) +
   scale_shape_manual(name = NULL, values = c(21,19), labels = c("NutNet", "Saddle")) +
@@ -374,11 +374,11 @@ allcov_fig
 
 # write out as tiff
 ggsave("alpine_addnuts/figures/journal_figs/all_meancov.tiff", allcov_fig, dpi = 320,
-       width = 6, height = 4, units = "in")
+       width = 6, height = 4.8, units = "in")
 
 # write out as pdf
-ggsave("alpine_addnuts/figures/journal_figs/all_meancov2.pdf", allcov_fig, dpi = 320,
-       width = 6, height = 4, units = "in")
+ggsave("alpine_addnuts/figures/journal_figs/all_meancov.pdf", allcov_fig, dpi = 320,
+       width = 6, height = 4.8, units = "in")
 
 
 # -- PCA FIGURE (MAIN AND SUPPLEMENT) ----
