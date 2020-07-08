@@ -24,3 +24,15 @@ getTabular <- function(edi_id, na_vals = c("", "NA", NA, NaN, ".", "NaN", " "), 
   print(paste0("Reading in knb-lter-", site, ".", edi_id, ".", v))
   return(dat)
 }
+
+# function to read in tabular csv dataset for data package (could make more generic with read table, but should know what you're reading in to use)
+# uses bases read.csv
+getTabular2 <- function(edi_id, na_vals = c("", "NA", NA, NaN, ".", "NaN", " "), site = "nwt", datanum = 1, h = TRUE){
+  v <- getPackageVersion(edi_id, site = site)
+  id <- getEntityId(edi_id, v, site = site, datanum = datanum)
+  dat <- read.csv(paste0("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-", site, ".", edi_id, ".", v, 
+                                "&entityid=", id),
+                           strip.white =TRUE, na.strings = na_vals, header = h)
+  print(paste0("Reading in knb-lter-", site, ".", edi_id, ".", v))
+  return(dat)
+}
