@@ -31,6 +31,27 @@
 # EDI data package is knb-nwt-lter-6 (currently v2 at time of script)
 
 
+# spp comp methods from EDI:
+# Plant species composition in each plot was measured annually at peak biomass, using a point-intercept method with a 100-point grid. 
+# At each of the 100 grid points, the uppermost plant present was recorded as being hit. 
+# Plants found present in the plot without being hit were given a hit value of 0.5. 
+# Non-plant hits included bare soil surface or small gravely rock (bare), lichen growing on soil (lichen), and rocks or rock fragments at least 10 cm in diameter or generally under which plant growth is unlikely (rock).
+# ‘Litter’ refers to dead plant material that was never alive during the current growing season. 
+# When litter was the uppermost hit at a point but live plant material was intercepted lower down, hits were recorded as the live species.
+
+# > CTW: total hits should not sum much over 100 per plot (may if many plants present not hit)
+# > litter, and non-veg only recorded if no live, current-season plant below
+# > present not hit = 0.5
+
+# target removal moethds from EDI:
+# Plots were visited one to three times per season to implement removal treatments.
+# Codominant experimental plots – In targeted species removal plots, all aboveground biomass of G. rossii (CA-) or D. cespitosa (CD-) was removed. 
+# In random removal plots (CBX), the random biomass removal protocol (Appendix 1) was followed to remove a similar amount of biomass of non-targeted species.
+# As the amount of G. rossii and D. cespitosa removed from plots diminished with time, random biomass removal was similarly diminished until eventually just one individual plant was removed at each of three haphazardly selected points inside the plot.
+
+
+
+
 
 # -- SETUP ----
 library(tidyverse)
@@ -43,6 +64,15 @@ codom <- getTabular2(edi_id = 6)
 glimpse(codom)
 summary(codom)
 sapply(select(codom, year, site:spp, growth_habit, hits), function(x) sort(unique(x)))
+
+# pull out sppLUT for convenience
+spplut <- distinct(codom, spp, USDA_code, USDA_name, growth_habit) %>%
+  # infill litter, rock and bare as ground cover
+  replace_na(list(growth_habit = "ground cover")) %>%
+  arrange(spp)
+
+
+# also plot the things that only occur 1 time with high hits along with whatever occurs next to them alphabetically
 
 
 
@@ -143,10 +173,127 @@ sppcheck <- select(codom, LTER_site:spp, hits) %>%
   arrange(plotid, spp, year) %>%
   group_by(plotid, spp) %>%
   mutate(diffhits = hits - lag(hits),
-         flagdiff = abs(diffhits) > 10) %>%
+         # flag anything that's one time only
+         onetime = length(year[hits>0]) == 1 & length(hits[!hits %in% c(0,0.5,1)]) == 1,
+         twotime = length(year[hits>0]) == 2 & length(hits[!hits %in% c(0,0.5,1)]) == 1) %>%
+  ungroup() %>%
+  mutate(flagdiff = abs(diffhits) >= 10) %>%
+  group_by(plotid, spp) %>%
+  mutate(checkspp = any(flagdiff, na.rm = T)) %>%
+  ungroup()
+  
+
+# calculate veg, moss and lichen total hits as second check (e.g. if spp flux, does overall green cover stay the same?)
+greenhits <- subset(sppcheck, !spp %in% c("litter", "rock", "bare")) %>%
+  group_by(site, plot, plotid, year) %>%
+  summarise(tothits = sum(hits)) %>%
+  ungroup
+
+# redo with codom orig to be sure can sum > 100
+greenhits2 <- subset(codom, !spp %in% c("litter", "rock", "bare")) %>%
+  distinct() %>%
+  group_by(site, plot, year) %>%
+  summarise(tothits = sum(hits)) %>%
+  ungroup
+
+sort(unique(greenhits2$year[greenhits2$tothits > 105])) # only 2002 and 2005 have over 110 cover
+length(unique(greenhits$plotid[greenhits$year == 2002]))
+length(unique(greenhits$plotid[greenhits$year == 2005]))
+
+# try remove all spp present and see what sums are
+greenhits3 <- subset(codom, !spp %in% c("litter", "rock", "bare")) %>%
+  subset(hits != 0.5) %>%
+  group_by(site, plot, year) %>%
+  summarise(tothits = sum(hits)) %>%
+  ungroup
+# only +100 sum (with spp present removed) in 2011, 2016, 2018 (only three plots--1 per yr..)
+
+# is richness in 2002 and 2005 fairly consistent with other years?
+S <- subset(sppcheck, hits > 0) %>%
+  distinct(site, plot, plotid, year, spp) %>%
+  group_by(site, plot, plotid, year) %>%
+  summarise(S = length(unique(spp))) %>%
   ungroup()
 
-sppreview <- subset(sppcheck)
+# plot for swings
+ggplot(S, aes(year, S, col = plot, group = plotid)) +
+  geom_line() +
+  facet_wrap(~site, scales = "free_y")
+
+
+# > notes:
+# > looked at rawdat for 2002 and 2005.. hi hits are real
+# > in 2005, multiple hits recorded (in IA's methods)
+# > not sure why 2002 high (i.e. if multiple hits done yr1 .. KNS would have collected data then?), but KNS says to relativize counts in those years
+# > 2002 hi counts are all in all types of treatment plots (-A, -D, and X)
+# > To Do: relativize non-present-only veg, lichen and moss in 2002 and 2005 and add back in then re-crunch flagging
+
+# clean up env
+rm(greenhits, greenhits2, greenhits3, S)
+
+
+
+# 1) TREAT 2002, 2005 DAT -----
+# check that total cover in other years is around 100 (i.e. should i relativize just veg/moss/lichen or all [litter, bare, rock too]?)
+totcovcheck <- mutate(codom, growth_habit = ifelse(USDA_code %in% removeusda, "ground cover", growth_habit)) %>%
+  unite(plotid, site, plot, remove = F) %>%
+  group_by(year, site, plot, plotid, growth_habit) %>%
+  summarize(tothits = sum(hits)) %>%
+  ungroup() %>%
+  spread(growth_habit, tothits, fill = 0) %>%
+  mutate(greenhits = apply(.[grepl("forb|gram|shrub|lich|nonvas|lycop", names(.))], 1, sum),
+         allhits = apply(.[grepl("forb|gram|shrub|ground|lich|nonvas|lycop", names(.))], 1, sum))
+
+summary(as.factor(totcovcheck$year))
+sort(sapply(split(totcovcheck$year, totcovcheck$plotid), length)) #2 CAN missing a year
+unique(totcovcheck$year[totcovcheck$plotid == "2_CAN"]) # ya, 2013.
+
+# lbh curious about <100 tothits..
+# who does it affect?
+ggplot(subset(totcovcheck, allhits < 100), aes(year, allhits, col = site)) +
+  geom_point() +
+  facet_wrap(~plot)
+# let's say ppl forgot to do a few points or even a row..
+ggplot(subset(totcovcheck, allhits < 95), aes(as.factor(site), allhits, col = as.factor(year))) +
+  geom_point() +
+  facet_wrap(~plot, scales = "free_x")
+
+sppreview <- subset(sppcheck, checkspp) %>%
+  # remove nonveg, descae, acoros (and maybe also both plots since those are random removals)
+  filter(!spp %in% c("rock", "bare", "litter", "GEUROS", "DESCAE"))
+
+
+# screen by treatment, because might make sense that certain spp flux in target removal treatments
+# control plots should not flux quite as much (esp XX)
+
+
+
+ggplot(subset(sppreview, rem == "A"), aes(year, diffhits, col = as.factor(site), group = plotid)) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_line() +
+  facet_wrap(~spp+plot, scales = "free_y")
+
+ggplot(subset(sppreview, rem == "D"), aes(year, diffhits, col = as.factor(site), group = plotid)) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_line() +
+  facet_wrap(~spp+plot, scales = "free_y")
+
+ggplot(subset(sppreview, rem == "X"), aes(year, diffhits, col = as.factor(site), group = plotid)) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_line() +
+  facet_wrap(~spp+plot) #, scales = "free_y"
+
+ggplot(subset(sppreview, rem == "X"), aes(year, diffhits, col = spp, group = spp)) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_line() +
+  facet_wrap(~site+plot, scales = "free_y")
+
+
+# look at one time only spp -- or 2 if not consecutive years?
+infrequent <- sppreview
+
+
+
 
 
 # -- COMPILE FI SCORES -----
