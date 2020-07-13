@@ -55,6 +55,7 @@
 
 # -- SETUP ----
 library(tidyverse)
+library(readxl)
 options(stringsAsFactors = F)
 theme_set(theme_bw())
 source("edi_functions.R")
@@ -72,11 +73,60 @@ spplut <- distinct(codom, spp, USDA_code, USDA_name, growth_habit) %>%
   arrange(spp)
 
 
+# read in JGS codom rawdat files (master)
+rawdat_all <- read_excel("/Users/scarlet/Documents/nwt_lter/unpub_data/codom/NWT_CoDom_SpComp_data_L0.xlsx", na = c(" ", "", NA, "NA", "NaN"), trim_ws = T)
+str(rawdat_all)
+summary(rawdat_all)
+# what is the NA row?
+View(subset(rawdat_all, is.na(CARHET))) #hm.. this is the missing plot (2CAN 2013), but it DOES have some zeros for 3 species.. ?
+
+# only 2014 bc that has different tallies than master
+raw2014 <- read_excel("/Users/scarlet/Documents/nwt_lter/unpub_data/codom/codom_yearly_sp_comp_raw_data/Niwot_CoDom_2014_SpComp.xlsx", na = c(" ", "", NA, "NA", "NaN"), trim_ws = T, skip = 10)
+str(raw2014)
+
+# read in 2002-2005 raw dat to be sure..
+earlydat <- read_excel("/Users/scarlet/Documents/nwt_lter/unpub_data/codom/codom2002_2005/SpeciesCompMaster2002-2005.xls",
+                       na = c(".", " ", "", NA, "NA", "NaN"), trim_ws = T, col_names = F) %>%
+  data.frame()
+
+
 # also plot the things that only occur 1 time with high hits along with whatever occurs next to them alphabetically
 
 
 
-# -- SCREEN AND PREP DATA -----
+# -- SCREEN AND PREP EARLY DATA -----
+# JGS master file
+# check first if this file will solve some of the sub 100 plots in 2003 and 2014
+sumcheck <- apply(rawdat_all[,grep("ACHMIL", names(rawdat_all)):ncol(rawdat_all)],1, function(x) sum(x, na.rm = T))
+View(rawdat_all[sumcheck< 98,])
+sumcheck[sumcheck < 100]
+boxplot(sumcheck[sumcheck < 98]) #hm..
+
+
+# IA early dat raw file
+# first two row = headers
+IAspp <- earlydat[1:2,]
+IAspp <- paste(earlydat[1,], earlydat[2,], sep = "_")
+# assign row 3 to first 3 slots
+IAspp[1:3] <- as.character(unname(earlydat[3,][1:3]))
+IAspp <- gsub("_NA", "", IAspp)
+IAspp <- gsub(" ", "_", IAspp)
+
+names(earlydat) <- IAspp
+earlydat <- earlydat[4:nrow(earlydat),]
+earlydat[,4:ncol(earlydat)] <- sapply(earlydat[,4:ncol(earlydat)], function(x) ifelse(grepl("^P", x), 0.5, x))
+sapply(earlydat[,4:ncol(earlydat)], unique)
+sapply(earlydat[,4:ncol(earlydat)], function(x) any(grepl("[[:alpha:]]", x)))
+earlydat2 <- earlydat
+earlydat2[,4:ncol(earlydat)] <- sapply(earlydat[,4:ncol(earlydat)], as.numeric)
+sumcheck2 <- apply(earlydat2[,4:ncol(earlydat2)], 1, function(x) sum(x, na.rm = T))
+View(earlydat2[sumcheck2 < 100,])
+View(earlydat[sumcheck2 < 100,])
+apply(earlydat[sumcheck2 < 100,4:ncol(earlydat)], 1, function(x) sort(unique(x))) #hm.. true low values.. 56 of 70 plots in 2003.. 
+
+
+
+# -- SCREEN AND PREP CURRENT DATA -----
 # look at avg presence per species (is 50% reasonable cutoff?)
 # remove rare (< 50% in plot all years  or < 1% cover in plot)
 # check unknowns (how commonly recorded per plot)
@@ -103,7 +153,7 @@ unite(codom, plotid, site, plot, remove = F) %>%
 
 # are hits already summed per spp? (each spp will have 1 obs per plot if present)
 unite(codom, plotid, site, plot, remove = F) %>%
-  subset(!USDA_code %in% removespp) %>%
+  subset(!USDA_code %in% removeusda) %>%
   distinct(plotid, plot, year, spp, site, hits) %>%
   group_by(plot, year, site, spp) %>%
   summarise(nobs = length(hits)) %>%
@@ -228,12 +278,9 @@ ggplot(S, aes(year, S, col = plot, group = plotid)) +
 # > 2002 hi counts are all in all types of treatment plots (-A, -D, and X)
 # > To Do: relativize non-present-only veg, lichen and moss in 2002 and 2005 and add back in then re-crunch flagging
 
-# clean up env
-rm(greenhits, greenhits2, greenhits3, S)
 
 
 
-# 1) TREAT 2002, 2005 DAT -----
 # check that total cover in other years is around 100 (i.e. should i relativize just veg/moss/lichen or all [litter, bare, rock too]?)
 totcovcheck <- mutate(codom, growth_habit = ifelse(USDA_code %in% removeusda, "ground cover", growth_habit)) %>%
   unite(plotid, site, plot, remove = F) %>%
@@ -242,7 +289,11 @@ totcovcheck <- mutate(codom, growth_habit = ifelse(USDA_code %in% removeusda, "g
   ungroup() %>%
   spread(growth_habit, tothits, fill = 0) %>%
   mutate(greenhits = apply(.[grepl("forb|gram|shrub|lich|nonvas|lycop", names(.))], 1, sum),
-         allhits = apply(.[grepl("forb|gram|shrub|ground|lich|nonvas|lycop", names(.))], 1, sum))
+         allhits = apply(.[grepl("forb|gram|shrub|ground|lich|nonvas|lycop", names(.))], 1, sum)) %>%
+  # join with JGS rawdat all hits to compare
+  left_join(data.frame(cbind(rawdat_all[c("year", "site", "plot")], sumcheck)))
+  
+summary(totcovcheck$allhits == totcovcheck$sumcheck) # yup, all the same.. nothing to do about hi or low total hits values other than to know about them
 
 summary(as.factor(totcovcheck$year))
 sort(sapply(split(totcovcheck$year, totcovcheck$plotid), length)) #2 CAN missing a year
@@ -293,7 +344,12 @@ ggplot(subset(sppreview, rem == "X"), aes(year, diffhits, col = spp, group = spp
 infrequent <- sppreview
 
 
+# clean up env
+rm(greenhits, greenhits2, greenhits3, S)
 
+
+
+# 1) TREAT 2002, 2005 DAT -----
 
 
 # -- COMPILE FI SCORES -----
