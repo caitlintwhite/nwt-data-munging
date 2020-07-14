@@ -94,7 +94,7 @@ earlydat <- read_excel("/Users/scarlet/Documents/nwt_lter/unpub_data/codom/codom
 
 
 
-# -- SCREEN AND PREP EARLY DATA -----
+# -- SCREEN AND PREP RAW DATA -----
 # JGS master file
 # check first if this file will solve some of the sub 100 plots in 2003 and 2014
 sumcheck <- apply(rawdat_all[,grep("ACHMIL", names(rawdat_all)):ncol(rawdat_all)],1, function(x) sum(x, na.rm = T))
@@ -123,6 +123,10 @@ sumcheck2 <- apply(earlydat2[,4:ncol(earlydat2)], 1, function(x) sum(x, na.rm = 
 View(earlydat2[sumcheck2 < 100,])
 View(earlydat[sumcheck2 < 100,])
 apply(earlydat[sumcheck2 < 100,4:ncol(earlydat)], 1, function(x) sort(unique(x))) #hm.. true low values.. 56 of 70 plots in 2003.. 
+
+
+
+
 
 
 
@@ -309,39 +313,15 @@ ggplot(subset(totcovcheck, allhits < 95), aes(as.factor(site), allhits, col = as
   geom_point() +
   facet_wrap(~plot, scales = "free_x")
 
-sppreview <- subset(sppcheck, checkspp) %>%
-  # remove nonveg, descae, acoros (and maybe also both plots since those are random removals)
-  filter(!spp %in% c("rock", "bare", "litter", "GEUROS", "DESCAE"))
-
-
-# screen by treatment, because might make sense that certain spp flux in target removal treatments
-# control plots should not flux quite as much (esp XX)
-
-
-
-ggplot(subset(sppreview, rem == "A"), aes(year, diffhits, col = as.factor(site), group = plotid)) +
-  geom_hline(aes(yintercept = 0)) +
+# plot tothits to see if can see when all hits vs top hits were used
+group_by(totcovcheck, plotid) %>%
+  mutate(avghits = mean(allhits)) %>%
+  ungroup() %>%
+  ggplot(aes(year, allhits, group = plot, col = plot)) +
+  geom_hline(aes(yintercept = 100), col = "grey20", lty = 2) +
+  geom_hline(aes(yintercept = avghits)) +
   geom_line() +
-  facet_wrap(~spp+plot, scales = "free_y")
-
-ggplot(subset(sppreview, rem == "D"), aes(year, diffhits, col = as.factor(site), group = plotid)) +
-  geom_hline(aes(yintercept = 0)) +
-  geom_line() +
-  facet_wrap(~spp+plot, scales = "free_y")
-
-ggplot(subset(sppreview, rem == "X"), aes(year, diffhits, col = as.factor(site), group = plotid)) +
-  geom_hline(aes(yintercept = 0)) +
-  geom_line() +
-  facet_wrap(~spp+plot) #, scales = "free_y"
-
-ggplot(subset(sppreview, rem == "X"), aes(year, diffhits, col = spp, group = spp)) +
-  geom_hline(aes(yintercept = 0)) +
-  geom_line() +
-  facet_wrap(~site+plot, scales = "free_y")
-
-
-# look at one time only spp -- or 2 if not consecutive years?
-infrequent <- sppreview
+  facet_grid(plot~site, scales = "free_y")
 
 
 # clean up env
@@ -349,7 +329,358 @@ rm(greenhits, greenhits2, greenhits3, S)
 
 
 
-# 1) TREAT 2002, 2005 DAT -----
+# -- CORRECT 2014 LOW HITS DATA ----
+# treat 2014 dat
+raw2014_tidy <- gather(raw2014, spp, hits, 4:`unk forb`) %>%
+  subset(!is.na(hits)) %>%
+  # check total hits
+  group_by(Site, Plot) %>%
+  mutate(tot2 = sum(hits)) %>%
+  ungroup() %>%
+  mutate(sumcheck = Total == tot2)
+
+summary(raw2014_tidy$sumcheck) # great
+
+raw2014_tidy <- dplyr::select(raw2014_tidy, -c(Total, tot2, Notes, sumcheck)) %>%
+  rename_all(function(x) casefold(x))
+# clean up codes
+summary(unique(raw2014_tidy$spp) %in% spplut$spp)
+unique(raw2014_tidy$spp)[!unique(raw2014_tidy$spp) %in% spplut$spp]
+# what spp are in the edi dataset?
+
+# do achlan check with achmil
+achmil2014 <- left_join(subset(raw2014_tidy, spp == "ACHLAN"), subset(codom, spp == "ACHMIL" & year == 2014, names(codom) != "date"), by = c("site", "plot"))
+# all but 1 yes (0 got lopped off of 10?)
+# clean up spp
+raw2014_tidy <- mutate(raw2014_tidy,
+                       spp = recode(spp, "ACHLAN" = "ACHMIL", "ACOROS" = "GEUROS", "CLERHO" = "RHORHO",
+                                    "CARsp" = "CAR_SP1", "Draba, yellow" = "DRABA_SP1", "POAABB" = "POA_SP1",
+                                    "SALIXspp" = "SALIX_SP1", "unk forb" = "FORB_SP1")) 
+summary(unique(raw2014_tidy$spp) %in% spplut$spp)
+
+# find out what's different
+check2014 <- full_join(raw2014_tidy, subset(codom, year == 2014, names(codom) != "date"), by = c("site", "plot", "spp")) %>%
+  rename(raw_hits = hits.x, edi_hits = hits.y) %>%
+  subset(raw_hits != edi_hits) %>%
+  unite(plotid, site, plot, remove = F)
+# are these the same plots that have <100 cover in codom?
+subset(codom, year == 2014) %>%
+  unite(plotid, site, plot, remove = F) %>%
+  group_by(site, plot, plotid) %>%
+  summarise(allhits = sum(hits)) %>%
+  ungroup() %>%
+  subset(allhits < 100) %>%
+  mutate(check = plotid %in% check2014$plotid) %>%
+  distinct(check) %>%
+  summary() # yes
+
+# correct hits from check 2014 in edi dataset
+for(i in 1:nrow(check2014)){
+  #id row to update 
+  temprow <- with(codom, which(site == check2014$site[i] & plot == check2014$plot[i] & spp == check2014$spp[i] & year == 2014))
+  codom$hits[temprow] <- check2014$raw_hits[i]
+}
+
+# are these good now?
+check2014 <- full_join(raw2014_tidy, subset(codom, year == 2014, names(codom) != "date"), by = c("site", "plot", "spp")) %>%
+  rename(raw_hits = hits.x, edi_hits = hits.y) %>%
+  subset(raw_hits != edi_hits) %>%
+  unite(plotid, site, plot, remove = F) # sweet
+
+rm(check2014, raw2014, raw2014_tidy)
+
+
+# -- SCREEN FOR SPP HITS SPIKES -----
+# recrunch totcovcheck
+# check that total cover in other years is around 100 (i.e. should i relativize just veg/moss/lichen or all [litter, bare, rock too]?)
+totcovcheck <- mutate(codom, growth_habit = ifelse(USDA_code %in% removeusda, "ground cover", growth_habit)) %>%
+  unite(plotid, site, plot, remove = F) %>%
+  group_by(year, site, plot, plotid, growth_habit) %>%
+  summarize(tothits = sum(hits),
+            # crunch non-present
+            #onlyhits = sum(hits[hits != 0.5])
+            ) %>%
+  ungroup() %>%
+  spread(growth_habit, tothits, fill = 0) %>%
+  mutate(greenhits = apply(.[grepl("forb|gram|shrub|lich|nonvas|lycop", names(.))], 1, sum),
+         allhits = apply(.[grepl("forb|gram|shrub|ground|lich|nonvas|lycop", names(.))], 1, sum)) %>%
+  # join with JGS rawdat all hits to compare
+  left_join(data.frame(cbind(rawdat_all[c("year", "site", "plot")], sumcheck)))
+
+# replot all hits with mean line
+# plot tothits to see if can see when all hits vs top hits were used
+group_by(totcovcheck, plotid) %>%
+  mutate(avghits = mean(allhits)) %>%
+  ungroup() %>%
+  ggplot(aes(year, allhits, group = plot, col = plot)) +
+  geom_hline(aes(yintercept = 100), col = "grey20", lty = 2) +
+  geom_hline(aes(yintercept = avghits)) +
+  geom_line() +
+  facet_grid(plot~site, scales = "free_y") # better. 2002, 2003 and 2005 are years that need to be corrected.. maybe also any year that doesn't have 100 total hits (e.g. if 97.5 adjust)
+
+tothitscheck <- mutate(codom, growth_habit = ifelse(USDA_code %in% removeusda, "ground cover", growth_habit)) %>%
+  unite(plotid, site, plot, remove = F) %>%
+  group_by(year, site, plot, plotid, growth_habit) %>%
+  summarize(tothits = sum(hits[hits != 0.5]),
+            # crunch non-present
+            #onlyhits = sum(hits[hits != 0.5])
+  ) %>%
+  ungroup() %>%
+  spread(growth_habit, tothits, fill = 0) %>%
+  mutate(greenhits = apply(.[grepl("forb|gram|shrub|lich|nonvas|lycop", names(.))], 1, sum),
+         allhits = apply(.[grepl("forb|gram|shrub|ground|lich|nonvas|lycop", names(.))], 1, sum)) %>%
+  # join with JGS rawdat all hits to compare
+  left_join(data.frame(cbind(rawdat_all[c("year", "site", "plot")], sumcheck)))
+
+# plot to see how many plots have  over/under 100 hits (not counting spp present 0.5) [i.e. how many may need to be relativized]
+ggplot(subset(tothitscheck, allhits != 100), aes(year, allhits, group = plot, col = allhits < 100)) +
+  geom_hline(aes(yintercept = 100), col = "grey20", lty = 2) +
+  #geom_hline(aes(yintercept = avghits)) +
+  geom_point() +
+  facet_grid(plot~site) # a lot of points..
+
+
+
+# -- RELATIVIZE +- 100 hits -----
+# leave present be, but relativize crosshair hits for anything that doesn't sum to 100
+codom2 <- codom %>%
+  group_by(site, plot, year) %>%
+  mutate(tothits = sum(hits[hits != 0.5])) %>%
+  ungroup() %>%
+  mutate(hits100 = ifelse(hits != 0.5, round((hits/tothits)*100, 2), hits),
+         # force anything that's < 1 to 1
+         hits100 = ifelse(hits != 0.5 & hits100 < 1, 1, hits100)) %>%
+  group_by(site, plot, year) %>%
+  mutate(sumcheck = sum(hits100[hits100 != 0.5])) %>%
+  ungroup() %>%
+  #infill growth form with ground cover
+  replace_na(list(growth_habit = "ground cover"))
+
+# recrunch totcovcheck
+totcovcheck2 <- codom2 %>%
+  unite(plotid, site, plot, remove = F) %>%
+  group_by(year, site, plot, plotid, growth_habit) %>%
+  summarize(tothits = sum(hits100)) %>%
+  ungroup() %>%
+  spread(growth_habit, tothits, fill = 0) %>%
+  mutate(greenhits = apply(.[grepl("forb|gram|shrub|lich|nonvas|lycop", names(.))], 1, sum),
+         allhits = apply(.[grepl("forb|gram|shrub|ground|lich|nonvas|lycop", names(.))], 1, sum)) %>%
+  # diff forb, gram, and bare total hits
+  arrange(plotid, year) %>%
+  group_by(plotid) %>%
+  mutate(diff_forb = forb - lag(forb),
+         diff_gram = graminoid - lag(graminoid),
+         diff_ground = `ground cover` - lag(`ground cover`)) %>%
+  ungroup()
+  
+
+
+# recrunch sppchecks since 2014 updates and relativizing
+# .. spread out spp to infill 0s across all plots, all years; gather and diff interannual vals; flag cutoff or deviation from some spp-plot stat (e.g. median or modal value?)
+sppcheck100 <- select(codom2, LTER_site:spp, hits100) %>%
+  rename(hits = hits100) %>%
+  data.frame() %>%
+  spread(spp, hits, fill = 0) %>%
+  gather(spp, hits, names(.)[grep("nut", names(.))+1]:ncol(.)) %>%
+  unite(plotid, site, plot, remove = F) %>%
+  arrange(plotid, spp, year) %>%
+  # join in spp info
+  left_join(spplut) %>%
+  group_by(plotid, spp) %>%
+  mutate(diffhits = hits - lag(hits),
+         # flag anything that's one time only
+         onetime = length(year[hits>0]) == 1 & length(hits[!hits %in% c(0,0.5,1)]) == 1,
+         twotime = length(year[hits>0]) == 2 & length(hits[!hits %in% c(0,0.5,1)]) == 1,
+         zerocheck = (hits == 0 & lag(hits) > 4 & lead(hits) > 4)
+         )  %>%
+  ungroup() %>%
+  mutate(flagdiff = ifelse(growth_habit == "graminoid", abs(diffhits) >= 20,abs(diffhits) >= 10),
+         # flag any 1x spp that diff > 5
+         flagdiff = ifelse(onetime & diffhits > 4.5, TRUE, flagdiff),
+         # ignore anything that's geum, deschampsia, or ground cover
+         flagdiff = ifelse(growth_habit == "ground cover" | spp %in% c("DESCAE", "GEUROS", "moss"), FALSE, flagdiff),
+         # flag anything that is fails zerocheck
+         flagdiff = ifelse(zerocheck, TRUE, flagdiff)) %>%
+  group_by(plotid, spp) %>%
+  mutate(checkspp = any(flagdiff, na.rm = T)) %>%
+  ungroup()
+
+
+# screen by treatment, because might make sense that certain spp flux in target removal treatments
+# control plots should not flux quite as much (esp XX)
+ggplot(subset(sppcheck100, checkspp & rem == "A"), aes(year, diffhits, col = as.factor(site), group = plotid)) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_line() +
+  geom_point(data = subset(sppcheck100, checkspp & zerocheck & rem == "A"), aes(year, diffhits, col = as.factor(site), group = plotid)) +
+  ggtitle("codom qa check: spp spikes in acoros removal plots") +
+  facet_wrap(~plot+spp, scales = "free_y")
+
+ggplot(subset(sppcheck100, checkspp & rem == "D"), aes(year, diffhits, col = as.factor(site), group = plotid)) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_line() +
+  geom_point(data = subset(sppcheck100, checkspp & zerocheck & rem == "D"), aes(year, diffhits, col = as.factor(site), group = plotid), size = 2) +
+  ggtitle("codom qa check: spp spikes in descae removal plots") +
+  facet_wrap(~spp+plot, scales = "free_y")
+
+ggplot(subset(sppcheck100, checkspp & rem == "X"), aes(year, diffhits, col = as.factor(site), group = plotid)) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_line() +
+  geom_point(data = subset(sppcheck100, checkspp & zerocheck & rem == "X"), aes(year, diffhits, col = as.factor(site), group = plotid), size = 2) +
+  ggtitle("codom qa check: spp spikes in control plots") +
+  facet_wrap(~plot+spp, scales = "free_y")
+
+
+
+# notes from talking with jane about above plots:
+# > 1) DANINT spike in CAX due to miss-ID with descae in 2009 (jgs says person that year was working on her own, had only worked season prior with someone else the for first time) 
+# > 2) AREFEN that only appears one time -- check if STELON or CERARV was ever in that plot, was likely that (Hope trained IS and Marko in 2005 and got AREFEN mixed up so they were confused too)
+# > 3) If STELON only appears once, also check is CERARV was there -- STELON and CERARV don't tend to grow in same habitat (CERARV grows in drier places)
+# > 4) Change LEWPYG one time, hit hits to litter
+# > 5) Check for BISVIV only once when other BISBIS
+# > 6) CARSCO shouldn't have been confused with anything else -- if spikes, check to see if increase in ground cover or forbs
+# > 7) If forbs spike, check for corresponding spike (up or down) in total gram hits
+# > 8) PHLALP spike is probably TRISPI (2006 only year PHLALP there and TRISPI not--a little high, maybe PHLALP = TRISPI + DESCAE)
+
+# add in functional total hits to check if when forb spp increase grams or ground cover decrease
+sppcheck100 <- left_join(sppcheck100, dplyr::select(totcovcheck2, year, plotid, diff_forb:diff_ground)) %>%
+  mutate(flagdiff2 = ifelse(growth_habit == "graminoid" & flagdiff & abs(diff_ground) > abs(diff_gram), FALSE, flagdiff))
+
+
+# manual corrections:
+# 1) DANINT in 2009, 7_CAX
+# sum DANINT and DESCAE, look at relative amounts of each in year prior and before and apportion similarly
+Dsum <- subset(codom2, site == 7 & plot == "CAX" & spp %in% c("DESCAE", "DANINT")) %>%
+  select(LTER_site:growth_habit, hits100) %>%
+  group_by(year) %>%
+  mutate(yrsum = sum(hits100)) %>%
+  ungroup() %>%
+  arrange(year) %>%
+  group_by(spp) %>%
+  mutate(lagdiff = hits100 - lag(hits100)) %>%
+  ungroup() %>%
+  mutate(relhits = round((hits100/yrsum)*100,2))
+
+ggplot(Dsum, aes(year, relhits)) +
+  geom_line(aes(col = spp)) +
+  # plot midpoints
+  geom_point(aes(x = 2009, y = mean(c(Dsum$relhits[Dsum$spp == "DANINT" & Dsum$year == 2008],Dsum$relhits[Dsum$spp == "DANINT" & Dsum$year == 2010])))) +
+  geom_point(aes(x = 2009, y = mean(c(Dsum$relhits[Dsum$spp == "DESCAE" & Dsum$year == 2008],Dsum$relhits[Dsum$spp == "DESCAE" & Dsum$year == 2010]))))
+
+# > decide take relcov two years prior and 2 after for each and apportion total hits of the two
+danint <- subset(Dsum, spp == "DANINT" & year %in% c(2007, 2008, 2010, 2011)) %>%
+  select(relhits) %>% sapply(mean)
+descae <- subset(Dsum, spp == "DESCAE" & year %in% c(2007, 2008, 2010, 2011)) %>%
+  select(relhits) %>% sapply(mean)
+round(unique(Dsum$yrsum[Dsum$year == 2009])*(danint/100),0)
+round(unique(Dsum$yrsum[Dsum$year == 2009])*(descae/100),0)
+# check how those values look in the time series
+ggplot(Dsum, aes(year, hits100)) +
+  geom_line(aes(col = spp)) +
+  # plot midpoints
+  geom_point(aes(x = 2009, y = 35, col = "DANINT")) +
+  geom_point(aes(x = 2009, y = 20, col = "DESCAE")) # looks reasonable
+
+danintrow <- with(codom2, which(spp == "DANINT" & year == 2009 & site == 7 & plot == "CAX"))
+descaerow <- with(codom2, which(spp == "DESCAE" & year == 2009 & site == 7 & plot == "CAX"))
+codom2$hits100[danintrow] <- round(unique(Dsum$yrsum[Dsum$year == 2009])*(danint/100),0)
+codom2$hits100[descaerow] <- round(unique(Dsum$yrsum[Dsum$year == 2009])*(descae/100),0)
+
+# clean up
+rm(Dsum, danint, descae, danintrow, descaerow)
+
+
+# 2) LEWPYG to litter (7_CXX 2006, 5_CBX 2004) [6_CDN also has spike but spike real, both litter and lewpyg present throughout ts]
+# review records to swap
+View(subset(sppcheck100, spp %in% c("litter", "LEWPYG") & plotid %in% c("7_CXX", "5_CBX")))
+# id rows to swap hits100 vals (litter not in dataset these plots these years, so just reassign codes/plant names)
+cxxlewpyg <- with(codom2, which(site == 7 & plot == "CXX" & spp == "LEWPYG" & year == 2006))
+cbxlewpyg <- with(codom2, which(site == 5 & plot == "CBX" & spp == "LEWPYG" & year == 2004))
+# to be sure
+codom2$hits100[cxxlewpyg]
+codom2$hits100[cbxlewpyg] # yes
+# need to replace spp through growth_habit
+codom2[c(cxxlewpyg,cbxlewpyg), c("spp", "USDA_code", "USDA_name", "growth_habit")] <- subset(spplut, spp == "litter")
+
+# clean up
+rm(cxxlewpyg, cbxlewpyg)
+
+
+# 3) ACHMIL to ARTSCO in 6_CXX 2007
+# > only year ARTSCO not there and only year ACHMIL is .. maybe got misentered? (or miss-ID'd?.. )
+# review
+View(subset(codom2, plot == "CXX" & site == 6 & spp %in% c("ACHMIL", "ARTSCO"))) # yup. only year achmil there and artsco not there
+achmilrow <- with(codom2, which(site == 6 & plot == "CXX" & spp == "ACHMIL" & year == 2007))
+codom2[achmilrow, c("spp", "USDA_code", "USDA_name", "growth_habit")] <- subset(spplut, spp == "ARTSCO")
+# clean up
+rm(achmilrow)
+
+
+# 4) PHLALP to TRISPI (4_CXN)
+# review
+View(subset(codom2, plot == "CXN" & site == 4 & spp %in% c("PHLALP", "TRISPI"))) # yup. only year phlalp there and trispi not there
+phlalprow <- with(codom2, which(site == 4 & plot == "CXN" & spp == "PHLALP" & year == 2006))
+codom2[phlalprow, c("spp", "USDA_code", "USDA_name", "growth_habit")] <- subset(spplut, spp == "TRISPI")
+# clean up
+rm(phlalprow)
+
+
+# 5) BISVIV to BISBIS when BISVIV only appears once and BISBIS other years
+bischeck <- subset(sppcheck100, spp %in% c("BISBIS", "BISVIV")) %>%
+  group_by(plotid) %>%
+  mutate(nbisbis = length(hits[hits > 0 & spp == "BISBIS"]),
+         nbisviv = length(hits[hits > 0 & spp == "BISVIV"])) %>%
+  group_by(plotid, year) %>%
+  mutate(flagbis = (hits > 0 & spp == "BISVIV") & (hits == 0 & spp == "BISBIS")) %>%
+  ungroup()
+View(subset(bischeck, plotid %in% unique(plotid[onetime])))
+# hm.. every year bisviv there, bisbis also recorded.. keep as is
+
+
+# 6) final check for 1x STELON, ARFEF, CERARV
+forbcheck <- subset(sppcheck100, plotid %in% unique(plotid[onetime & spp %in% c("STELON", "ARFEF", "CERARV")])) %>%
+  filter(spp %in% c("STELON", "ARFEF", "CERARV")) %>%
+  # clean up a bit to review
+  dplyr::select(LTER_site:checkspp) %>%
+  subset(hits != 0) %>%
+  arrange(plotid, year, spp)
+# not going to mess with this one either. plots where spp are one time, others don't show up (usually), and others where a spp is 1x the others are also recorded for that year
+
+
+# one more stelon check (with sibpro..)
+steloncheck <- subset(codom2, spp %in% c("STELON", "SIBPRO")) %>%
+  unite(plotid, site, plot) %>%
+  arrange(plotid, year, spp) %>%
+  group_by(plotid, year) %>%
+  mutate(nspp = length(unique(spp)),
+         unihits = length(unique(hits))) %>%
+  ungroup() %>%
+  subset(plotid %in% plotid[nspp == 2])
+
+# look and stelon and sibbaldia in plots that have same hits values in 2004.. is stelon in those plots in other years?
+# i.e. which stelon to drop and which to allow (e.g. if only 0.5 or 1 and present in other years? [esp recent])
+stelon2004 <- subset(steloncheck, plotid %in% unique(plotid[nspp == 2 & unihits == 1])) %>%
+  arrange(plotid, year, spp) %>%
+  # flag any plot where STELON only there in 2004 (or one year)
+  group_by(plotid, spp) %>%
+  mutate(nyear = length(unique(year)),
+         # calculate mean hits excluding 2004
+         meanhits100 = mean(hits100[year != 2004])) %>%
+  ungroup() %>%
+  mutate(flag2004 = ifelse(year == 2004, hits100 > meanhits100,FALSE),
+         diff2004 = hits100-meanhits100)
+
+length(unique(stelon2004$plotid))
+
+# time to move on! (yay!)
+# > select vegdat to use moving forward to FI scores
+# want to use codom2, hits100 col
+clean_veg <- dplyr::select(codom2, LTER_site:growth_habit, hits100)
+# clean up enviro
+rm(forbcheck, bischeck)
+
+
+
+# -- WRITE OUT VEG MATRICES FOR PYTHON -----
 
 
 # -- COMPILE FI SCORES -----
