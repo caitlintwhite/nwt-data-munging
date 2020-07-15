@@ -582,11 +582,15 @@ ggplot(Dsum, aes(year, hits100)) +
 
 danintrow <- with(codom2, which(spp == "DANINT" & year == 2009 & site == 7 & plot == "CAX"))
 descaerow <- with(codom2, which(spp == "DESCAE" & year == 2009 & site == 7 & plot == "CAX"))
-codom2$hits100[danintrow] <- round(unique(Dsum$yrsum[Dsum$year == 2009])*(danint/100),0)
-codom2$hits100[descaerow] <- round(unique(Dsum$yrsum[Dsum$year == 2009])*(descae/100),0)
+# also update hits col for recrunching hits100
+# is original tothits 100? if so, can assign same number as hits100 (never needed to be relativized)
+codom2$tothits[danintrow]
+codom2[danintrow, c("hits", "hits100")] <- round(unique(Dsum$yrsum[Dsum$year == 2009])*(danint/100),0)
+codom2[descaerow, c("hits", "hits100")] <- round(unique(Dsum$yrsum[Dsum$year == 2009])*(descae/100),0)
 
 # clean up
 rm(Dsum, danint, descae, danintrow, descaerow)
+
 
 
 # 2) LEWPYG to litter (7_CXX 2006, 5_CBX 2004) [6_CDN also has spike but spike real, both litter and lewpyg present throughout ts]
@@ -658,29 +662,180 @@ steloncheck <- subset(codom2, spp %in% c("STELON", "SIBPRO")) %>%
 
 # look and stelon and sibbaldia in plots that have same hits values in 2004.. is stelon in those plots in other years?
 # i.e. which stelon to drop and which to allow (e.g. if only 0.5 or 1 and present in other years? [esp recent])
-stelon2004 <- subset(steloncheck, plotid %in% unique(plotid[nspp == 2 & unihits == 1])) %>%
+stelon2004 <- subset(steloncheck, plotid %in% unique(plotid[nspp == 2 & unihits == 1 & year == 2004])) %>%
   arrange(plotid, year, spp) %>%
   # flag any plot where STELON only there in 2004 (or one year)
   group_by(plotid, spp) %>%
   mutate(nyear = length(unique(year)),
+         nearly = length(unique(year[year < 2006 & year != 2004])),
          # calculate mean hits excluding 2004
-         meanhits100 = mean(hits100[year != 2004])) %>%
+         meanhits100 = mean(hits100[year != 2004]),
+         meanearly = mean(hits100[year < 2006 & year != 2004])) %>%
   ungroup() %>%
   mutate(flag2004 = ifelse(year == 2004, hits100 > meanhits100,FALSE),
-         diff2004 = hits100-meanhits100)
+         diff2004 = hits100-meanhits100,
+         flagearly = ifelse(year == 2004, hits100 > meanearly,FALSE),
+         diffearly = hits100 - meanearly)
 
 length(unique(stelon2004$plotid))
+# 5_CXX .. change to 0.5.. not recorded until 2005 and 2005 was an all hits year. there are some plots in 2004 where tothits under 100, so this will be one of them (but not by much)
+# 7_CAC .. maybe change from 4 to 0.5.. was 3 hits in 2002 (but KNS was doing all hits that year, then 1 hit 2005, then present or 1 hit 2007-2014)
+# all other STELONs in 2004 should be dropped bc that was the only year they were there and the value matched sibbaldia exactly
+stelonplots <- with(stelon2004, plotid[spp == "STELON" & year == 2004])
+
+for(i in stelonplots){
+  if(i %in% c("5_CXX", "7_CAC")){
+    # change to 0.5
+    temprow <- with(codom2, which(site == substr(i,1,1) & plot == substr(i, 3, 5) & year == 2004 & spp == "STELON"))
+    codom2$hits[temprow] <- 0.5
+    codom2$hits100[temprow] <- 0.5
+    next
+  }
+  #drop from codom2
+  temprow <- with(codom2, which(site == substr(i,1,1) & plot == substr(i, 3, 5) & year == 2004 & spp == "STELON"))
+  codom2 <- codom2[-temprow,]
+}
+
+
+# recrunch hits100 with updated hits for all
+clean_veg <- codom2 %>%
+  group_by(site, plot, year) %>%
+  mutate(tothits = sum(hits[hits != 0.5])) %>%
+  ungroup() %>%
+  mutate(hits100 = ifelse(hits != 0.5, round((hits/tothits)*100, 2), hits),
+         # force anything that's < 1 to 1
+         hits100 = ifelse(hits != 0.5 & hits100 < 1, 1, hits100)) %>%
+  group_by(site, plot, year) %>%
+  mutate(sumcheck = sum(hits100[hits100 != 0.5])) %>%
+  ungroup() %>%
+  # make plotid
+  unite(plotid, site, plot, remove = F) %>%
+  # > select vegdat to use moving forward to FI scores using relativized hits
+  dplyr::select(LTER_site:date, plotid, site:growth_habit, hits100) %>%
+  rename(hits = hits100)
+
+
+# check to be sure all sums to about 100 and no funny individuals hits values
+boxplot(clean_veg$hits)
+summary(clean_veg$hits)
+group_by(clean_veg, year, plotid) %>%
+  summarise(tothits = sum(hits)) %>%
+  summary() #good
+
+# make sure it looks good
+# write out for courtney and katie to use for katie's proposal
+write_csv(clean_veg, "codom/codom_sppcomp_clean.csv")
 
 # time to move on! (yay!)
-# > select vegdat to use moving forward to FI scores
-# want to use codom2, hits100 col
-clean_veg <- dplyr::select(codom2, LTER_site:growth_habit, hits100)
 # clean up enviro
-rm(forbcheck, bischeck)
+rm(forbcheck, bischeck, steloncheck, stelon2004, stelonplots, totcovcheck, totcovcheck2, achmil2014,
+   tothitscheck, sppcheck100, sppcheck, rawdat_all, codom2, spptempfreq, earlydat, earlydat2, sppreview,
+   sumcheck, sumcheck2, IAspp, i, removeusda, temprow)
 
 
 
 # -- WRITE OUT VEG MATRICES FOR PYTHON -----
+copy <- clean_veg
+# note: need to make 2013 infill data for 2_CAN so FI can run for that plot (average values from 2012 and 2014, no missing data allowed)
+
+# re-assess who to drop
+spptempfreq <- clean_veg %>%
+  subset(growth_habit != "ground cover") %>%
+  group_by(plotid) %>%
+  mutate(yrs = length(unique(year))) %>%
+  ungroup() %>%
+  group_by(site, plot, plotid, yrs, spp) %>%
+  summarise(nobs = length(hits),
+            meanhits = mean(hits),
+            maxhits = max(hits),
+            sumhits = sum(hits)) %>%
+  ungroup() %>%
+  mutate(relfreq = (nobs/yrs)*100) 
+
+
+# look at distribution
+ggplot(spptempfreq) +
+  geom_boxplot(aes(site, relfreq, group = site)) +
+  geom_jitter(aes(site, relfreq, group = site, col = nobs), width = 0.2) +
+  facet_wrap(~plot) # maybe cutoff at 25% if lose too much info with 50% cutoff?
+
+# what is the mean # hits by relfreq? ()
+gather(spptempfreq, met, val, meanhits:sumhits) %>%
+  subset(!grepl("B", plotid)) %>%
+  subset(nobs>3) %>%
+  ggplot() +
+  geom_vline(aes(xintercept = 50), col = "red", lty = 2) +
+  geom_point(aes(round(relfreq,1), val, col = nobs)) +
+  #scale_color_manual(values = c("TRUE" = "pink", "FALSE" = "grey10")) +
+  scale_x_continuous(breaks = seq(20,100, 20)) +
+  labs(x = "Relative temporal frequency (point = species-plot)",
+       y = "Plot hits summary value",
+       title = "NWT Codom: species max hits (per plot-yr), mean hits (per plot-yr),\ntotal hits (all years) by plot temporal rel. frequency") +
+  facet_grid(met ~ ., scales = "free_y")
+
+
+# > drop any spp hit 3x or less.. can modify later if Katie wants, but that seems like a reasonable cut looking at the data
+
+# make placeholder dat for 2013 2_CAN
+# > STELON is only spp present 1 year in 2012 & 2014 at 0.5; is present in 2_CAN most of 2010s so keep at 0.5 for 2013
+# > looked at other CAN plots 2012-2014 and taking average seems like an alright enough  quick strategy (2013 was maybe a bit of a grass year?)
+CAN2_1214 <- subset(clean_veg, plotid == "2_CAN"& year %in% c(2012, 2014)) %>%
+  group_by(spp) %>%
+  mutate(nobs = length(year),
+    meanhits = mean(hits)) %>%
+  ungroup() %>%
+  arrange(spp) %>%
+  mutate(year = 2013,
+         date = NA) %>%
+  select(-hits) %>%
+  distinct() %>%
+  rename(hits = meanhits)
+# manual edits to get sum to 100 (excluding PA)
+CAN2_1214$hitsedit <- CAN2_1214$hits
+CAN2_1214$hitsedit[CAN2_1214$spp == "bare"] <- 0
+CAN2_1214$hitsedit[CAN2_1214$spp == "litter"] <- CAN2_1214$hits[CAN2_1214$spp == "litter"]-0.5
+CAN2_1214$hitsedit[CAN2_1214$spp == "TRIPAR"] <- CAN2_1214$hits[CAN2_1214$spp == "TRIPAR"]+0.5
+CAN2_1214$hitsedit[CAN2_1214$spp == "CARSCO"] <- CAN2_1214$hits[CAN2_1214$spp == "CARSCO"]+0.5
+CAN2_1214$hitsedit[CAN2_1214$spp == "GENALG"] <- CAN2_1214$hits[CAN2_1214$spp == "GENALG"] + 0.5
+CAN2_1214$hitsedit[CAN2_1214$spp == "CALLEP"] <- CAN2_1214$hits[CAN2_1214$spp == "CALLEP"] + 0.25
+sum(CAN2_1214$hitsedit[CAN2_1214$hitsedit != 0.5]) # great
+CAN2_1214 <- select(CAN2_1214, LTER_site:growth_habit, hitsedit) %>% rename(hits = hitsedit) %>% data.frame()
+
+# append to cleanveg
+clean_veg <- rbind(clean_veg, CAN2_1214)
+# clean up
+rm(CAN2_1214)
+
+
+# notes on file prep:
+# > can use same veg matrix for each type of FI Katie wants
+# > filename should have plotid
+# > remove ground cover and any spp not present 4 yrs or more
+# > katie doesn't care about rando removal plots (but could run all the same.. no cost in a for-loop)
+# > python code needs year in col 1, spp after that
+# > write out with NO headers
+
+for(i in unique(clean_veg$plotid)){
+  # subset plot
+  tempdat <- subset(clean_veg, plotid == i & growth_habit != "ground cover") %>%
+    # calc temporal freq and drop anything 3 yrs or less
+    group_by(spp) %>%
+    mutate(nobs = length(unique(year))) %>%
+    ungroup() %>%
+    # keep only those spp that occurred 4 yrs or more
+    subset(nobs > 3, c(year, spp, hits)) %>%
+    # make wide, infill NA with 0s
+    spread(spp, hits, fill = 0) %>%
+    # order by year
+    arrange(year) %>%
+    data.frame()
+
+  # write out
+  write_csv(tempdat, paste0("~/python/hack4kns/vegdat/", i,"vegdat.csv"), col_names = F) #"codom/forpython/"
+  
+}
+
+
 
 
 # -- COMPILE FI SCORES -----
