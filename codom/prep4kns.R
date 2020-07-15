@@ -200,7 +200,7 @@ gather(spptempfreq, met, val, meanhits:sumhits) %>%
   scale_x_continuous(breaks = seq(20,100, 20)) +
   labs(x = "Relative temporal frequency (point = species-plot)",
        y = "Plot hits summary value",
-  title = "NWT Codom: species max hits (per plot-yr), mean hits (per plot-yr),\ntotal hits (all years) by plot temporal rel. frequency") +
+       title = "NWT Codom: species max hits (per plot-yr), mean hits (per plot-yr),\ntotal hits (all years) by plot temporal rel. frequency") +
   facet_grid(met ~ ., scales = "free_y")
 
 
@@ -235,7 +235,7 @@ sppcheck <- select(codom, LTER_site:spp, hits) %>%
   group_by(plotid, spp) %>%
   mutate(checkspp = any(flagdiff, na.rm = T)) %>%
   ungroup()
-  
+
 
 # calculate veg, moss and lichen total hits as second check (e.g. if spp flux, does overall green cover stay the same?)
 greenhits <- subset(sppcheck, !spp %in% c("litter", "rock", "bare")) %>%
@@ -296,7 +296,7 @@ totcovcheck <- mutate(codom, growth_habit = ifelse(USDA_code %in% removeusda, "g
          allhits = apply(.[grepl("forb|gram|shrub|ground|lich|nonvas|lycop", names(.))], 1, sum)) %>%
   # join with JGS rawdat all hits to compare
   left_join(data.frame(cbind(rawdat_all[c("year", "site", "plot")], sumcheck)))
-  
+
 summary(totcovcheck$allhits == totcovcheck$sumcheck) # yup, all the same.. nothing to do about hi or low total hits values other than to know about them
 
 summary(as.factor(totcovcheck$year))
@@ -399,7 +399,7 @@ totcovcheck <- mutate(codom, growth_habit = ifelse(USDA_code %in% removeusda, "g
   summarize(tothits = sum(hits),
             # crunch non-present
             #onlyhits = sum(hits[hits != 0.5])
-            ) %>%
+  ) %>%
   ungroup() %>%
   spread(growth_habit, tothits, fill = 0) %>%
   mutate(greenhits = apply(.[grepl("forb|gram|shrub|lich|nonvas|lycop", names(.))], 1, sum),
@@ -472,7 +472,7 @@ totcovcheck2 <- codom2 %>%
          diff_gram = graminoid - lag(graminoid),
          diff_ground = `ground cover` - lag(`ground cover`)) %>%
   ungroup()
-  
+
 
 
 # recrunch sppchecks since 2014 updates and relativizing
@@ -492,7 +492,7 @@ sppcheck100 <- select(codom2, LTER_site:spp, hits100) %>%
          onetime = length(year[hits>0]) == 1 & length(hits[!hits %in% c(0,0.5,1)]) == 1,
          twotime = length(year[hits>0]) == 2 & length(hits[!hits %in% c(0,0.5,1)]) == 1,
          zerocheck = (hits == 0 & lag(hits) > 4 & lead(hits) > 4)
-         )  %>%
+  )  %>%
   ungroup() %>%
   mutate(flagdiff = ifelse(growth_habit == "graminoid", abs(diffhits) >= 20,abs(diffhits) >= 10),
          # flag any 1x spp that diff > 5
@@ -782,7 +782,7 @@ gather(spptempfreq, met, val, meanhits:sumhits) %>%
 CAN2_1214 <- subset(clean_veg, plotid == "2_CAN"& year %in% c(2012, 2014)) %>%
   group_by(spp) %>%
   mutate(nobs = length(year),
-    meanhits = mean(hits)) %>%
+         meanhits = mean(hits)) %>%
   ungroup() %>%
   arrange(spp) %>%
   mutate(year = 2013,
@@ -829,13 +829,69 @@ for(i in unique(clean_veg$plotid)){
     # order by year
     arrange(year) %>%
     data.frame()
-
+  
   # write out
   write_csv(tempdat, paste0("~/python/hack4kns/vegdat/", i,"vegdat.csv"), col_names = F) #"codom/forpython/"
   
 }
 
+# -- REORG TIME WINDOW FIs -----
+# need to run this loop after generating each time-window set of FI scores (e.g. 4yr, 8yr) before running next set
+# > note: it takes about 8 seconds to generate FI scores on all 70 plots! crazy
+
+FIfiles <- list.files("~/python/hack4kns/vegdat/") 
+# select FI files generated (has FI or _sost)
+FIfiles <- FIfiles[grepl("FI|_sost", FIfiles)]
+# set window yr for loop below
+y <- 8 #4
+# run loop to move and clean up files
+for(i in FIfiles){
+  # if is an FI file, move (if sost, ignore this part)
+  if(grepl("_FI", i)){
+    file.copy(from = paste0("~/python/hack4kns/vegdat/",i), 
+              to = paste0("~/python/hack4kns/vegdat/", y, "yrwin/", y, "yr_",i), overwrite = T)
+  }
+  # remove from vegdat
+  file.remove(paste0("~/python/hack4kns/vegdat/",i))
+}
 
 
 
 # -- COMPILE FI SCORES -----
+# > want to stack all FI scores, being sure to note which time window set they're from
+
+# initate master df
+FImaster <- data.frame()
+# run loop to read in all FI dats
+for(i in c(4,8)){
+  tempfiles <- list.files(paste0("~/python/hack4kns/vegdat/", i, "yrwin"), full.names = T)
+  for(t in tempfiles){
+    tempdat <- read.csv(t, stringsAsFactors = F) %>%
+      rename(increment = X) %>%
+      mutate(winsize = i,
+             plotid = str_extract(t, "[0-9]_[A-Z]{3}(?=vegdat)"))
+    FImaster <- rbind(FImaster, tempdat)
+  }
+}
+
+# pair site info and clean up
+FImaster <- left_join(FImaster, distinct(dplyr::select(clean_veg, LTER_site, local_site, plotid:nut))) %>%
+  # reorder cols
+  dplyr::select(LTER_site, local_site, plotid, site:nut, winsize, increment:ncol(.)) %>%
+  rename(timestep = Time_Step,
+         smooth3_FI = Smooth_FI) %>%
+  data.frame()
+str(FImaster)
+
+# plot to be sure looks okay
+ggplot(FImaster, aes(increment, FI)) +
+  geom_line(aes(group = plotid)) +
+  geom_smooth(fill = "dodgerblue2") +
+  scale_x_continuous(breaks = seq(0,20,2)) +
+  ggtitle("NWT LTER Codom spp comp: FI prelim results, 4- and 8-yr windows") +
+  facet_wrap(~plot+winsize)
+# write out for kns
+ggsave("codom/codom_FIprelim.pdf", width = 7, height = 6, units = "in")
+
+# write out FI dataset
+write_csv(FImaster, "codom/codom_FI_4-8yr.csv")
