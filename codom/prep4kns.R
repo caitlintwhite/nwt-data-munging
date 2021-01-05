@@ -59,7 +59,8 @@ library(readxl)
 options(stringsAsFactors = F)
 theme_set(theme_bw())
 source("edi_functions.R")
-
+na_vals <- c(".", " ", "", NA, "NA", NaN, "NaN")
+  
 # read in plant dat
 codom <- getTabular2(edi_id = 6)
 glimpse(codom)
@@ -74,19 +75,19 @@ spplut <- distinct(codom, spp, USDA_code, USDA_name, growth_habit) %>%
 
 
 # read in JGS codom rawdat files (master)
-rawdat_all <- read_excel("/Users/scarlet/Documents/nwt_lter/unpub_data/codom/NWT_CoDom_SpComp_data_L0.xlsx", na = c(" ", "", NA, "NA", "NaN"), trim_ws = T)
+rawdat_all <- read_excel("/Users/scarlet/Documents/nwt_lter/unpub_data/codom/NWT_CoDom_SpComp_data_L0.xlsx", na = na_vals, trim_ws = T)
 str(rawdat_all)
 summary(rawdat_all)
 # what is the NA row?
 View(subset(rawdat_all, is.na(CARHET))) #hm.. this is the missing plot (2CAN 2013), but it DOES have some zeros for 3 species.. ?
 
 # only 2014 bc that has different tallies than master
-raw2014 <- read_excel("/Users/scarlet/Documents/nwt_lter/unpub_data/codom/codom_yearly_sp_comp_raw_data/Niwot_CoDom_2014_SpComp.xlsx", na = c(" ", "", NA, "NA", "NaN"), trim_ws = T, skip = 10)
+raw2014 <- read_excel("/Users/scarlet/Documents/nwt_lter/unpub_data/codom/codom_yearly_sp_comp_raw_data/Niwot_CoDom_2014_SpComp.xlsx", na = na_vals, trim_ws = T, skip = 10)
 str(raw2014)
 
 # read in 2002-2005 raw dat to be sure..
 earlydat <- read_excel("/Users/scarlet/Documents/nwt_lter/unpub_data/codom/codom2002_2005/SpeciesCompMaster2002-2005.xls",
-                       na = c(".", " ", "", NA, "NA", "NaN"), trim_ws = T, col_names = F) %>%
+                       na = na_vals, trim_ws = T, col_names = F) %>%
   data.frame()
 
 
@@ -303,7 +304,7 @@ summary(as.factor(totcovcheck$year))
 sort(sapply(split(totcovcheck$year, totcovcheck$plotid), length)) #2 CAN missing a year
 unique(totcovcheck$year[totcovcheck$plotid == "2_CAN"]) # ya, 2013.
 
-# lbh curious about <100 tothits..
+# lb curious about <100 tothits..
 # who does it affect?
 ggplot(subset(totcovcheck, allhits < 100), aes(year, allhits, col = site)) +
   geom_point() +
