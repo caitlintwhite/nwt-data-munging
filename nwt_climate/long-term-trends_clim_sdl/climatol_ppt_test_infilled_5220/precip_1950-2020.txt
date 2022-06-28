@@ -1,0 +1,12 @@
+
+HOMOGEN() APPLICATION OUTPUT  (From R's contributed package 'climatol' 3.1.1)
+
+=========== Homogenization of precip, 1950-2020. (Sat Jun 25 19:29:30 2022)
+
+Parameters: varcli=precip anyi=1950 anyf=2020 suf=NA nm=NA nref=10,10,4 std=2 swa=NA ndec=1 dz.max=5 dz.min=-5 wd=0,0,100 snht1=25 snht2=25 tol=0.02 maxdif=0.05 mxdif=0.05 maxite=999 force=FALSE wz=0.001 trf=0 mndat=NA gp=3 ini=NA na.strings=NA vmin=NA vmax=NA nclust=100 cutlev=NA grdcol=#666666 mapcol=#666666 hires=TRUE expl=FALSE metad=FALSE sufbrk=m tinc=NA tz=UTC cex=1.2 verb=TRUE
+
+Data matrix: 25933 data x 3 stations
+
+730 time steps between terms 1 (1950-01-01) and 730 (1951-12-31)
+  have missing data in all stations!
+(See the figures in precip_1950-2020-availability.pdf) 

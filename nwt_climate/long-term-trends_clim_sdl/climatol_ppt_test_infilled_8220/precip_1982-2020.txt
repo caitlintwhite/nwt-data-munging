@@ -1,0 +1,62 @@
+
+HOMOGEN() APPLICATION OUTPUT  (From R's contributed package 'climatol' 3.1.1)
+
+=========== Homogenization of precip, 1982-2020. (Sat Jun 25 22:15:06 2022)
+
+Parameters: varcli=precip anyi=1982 anyf=2020 suf=NA nm=NA nref=10,10,4 std=2 swa=NA ndec=1 dz.max=5 dz.min=-5 wd=0,0,100 snht1=0 snht2=0 tol=0.02 maxdif=0.05 mxdif=0.05 maxite=999 force=FALSE wz=0.001 trf=0 mndat=NA gp=3 ini=NA na.strings=NA vmin=NA vmax=NA nclust=100 cutlev=NA grdcol=#666666 mapcol=#666666 hires=TRUE expl=TRUE metad=FALSE sufbrk=m tinc=NA tz=UTC cex=1.2 verb=TRUE
+
+Data matrix: 14245 data x 3 stations
+Computing inter-station distances:  1  2
+
+
+========== STAGE 3 (Final computation of all missing data) ==========
+
+Computing inter-station weights... (done)
+
+Computation of missing data with outlier removal
+(Suggested data replacements are provisional)
+
+The following lines will have one of these formats:
+  Station(rank) Date: Observed -> Suggested (Anomaly, in std. devs.)
+  Iteration Max.data.difference (Station_code)
+2 0 (d1)
+
+Last series readjustment (please, be patient...)
+
+======== End of the missing data filling process, after 27.44 secs 
+
+----------- Final computations:
+
+ACmx: Station maximum absolute autocorrelations of anomalies
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.170   0.175   0.180   0.190   0.200   0.220 
+
+SNHT: Standard normal homogeneity test (on anomaly series)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  46.40   48.00   49.60   76.57   91.65  133.70 
+
+RMSE: Root mean squared error of the estimated data
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  3.782   4.222   4.662   4.544   4.924   5.187 
+
+POD: Percentage of original data
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    100     100     100     100     100     100 
+
+  ACmx SNHT  RMSE POD Code Name  
+1 0.18  49.6 5.2  100 d1   st0001
+2 0.22  46.4 3.8  100 c1   st0002
+3 0.17 133.7 4.7  100 sdl  st0003
+
+----------- Generated output files: -------------------------
+
+precip_1982-2020.txt :  This text output 
+precip_1982-2020_out.csv :  List of corrected outliers 
+precip_1982-2020_brk.csv :  List of corrected breaks 
+precip_1982-2020.pdf :  Diagnostic graphics 
+precip_1982-2020.rda :  Homogenization results. Postprocess with (examples):
+   dahstat('precip',1982,2020) #get averages in file precip_1982-2020-me.csv 
+   dahstat('precip',1982,2020,stat='tnd') #get OLS trends and their p-values 
+   dahgrid('precip',1982,2020,grid=YOURGRID) #get homogenized grids 
+   ... (See other options in the package documentation)
+
