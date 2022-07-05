@@ -1,0 +1,62 @@
+
+HOMOGEN() APPLICATION OUTPUT  (From R's contributed package 'climatol' 3.1.1)
+
+=========== Homogenization of TN, 1982-2017. (Sat Jul  2 22:19:01 2022)
+
+Parameters: varcli=TN anyi=1982 anyf=2017 suf=NA nm=NA nref=10,10,4 std=3 swa=NA ndec=1 dz.max=5 dz.min=-5 wd=0,0,100 snht1=0 snht2=0 tol=0.02 maxdif=0.05 mxdif=0.05 maxite=999 force=FALSE wz=0.001 trf=0 mndat=NA gp=3 ini=NA na.strings=NA vmin=NA vmax=NA nclust=100 cutlev=NA grdcol=#666666 mapcol=#666666 hires=TRUE expl=TRUE metad=FALSE sufbrk=m tinc=NA tz=UTC cex=1.2 verb=TRUE
+
+Data matrix: 13149 data x 3 stations
+Computing inter-station distances:  1  2
+
+
+========== STAGE 3 (Final computation of all missing data) ==========
+
+Computing inter-station weights... (done)
+
+Computation of missing data with outlier removal
+(Suggested data replacements are provisional)
+
+The following lines will have one of these formats:
+  Station(rank) Date: Observed -> Suggested (Anomaly, in std. devs.)
+  Iteration Max.data.difference (Station_code)
+2 0.038 (sdl)
+
+Last series readjustment (please, be patient...)
+
+======== End of the missing data filling process, after 27.32 secs 
+
+----------- Final computations:
+
+ACmx: Station maximum absolute autocorrelations of anomalies
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.3900  0.4050  0.4200  0.4133  0.4250  0.4300 
+
+SNHT: Standard normal homogeneity test (on anomaly series)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  103.7   134.6   165.5   157.5   184.4   203.4 
+
+RMSE: Root mean squared error of the estimated data
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  1.928   2.389   2.851   2.633   2.985   3.120 
+
+POD: Percentage of original data
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  95.00   97.50  100.00   98.33  100.00  100.00 
+
+  ACmx SNHT  RMSE POD Code Name  
+1 0.43 203.4 2.9  100 d1   st0001
+2 0.42 103.7 3.1  100 c1   st0002
+3 0.39 165.5 1.9   95 sdl  st0003
+
+----------- Generated output files: -------------------------
+
+TN_1982-2017.txt :  This text output 
+TN_1982-2017_out.csv :  List of corrected outliers 
+TN_1982-2017_brk.csv :  List of corrected breaks 
+TN_1982-2017.pdf :  Diagnostic graphics 
+TN_1982-2017.rda :  Homogenization results. Postprocess with (examples):
+   dahstat('TN',1982,2017) #get averages in file TN_1982-2017-me.csv 
+   dahstat('TN',1982,2017,stat='tnd') #get OLS trends and their p-values 
+   dahgrid('TN',1982,2017,grid=YOURGRID) #get homogenized grids 
+   ... (See other options in the package documentation)
+

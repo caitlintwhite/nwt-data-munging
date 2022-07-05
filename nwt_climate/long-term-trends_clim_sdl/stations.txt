@@ -1,3 +1,3 @@
-"clim_sdl/d1.txt" -105.5878198 40.05490012 3739 "d1"
-"clim_sdl/c1.txt" -105.543657 40.036902 3022 "c1"
-"clim_sdl/sdl.txt" -105.5923174 40.05492794 3528 "sdl"
+"nwt_climate/long-term-trends_clim_sdl/d1.txt" -105.5878198 40.05490012 3739 "d1"
+"nwt_climate/long-term-trends_clim_sdl/c1.txt" -105.543657 40.036902 3022 "c1"
+"nwt_climate/long-term-trends_clim_sdl/sdl.txt" -105.5923174 40.05492794 3528 "sdl"
