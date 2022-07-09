@@ -21,8 +21,8 @@ source("nwt_climate/R/prep_data_functions.R")
 # specify path to data directory (can be wherever, but raw input files should live in data/raw_data)
 datpath <- "~/Documents/nwt_lter/nwt_climate/data/"
 fluxpath <- "~/Documents/nwt_lter/nwt_climate/data/raw/AmeriFlux"
+ghcndpath <- "~/Documents/nwt_lter/nwt_climate/data/raw/GHCNd"
 
-dir.exists("~/Documents/nwt_lter/nwt_climate/data/raw/AmeriFlux")
 # create subfolders for data out if they don't exist
 for(i in c("qc", "infill", "homogenize")){
   if(!i %in% list.files(datpath)){
@@ -43,10 +43,13 @@ snotel <- getSnotelNeighbors()
 nwtchart <- getNWTcharts()
 nwtchart_infilled <- getNWTchartsinfilled()
 nwtlogger <- getNWTdailyloggers()
-ameriflux <- getAmeriflux()
+ameriflux <- getAmeriflux(fluxpath)
 
 
 # -- PREP DATA -----
-
+ameriflux_prepped <- lapply(ameriflux, prepAmeriflux)
+# review NAs in datasets
+lapply(ameriflux_prepped, function(x) summary(is.na(x)))
+purrr::map(ameriflux_prepped,  summary(is.na(.y)))
 
 

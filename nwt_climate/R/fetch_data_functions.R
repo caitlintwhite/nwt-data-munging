@@ -135,24 +135,86 @@ getNWThrlyinfilled <- function(sites = c("C1", "SDL", "D1")){
 
 
 # == FOR SNOTEL DATA ======
+# function to read in snotel sites near NWT based on NRCS report generator url (v 2.0)
+# > bc url, this may break in the future (go to report generator, select these sites, vars and flags, and use the text-file looking https that pops up when loaded)
 
-# function to read in snotel sites near NWT based on urls (CTW can't figure out url pattern re: 05J##S, ## doesn't correspond to site ID)
-# > meaning: urls may break in future, if so use snotelr package
-getSnotelNeighbors <- function(sites = c("Niwot", "UniversityCamp","Sawtooth", "HighLonesome")){
+
+getSnotelNeighbors <- function(sites = c("Niwot", "UniversityCamp", "LakeEldora", "HighLonesome", "Sawtooth")){
   
-  # store urls for nearby snotel sites in list
-  snotelpath <- list(Niwot = "https://wcc.sc.egov.usda.gov/nwcc/tabget?state=CO&stationidname=05J42S-NIWOT",
-                     UniversityCamp = "https://wcc.sc.egov.usda.gov/nwcc/tabget?state=CO&stationidname=05J08S-UNIVERSITY+CAMP",
-                     Sawtooth = "https://wcc.sc.egov.usda.gov/nwcc/tabget?state=CO&stationidname=05J45S-SAWTOOTH",
-                     HighLonesome = "https://wcc.sc.egov.usda.gov/nwcc/tabget?state=CO&stationidname=05J46S-HIGH+LONESOME"
-  )
+  # snotel sites near or at NWT LTER
+  co_snotel_sites <- c(Niwot = 663, UniversityCamp = 838, LakeEldora = 564, HighLonesome = 1187, Sawtooth = 1251)
   
-  # select sites specified by user
-  snotelpath <- snotelpath[sites]
+  # parts of a very long url...
+  # basic type of report requested (use metric units, daily summaries, from start of record for each station)
+  snotelreport <- "https://wcc.sc.egov.usda.gov/reportGenerator/view_csv/customMultipleStationReport,metric/daily/start_of_period/"
+  # sites to report
+  snotelsites <- "564:CO:SNTL%7C663:CO:SNTL%7C838:CO:SNTL%7C1251:CO:SNTL%7C1187:CO:SNTL%7Cid=%22%22%7Cname/"
+  # site metadata, observational data, and data flags requested
+  # > could mod function to gsub out variables not interested in, but read in all for now
+  snoteldats <- "POR_BEGIN,POR_END/stationId,name,elevation,latitude,longitude,PRCP::value,PRCP::qcFlag,PRCP::qaFlag,PRCPSA::value,PRCPSA::qcFlag,PRCPSA::qaFlag,TAVG::value,TAVG::qcFlag,TAVG::qaFlag,TMAX::value,TMAX::qcFlag,TMAX::qaFlag,TMIN::value,TMIN::qcFlag,TMIN::qaFlag?fitToScreen=false"
   
-  # read data to list
-  snoteldat <- lapply(snotelpath, function(x) read.csv(x, header = T, comment.char = "#", strip.white = T, blank.lines.skip = T))
+  # sub out any sites not interested in
+  removesites <- co_snotel_sites[!names(co_snotel_sites) %in% sites]
+  # if any sites named, remove from url string
+  if(length(removesites) > 0){
+    removesites <- paste0(removesites, ":CO:SNTL%7C")
+    removesites <- stringr::str_flatten(removesites, collapse = "|")
+    snotelsites <- gsub(removesites, "", snotelsites)
+  }
+  
+  # put parts of url together in order: report type, sites, data requested
+  snotelurl <- paste0(snotelreport, snotelsites, snoteldats)
+  # read in data
+  snoteldat <- read.csv(snotelurl, comment.char = "#", na.strings = c(NA, "NA", "", " "), strip.white = T, blank.lines.skip = T, stringsAsFactors = F)
   
   return(snoteldat)
 }
 
+
+# Snotel flag notes:
+# Quality Control flags included:
+#
+# Flag    Name                Description
+#  V      Valid               Validated Data
+#  N      No Profile          No profile for automated validation
+#  E      Edit                Edit, minor adjustment for sensor noise
+#  B      Back Estimate       Regression-based estimate for homogenizing collocated Snow Course and Snow Pillow data sets
+#  K      Estimate            Estimate
+#  X      External Estimate   External estimate
+#  S      Suspect             Suspect data
+# 
+# Quality Assurance flags included:
+#
+# Flag    Name                Description
+#  U      Unknown             Unknown
+#  R      Raw                 No Human Review
+#  P      Provisional         Preliminary Human Review
+#  A      Approved            Processing and Final Review Completed
+
+
+
+
+# ----------------------------------------
+# OLDER VERSIONS OF FUNCTIONS (save code)
+
+# function to read in snotel sites near NWT based on urls (CTW can't figure out url pattern re: 05J##S, ## doesn't correspond to site ID)
+# > meaning: urls may break in future, if so use snotelr package
+# > why retired: CTW figured out how to modify reportGenerator url to read in data -- with flagging!
+# getSnotelNeighbors <- function(sites = c("Niwot", "UniversityCamp","Sawtooth", "HighLonesome", "LakeEldora")){
+#   
+#   # store urls for nearby snotel sites in list
+#   snotelpath <- list(Niwot = "https://wcc.sc.egov.usda.gov/nwcc/tabget?state=CO&stationidname=05J42S-NIWOT",
+#                      UniversityCamp = "https://wcc.sc.egov.usda.gov/nwcc/tabget?state=CO&stationidname=05J08S-UNIVERSITY+CAMP",
+#                      Sawtooth = "https://wcc.sc.egov.usda.gov/nwcc/tabget?state=CO&stationidname=05J45S-SAWTOOTH",
+#                      HighLonesome = "https://wcc.sc.egov.usda.gov/nwcc/tabget?state=CO&stationidname=05J46S-HIGH+LONESOME",
+#                      LakeEldora = "https://wcc.sc.egov.usda.gov/nwcc/tabget?state=CO&stationidname=05J41S-LAKE+ELDORA"
+#   )
+#   
+#   # select sites specified by user
+#   snotelpath <- snotelpath[sites]
+#   
+#   # read data to list
+#   snoteldat <- lapply(snotelpath, function(x) read.csv(x, header = T, comment.char = "#", strip.white = T, blank.lines.skip = T))
+#   
+#   return(snoteldat)
+# }

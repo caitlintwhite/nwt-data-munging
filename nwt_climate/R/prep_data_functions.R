@@ -8,24 +8,66 @@ set_path <- function(){
 
 na_vals <- c(" ", "", ".", NA, NaN, "NA", "NaN", -9999)
 
-#fxn to convert F to C
+#function to convert degrees F to C
 F2C <- function(xF){
   xC <- (xF - 32) * (5/9)
   xC <- round(xC, 2)
   return(xC)
 }
 
-# get snotel datasets
-read.csv()
+# function to convert inches to mm
+in2mm <- function(xI){
+  xM <- (xI * (1/25.4))
+  xM <- round(xM, 2) 
+  return(xM)
+}
 
-prepSnotel <- function(){
+
+# get snotel datasets
+
+
+prepSnotel <- function(dat){
+  # mainly need to convert temps from F to C, ppt from inch to mm
+  # and rename cols to something shorter
+  # all dats have same data structure
+  
   
 }
 
 
+# function to read, stack, and prep all ghcnd datasets
+# > all .csvs downloaded should live in same folder
+prepNOAA <- function(datpath){
+  
+  require(magrittr)
+  require(dplyr)
+  
+  datfiles <- list.files(datpath, full.names = T, pattern = "[.]csv$")
+  # create master df for row-binding all datasets
+  master <- data.frame()
+  for(i in datfiles){
+    dat <- read.csv(i, na.strings = c(" ", "", NA, "NA"), blank.lines.skip = T, stringsAsFactors = F) 
+    # bind_rows efficiently rbinds datasets with mismatched colnames, preserving all colnames 
+    # if ever bind_rows bonks, can use setdiff() on names
+    master <- dplyr::bind_rows(master, dat)
+    }
+      
+  # pull in observation data and flags (tidy) so metric in one col, value in next, and flags (attributes) are in next
+  # goal is to pull out time of observation where available
+  mets_atts <- names(master)[grepl("ATTRIB", names(master))]
+  mets <- gsub("_[A-Z]+$", "", mets_atts)
+  master2 <- tidyr::gather(master, key = METRIC, value = val, c(all_of(mets), all_of(mets_atts))) %>%
+    dplyr::mutate(type = ifelse(grepl("ATTR", METRIC), "ATTRIBUTE", "VALUE"),
+                  METRIC = gsub("_[A-Z]+$", "", METRIC)) %>%
+    tidyr::spread(type, val) %>%
+    dplyr::mutate(VALUE = as.numeric(VALUE),
+                  time_obs = stringr::str_extract(ATTRIBUTE, "[0-9]{4}")) %>%
+    dplyr::group_by(NAME, METRIC) %>%
+    dplyr::mutate(check_time = length(unique(time_obs[!is.na(time_obs)]))) %>%
+    dplyr::ungroup()
+     
 
-prepNOAA <- function(dat){
-    dat$DATE <- as.Date(dat$DATE)
+dat$DATE <- as.Date(dat$DATE)
     tempdat <- data.frame(station = unique(dat$NAME),
                           stationID = unique(dat$STATION),
                           date = seq.Date(min(dat$DATE), max(dat$DATE), 1))
@@ -75,10 +117,10 @@ prepCSU <- function(dat){
 # function to read in Ameriflux data for sites at/near NWT (static file read-in)
 # > for dynamic read in, use amerifluxr package (CTW slightly prefers more control with static file read in to amerifluxr package)
 
-getAmeriflux <- function(fluxpath){
+getAmeriflux <- function(datpath){
   
   # id unzipped folders that have ameriflux data
-  fluxfolders <- list.dirs(fluxpath, full.names = T)
+  fluxfolders <- list.dirs(datpath, full.names = T)
   # grab AMF folders only
   fluxfolders <- fluxfolders[grep("AMF", fluxfolders)]
   # grab .csv files within each folder
@@ -129,17 +171,29 @@ prepAmeriflux <- function(dat, mets = c("TA", "P")){
   tempdat$date_end <- substr(tempdat$TIMESTAMP_END, start = 1, stop = 8)
   tempdat$time_start <- substr(tempdat$TIMESTAMP_START, start = 9, stop = 12)
   tempdat$time_end <- substr(tempdat$TIMESTAMP_END, start = 9, stop = 12)
-  tempdat$TIMESTAMP_START <- as.POSIXct(tempdat$TIMSETAMP_START, format = "%Y%m%d%H%M%OS", tz = "UTC")
-  tempdat$TIMESTAMP_END <- as.POSIXct(tempdat$TIMSETAMP_END, format = "%Y%m%d%H%M%OS", tz = "UTC")
+  # clean up time formatting
+  tempdat[grep("^TIME", names(tempdat))] <- lapply(tempdat[grep("^TIME", names(tempdat))], function(x) as.POSIXct(x, format = "%Y%m%d%H%M%OS", tz = "UTC"))
+  tempdat[grep("^date", names(tempdat))] <- lapply(tempdat[grep("^date", names(tempdat))], function(x) as.Date(x, format = "%Y%m%d"))
   
-  # clean up
-  tempdat <- dplyr::select(tempdat, date_start:fluxname, TIMESTAMP_START:ncol(tempdat)) %>%
-    mutate_at(.vars = c("date_start", "date_end"), .funs = function(x) as.Date(x, format = "%Y%m%d")) %>%
-    mutate_at(.vars = names(.)[grepl("TIME", names(.))], as.POSIXct())
-    mutate_at(.vars = names(.)[grepl(keepcols, names(.))], as.numeric)
+  # rearrange cols
+  tempdat <- subset(tempdat, select = c(grep("SITE", names(tempdat)), 
+                                         grep("LOC", names(tempdat)),  
+                                         grep("TIME", names(tempdat)),
+                                         date_start:time_end,
+                                         grep(keepcols, names(tempdat))))
+  # keep site-time-loc cols where they are, order variables columns by variable-flagging
+  tempdat <- tempdat[c(names(tempdat)[grepl("site|loc|date|time", names(tempdat), ignore.case = T)], 
+                        # order variables and their flag cols alphabetically
+                       sort(names(tempdat)[grepl(keepcols, names(tempdat))]))]
+  
+  # subset dataset to first date-time where at least one variable measured is not NA
+  narows <- apply(tempdat[grep(keepcols, names(tempdat))],1, function(x) all(is.na(x))) # are all measured/flagged obs NA? (T/F)
+  # first element that is false will be starting row that has firstnon-NA value, take that to end of data record
+  tempdat <- tempdat[names(narows[!narows][1]):nrow(tempdat),] 
   
   return(tempdat)
 }
+
 
 
 # == GENERIC FUNCTIONS =====
