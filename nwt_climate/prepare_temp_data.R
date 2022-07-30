@@ -17,8 +17,9 @@ library(lubridate)
 # source scripts (this will change for package)
 source("nwt_climate/R/fetch_data_functions.R")
 source("nwt_climate/R/prep_data_functions.R")
+source("nwt_climate/R/dataviz_functions.R")
 
-# specify path to data directory (can be wherever, but raw input files should live in data/raw_data)
+# specify path to data directory (can be wherever, but raw input files should live in data/raw)
 datpath <- "~/Documents/nwt_lter/nwt_climate/data/"
 fluxpath <- "~/Documents/nwt_lter/nwt_climate/data/raw/AmeriFlux"
 ghcndpath <- "~/Documents/nwt_lter/nwt_climate/data/raw/GHCNd"
@@ -44,6 +45,8 @@ nwtchart <- getNWTcharts()
 nwtchart_infilled <- getNWTchartsinfilled()
 nwtlogger <- getNWTdailyloggers()
 ameriflux <- getAmeriflux(fluxpath)
+ghcnd <- getGHCND(ghcndpath)
+
 
 
 # -- PREP DATA -----
@@ -52,4 +55,17 @@ ameriflux_prepped <- lapply(ameriflux, prepAmeriflux)
 lapply(ameriflux_prepped, function(x) summary(is.na(x)))
 purrr::map(ameriflux_prepped,  summary(is.na(.y)))
 
+
+# viz data available for ameriflux, sdl
+plot_all(listobject =nwtchart, timecol = "date", mets = c("airtemp", "ppt"))
+plot_all(listobject =nwtlogger, timecol = "date", mets = c("airtemp"), plotNA = F)
+
+plot_all_groups(snotel2[,!grepl("Flag", names(snotel2))], timecol = "Date", mets = c("Pre.*", "Air.*"), 
+                groupvars = "Station.Name", plotNA = F)
+
+
+ghcndattr <- names(ghcnd)[grepl("ATTR", names(ghcnd))]
+ghcndmets <- gsub("_A.*$", "", ghcndattr)
+plot_all_groups(ghcnd, timecol = "DATE", mets = ghcndmets, groupvars = "NAME", allvars = F)
+plot_all_groups(ghcnd, timecol = "DATE", mets = ghcndmets, groupvars = "NAME", allvars = F, plotNA = F)
 

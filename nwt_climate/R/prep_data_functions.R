@@ -37,7 +37,24 @@ prepSnotel <- function(dat){
 
 # function to read, stack, and prep all ghcnd datasets
 # > all .csvs downloaded should live in same folder
-prepNOAA <- function(datpath){
+getGHCND <- function(datpath){
+  
+  datfiles <- list.files(datpath, full.names = T, pattern = "[.]csv$")
+  
+  # create master df for row-binding all datasets
+  master <- data.frame()
+  for(i in datfiles){
+    dat <- read.csv(i, na.strings = c(" ", "", NA, "NA"), blank.lines.skip = T, stringsAsFactors = F)
+    # convert date to date class -- in standard form so should be able to detect
+    dat$DATE <- as.Date(dat$DATE)
+    # bind_rows efficiently rbinds datasets with mismatched colnames, preserving all colnames 
+    # if ever bind_rows bonks, can use setdiff() on names
+    master <- dplyr::bind_rows(master, dat)
+  }
+ return(master) 
+}
+
+prepGHCND <- function(datpath){
   
   require(magrittr)
   require(dplyr)
@@ -191,6 +208,9 @@ prepAmeriflux <- function(dat, mets = c("TA", "P")){
   # first element that is false will be starting row that has firstnon-NA value, take that to end of data record
   tempdat <- tempdat[names(narows[!narows][1]):nrow(tempdat),] 
   
+  # make met observation columns, e.g,. ppt, temp, numeric (corresponding flag columns stay as character)
+  tempdat[grep(keepcols, names(tempdat))] <- sapply(tempdat[grep(keepcols, names(tempdat))], as.numeric)
+  
   return(tempdat)
 }
 
@@ -201,6 +221,137 @@ prep_temp <- function(){
   
 }
 
+# function to tidy (long-form) temp (this could be made generic for ppt too..)
+tidytemp <- function(dat, datasource = NA, sep = "_", special = "flag", dropcol = NA){
+  #if cols to drop, drop
+  if(!is.na(dropcol)){
+    dat <- dat[!colnames(dat) %in% dropcol] 
+  }
+  
+  # gather temp and any special cols
+  # id start of temp cols
+  temp_pos <- min(grep("temp", colnames(dat)))
+  dat_long <- dat %>%
+    gather(met, temp, temp_pos:ncol(.)) %>%
+    arrange(met, date) %>%
+    # add month and year
+    mutate(yr = year(date),
+           mon = month(date),
+           doy = yday(date)) %>%
+    dplyr::select(c(1:date, yr:doy, met:ncol(.)))
+  
+  
+  # if special cols exist, pull out special cols and rejoin wide-form
+  if(!is.na(special)){
+    tempspecial <- dat_long %>%
+      filter(grepl(special, met)) %>%
+      mutate(met = gsub(paste0(special,"_"), "", met))
+    # rename temp col as special val
+    colnames(tempspecial)[which(colnames(tempspecial) == "temp")] <- special
+    
+    # drop special vals from long-form dat and join wide to temp vals
+    dat_long <- subset(dat_long, !grepl(special, met)) %>%
+      left_join(tempspecial) %>%
+      dplyr::select(LTER_site:date, yr:doy, met:ncol(.)) 
+  }
+  
+  # make sure temp is numeric (can be coerced to character when gathered with flags)
+  dat_long$temp <- as.numeric(dat_long$temp)
+  
+  # if desired, prefix temp and special col colname with datasource
+  if(!is.na(datasource)){
+    colnames(dat_long)[colnames(dat_long) %in% c("temp", special)] <- paste(datasource, colnames(dat_long)[colnames(dat_long) %in% c("temp", special)], sep = sep)
+  }
+  
+  # return tidy dataset and clean up environment
+  return(dat_long)
+  rm(tempspecial, temp_pos)
+}
+
+
+# for wide-form
+pare_temp <- function(dat, tempstring, flagstring = NA, keepcols, datecol = "date", DTR = T, maxstring = "max", minstring = "min", reps = NA){
+  tempcols <- names(dat)[grepl(tempstring, names(dat), ignore.case = T)]
+  tempdat <- dat[c(keepcols, tempcols)]
+  
+  if(!is.na(flagstring)){
+    flagcols <- names(tempdat[grepl(flagstring, names(tempdat), ignore.case = T)])
+    flagdat <- subset(dat, select = c(keepcols, flagcols))
+    # if creating diurnal temp, collapse any flags from maxT and minT
+    if(DTR){
+      if(all(is.na(reps))){
+        maxcol <- names(flagdat)[grepl(maxstring, names(flagdat), ignore.case = T)]
+        mincol <- names(flagdat)[grepl(minstring, names(flagdat), ignore.case = T)]
+        flagdat <- rowwise(flagdat) %>%
+          mutate(flag_DTR = ifelse(is.na(get(maxcol)) & is.na(get(mincol)), NA, 
+                                   ifelse(is.na(get(maxcol)), paste0(minstring, ": ", get(mincol)), 
+                                          ifelse(is.na(get(mincol)), paste0(maxstring, ": ", get(maxcol)),
+                                                 ifelse(get(maxcol) == get(mincol), as.character(get(maxcol)),
+                                                        paste0(maxstring, ": ", get(maxcol), ", ", minstring, ": ", get(mincol))))))) %>%
+          ungroup()
+        #prefix whatever flagstring is being used
+        names(flagdat)[names(flagdat) == "flag_DTR"] <- paste0(flagstring, "_DTR")
+      }else{
+        # for multiple sensors, calculate per sensor DTR
+        for(r in reps){
+          maxcol <- names(flagdat)[grepl(r, names(flagdat), ignore.case = T) & grepl(maxstring, names(flagdat), ignore.case = T)]
+          mincol <- names(flagdat)[grepl(r, names(flagdat), ignore.case = T) & grepl(minstring, names(flagdat), ignore.case = T)]
+          flagdat <- rowwise(flagdat) %>%
+            mutate(flag_DTR = ifelse(is.na(get(maxcol)) & is.na(get(mincol)), NA, 
+                                     ifelse(is.na(get(maxcol)), paste0(minstring, ": ", get(mincol)), 
+                                            ifelse(is.na(get(mincol)), paste0(maxstring, ": ", get(maxcol)),
+                                                   ifelse(get(maxcol) == get(mincol), as.character(get(maxcol)),
+                                                          paste0(maxstring, ": ", get(maxcol), ", ", minstring, ": ", get(mincol))))))) %>%
+            ungroup()
+          #prefix whatever flagstring is being used and append sensor to newly created DTR flag with sensor
+          names(flagdat)[names(flagdat) == "flag_DTR"] <- paste0(flagstring, "_DTR_", r)
+        }
+      }
+      flagcols <- names(flagdat)[grep(flagstring, names(flagdat), ignore.case = T)]
+    }
+    # make long form
+    flagdat <- gather(flagdat, metric, flag, c(flagcols))
+    # drop flag cols from tempdat
+    tempdat <- tempdat[!names(tempdat) %in% flagcols]
+  }
+  
+  if(DTR){
+    if(all(is.na(reps))){
+      tempdat$DTR <- tempdat[[grep(maxstring, names(tempdat), ignore.case = T)]] - tempdat[[grep(minstring, names(tempdat), ignore.case = T)]]
+    }else{
+      # for multiple sensors, calculate per sensor DTR
+      for(r in reps){
+        maxcol <- names(tempdat)[grepl(r, names(tempdat), ignore.case = T) & grepl(maxstring, names(tempdat), ignore.case = T)]
+        mincol <- names(tempdat)[grepl(r, names(tempdat), ignore.case = T) & grepl(minstring, names(tempdat), ignore.case = T)]
+        tempdat[paste0("DTR_", r)] <- tempdat[maxcol] - tempdat[mincol]
+      }
+    }
+  }
+  
+  # make temperature data long form (tidy)
+  temppos <- min(which(names(tempdat) %in% tempcols))
+  templong <- gather(tempdat, metric, temp, c(temppos:ncol(tempdat)))
+  
+  #re-join flagging
+  if(!is.na(flagstring)){
+    # clean up metric in flagdat
+    #tempcols <- unique(templong$metric)
+    # make regex
+    metricvals <- str_flatten(unique(templong$metric), collapse = "|")
+    flagdat$metric <- str_extract(flagdat$metric, pattern = metricvals)
+    templong <- merge(templong, flagdat, all.x = T)
+  }
+  
+  # subset data so only period of measurement included (instrument active lifetime)
+  # > this matters for loggers vs. hmps
+  templong_startdate <- min(with(templong, unique(get(datecol)[!is.na(temp)])))
+  templong_enddate <- max(with(templong, unique(get(datecol)[!is.na(temp)])))
+  templong <- subset(templong, get(datecol) >= templong_startdate)
+  templong <- subset(templong, get(datecol) <= templong_enddate)
+  
+  # return dataset
+  return(templong)
+}
 
 
 prep_ppt <- function(){
