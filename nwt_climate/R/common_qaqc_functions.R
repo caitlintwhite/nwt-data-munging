@@ -1,6 +1,99 @@
 # qaqc functions common across ppt and temp
 
 # check all expected timestamps present
+#yr, mon, doy, time + data source if desired
+
+standardize_time <- function(newdat, dateform){
+  # create data frame of all expected timestamps
+  tempdates <- sort(unique(newdat$date))
+  mindate <- min(tempdates)
+  maxdate <- max(tempdates)
+  datestep <- tempdates[2] - tempdates[1]
+  dateseq <- seq.Date(mindate, maxdate, by = datestep)
+  
+  dateframe <- data.frame(date = dateseq,
+                          yr = lubridate::year(dateseq),
+                          mon = lubridate::month(dateseq),
+                          doy = lubridate::yday(dateseq))
+  
+  
+  if(grepl("%H", dateform, ignore.case = T)){
+    tempdt <- sort(unique(newdat$date_time))
+    mindt <- min(tempdt)
+    maxdt <- max(tempdt)
+    # calculate interval
+    timeinterval <- tempdt[2] - tempdt[1]
+    # create date_time sequence
+    dtseq <- seq.POSIXt(mindt, maxdt, by = timeinterval)
+    # extract time pattern from dateform
+    timestep <- str_extract(dateform, "%H.*S+")
+    dtframe <- data.frame(date_time = dtseq,
+                          date = as.Date(dtseq),
+                          timestamp = format(dtseq, format = timestep))
+    # merge timestamps with dateframe
+    dateframe <- merge(dtframe, dateframe, all = T)
+  }
+  
+  # combine date/time descriptive info to data
+  newdat <- merge(dateframe, newdat, all = T)
+  # print missing datetimes found (if any)
+  return(newdat)
+}
+
+check_datetime <- function(dat, datecol = "date", dateform = "%Y-%m-%d", idcols = NA, groupvar = NA, datsource = NA){
+  
+  # assign data to new frame with a date column for merging
+  newdat <- dat
+  if(grepl("%H", dateform)){
+    names(newdat)[names(newdat) == datecol] <- "date_time"
+    # ensure in posix form
+    newdat$date_time <- as.POSIXct(newdat$date_time, format = dateform)
+    newdat$date <- as.Date(newdat$date_time)
+  }else{
+    names(newdat)[names(newdat) == datecol] <- "date"
+    # ensure in date form
+    newdat$date <- as.Date(newdat$date, format = dateform)
+  }
+  master <- data.frame()
+  # if no individual sites, proceed with using min and max time of global dataset
+  if(is.na(groupvar)){
+    master <- standardize_time(newdat, dateform)
+    # print date range and # missing timestamps found
+    print(paste("date range is:")) 
+    print(range(newdat$date))
+    print(paste(sum(is.na(newdat[[groupvar]])), "missing time intervals corrected"))
+    # fill down any static cols
+    if(!is.na(idcols[1])){
+      newdat[,idcols] <- newdat[1,idcols]  # min (first) date should have info for all static id cols 
+    }
+  }else{
+    # store all of newdat in its own temp object
+    newdat_all <- newdat
+    # iterate by site if individual sites present
+    for(g in unique(newdat_all[[groupvar]])){
+      # subset group of interest
+      newdat <- newdat_all[newdat_all[groupvar] == g,]
+      newdat <- standardize_time(newdat, dateform)
+      # print date range and # missing timestamps found
+      print(paste("date range for", g, "is:")) 
+      print(range(newdat$date))
+      print(paste(sum(is.na(newdat[[groupvar]])), "missing time intervals corrected"))
+      # fill down any static cols
+      if(!is.na(idcols[1])){
+        newdat[,idcols] <- newdat[1,idcols]  # min (first) date should have info for all static id cols 
+      }
+      # append subset to master df
+      master <- rbind(master, newdat)
+    }
+  }
+  # if data source indicated, add to beginning
+  if(!is.na(datsource)){
+    master <- cbind(data_source = datsource, master)
+  }
+  
+  return(data.frame(master))
+}
+
 
 # plausibility checks (e.g. outside physically plausible value or range detection of instrument)
 ## allow data user to enter bounds (max, min) and screen for those
