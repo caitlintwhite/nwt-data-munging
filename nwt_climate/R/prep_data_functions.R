@@ -17,8 +17,15 @@ F2C <- function(xF){
 
 # function to convert inches to mm
 in2mm <- function(xI){
-  xM <- (xI * (1/25.4))
-  xM <- round(xM, 2) 
+  xmm <- (xI * (1/25.4))
+  xmm <- round(xmm, 2) 
+  return(xmm)
+}
+
+# function to convert feet to meters (e.g., for elevation)
+ft2m <- function(xFt){
+  xM <- (xFt * 0.3048)
+  xM <- round(xM, 2)
   return(xM)
 }
 
@@ -26,12 +33,31 @@ in2mm <- function(xI){
 # get snotel datasets
 
 
-prepSnotel <- function(dat){
-  # mainly need to convert temps from F to C, ppt from inch to mm
-  # and rename cols to something shorter
-  # all dats have same data structure
+tidySnotel <- function(dat, hasFlags = T){
+  # all dats from different stations have same structure
   
+  mets <- names(dat)[grepl("Precip|Temp", names(dat))]
+  dat_out <- tidyr::gather(dat, metric, value, dplyr::all_of(mets))
+  # if QA or QC flags present, separate from measurements
+  if(hasFlags){
+   dat_out$type <- with(dat_out, ifelse(grepl("Flag", metric), stringr::str_extract(metric, "Q.[.]Flag"), "measurement"))
+   # clean up metric
+   dat_out$metric <- with(dat_out, ifelse(grepl("Snow.adj", metric), stringr::str_extract(metric, "P.*adj"),
+                                                 stringr::str_extract(metric,"^Air.*mum|^Air.*age|^Pre.*ment")))
+   dat_out <- tidyr::spread(dat_out, type, value)
+  }
+  # convert measurement to numeric
+  dat_out$measurement <- as.numeric(dat_out$measurement)
   
+  # clean up colnames
+  names(dat_out) <- casefold(names(dat_out))
+  names(dat_out)[grepl("elev", names(dat_out))] <- "elevation"
+  names(dat_out) <- gsub("[.]", "_", names(dat_out))
+  
+  # clean up extra periods in metric
+  dat_out$metric <- gsub("...", ".", dat_out$metric, fixed = T)
+  
+  return(dat_out)
 }
 
 
@@ -54,48 +80,33 @@ getGHCND <- function(datpath){
  return(master) 
 }
 
-prepGHCND <- function(datpath){
+tidyGHCND <- function(dat, mets = c("TMAX", "TMIN", "PRCP"), hasAttributes = T){
   
-  require(magrittr)
-  require(dplyr)
+  # collapse metric strings to regex search string
+  mets <- stringr::str_flatten(mets, collapse = "|")
   
-  datfiles <- list.files(datpath, full.names = T, pattern = "[.]csv$")
-  # create master df for row-binding all datasets
-  master <- data.frame()
-  for(i in datfiles){
-    dat <- read.csv(i, na.strings = c(" ", "", NA, "NA"), blank.lines.skip = T, stringsAsFactors = F) 
-    # bind_rows efficiently rbinds datasets with mismatched colnames, preserving all colnames 
-    # if ever bind_rows bonks, can use setdiff() on names
-    master <- dplyr::bind_rows(master, dat)
-    }
-      
   # pull in observation data and flags (tidy) so metric in one col, value in next, and flags (attributes) are in next
-  # goal is to pull out time of observation where available
-  mets_atts <- names(master)[grepl("ATTRIB", names(master))]
-  mets <- gsub("_[A-Z]+$", "", mets_atts)
-  master2 <- tidyr::gather(master, key = METRIC, value = val, c(all_of(mets), all_of(mets_atts))) %>%
-    dplyr::mutate(type = ifelse(grepl("ATTR", METRIC), "ATTRIBUTE", "VALUE"),
-                  METRIC = gsub("_[A-Z]+$", "", METRIC)) %>%
-    tidyr::spread(type, val) %>%
-    dplyr::mutate(VALUE = as.numeric(VALUE),
-                  time_obs = stringr::str_extract(ATTRIBUTE, "[0-9]{4}")) %>%
-    dplyr::group_by(NAME, METRIC) %>%
-    dplyr::mutate(check_time = length(unique(time_obs[!is.na(time_obs)]))) %>%
-    dplyr::ungroup()
-     
+  metcols <- names(dat)[grepl(mets, names(dat), ignore.case = T)]
+  # gather measurements and their attributes (if present)
+  dat_out <- tidyr::gather(dat, key = METRIC, value = MEASUREMENT, c(all_of(metcols)))
+  # if attributes present, split out
+  if(hasAttributes){
+    dat_out$type <- ifelse(grepl("ATTR", dat_out$METRIC), "zATTRIBUTE", "MEASUREMENT")
+    # clean up metric
+    dat_out$METRIC <- gsub("_AT.*$", "", dat_out$METRIC)
+    # spread attributes and measurements
+    dat_out <- tidyr::spread(dat_out, type, MEASUREMENT)
+    # split attribute
+    dat_out <- tidyr::separate(dat_out, zATTRIBUTE, into = c("M", "Q", "S", "time_observed"), sep = ",", )
+    # if any attribute blank, assign NA
+    dat_out[c("M", "Q", "S", "time_observed")] <- lapply(dat_out[c("M", "Q", "S", "time_observed")], function(x) ifelse(x=="",NA, x))
+  }
+  # class measurement as numeric 
+  dat_out$MEASUREMENT <- as.numeric(dat_out$MEASUREMENT)
+  # lowcase names
+  names(dat_out) <- casefold(names(dat_out))
 
-dat$DATE <- as.Date(dat$DATE)
-    tempdat <- data.frame(station = unique(dat$NAME),
-                          stationID = unique(dat$STATION),
-                          date = seq.Date(min(dat$DATE), max(dat$DATE), 1))
-    tempdat <- tempdat %>%
-      mutate(yr = year(date),
-             mon = month(date), 
-             doy = yday(date)) %>%
-      left_join(dat, by = c("date" = "DATE"))
-    keepnames <- which(colnames(tempdat) %in% c("TMAX", "TMIN", "PRCP", "SNOW"))
-    tempdat <- tempdat[,c(1:6, keepnames)]
-    return(tempdat)
+  return(dat_out)
 }
 
 
@@ -206,17 +217,116 @@ prepAmeriflux <- function(dat, mets = c("TA", "P")){
   # subset dataset to first date-time where at least one variable measured is not NA
   narows <- apply(tempdat[grep(keepcols, names(tempdat))],1, function(x) all(is.na(x))) # are all measured/flagged obs NA? (T/F)
   # first element that is false will be starting row that has firstnon-NA value, take that to end of data record
-  tempdat <- tempdat[names(narows[!narows][1]):nrow(tempdat),] 
+  tempdat <- tempdat[names(narows[!narows][1]):nrow(tempdat),]
   
   # make met observation columns, e.g,. ppt, temp, numeric (corresponding flag columns stay as character)
-  tempdat[grep(keepcols, names(tempdat))] <- sapply(tempdat[grep(keepcols, names(tempdat))], as.numeric)
-  
+  tempdat[grep(keepcols, names(tempdat))] <- data.frame(apply(tempdat[grep(keepcols, names(tempdat))], 2, as.numeric))
+
   return(tempdat)
+}
+
+
+# function to tidy ameriflux data
+
+tidyAmeriflux <- function(datlist, checkdate = T, ...){
+  dat_out <- stackData(datlist, ...)
+  
+  # standardize names to match others
+  names(dat_out) <- casefold(names(dat_out))
+  names(dat_out) <- gsub("site", "station", names(dat_out))
+  names(dat_out)[grepl("elev", names(dat_out))] <- "elevation"
+  names(dat_out)[grepl("lat", names(dat_out))] <- "latitude"
+  names(dat_out)[grepl("lon", names(dat_out))] <- "longitude"
+  
+  # separate infilled from raw
+  dat_out$type <- with(dat_out, ifelse(grepl("_PI_F", metric), "qc", "raw"))
+  dat_out$metric <- gsub("_PI_F", "", dat_out$metric)
+  dat_out$rep <- stringr::str_extract(dat_out$metric, "_.*$")
+  dat_out$metric <- gsub("_.*", "", dat_out$metric)
+  
+  require(magrittr)
+  # tidy data
+  dat_out <- dat_out %>%
+      tidyr::gather(met2, measurement, max:tot) %>%
+      tidyr::unite(metric, metric, met2, sep = "_") %>%
+      tidyr::gather(datum, value, nobs, measurement) %>%
+      tidyr::unite(type, type, datum, sep = "_") %>%
+      tidyr::spread(type, value)
+    
+    # drop any precip metric that is not daily total precip, or temp metric that is the daily sum
+    dat_out <- subset(dat_out, !grepl("P_m|P_a|TA_tot", metric))
+    # make metric like nwt naming convention
+    dat_out$metric <- gsub("P_", "ppt_", dat_out$metric)
+    dat_out$metric <- gsub("TA_", "airtemp_", dat_out$metric)
+    
+  if(checkdate){
+  # give it yr, mon, doy
+  dat_out <- check_datetime(dat_out, datecol = "date_start", groupvar = c("station_id"))
+  }
+  
+  return(dat_out)
 }
 
 
 
 # == GENERIC FUNCTIONS =====
+# function unlist datasets and stack them to write out
+stackData <- function(datlist, data_source = NA){
+  dat_out <- data.frame()
+  for(i in 1:length(datlist)){
+    dat_out <- dplyr::bind_rows(dat_out, datlist[[i]])
+  }
+  if(!is.na(data_source)){
+    dat_out <- cbind(data_source, dat_out)
+  }
+  return(dat_out)
+}
+
+
+# function to convert sub-daily Ameriflux data (or other datasets) to daily
+# need to provide which col to defer to for 24hr period
+sub2daily <- function(dat, intervalcol = "date_start", mets = c("TA", "P"), idcols = c("SITE", "LOC"), missingAllowed = 2){
+  
+  require(magrittr)
+  
+  # prep search string for metric columns to collapse
+  mets <- paste0("^", mets, "($|_)")
+  mets <- stringr::str_flatten(mets, collapse = "|")
+  
+  # gather mets in one column for counting missing
+  dat_out <- tidyr::gather(dat, metric, measurement, names(dat)[grepl(mets, names(dat))])
+  dat_out <- dplyr::grouped_df(dat_out, vars = c(intervalcol, "metric")) %>% # I think pipe is required for group_by to apply to later commands?
+    mutate(nobs = sum(!is.na(measurement)))
+  # note whether there are sufficient observations to calculate daily value
+  dat_out$pass <- with(dat_out, nobs >= max(nobs) - missingAllowed)
+  # calculate dailies for temp and precip
+  dat_out <- dat_out %>%
+    mutate(max = ifelse(pass, max(measurement, na.rm = T), NA),
+           min = ifelse(pass, min(measurement, na.rm = T), NA),
+           avg = ifelse(pass, mean(measurement, na.rm = T), NA), 
+           tot = ifelse(pass, sum(measurement, na.rm = T), NA)) %>%
+    ungroup()
+  
+  # prep search string for id columns to keep
+  idcols <- stringr::str_flatten(idcols, collapse = "|")
+  
+  # distill df to daily obs
+  keepcols <- names(dat_out)[grepl(idcols, names(dat_out), ignore.case = T)]
+  keepcols <- c(keepcols, intervalcol, "metric", "nobs", "max", "min", "avg", "tot")
+  dat_out <- distinct(dat_out[keepcols])
+  dat_out <- data.frame(dat_out) # no tibbles
+  
+  return(dat_out)
+  
+  #dat_out$intervals <- aggregate(dat_out, by = list(dat_out[[intervalcol]], dat_out$metric), FUN = function(x) sum(!is.na(x)))
+  
+}
+
+
+complete_datetime <- function(){
+  
+}
+
 prep_temp <- function(){
   
 }
@@ -354,7 +464,7 @@ pare_temp <- function(dat, tempstring, flagstring = NA, keepcols, datecol = "dat
 }
 
 
-prep_ppt <- function(){
+prep_ppt <- function(dat, pptstring, flagcols){
   
 }
 

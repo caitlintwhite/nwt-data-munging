@@ -30,7 +30,7 @@ available_dataviz <- function(dat, timecol, id = NULL, mets, allvars = T, plotNA
   # determine expected time interval based on most recent data
   timeinterval <- plotdat[[timecol]][nrow(plotdat)] - plotdat[[timecol]][nrow(plotdat)-1]
   # create expected time series based on time class
-  if(class(plotdat[[timecol]]) == "Date"){
+  if("Date" %in% class(plotdat[[timecol]])){
     missing_times <- seq.Date(from = min(plotdat[[timecol]]), to = max(plotdat[[timecol]]), by = timeinterval)
   }else{
     # assume it's POSIX format if not Date
@@ -38,20 +38,21 @@ available_dataviz <- function(dat, timecol, id = NULL, mets, allvars = T, plotNA
   }
   # create df of expected times and data values
   expectedtime_df <- data.frame(missing_times)
+  expectedtime_df$missing <- !missing_times %in% plotdat[[timecol]]
   expectedtime_df <- cbind(expectedtime_df, 
                            matrix(nrow = length(missing_times), ncol = length(unique(plotdat$metric)),
                                   dimnames = list(NULL, unique(plotdat$metric))))
   expectedtime_df <- gather(expectedtime_df, metric, value, unique(plotdat$metric))
   # drop empty value col then merge data
-  expectedtime_df <- expectedtime_df[c("missing_times", "metric")]
+  #expectedtime_df <- expectedtime_df[c("missing_times", "metric")]
   names(expectedtime_df)[1] <- timecol
-  expectedtime_df <- left_join(expectedtime_df, cbind(plotdat, present = 1), by = c(timecol, "metric"))
+  #expectedtime_df <- left_join(expectedtime_df, cbind(plotdat, present = 1), by = c(timecol, "metric"))
   
   # plot
   if(plotNA){
     p <- ggplot(plotdat, aes(get(timecol), is.na(value))) +
     geom_jitter(alpha = 0.5, height = 0.25, width = 0) +
-    geom_jitter(data = subset(expectedtime_df, is.na(present)), alpha = 0.5,  height = 0.12, width = 0, col = "orchid") +
+    geom_jitter(data = subset(expectedtime_df, missing), alpha = 0.5,  height = 0.12, width = 0, col = "orchid") +
     labs(x = NULL, y = "Value missing?", subtitle = id) +
     facet_wrap(~metric)
   }
