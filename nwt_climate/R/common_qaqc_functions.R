@@ -40,10 +40,12 @@ standardize_time <- function(newdat, dateform){
   return(newdat)
 }
 
-check_datetime <- function(dat, datecol = "date", dateform = "%Y-%m-%d", idcols = NA, groupvar = NA, datsource = NA){
+check_datetime <- function(dat, datecol = "date", dateform = "%Y-%m-%d", idcols = NA, groupvar = NA, datsource = NA,...){
+  
   
   # assign data to new frame with a date column for merging
   newdat <- dat
+  
   if(grepl("%H", dateform)){
     names(newdat)[names(newdat) == datecol] <- "date_time"
     # ensure in posix form
@@ -155,21 +157,22 @@ flag_maxmin <- function(dat, metric = "temp", maxmet = "airtemp_max", minmet = "
   dat$qa_maxmin <- NA
   return(dat)
 }
-# check for all expected date-times in series
-## POSIX and hours data could be added in to this function, but writing just for normal Date classes to start
-check_datetime <- function(dat, datecol = "date", increment = 1, dateform = "%Y-%m-%d"){
-  if(class(dat[[datecol]]) != "Date"){
-    dat[datecol] <- as.Date(dat[[datecol]], format = dateform)
-  }
-  expected <- seq.Date(min(dat[[datecol]]), max(dat[[datecol]]), increment) # increment by 1 day by default
-  if(all(dat[[datecol]] %in% expected) & all(expected %in% dat[[datecol]])){
-    print("All expected date-times present!")
-  }else{
-    expected_missing <- expected[!expected %in% dat[[datecol]]]
-    names(expected_missing) <- "expected dates missing"
-    unexpected_dates <- dat[[datecol]][!dat[[datecol]] %in% expected]
-    names(unexpected_dates) <- "unexpected dates present"
-    return(list(expected_missing, unexpected_dates))
-  }
-}
 
+# # check for all expected date-times in series
+# ## POSIX and hours data could be added in to this function, but writing just for normal Date classes to start
+# check_datetime <- function(dat, datecol = "date", increment = 1, dateform = "%Y-%m-%d"){
+#   if(class(dat[[datecol]]) != "Date"){
+#     dat[datecol] <- as.Date(dat[[datecol]], format = dateform)
+#   }
+#   expected <- seq.Date(min(dat[[datecol]]), max(dat[[datecol]]), increment) # increment by 1 day by default
+#   if(all(dat[[datecol]] %in% expected) & all(expected %in% dat[[datecol]])){
+#     print("All expected date-times present!")
+#   }else{
+#     expected_missing <- expected[!expected %in% dat[[datecol]]]
+#     names(expected_missing) <- "expected dates missing"
+#     unexpected_dates <- dat[[datecol]][!dat[[datecol]] %in% expected]
+#     names(unexpected_dates) <- "unexpected dates present"
+#     return(list(expected_missing, unexpected_dates))
+#   }
+# }
+# 

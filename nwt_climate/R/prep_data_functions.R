@@ -57,6 +57,7 @@ tidySnotel <- function(dat, hasFlags = T){
   # clean up extra periods in metric
   dat_out$metric <- gsub("...", ".", dat_out$metric, fixed = T)
   
+  
   return(dat_out)
 }
 
@@ -259,6 +260,10 @@ tidyAmeriflux <- function(datlist, checkdate = T, ...){
     dat_out$metric <- gsub("P_", "ppt_", dat_out$metric)
     dat_out$metric <- gsub("TA_", "airtemp_", dat_out$metric)
     
+    # note which values were adjusted
+    dat_out$raw_adjusted <- with(dat_out, (raw_measurement != qc_measurement) | (is.na(raw_measurement) & !is.na(qc_measurement)))
+    dat_out$raw_adjusted[is.na(dat_out$raw_adjusted)] <- FALSE
+    
   if(checkdate){
   # give it yr, mon, doy
   dat_out <- check_datetime(dat_out, datecol = "date_start", groupvar = c("station_id"))
@@ -322,16 +327,14 @@ sub2daily <- function(dat, intervalcol = "date_start", mets = c("TA", "P"), idco
   
 }
 
-
-complete_datetime <- function(){
-  
+# function to format NWT chart ppt for stacking
+tidyNWTchart <- function(datlist){
+    
 }
 
-prep_temp <- function(){
-  
-}
 
-# function to tidy (long-form) temp (this could be made generic for ppt too..)
+
+# function to tidy (long-form) NWT chart temp (this could be made generic for ppt too..)
 tidytemp <- function(dat, datasource = NA, sep = "_", special = "flag", dropcol = NA){
   #if cols to drop, drop
   if(!is.na(dropcol)){
@@ -344,7 +347,7 @@ tidytemp <- function(dat, datasource = NA, sep = "_", special = "flag", dropcol 
   dat_long <- dat %>%
     gather(met, temp, temp_pos:ncol(.)) %>%
     arrange(met, date) %>%
-    # add month and year
+    #add month and year
     mutate(yr = year(date),
            mon = month(date),
            doy = yday(date)) %>%
@@ -358,26 +361,80 @@ tidytemp <- function(dat, datasource = NA, sep = "_", special = "flag", dropcol 
       mutate(met = gsub(paste0(special,"_"), "", met))
     # rename temp col as special val
     colnames(tempspecial)[which(colnames(tempspecial) == "temp")] <- special
+    # make sure special col is character
+    tempspecial[[special]] <- as.character(tempspecial[[special]])
     
     # drop special vals from long-form dat and join wide to temp vals
     dat_long <- subset(dat_long, !grepl(special, met)) %>%
       left_join(tempspecial) %>%
-      dplyr::select(LTER_site:date, yr:doy, met:ncol(.)) 
+      dplyr::select(1:date, yr:doy, met:ncol(.)) 
   }
   
   # make sure temp is numeric (can be coerced to character when gathered with flags)
   dat_long$temp <- as.numeric(dat_long$temp)
+  
+  # check if hmps present (if this is for NWT dataset.. assuming yes)
+  hmps <- any(grepl("hmp", dat_long$met, ignore.case = T))
+  # if present, update logger, add column for reps and clean up metric
+  if(hmps){
+    # grab last column name before adding sensor and reps for reorganizing
+    lastcol <- names(dat_long)[ncol(dat_long)]
+    # pull sensor name from met value
+    dat_long$sensor <- stringr::str_extract(dat_long$met, "_hmp[:digit:]")
+    # clean up met
+    dat_long$met <- gsub("_hmp[1-9]", "", dat_long$met)
+    #pull rep from sensor col
+    dat_long$rep <- gsub("_hmp", "", dat_long$sensor)
+    # clean up sensor
+    dat_long$sensor <- stringr::str_extract(dat_long$sensor, "_hmp")
+    dat_long$logger <- with(dat_long, ifelse(!is.na(sensor), paste0(logger, sensor), logger))
+    # drop sensor col
+    dat_long <- subset(dat_long, select = -sensor)
+    # reorg cols
+    dat_long <- subset(dat_long, select = c(1:met, rep, temp:get(lastcol)))
+    # check there are reps, if all empty drop that too
+    if(all(is.na(dat_long$rep))){
+      dat_long <- subset(dat_long, select = -rep)
+      print("No replicates detected; if error, review output")
+    }
+    
+  }
   
   # if desired, prefix temp and special col colname with datasource
   if(!is.na(datasource)){
     colnames(dat_long)[colnames(dat_long) %in% c("temp", special)] <- paste(datasource, colnames(dat_long)[colnames(dat_long) %in% c("temp", special)], sep = sep)
   }
   
+  # clean up colnames to match other dats out
+  names(dat_long)[names(dat_long) == "temp"] <- "measurement"
+  names(dat_long)[names(dat_long) == "met"] <- "metric"
+  
+  # if loggers present, iterate through tidy dataset to remove any dates not relevant to logger/instrument/sensors
+  if("logger" %in% names(dat_long)){
+    for(u in unique(dat_long$logger)){
+      print(u)
+      mindate <- with(subset(dat_long, logger == u), ifelse(all(is.na(measurement)), as.character(max(date)), as.character(min(date[!is.na(measurement)]))))
+      maxdate <- with(subset(dat_long, logger == u), ifelse(all(is.na(measurement)), as.character(min(date)), as.character(max(date[!is.na(measurement)]))))
+      print(mindate)
+      print(maxdate)
+      # remove unrelevant dates
+      dat_long <- subset(dat_long, (logger == u & date >= as.Date(mindate) & date <= as.Date(maxdate)) | logger != u)
+    }
+  }
+  
+  
   # return tidy dataset and clean up environment
   return(dat_long)
   rm(tempspecial, temp_pos)
 }
 
+# add data source name to data frame
+addSource <- function(datlist){
+  for(i in 1:length(datlist)){
+    datlist[[i]] <- cbind(datsource = names(datlist)[i], data.frame(datlist[[i]]))
+  }
+  return(datlist)
+}
 
 # for wide-form
 pare_temp <- function(dat, tempstring, flagstring = NA, keepcols, datecol = "date", DTR = T, maxstring = "max", minstring = "min", reps = NA){

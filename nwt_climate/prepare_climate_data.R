@@ -33,7 +33,7 @@ fluxpath <- "~/Documents/nwt_lter/nwt_climate/data/raw/AmeriFlux"
 ghcndpath <- "~/Documents/nwt_lter/nwt_climate/data/raw/GHCNd"
 
 # create subfolders for data out if they don't exist
-for(i in c("qc", "infill", "homogenize")){
+for(i in c("prep", "qc", "infill", "homogenize")){
   if(!i %in% list.files(datpath)){
     dir.create(paste0(datpath, i))
   }
@@ -99,12 +99,45 @@ plot_all_list(listobject = nwtchart, timecol = "date", mets = c("airtemp", "ppt"
 plot_all_list(listobject = nwtchart_infilled, timecol = "date", mets = c("m.*_temp", "precip", "DTR"), plotNA = F)
 
 
+# nothing to do here for prep but to stack all datasets
+chartTemp_out <-lapply(nwtchart[1:3], tidytemp)
+chartTemp_out <- data.table::rbindlist(chartTemp_out) %>%
+  data.frame()
+chartTemp_out <- check_datetime(chartTemp_out, groupvar = c("local_site"))
+
+# prep NWT chart ppt -- need to make sure flag cols are character
+chartPPT_out <- nwtchart[grepl("ppt", names(nwtchart))]
+chartPPT_out <- data.table::rbindlist(chartPPT_out) %>%
+  data.frame()
+chartPPT_out <- check_datetime(chartPPT_out, groupvar = c("local_site"))
+
+
 
 # 1.2. NWT climate daily logger -----
 plot_all_list(listobject = nwtlogger, timecol = "date", mets = c("airtemp", "ppt"))
 plot_all_list(listobject = nwtlogger, timecol = "date", mets = c("airtemp", "ppt"), plotNA = F)
 
 #' Here we see unrealistic values with D1 21x logger era for airtemp min, max and avg, otherwise temps across loggers are generally in the range of plausible but with noticeable spikes
+lapply(nwtlogger, names)
+loggerTemp_out <- lapply(nwtlogger, function(x) subset.data.frame(x, select = grep("site|logger|date|^airtemp|^flag_airtemp", names(x), ignore.case = T)))
+loggerTemp_out <- lapply(loggerTemp_out, tidytemp)
+# cr21x logger datasets don't have local_site so append dat name to each dataset so know which data corresponds to what
+loggerTemp_out <- addSource(loggerTemp_out)
+# for(i in 1:length(loggerTemp_out)){
+#   loggerTemp_out[[i]] <- cbind(datsource = names(loggerTemp_out)[i], data.frame(loggerTemp_out[[i]]))
+# }
+
+loggerTemp_out <- lapply(loggerTemp_out, check_datetime)
+loggerTemp_out <- data.table::rbindlist(loggerTemp_out, fill = T) %>% data.frame()
+# infill LTER site and local_site for any where missing
+loggerTemp_out$LTER_site <- unique(loggerTemp_out$LTER_site[!is.na(loggerTemp_out$LTER_site)])
+loggerTemp_out$local_site <- with(loggerTemp_out, ifelse(is.na(local_site), casefold(str_extract(datsource, "C1|D1|SDL")), local_site))
+# drop datsource
+loggerTemp_out <- subset(loggerTemp_out, select = -datsource)
+
+c1loggerPPT_out <- nwtlogger[["C123x"]] %>%
+  subset(select = grepl("site|logger|date|ppt", names(.))) %>%
+  check_datetime()
 
 
 
@@ -178,8 +211,12 @@ ggplot(subset(ameriflux_daily[[1]], grepl("P_", metric)), aes(date_start, tot)) 
 # put all in one dataset then subset to what you want to keep
 ameriflux_out <- tidyAmeriflux(ameriflux_daily)
 
+# check how many values were adjusted from raw
+lapply(split(ameriflux_out$raw_adjusted, paste(ameriflux_out$station_name, ameriflux_out$metric)), summary)
+# NA's for Niwot Ridge Forest are from 2021 not being infilled yet; Tvan sites don't have a QC'd value
+
 # for US-NR1, just keep sensor 1 (infilled and raw); at other stations only temp (TA) is available for metric
-ameriflux_out <- subset(ameriflux_out, grepl("F_1_1_1|^TA$", metric))
+ameriflux_out <- subset(ameriflux_out, rep == "_1_1_1" | grepl("3|4", station_id))
 
 
 
@@ -254,7 +291,7 @@ ghcnd_out <- tidyGHCND(ghcnd_out, mets = c("TMAX", "TMIN", "PRCP", "TOBS"))
 
 
 
-# -- PREP TEMP, PREP PPT, STANDARDIZE NAMES ------
+# -- WRITE OUT ------
 #' Now that we've reviewed datasets available, we want to separate temp from ppt in each data source, and assign common names across all datasets for simplicity
 #' We also want to make sure the data source is present in each dataset
 #' Once prepped, write out each set separately for QC. Some stations may have too many QC flags for infilling use, and so that's why we keep sources separate when writing out.
@@ -265,12 +302,40 @@ ghcnd_out <- tidyGHCND(ghcnd_out, mets = c("TMAX", "TMIN", "PRCP", "TOBS"))
 #' I prefer lower camelCase or snake_case format, so that's how I'll prep dats out here:
 #' 
 
-# standardize stations cols in ghcnd
+# standardize stations cols in ghcnd, and make metric convention similar to NWT
 names(ghcnd_out)[names(ghcnd_out) %in% c("station", "name")] <- c("station_id", "station_name")
+ghcnd_out$metric[ghcnd_out$metric == "TMIN"] <- "airtemp_min"
+ghcnd_out$metric[ghcnd_out$metric == "TMAX"] <- "airtemp_max"
+ghcnd_out$metric[ghcnd_out$metric == "PRCP"] <- "ppt_tot"
+# time of observation still present as TOBS in metric
 
-# snotel is already taken care of by tidySnotel function
 
-# retired code
-# lapply(ameriflux_prepped, function(x) summary(is.na(x)))
-# purrr::map(ameriflux_prepped,  summary(is.na(.y)))
+# snotel colnames already taken care of by tidySnotel function, but metrics need standardization
+snotel_out$metric <- gsub("Air.Temperature", "airtemp", snotel_out$metric)
+snotel_out$metric <- gsub("Precipitation.Increment", "ppt_tot", snotel_out$metric)
+snotel_out$metric <- gsub(".", "_", snotel_out$metric, fixed = T)
+snotel_out$metric <- casefold(snotel_out$metric)
+snotel_out$metric[grepl("airtemp", snotel_out$metric)] <- substr(snotel_out$metric[grepl("airtemp", snotel_out$metric)],1,11)
+snotel_out$metric <- gsub("_ave", "_avg", snotel_out$metric)
 
+# ameriflux colnames and metric conventions already taken care of by tidyAmeriflux function
+
+
+# can write out as .csv or rdata because they are large
+# NWT data
+write.csv(chartTemp_out, paste0(datpath, "/prep/nwtchartTemp_prep.csv"), row.names = F) #15 MB
+write.csv(chartPPT_out, paste0(datpath, "/prep/nwtchartPPT_prep.csv"), row.names = F) #15 MB
+write.csv(loggerTemp_out, paste0(datpath, "/prep/nwtloggerTemp_prep.csv"), row.names = F) #15 MB
+write.csv(c1loggerPPT_out, paste0(datpath, "/prep/c1loggerPPT_prep.csv"), row.names = F) #15 MB
+saveRDS(chartTemp_out, paste0(datpath, "/prep/nwtchartTemp_prep.rds")) #15 MB
+saveRDS(chartPPT_out, paste0(datpath, "/prep/nwtchartPPT_prep.rds")) #15 MB
+saveRDS(loggerTemp_out, paste0(datpath, "/prep/nwtloggerTemp_prep.rds")) #15 MB
+saveRDS(c1loggerPPT_out, paste0(datpath, "/prep/c1loggerPPT_prep.rds")) #15 MB
+
+# other data
+write.csv(ameriflux_out, paste0(datpath, "/prep/ameriflux_prep.csv"), row.names = F) #15 MB
+write.csv(snotel_out, paste0(datpath, "/prep/snotel_prep.csv"), row.names = F) #28 MB
+write.csv(ghcnd_out, paste0(datpath, "/prep/ghcnd_prep.csv"), row.names = F) #103 MB
+saveRDS(ameriflux_out, paste0(datpath, "/prep/ameriflux_prep.rds"))
+saveRDS(snotel_out, paste0(datpath, "/prep/snotel_prep.rds"))
+saveRDS(ghcnd, paste0(datpath, "/prep/ghcnd_prep.rds"))
