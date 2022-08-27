@@ -192,6 +192,21 @@ getSnotelNeighbors <- function(sites = c("Niwot", "UniversityCamp", "LakeEldora"
 #  A      Approved            Processing and Final Review Completed
 
 
+# FOR TIDY CLIMATE DATA -----
+# to read in climate data prepped in step 1 (not raw data, screened and formatted in pckg way)
+get_tidydat <- function(filestring, rdsfiles, met){
+  
+  # flatten string if more than one
+  if(length(met) > 1){
+    met <- stringr::str_flatten(met, collapse = "|")
+  }
+  
+  # read in data
+  dat <- readRDS(rdsfiles[grepl(filestring, rdsfiles, ignore.case = T)])
+  # subset just metric(s) of interest
+  dat <- subset(dat, grepl(met, metric))
+  return(dat)
+}
 
 
 # ----------------------------------------

@@ -78,3 +78,83 @@ plot_all_groups <- function(dat, groupvars, ...){
     available_dataviz(subset(dat, get(groupvars) == i), id = i, ...)
   }
 }
+
+
+# panel plot user-selected flagged data for review (e.g., qdays violations)
+visual_qcreview <- function(reviewdat, alldat, groupvar, ndays = 15){
+  # initiate list for storing ggplots
+  plot_list <- list()
+  
+  # sort review data by groupvar then date
+  #reviewdat <- dplyr::arrange(reviewdat, eval(groupvar), date)
+  
+  # iterate through subsetted review data
+  for(r in 1:nrow(reviewdat)){
+    
+    subdat <- subset(alldat, date < reviewdat$date[r] + ndays  & date > reviewdat$date[r] - ndays)
+    tempplot <- ggplot(subdat, aes(date, raw,col = get(groupvar)), ) +
+      geom_line() +
+      geom_label(data = subset(subdat, qdays > 1), aes(label = qdays)) +
+      geom_point(data = reviewdat[r,], pch = 1, col = "black", size = 3) +
+      # add info to plot
+      labs(subtitle = paste(reviewdat[[groupvar]][r], reviewdat$date[r])) +
+      theme(legend.title = element_blank())
+      
+      # store plot in a list
+      plot_list[length(plot_list)+1] <- list(tempplot)
+      
+  }
+  return(do.call(gridExtra::grid.arrange, plot_list))
+  # print
+  #return(plot_list)
+  
+}
+
+
+# function to panel plot flagged data
+visual_qa <- function(dat, qadat, sorttime = "date", add_fourth = NA){
+  # initiate list for storing ggplots
+  plot_list <- list()
+  # id temperature cols in reference data frame
+  tempcols <- colnames(dat)[grepl("temp", colnames(dat))]
+  
+  for(m in c("airtemp_max", "airtemp_min")){
+    tempdf <- qadat[qadat$met == m,] %>% as.data.frame()
+    # order by preferred time sort (default is date)
+    tempdf <- tempdf[order( tempdf[,which(colnames(tempdf) == sorttime)]),]
+    
+    for(d in as.character(tempdf$date)){
+      d <- as.Date(d, format = "%Y-%m-%d")
+      tempplot <- ggplot(data = subset(dat, met == m & date %in% seq(as.Date(d)-10, as.Date(d)+10, 1))) +
+        geom_line(aes(date, main)) +
+        geom_point(aes(date, main)) +
+        # circle the flagged value in red
+        geom_point(data = subset(dat, met == m & date == as.Date(d)),
+                   aes(date, main), col = "red", pch  = 1, size = 3) +
+        labs(y = gsub("airtemp_", "T", m),
+             x = d) +
+        # add sdl chart temp for comparison (purple dots)
+        geom_line(aes(date, comp1), col = "purple") +
+        geom_point(aes(date, comp1), col = "purple", pch = 1) +
+        geom_line(aes(date, comp2), col = "steelblue2") +
+        geom_point(aes(date, comp2), col = "steelblue4", pch = 1) +
+        geom_line(aes(date, comp3), col = "forestgreen") +
+        geom_point(aes(date, comp3), col = "darkgreen", pch = 1) +
+        theme_bw()
+      
+      if(!is.na(add_fourth)){
+        colnames(dat)[colnames(dat) == add_fourth] <- "comp4"
+        tempplot <- tempplot + 
+          geom_line(data = subset(dat, met == m & date %in% seq(as.Date(d)-10, as.Date(d)+10, 1)), 
+                    aes(date, comp4), col = "goldenrod1") + 
+          geom_point(data = subset(dat, met == m & date %in% seq(as.Date(d)-10, as.Date(d)+10, 1)), 
+                     aes(date, comp4), col = "goldenrod1", pch = 1)
+      }
+      
+      # store plot in a list
+      plot_list[length(plot_list)+1] <- list(tempplot)
+    }
+  }
+  return(plot_list)
+}
+

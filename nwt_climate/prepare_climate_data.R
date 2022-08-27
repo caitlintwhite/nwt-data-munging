@@ -108,7 +108,12 @@ chartTemp_out <- check_datetime(chartTemp_out, groupvar = c("local_site"))
 # prep NWT chart ppt -- need to make sure flag cols are character
 chartPPT_out <- nwtchart[grepl("ppt", names(nwtchart))]
 chartPPT_out <- data.table::rbindlist(chartPPT_out) %>%
-  data.frame()
+  data.frame() %>%
+  # reformat to output similar to other dats
+  rename(measurement = ppt_tot) %>%
+  mutate(metric = "ppt_tot") %>%
+  # rearrange cols
+  dplyr::select(1:date, metric, measurement:ncol(.))
 chartPPT_out <- check_datetime(chartPPT_out, groupvar = c("local_site"))
 
 
@@ -137,7 +142,14 @@ loggerTemp_out <- subset(loggerTemp_out, select = -datsource)
 
 c1loggerPPT_out <- nwtlogger[["C123x"]] %>%
   subset(select = grepl("site|logger|date|ppt", names(.))) %>%
+  # reformat to output similar to other dats
+  rename(measurement = ppt_tot) %>%
+  mutate(metric = "ppt_tot") %>%
+  # rearrange cols
+  dplyr::select(1:date, metric, measurement:ncol(.)) %>%
   check_datetime()
+
+
 
 
 
@@ -285,7 +297,7 @@ ghcnd_out <- subset(ghcnd, !grepl("carib|nederland 5|silver", NAME, ignore.case 
 ghcnd_out <- check_datetime(ghcnd_out, datecol = "DATE", idcols = ghcnd_idcols, groupvar = "NAME")
 
 # collapse variable columns in so tidy (metrics in one column, attributes in another, then break into 4 cols of flag types )
-ghcnd_out <- tidyGHCND(ghcnd_out, mets = c("TMAX", "TMIN", "PRCP", "TOBS")) 
+ghcnd_out <- tidyGHCND(ghcnd_out, mets = c("TMAX", "TMIN", "PRCP", "TOBS")) # warning message is fine
 
 
 
@@ -338,4 +350,4 @@ write.csv(snotel_out, paste0(datpath, "/prep/snotel_prep.csv"), row.names = F) #
 write.csv(ghcnd_out, paste0(datpath, "/prep/ghcnd_prep.csv"), row.names = F) #103 MB
 saveRDS(ameriflux_out, paste0(datpath, "/prep/ameriflux_prep.rds"))
 saveRDS(snotel_out, paste0(datpath, "/prep/snotel_prep.rds"))
-saveRDS(ghcnd, paste0(datpath, "/prep/ghcnd_prep.rds"))
+saveRDS(ghcnd_out, paste0(datpath, "/prep/ghcnd_prep.rds"))
