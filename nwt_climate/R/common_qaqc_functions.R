@@ -8,8 +8,11 @@ standardize_time <- function(newdat, dateform){
   tempdates <- sort(unique(newdat$date))
   mindate <- min(tempdates)
   maxdate <- max(tempdates)
-  datestep <- tempdates[2] - tempdates[1]
-  dateseq <- seq.Date(mindate, maxdate, by = datestep)
+  #datestep <- tempdates[2] - tempdates[1]
+  # difference tempdates and take the minimum > 0
+  datestep <- diff(tempdates)
+  #datestep_tbl <- table(datestep)
+  dateseq <- seq.Date(mindate, maxdate, by = median(datestep[datestep > 0]))
   
   dateframe <- data.frame(date = dateseq,
                           yr = lubridate::year(dateseq),

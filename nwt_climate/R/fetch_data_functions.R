@@ -192,7 +192,7 @@ getSnotelNeighbors <- function(sites = c("Niwot", "UniversityCamp", "LakeEldora"
 #  A      Approved            Processing and Final Review Completed
 
 
-# FOR TIDY CLIMATE DATA -----
+# -- FOR TIDY CLIMATE DATA -----
 # to read in climate data prepped in step 1 (not raw data, screened and formatted in pckg way)
 get_tidydat <- function(filestring, rdsfiles, met){
   

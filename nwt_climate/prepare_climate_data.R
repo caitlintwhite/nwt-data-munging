@@ -249,7 +249,7 @@ ggplot(snotel, aes(Date, Precipitation.Increment..mm. - Precipitation.Increment.
 
 
 #  standardize col names and write out as tidy RDA file
-snotel_out <- check_datetime(dat = snotel, datecol = "Date",groupvar = "Station.Name", idcols = grepl("Stat|Elev|Lat|Long", names(snotel)))
+snotel_out <- check_datetime(dat = snotel, datecol = "Date",groupvar = "Station.Name", idcols = names(snotel)[grepl("Stat|Elev|Lat|Long", names(snotel), ignore.case = T)])
 # convert snotel station elevation from ft to meters
 snotel_out$Elevation..ft. <- ft2m(snotel_out$Elevation..ft.)
 snotel_out <- tidySnotel(snotel_out)
@@ -294,12 +294,14 @@ plot_all_groups(ghcnd, timecol = "DATE", mets = ghcndmets, groupvars = "NAME", a
 ghcnd_idcols <- names(ghcnd)[grepl("stat|name|lat|long|elev", names(ghcnd), ignore.case = T)]
 ghcnd_out <- subset(ghcnd, !grepl("carib|nederland 5|silver", NAME, ignore.case = T), 
                     select = c(ghcnd_idcols, names(ghcnd)[grepl("tmin|tmax|prcp|tobs|date", names(ghcnd), ignore.case = T)]))
-ghcnd_out <- check_datetime(ghcnd_out, datecol = "DATE", idcols = ghcnd_idcols, groupvar = "NAME")
+# be sure to run check_datetime by the unique ID key for the dataset (e.g., in ghcnd, NAME value 'FRASER, CO US' has two different STATION values)
+ghcnd_out <- check_datetime(ghcnd_out, datecol = "DATE", idcols = ghcnd_idcols, groupvar = "STATION")
 
 # collapse variable columns in so tidy (metrics in one column, attributes in another, then break into 4 cols of flag types )
 ghcnd_out <- tidyGHCND(ghcnd_out, mets = c("TMAX", "TMIN", "PRCP", "TOBS")) # warning message is fine
 
-
+# check for NAs
+summary(ghcnd_out) # there shouldn't be NAs for yr, mon or doy
 
 
 
