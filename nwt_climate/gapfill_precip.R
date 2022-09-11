@@ -488,4 +488,13 @@ saveRDS(c1_out_tkctw, paste0(datpath, "/infill/c1PPT_infilled_draft.rds"))
 saveRDS(d1_out_tkctw, paste0(datpath, "/infill/d1PPT_infilled_draft.rds"))
 saveRDS(sdl_out, paste0(datpath, "/infill/sdlPPT_infilled_draft.rds"))
 
+# write out predicted values for comparison and ctw's recalculated c1 and d1 infilled as well
+saveRDS(sdl_historicfill, paste0(datpath, "/infill/sdl_historicfill.rds"))
+saveRDS(sdl_seasonfill, paste0(datpath, "/infill/sdl_seasonfill.rds"))
+saveRDS(sdlchosen, paste0(datpath, "/infill/sdlchosen.rds"))
+saveRDS(sdl_backfillexpanded_chosen, paste0(datpath, "/infill/sdl_backfillexpanded_chosen.rds"))
+saveRDS(c1_out, paste0(datpath, "/infill/c1PPT_infilled_ctw1980.rds"))
+saveRDS(d1_out, paste0(datpath, "/infill/d1PPT_infilled_ctw1980.rds"))
 
+# and the all stacked dat
+saveRDS(alldats_qdays, paste0(datpath, "/infill/allPPTdats_wNWTqdays.rds"))
