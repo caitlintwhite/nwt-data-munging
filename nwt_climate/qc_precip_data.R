@@ -582,7 +582,7 @@ snotel_out2$measurement <- with(snotel_out2, ifelse(!is.na(compare_qcflag) & qc_
 
 
 
-# -- STANDARDIZE COlNAMES OUT -----
+# -- STANDARDIZE COLNAMES OUT -----
 # make data wide-format for infilling (in regression models predictor vars need to be columns)
 
 names(chartppt_out_qc2)
