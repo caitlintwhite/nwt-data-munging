@@ -361,7 +361,7 @@ tk_ppt_historicfill <- function(dat, target_site, missing_dates, site_order, qda
     temp_df[paste0(target_site, "_ln")] <- ifelse(temp_df[[target_site]]>0, log(temp_df[[target_site]]), NA)
     temp_df[paste0(best$site, "_ln")] <- ifelse(temp_df[[best$site]]>0, log(temp_df[[best$site]]), NA)
     
-    # iterate through mean T and DTR, run lm, predict missing values, and store results in data frame
+    # run lm on natural logged positive precip, predict missing values, and store results in data frame
     best_mod <- lm(formula = paste0(target_site, "_ln", " ~ ", best$site, "_ln"), data = temp_df)
     
     # if source station had 0 rainfall on missing date, record -Inf for target (exponentiates to 0), else predict value
