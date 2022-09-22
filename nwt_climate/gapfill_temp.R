@@ -177,6 +177,8 @@ summary(lm("d1_chart_DTR ~ sdl_chart_DTR", data = moddat))$coefficients # but DT
 # -- SDL loggers -----
 unique(allsites$local_site[grepl("sdl", allsites$local_site)])
 
+
+# -- sdl 21x ----
 sdl21x_missing <- idInfillDates(alldats, "sdl_cr21x", 1980)
 sdl21x_order <- with(allsites, paired_site[grepl("sdl_cr21x", local_site) & final_rank!= 1])
 # moving window infill
@@ -187,12 +189,139 @@ sdl21x_historic <- tk_temp_historicfill(alldats, "sdl_cr21x", sdl21x_missing, sd
 
 
 # selection for sdl21x
-comparesdl21x <- rbind(sdl21x_historic, sdl21x_season_tempnobs)
+select_sdl121x <- select_model(sdl21x_historic, sdl21x_season_tempnobs)
+outstanding_dates <- sdl21x_missing[!sdl21x_missing %in% select_sd121x$date]
 
-select_sd121x <- select_model(comparesdl21x)
-outstanding_dates <- sdl21x_missing[!sdl21x_missing %in% dat_means$date[dat_means$selectmod]]
+# plots using calculate_tmintmax code in progress with sdl21x
+ggplot(dat_out, aes(month(date), dtr_infill, group = month(date))) +
+  geom_violin(fill = "yellow", col = "goldenrod", alpha = 0.5) +
+  geom_violin(aes(month(date), airtemp_max-airtemp_min), alpha = 0.5, col = "purple")
 
-sdlcr1000
+ggplot(subset(dat_out, !is.na(meanadj_tmin_infill))) +
+  geom_line(aes(as.numeric(factor(date)), adj_tmin_infill), col = "goldenrod", alpha = 0.5) +
+  geom_line(aes(as.numeric(factor(date)), meanadj_tmin_infill), col = "orchid", alpha = 0.5) +
+  geom_line(aes(as.numeric(factor(date)), adj_tmin_measured), col = "skyblue") +
+  theme(axis.text.x = element_blank()) # predicted DTR is generally truncated, but within range, compared to actual DTR (except in fall.. diurnal falls below observed range. is especially truncated)
 
-#hmps
+ggplot(subset(dat_out, !is.na(meanadj_tmin_infill))) +
+  geom_line(aes(as.numeric(factor(date)), tmin_infill), col = "black", alpha = 0.5) +
+  geom_line(aes(as.numeric(factor(date)), adj_tmin_infill), col = "goldenrod", alpha = 0.5) +
+  geom_point(aes(as.numeric(factor(date)), adj_tmin_infill, size = month(date)), col = "goldenrod", alpha = 0.5) +
+  geom_line(aes(as.numeric(factor(date)), meanadj_tmin_infill), col = "orchid", alpha = 0.5) +
+  geom_line(aes(as.numeric(factor(date)), adj_tmin_measured), col = "skyblue") +
+  geom_point(aes(as.numeric(factor(date)), adj_tmin_measured), col = "skyblue") +
+  theme(axis.text.x = element_blank()) # diurnal predicted yields more muted/warmer tmin compared to tmean observed or tmean predicted adjusted tmin
 
+ggplot(subset(dat_out, !is.na(meanadj_tmax_infill))) +
+  geom_line(aes(as.numeric(factor(date)), tmax_infill), col = "black", alpha = 0.5) +
+  geom_line(aes(as.numeric(factor(date)), adj_tmax_infill), col = "goldenrod", alpha = 0.5) +
+  geom_point(aes(as.numeric(factor(date)), adj_tmax_infill, size = month(date)), col = "goldenrod", alpha = 0.5) +
+  geom_line(aes(as.numeric(factor(date)), meanadj_tmax_infill), col = "orchid", alpha = 0.5) +
+  geom_line(aes(as.numeric(factor(date)), adj_tmax_measured), col = "skyblue") +
+  geom_point(aes(as.numeric(factor(date)), adj_tmax_measured), col = "skyblue") +
+  theme(axis.text.x = element_blank()) # diurnal predicted tmax seems like a reasonable compromise in this case? observed tmean adjusted tmax is warmer than other (with a high point), tmean predicted is cooler (with a few low points)
+# go with diurnal adjusted (since follows tim's method, but reject any tmin greater than 20C [even in summer would not be 70F overnight at saddle])
+# looking at the raw data, the high adj-predicted point for tmin is a tmax value that would get flagged and NA'd
+# if diurnal-adj tmax is cooler than measured observed tmean, use predicted tmean (this only applies in one case) .. maybe reasons to return dat_out for review before selection
+# if diurnal-adj tmin is warmer than observed tmean, use predicted tmean
+
+# looking at flagged tmeans than are warmer/cooler than adj tmax/tmin, predicted tmax and tmin those days are closer to sdl chart (just looked at a few)
+# maybe scratch and just use all predicted values that day since unsure if tmean or the extreme is more correct (and eventually write comparison to nearby stations to select)
+
+
+sdl21x_predicted <- calculate_minmax(select_sdl121x, logtemp, "sdl_cr21x")
+sdl21x_predicted$flagmax <- with(sdl21x_predicted, airtemp_max < airtemp_min | airtemp_avg > airtemp_max)
+sdl21x_predicted$flagmin <- with(sdl21x_predicted, airtemp_avg < airtemp_min)
+
+# how does it look?
+ggplot(sdl21x_predicted) +
+  geom_vline(aes(xintercept = as.Date("1989-01-01"))) +
+  geom_line(aes(date, airtemp_avg), col = "green", alpha = 0.3) +
+  geom_line(aes(date, airtemp_max), col = "purple", alpha = 0.3) +
+  geom_point(data = subset(sdl21x_predicted, airtemp_max_method != "raw"), aes(date, airtemp_max), col = "red", alpha = 0.5) +
+  geom_line(aes(date, airtemp_min), col = "blue", alpha = 0.3) +
+  geom_point(data = subset(sdl21x_predicted, airtemp_min_method != "raw"), aes(date, airtemp_min), col = "dodgerblue", alpha = 0.5) +
+  geom_point(data = subset(sdl21x_predicted, flagmin), aes(date, airtemp_min), size = 2, col = "blue", alpha = 0.8) +
+  geom_point(data = subset(sdl21x_predicted, flagmin), aes(date, airtemp_avg), size = 2, col = "forestgreen", alpha = 0.8) +
+  geom_point(data = subset(sdl21x_predicted, flagmin), aes(date, airtemp_max), size = 2, col = "chocolate", alpha = 0.8) +
+  geom_smooth(aes(date, airtemp_avg), col = "black", alpha = 0.3)
+
+
+# -- sdl 23x -----
+sdl23x_missing <- idInfillDates(alldats, "sdl_cr23x", 1980)
+sdl23x_order <- with(allsites, paired_site[grepl("sdl_cr23x", local_site) & final_rank!= 1])
+# moving window infill
+sdl23x_season <- tk_temp_movingfill(alldats, target_site = "sdl_cr23x", missing_dates = sdl23x_missing, site_order =  sdl23x_order)
+# historic infill
+sdl23x_historic <- tk_temp_historicfill(alldats, "sdl_cr23x", sdl23x_missing, sdl23x_order)
+
+# selection for sdl23x
+select_sdl123x <- select_model(sdl23x_historic, sdl23x_season)
+sdl23x_predicted <- calculate_minmax(select_sdl123x, logtemp, "sdl_cr23x")
+sdl23x_predicted$flagmax <- with(sdl23x_predicted, airtemp_max < airtemp_min | airtemp_avg > airtemp_max)
+sdl23x_predicted$flagmin <- with(sdl23x_predicted, airtemp_avg < airtemp_min)
+
+# -- sdl 1000 (pre hmp) ----
+sdl1000_missing <- idInfillDates(alldats, "sdl_cr1000", 1980)
+sdl1000_order <- with(allsites, paired_site[grepl("sdl_cr1000", local_site) & final_rank!= 1])
+# moving window infill
+sdl1000_season <- tk_temp_movingfill(alldats, target_site = "sdl_cr1000", missing_dates = sdl1000_missing, site_order =  sdl1000_order)
+# historic infill
+sdl1000_historic <- tk_temp_historicfill(alldats, "sdl_cr1000", sdl1000_missing, sdl1000_order)
+
+# selection for sdl1000
+select_sdl11000 <- select_model(sdl1000_historic, sdl1000_season)
+sdl1000_predicted <- calculate_minmax(select_sdl11000, logtemp, "sdl_cr1000")
+sdl1000_predicted$flagmax <- with(sdl1000_predicted, airtemp_max < airtemp_min | airtemp_avg > airtemp_max)
+sdl1000_predicted$flagmin <- with(sdl1000_predicted, airtemp_avg < airtemp_min)
+
+
+# -- sdl hmp 1 ----
+sdl1000_hmp_1_missing <- idInfillDates(alldats, "sdl_cr1000_hmp_1", 1980)
+sdl1000_hmp_1_order <- with(allsites, paired_site[grepl("sdl_cr1000_hmp_1", local_site) & final_rank!= 1])
+# moving window infill
+sdl1000_hmp_1_season <- tk_temp_movingfill(alldats, target_site = "sdl_cr1000_hmp_1", missing_dates = sdl1000_hmp_1_missing, site_order =  sdl1000_hmp_1_order)
+# historic infill
+sdl1000_hmp_1_historic <- tk_temp_historicfill(alldats, "sdl_cr1000_hmp_1", sdl1000_hmp_1_missing, sdl1000_hmp_1_order)
+
+# selection for sdl23x
+select_sdl1000_hmp_1 <- select_model(sdl1000_hmp_1_historic, sdl1000_hmp_1_season)
+sdl1000_hmp_1_predicted <- calculate_minmax(select_sdl1000_hmp_1, logtemp, "sdl_cr1000_hmp_1")
+
+# -- sdl hmp 2 ----
+sdl1000_hmp_2_missing <- idInfillDates(alldats, "sdl_cr1000_hmp_2", 1980)
+sdl1000_hmp_2_order <- with(allsites, paired_site[grepl("sdl_cr1000_hmp_2", local_site) & final_rank!= 1])
+# moving window infill
+sdl1000_hmp_2_season <- tk_temp_movingfill(alldats, target_site = "sdl_cr1000_hmp_2", missing_dates = sdl1000_hmp_2_missing, site_order =  sdl1000_hmp_2_order)
+# historic infill
+sdl1000_hmp_2_historic <- tk_temp_historicfill(alldats, "sdl_cr1000_hmp_2", sdl1000_hmp_2_missing, sdl1000_hmp_2_order)
+
+# selection for sdl23x
+select_sdl1000_hmp_2 <- select_model(sdl1000_hmp_2_historic, sdl1000_hmp_2_season)
+sdl1000_hmp_2_predicted <- calculate_minmax(select_sdl1000_hmp_2, logtemp, "sdl_cr1000_hmp_2")
+
+
+# -- sdl hmp 3 ----
+sdl1000_hmp_3_missing <- idInfillDates(alldats, "sdl_cr1000_hmp_3", 1980)
+sdl1000_hmp_3_order <- with(allsites, paired_site[grepl("sdl_cr1000_hmp_3", local_site) & final_rank!= 1])
+# moving window infill
+sdl1000_hmp_3_season <- tk_temp_movingfill(alldats, target_site = "sdl_cr1000_hmp_3", missing_dates = sdl1000_hmp_3_missing, site_order =  sdl1000_hmp_3_order)
+# historic infill
+sdl1000_hmp_3_historic <- tk_temp_historicfill(alldats, "sdl_cr1000_hmp_3", sdl1000_hmp_3_missing, sdl1000_hmp_3_order)
+
+# selection for sdl23x
+select_sdl1000_hmp_3 <- select_model(sdl1000_hmp_3_historic, sdl1000_hmp_3_season)
+sdl1000_hmp_3_predicted <- calculate_minmax(select_sdl1000_hmp_3, logtemp, "sdl_cr1000_hmp_3")
+# hmp 3 seems to have stopped at june 2021?
+
+
+ggplot(sdl1000_hmp_1_predicted) +
+  geom_line(aes(date, airtemp_min), col = "blue", alpha = 0.4) +
+  geom_point(aes(date, airtemp_min), col = "blue", alpha = 0.4) +
+  geom_point(aes(date, airtemp_avg), col = "green", alpha = 0.4) +
+  geom_point(aes(date, airtemp_max), col = "red", alpha = 0.4)
+
+
+
+# -- WRITE OUT -----
+sdl_log_predicted <- rbind(sdl21x_predicted, sdl23x_predicted, sdl)
