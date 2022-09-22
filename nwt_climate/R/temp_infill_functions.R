@@ -7,6 +7,34 @@
 
 
 
+# prepartory functions:
+# id dates in time series that need infilling for any metric
+idInfillDates <- function(dat, site, startyr){
+  infilldates <- with(dat, unique(date[local_site == site & yr >= startyr & is.na(measurement)]))
+  return(infilldates)
+}
+
+
+# everything needs 1) airtemp_avg & 2) DTR + local_site, yr, date, doy, metric + measurement
+# make data frame of airtemp_avg and dtr appropriate to run through infill functions
+mean_and_diurnalT <- function(dat){
+  
+  tempdat <- subset(dat, select = c(date, yr, mon, doy, local_site, metric, measurement)) %>%
+    tidyr::spread(metric, measurement)
+  # if avg temp not present, make
+  if(!any(grepl("avg", names(tempdat)))){
+    tempdat$airtemp_avg <- (tempdat$airtemp_max + tempdat$airtemp_min)/2
+  }
+  # if diurnal temp not present, make
+  if(!any(grepl("DTR", names(tempdat), ignore.case = T))){
+    tempdat$DTR <- tempdat$airtemp_max - tempdat$airtemp_min
+  }
+  
+  # return all mets back in case helpful for crunching tmax and tmin after predictions
+  tempdat <- gather(tempdat, metric, measurement, grep("temp|DTR", names(tempdat)))
+  return(tempdat)
+}
+
 
 
 # function for short-term seasonal tk infill method
@@ -158,7 +186,8 @@ tk_temp_movingfill <- function(dat, target_site, missing_dates, site_order, wind
     }
     
     # select best
-    best <- subset(r2_df, pval <= 0.05 & r2 == max(r2, na.rm = T))
+    best <- subset(r2_df, pval <= 0.05) # subset to those with signif pvals
+    best <- subset(best, r2 == max(r2, na.rm = T))
     # if nothing has signif pval, select best r2
     if(nrow(best) == 0){
       best <- subset(r2_df, r2 == max(r2, na.rm = T))
@@ -237,6 +266,7 @@ tk_temp_historicfill <- function(dat, target_site, missing_dates, site_order, no
     # subset dat to doy range and local_sites that were operating during date in question
     temp_df <- subset(dat, doy %in% doyrange & local_site %in% unique(dat$local_site[dat$date == d]))
     
+
     # iterate through infill hierarchy and pick best r2 with pval < 0.05
     r2_df <- data.frame()
     for(site in site_order){
@@ -246,32 +276,39 @@ tk_temp_historicfill <- function(dat, target_site, missing_dates, site_order, no
         next
       }
       
-      # print(paste("widen", site))
       # widen data
       wide_df <- subset(temp_df, local_site %in% c(target_site, site), select = c(date:measurement))
+      wide_df <- tidyr::unite(wide_df, local_site, local_site, metric)
       wide_df <- tidyr::spread(wide_df, local_site, measurement)
+      wide_df$allthere <- apply(wide_df[grep(stringr::str_flatten(metric, collapse = "|"), names(wide_df))], 1, function(x)all(!is.na(x)))
       
-      # check there are observations > 0 for explanatory site
-      if(all(is.na(wide_df[site]))){
+      
+      if(sum(wide_df$allthere)<nobs_limit){
         next
       }
       
-      # checks that there is overlap for min nobs specified on non-NA dates for both sites
-      target_dates <- unique(wide_df$date[!is.na(wide_df[[target_site]])])
-      site_dates <- unique(wide_df$date[!is.na(wide_df[[site]])])
-      if(sum(target_dates %in% site_dates)<nobs_limit){
+      # check that explanatory site is present
+      if(!any(grepl(site, names(wide_df)))){
         next
       }
       
-      # check that there is a value for reference site (unlogged val, 0s okay) on the missing date
-      stopifnot(length(wide_df[[site]][wide_df$date == d]) == 2) # should be 2 for DTR and airtemp avg
-      if(any(is.na(wide_df[[site]][wide_df$date == d]))){
+      # # check that there is overlap for min nobs specified on non-NA dates for both sites
+      # target_dates <- unique(wide_df$date[!is.na(wide_df[[target_site]])])
+      # site_dates <- unique(wide_df$date[!is.na(wide_df[[site]])])
+      # if(sum(target_dates %in% site_dates)<nobs_limit){
+      #   next
+      # }
+      # 
+      
+      # check that there is a nonNA value for reference site on the missing date
+      #stopifnot(length(wide_df[[site]][wide_df$date == d]) == 2) # should be 2 for DTR and airtemp avg
+      if(any(is.na(wide_df[wide_df$date == d, grep(site, names(wide_df))]))){
         next
       }
       
       
       # run lm model and store results
-      mod <- lm(formula = paste(target_site,"~", site), data = subset(wide_df, metric == "airtemp_avg"))
+      mod <- lm(formula = paste0(target_site,"_airtemp_avg ~ ", site, "_airtemp_avg"), data = subset(wide_df, allthere))
       r2_df <- rbind(r2_df, 
                      data.frame(cbind(site = site,
                                       r2 = summary(mod)$r.squared,
@@ -306,7 +343,9 @@ tk_temp_historicfill <- function(dat, target_site, missing_dates, site_order, no
     }
     
     # select best model
-    best <- subset(r2_df, pval <= 0.05 & r2 == max(r2, na.rm = T))
+    best <- subset(r2_df, pval <= 0.05)
+    best <- subset(best, r2 == max(r2, na.rm = T))
+    
     # if nothing has signif pval, select best r2
     if(nrow(best) == 0){
       best <- subset(r2_df, r2 == max(r2, na.rm = T))
@@ -318,18 +357,19 @@ tk_temp_historicfill <- function(dat, target_site, missing_dates, site_order, no
     }
     
     # infill missing values based on best model
-    ## re-subset temp_df based on best model
-    temp_df <- subset(temp_df, local_site %in% c(target_site, best$site), select = c(date:measurement))
-    
     # widen data
-    temp_df <- tidyr::spread(temp_df, local_site, measurement)
+    wide_df <- subset(temp_df, local_site %in% c(target_site, best$site), select = c(date:measurement))
+    wide_df <- tidyr::unite(wide_df, local_site, local_site, metric)
+    wide_df <- tidyr::spread(wide_df, local_site, measurement)
+    wide_df$allthere <- apply(wide_df[grep(stringr::str_flatten(metric, collapse = "|"), names(wide_df))], 1, function(x)all(!is.na(x)))
+    
     
     # iterate through mean T and DTR, run lm, predict missing values, and store results in data frame
     for(m in metric){
-    best_mod <- lm(formula = paste(target_site, best$site, sep = "~"), data = subset(temp_df, metric == m))
+    best_mod <- lm(formula = paste0(target_site, "_", m, " ~ ", best$site, "_", m), data = subset(wide_df, allthere))
     
     #  predict value and store
-    tempinfill <- predict(best_mod, newdata = subset(temp_df, date == d & metric == m))
+    tempinfill <- predict(best_mod, newdata = subset(wide_df, date == d))
     
     tempinfill_df <- data.frame(date = d, infill = tempinfill,
                                 metric = m,
@@ -419,9 +459,20 @@ select_model <- function(dat_historic, dat_season){
   dat_means <- subset(dat_means, !date %in% chosen_dat$date) %>%
     group_by(date) %>%
     # if anything is under 0.05 and has the max r2 but doesn't meet nobs limit, still go with that model over the other
-    mutate(selectedmod = ifelse(!flag_mean_pval & pval_sub10 & maxr2, TRUE, 
-                                # if anything is under 0.05 and meetings nobs count and difference from max r2 is not too great (subjective -- screened and most of these are less than 0.01 difference)
-                                ifelse(!flag_mean_pval & !flag_nobs & maxr2_diff < 0.2, TRUE, FALSE)))
+    mutate(selectedmod = ifelse(!flag_mean_pval & pval_sub10 & maxr2, TRUE, FALSE))
+  
+  # repeat process
+  pull_season <- subset(dat_season, date %in% with(dat_means, date[selectedmod & grepl("moving", method)]))
+  pull_historic <- subset(dat_historic, date %in% with(dat_means, date[selectedmod & grepl("multi", method)]))
+  
+  chosen_dat <- distinct(rbind(chosen_dat, pull_season, pull_historic))
+  chosen_dat <- arrange(chosen_dat, date)
+  
+  # remove pulled dates from dat_means
+  dat_means <- subset(dat_means, !date %in% chosen_dat$date) %>%
+    group_by(date) %>%
+    # if anything is under 0.05 and meetings nobs count and difference from max r2 is not too great (subjective -- screened and most of these are less than 0.01 difference)
+    mutate(selectedmod = ifelse(!flag_mean_pval & !flag_nobs & maxr2_diff < 0.2, TRUE, FALSE))
   
   # repeat process
   pull_season <- subset(dat_season, date %in% with(dat_means, date[selectedmod & grepl("moving", method)]))
@@ -436,36 +487,126 @@ select_model <- function(dat_historic, dat_season){
     group_by(date) %>%
     mutate(selectedmod = maxr2)
   
-           r2_check1 = ifelse(mean_pval_flag == TRUE, 0, NA)) %>%
-    ungroup() #%>%
-    # append model flag to indicate mods where nobs < days infilled
-    #left_join(distinct(dat_compare[c("infillevent", "method", "flag_mod")]))
-    
-  # specify r2_check1 as 1 if pair has 0
-  # which events failed pval check?
-  fail_events <- dat_means$date[dat_means$r2_check1 == 0 & !is.na(dat_means$r2_check1)]
-  for(f in fail_events){
-    dat_means$r2_check1[dat_means$date == f & is.na(dat_means$r2_check1)] <- 1
+  # repeat process
+  pull_season <- subset(dat_season, date %in% with(dat_means, date[selectedmod & grepl("moving", method)]))
+  pull_historic <- subset(dat_historic, date %in% with(dat_means, date[selectedmod & grepl("multi", method)]))
+  
+  chosen_dat <- distinct(rbind(chosen_dat, pull_season, pull_historic))
+  chosen_dat <- arrange(chosen_dat, date)
+  
+  # at this point, all dates should have a selection. warn if not:
+  if(length(alldates[!alldates %in% chosen_dat$date]) == 0){
+    print("All missing dates have best model selected. Huzzah!")
+  }else{
+    print("Following dates still need model selection:")
+    print(alldates[!alldates %in% chosen_dat$date])
   }
-  # add second r2 check based on max r2
-  dat_means <- group_by(dat_means, date) %>%
-    mutate(r2_check2 = mean_r2 == max(mean_r2, na.rm = T)) %>%
-    ungroup() %>%
-    # select based on highest r2, as long as mean pval and model not flagged
-    mutate(selectmod = ifelse(mean_pval_flag == TRUE, FALSE, ## those that are flagged aren't selected outright
-                              ifelse(mean_pval_flag == FALSE & r2_check2 == TRUE, TRUE, FALSE))) ## those that pass flag checks and have highest r2 are selected outright
-  # iterate through infill events that don't have a model selected and choose
-  missingselect <- group_by(dat_means, date) %>%
-    summarise(sumselect = sum(selectmod)) %>%
-    filter(sumselect == 0)
-  for(m in missingselect$date){
-    temp_dat <- subset(dat_means, date == m)
-    temp_method <- temp_dat$method[!is.na(temp_dat$mean_pval_flag)]
-    dat_means$selectmod[dat_means$date == m & dat_means$method == temp_method] <- TRUE
-  }
-  return(dat_means)
+  
+  return(chosen_dat)
 }
 
+
+# function to calculate, compare, and choose final tmax, tmin, tmean and DTR values
+# TK rules are:
+# 1) if tmax or tmin present, calculate the other from predicted DTR (don't use predicted tmean)
+# 2) if both tmax and tmin missing, use tmean +- (DTR/2) to calculate tmax and tmin
+# CTW additions:
+# 3) for loggers: if tmean and another extreme present, compare prediction-derived missing value to value calculated from measured variables for the day
+# 4) devise some rule for keep raw value over predicted..
+
+calculate_minmax <- function(chosen_dat, target_dat, target_site){
+  
+  # subset target site from target_dat
+  dat_select <- subset(target_dat, local_site == target_site, select = c(date:measurement, local_site))
+  add_back <- c(names(target_dat)[!names(target_dat) %in% names(dat_select)], "local_site")
+  
+  # spread measured data
+  dat_select <- tidyr::spread(dat_select, metric, measurement)
+  # calculate DTR
+  dat_select$dtr <- with(dat_select, airtemp_max - airtemp_min)
+  
+  # separate predicted DTR from predicted tmean to process each, then merge with measured variables
+  pred_dtr <- subset(chosen_dat, metric == "DTR", select = -metric)
+  names(pred_dtr)[grep("infil|pval|r2|equ|n.ob", names(pred_dtr))] <- paste("dtr", names(pred_dtr)[grep("infi|pval|r2|equ|obs", names(pred_dtr))], sep = "_")
+  
+  pred_tmean <- subset(chosen_dat, metric == "airtemp_avg", select = -metric)
+  names(pred_tmean)[grep("infil|pval|r2|equ|obs", names(pred_tmean))] <- paste("airtemp_avg", names(pred_tmean)[grep("infil|pval|r2|equ|obs", names(pred_tmean))], sep = "_")
+  # merge
+  pred_dat <- merge(pred_tmean, pred_dtr)
+  # calculate tmax and tmin to have it ready
+  pred_dat$tmax_infill <- with(pred_dat, airtemp_avg_infill + (dtr_infill/2))
+  pred_dat$tmin_infill <- with(pred_dat, airtemp_avg_infill - (dtr_infill/2))
+  
+  # attach predicted values to dat_select to start comparing and selecting final
+  dat_select <- merge(dat_select, pred_dat[grep("date|infill", names(pred_dat))], all = T)
+  # crunch measured dat-adjusted predictions
+  # measured tmax or tmin with measured tmean present
+  dat_select$adj_tmax_measured <- with(dat_select, ifelse(is.na(airtemp_max) & !is.na(airtemp_min) & !is.na(airtemp_avg), 
+                                                    airtemp_min + ((airtemp_avg - airtemp_min) * 2), NA))
+  dat_select$adj_tmin_measured <- with(dat_select, ifelse(is.na(airtemp_min) & !is.na(airtemp_max)  & !is.na(airtemp_avg), 
+                                                    airtemp_max - ((airtemp_max - airtemp_avg) * 2), NA))
+  # prediction adjusted by measured tmin or tmax present (e.g., measured + predicted DTR)
+  dat_select$adj_tmax_infill <- with(dat_select, ifelse(is.na(airtemp_max) & !is.na(airtemp_min), airtemp_min + (dtr_infill), NA))
+  dat_select$adj_tmin_infill <- with(dat_select, ifelse(is.na(airtemp_min) & !is.na(airtemp_max), airtemp_max - (dtr_infill), NA))
+  
+  # calculate tmean predicted adjusted vals
+  dat_select$meanadj_tmax_infill <- with(dat_select, ifelse(is.na(airtemp_max) & !is.na(airtemp_min), airtemp_min + abs((airtemp_avg_infill- airtemp_min)*2), NA))
+  dat_select$meanadj_tmin_infill <- with(dat_select, ifelse(is.na(airtemp_min) & !is.na(airtemp_max), airtemp_max - abs((airtemp_max-airtemp_avg_infill)*2), NA))
+  
+  # add flags for diurnal adj tmax < observed tmean and diurnal adj tmin > observed mean
+  dat_select$flag_airtemp_avg <- with(dat_select, (adj_tmax_infill < airtemp_avg) | (adj_tmin_infill > airtemp_avg))
+  
+  # select final temps
+  # first rename the measures temps with raw_[name]
+  names(dat_select)[grep("^airtemp_[a-z]{3}$", names(dat_select))] <- paste0("raw_", names(dat_select)[grep("^airtemp_[a-z]{3}$", names(dat_select))])
+  
+  dat_select <- dplyr::mutate(dat_select,
+                           airtemp_max = ifelse(flag_airtemp_avg, tmax_infill, NA), # use prediction-derived tmax if raw airtemp_avg flagged
+                           airtemp_max = ifelse(is.na(raw_airtemp_avg) & !is.na(raw_airtemp_max) & !is.na(raw_airtemp_min), tmax_infill, airtemp_max), # for case where tmin and tmax recorded but mean not
+                           airtemp_max = ifelse(is.na(airtemp_max) & !is.na(adj_tmax_infill), adj_tmax_infill, airtemp_max), # otherwise, if dtr adjusted present, use that
+                           airtemp_max = ifelse(is.na(airtemp_max) & !is.na(raw_airtemp_max), raw_airtemp_max, airtemp_max),  # otherwise if raw value present, use that
+                           airtemp_max = ifelse(is.na(airtemp_max) & !is.na(tmax_infill), tmax_infill, airtemp_max), # otherwise, use prediction-derived tmax
+                           # add selection method to make life easier for flagging
+                           airtemp_max_method = ifelse(!is.na(adj_tmax_infill) & airtemp_max == adj_tmax_infill, "tmin observed dtr adjusted",
+                                                   ifelse(!is.na(raw_airtemp_max) & airtemp_max == raw_airtemp_max, "raw", "predicted")),
+                           # apply same treatment to tmin
+                           airtemp_min = ifelse(flag_airtemp_avg, tmin_infill, NA), # use predicted tmin if raw airtemp_avg flagged
+                           airtemp_min = ifelse(is.na(raw_airtemp_avg) & !is.na(raw_airtemp_max) & !is.na(raw_airtemp_min), tmin_infill, airtemp_min), # for case where tmin and tmax recorded but mean not
+                           airtemp_min = ifelse(is.na(airtemp_min) & !is.na(adj_tmin_infill), adj_tmin_infill, airtemp_min), # otherwise, if dtr adjusted present, use that
+                           airtemp_min = ifelse(is.na(airtemp_min) & !is.na(raw_airtemp_min), raw_airtemp_min, airtemp_min), # otherwise if raw value present, use that
+                           airtemp_min = ifelse(is.na(airtemp_min) & !is.na(tmin_infill), tmin_infill, airtemp_min), # otherwise, use prediction-derived tmin
+                           # add selection method to make life easier for flagging
+                           airtemp_min_method = ifelse(!is.na(adj_tmin_infill) & airtemp_min == adj_tmin_infill, "tmin observed dtr adjusted",
+                                                       ifelse(!is.na(raw_airtemp_min) & airtemp_min == raw_airtemp_min, "raw", "predicted")),
+                           # apply same treatment to tmean
+                           airtemp_avg = ifelse(flag_airtemp_avg, airtemp_avg_infill, NA), # airtemp avg flagged, use predicted
+                           airtemp_avg = ifelse(is.na(airtemp_avg) & !is.na(raw_airtemp_avg), raw_airtemp_avg, airtemp_avg), # otherwise, if raw has value present, use raw
+                           airtemp_avg = ifelse(is.na(airtemp_avg) & is.na(raw_airtemp_avg), airtemp_avg_infill, airtemp_avg), # otherwise use predicted (raw is missing)
+                           # add selection method to make life easier for flagging
+                           airtemp_avg_method = ifelse(!is.na(raw_airtemp_avg) & airtemp_avg == raw_airtemp_avg, "raw", "predicted"),
+                           # post selection checks
+                           flagmax = airtemp_max < airtemp_min | airtemp_avg > airtemp_max_method,
+                           flagmin = airtemp_avg < airtemp_min)
+  
+  
+  # select columns to keep and rejoin regression equations and site id info
+  keepcols <- names(dat_select)[grepl("date|yr|mon|doy|logger|local|^raw_air|^airtemp|dtr_in|flag", names(dat_select))]
+  dat_out <- subset(dat_select, select = keepcols)
+  # join id cols from target_dat
+  dat_out <- merge(dat_out, pred_dat[grep("date|^airte|metho|source|dtr", names(pred_dat))], all.x = T)
+  
+  # start ordering column names
+  idcols <- names(dat_out)[grep("dat|yr|mon|doy|local|log", names(dat_out))]
+  dtrcols <- names(dat_out)[grep("dtr", names(dat_out))]
+  rawcols <- names(dat_out)[grep("^raw", names(dat_out))]
+  tempcols <- names(dat_out)[grep("^airtemp", names(dat_out))]
+  flagcols <- names(dat_out)[grep("flag", names(dat_out))]
+  # reorder
+  dat_out <- dat_out[c(idcols, tempcols, "method", "source.station", dtrcols, flagcols, rawcols)] 
+  # return selected so user can review
+  return(dat_out)
+                          
+}
 
 # iterate by infill event and compare/select best model according to TK criteria
 select_model_old <- function(dat_compare){
