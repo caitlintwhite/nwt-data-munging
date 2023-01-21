@@ -236,7 +236,7 @@ tk_temp_movingfill <- function(dat, target_site, missing_dates, site_order, wind
 
 
 # build multi-year regression, +- 3 days on each side of target infill date
-tk_temp_historicfill <- function(dat, target_site, missing_dates, site_order, nobs_limit = 14){
+tk_temp_historicfill <- function(dat, target_site, missing_dates, site_order, metric = c("airtemp_avg", "DTR"), nobs_limit = 14){
   
   # initiate data frame for storing results
   dat_out <- data.frame()
@@ -585,9 +585,15 @@ calculate_minmax <- function(chosen_dat, target_dat, target_site){
                            # add selection method to make life easier for flagging
                            airtemp_avg_method = ifelse(!is.na(raw_airtemp_avg) & airtemp_avg == raw_airtemp_avg, "raw", "predicted"),
                            # post selection checks
-                           flagmax = airtemp_max < airtemp_min | airtemp_avg > airtemp_max_method,
-                           flagmin = airtemp_avg < airtemp_min)
+                           flagmax = airtemp_max <= airtemp_min | airtemp_avg >= airtemp_max_method,
+                           flagmin = airtemp_avg <= airtemp_min)
   
+  # if flagmax or flagmin, default to typical infill method (predicted tmean +- DTR*0.5)
+  # pull dates, iterate through and replace with predicted tmax, tmin and tmean
+  flagdates <- dat_select$date[dat_select$flagmax | dat_select$flagmin]
+  dat_select$airtemp_max[dat_select$date %in% flagdates] <- dat_select$tmax_infill[dat_select$date %in% flagdates]
+  dat_select$airtemp_min[dat_select$date %in% flagdates] <- dat_select$tmin_infill[dat_select$date %in% flagdates]
+  dat_select[dat_select$date %in% flagdates, c("airtemp_max_method", "airtemp_min_method")] <- "predicted (raw extreme dtr adjusted failed)"
   
   # select columns to keep and rejoin regression equations and site id info
   keepcols <- names(dat_select)[grepl("date|yr|mon|doy|logger|local|^raw_air|^airtemp|dtr_in|flag", names(dat_select))]

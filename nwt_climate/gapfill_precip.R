@@ -31,10 +31,10 @@ rdsfiles_qc <- list.files(paste0(datpath, "qc"), pattern = "rds", full.names = T
 
 # read in prepared precip data
 chartppt <- get_tidydat("chartPPT", rdsfiles_qc, "ppt")
-ameriflux <- get_tidydat("ameri", rdsfiles_qc, "ppt")
-snotel <- get_tidydat("sno", rdsfiles_qc, "ppt")
-ghcnd <- get_tidydat("ghc", rdsfiles_qc, "ppt")
-allsites <- readRDS(rdsfiles_qc[grep("site", rdsfiles_qc)])
+ameriflux <- get_tidydat("amerifluxP", rdsfiles_qc, "ppt")
+snotel <- get_tidydat("snotelP", rdsfiles_qc, "ppt")
+ghcnd <- get_tidydat("ghcndP", rdsfiles_qc, "ppt")
+allsites <- readRDS(rdsfiles_qc[grep("siteinfoP", rdsfiles_qc)])
 
 
 
@@ -265,7 +265,7 @@ d1_historicfill <- tk_ppt_historicfill(alldats, "d1", d1missing, d1_order_c1up)
 d1chosen <- choose_best(d1missing, d1_seasonfill, d1_historicfill)
 
 
-# -- backfill c1 based on best regression chosen ----
+# -- backfill d1 based on best regression chosen ----
 
 d1ppt_out <- subset(chartppt, local_site == "d1" & yr >= 1980) %>%
   # now make sure qdays > 1 have the raw measurement unless there is a qc note on it
@@ -316,6 +316,7 @@ d1ppt_out_complete$Flag.2[grepl(", I$", d1ppt_out_complete$method)] <- "I"
 
 # review for completeness
 summary(d1ppt_out_complete)
+summary(is.na(d1ppt_out_complete))
 
 
 # -- CLEAN UP FOR WRITE OUT -----
@@ -333,6 +334,7 @@ clean_sources <- function(dat, target_site){
   dat$source_station <- gsub("c1$", "C1 Belfort Shielded", dat$source_station)
   dat$source_station <- gsub("d1$", "D1 Belfort Shielded", dat$source_station)
   dat$source_station <- gsub("USC000", "", dat$source_station)
+  dat$source_station <- gsub("USW000", "", dat$source_station)
   dat$local_site <- target_site
   print(unique(dat$source_station))
   return(dat)
@@ -348,9 +350,13 @@ d1_out_complete_prep <- d1ppt_out_complete %>%
   mutate(precip = ifelse(!is.na(backfill), backfill, measurement),
          Flag.1 = ifelse(is.na(equation) & raw == measurement, "A", Flag.1),
          Flag.2 = ifelse(is.na(equation) & raw == measurement, "A", Flag.2),
-         source.station = ifelse(is.na(equation) & is.na(source.station), "D1 Belfort Shielded", source.station)) %>%
+         source.station = ifelse((is.na(equation) & is.na(source.station)) | method == "H", "D1 Belfort Shielded", source.station)) %>%
   rename_all(casefold) %>%
   rename_all(function(x) gsub(".", "_", x, fixed = T))
+
+# check completeness
+summary(d1_out_complete_prep)
+sapply(d1_out_complete_prep[c("flag_1", "flag_2","method")], unique) # looks okay
 
 # add A flags to test
 d1_out <- d1_out_complete_prep[unique(c(names_out[names_out %in% names(d1_out_complete_prep)], 
@@ -366,6 +372,8 @@ d1_out <- d1_out %>%
 # clean up names
 d1_out <- clean_sources(d1_out, "D1")
 
+# review one more time
+sapply(d1_out[c("flag_1", "flag_2","source_station")], function(x) summary(as.factor(x)))
 
 # same treatment to c1
 c1tkppt <- getTabular(184)
@@ -399,11 +407,16 @@ c1_out <- clean_sources(c1_out, "C1")
 names_current <- names(sdlppt_out_complete)
 sdl_out_complete_prep <- sdlppt_out_complete %>%
   mutate(precip = ifelse(!is.na(backfill), backfill, measurement),
-         Flag.1 = ifelse(is.na(equation) & raw == measurement, "A", Flag.1),
-         Flag.2 = ifelse(is.na(equation) & raw == measurement, "A", Flag.2),
-         source.station = ifelse(is.na(equation) & is.na(source.station), "SDL Belfort Shielded", source.station)) %>%
+         # assign "A" flags to nonfilled dates
+         Flag.1 = ifelse(is.na(method) & raw == measurement, "A", Flag.1),
+         Flag.2 = ifelse(is.na(method) & raw == measurement, "A", Flag.2),
+         # if was not infilled or method was just to divide accumulated precip by number of days, assign SDL Belfort
+         source.station = ifelse((is.na(method) & is.na(source.station)) | method == "H", "SDL Belfort Shielded", source.station)) %>%
   rename_all(casefold) %>%
   rename_all(function(x) gsub(".", "_", x, fixed = T))
+
+# check that everything now has flag and source stations
+summary(is.na(sdl_out_complete_prep)) # yes
 
 # add A flags to test
 sdl_out <- sdl_out_complete_prep[unique(c(names_out[names_out %in% names(sdl_out_complete_prep)], 
@@ -462,6 +475,38 @@ ggplot(sdl_out, aes(date, precip)) +
   geom_line() +
   geom_point(data = subset(sdl_out, !is.na(regression_equation)), col = "red")
 
+# double check for any missing values
+# > anything infilled should have equations
+summary(sdl_out) # infill values there for 2017 Apr, but H flags not there.. why?
+sapply(sdl_out[c("flag_1", "flag_1", "source_station", "infill_qcnote", "compare_qcflag")], function(x) summary(as.factor(x)))
+
+
+# double check flagging
+sapply(subset(sdl_out, flag_1 != "A" & flag_2 == "A", select = c(local_site, flag_1:compare_qcflag)), function(x) length(unique(x)))
+View(subset(sdl_out, flag_1 == "A" & flag_2 != "A")) # all G or H cases, should have SDL Belfort and no regression info
+View(subset(sdl_out, flag_1 != "A" & flag_2 == "A")) # these are cases where SDL just needed a single day infill
+summary(is.na(subset(sdl_out, flag_1 != "A" & flag_2 != "A")))
+
+# check same for d1 and c1
+View(subset(d1_out, flag_1 == "A" & flag_2 != "A")) # same deal. anything that was 0 accum needs D1 assigned and all regression info removed
+View(subset(d1_out, flag_1 != "A" & flag_2 == "A"))
+# check c1
+View(subset(c1_out, flag_1 == "A" & flag_2 != "A")) # same deal. anything that was 0 accum needs D1 assigned and all regression info removed
+View(subset(c1_out, flag_1 != "A" & flag_2 == "A"))
+
+
+## clean up flagging
+sdl_out$source_station[sdl_out$flag_2 %in% c("G", "H")] <- "SDL Belfort Shielded"
+sdl_out[grepl("^SDL", sdl_out$source_station), grep("pval|rsquar|regression", names(sdl_out))] <- NA
+View(sdl_out)
+# add note for H that regression source stations had 0 accumulated during period
+sdl_out$infill_qcnote[sdl_out$flag_2 == "H"] <- "Available source stations had 0 accumulated during qualifying days period; D1 station (nearest) did not record data during period"
+# clean up d1
+d1_out$source_station[d1_out$flag_2 %in% c("G", "H")] <- "D1 Belfort Shielded"
+d1_out[grepl("^D1", d1_out$source_station), grepl("pvalu|rsquar|regression", names(d1_out))] <- NA
+c1_out$source_station[c1_out$flag_2 %in% c("G", "H")] <- "C1 Belfort Shielded"
+c1_out[grepl("^C1", c1_out$source_station), grep("pval|rsquar|regression", names(c1_out))] <- NA
+
 
 # stack c1 and d1 with tkdats, but start over at 2011-01-01
 c1_out_tkctw <- subset(c1tkppt, year <= 2010) %>%
@@ -475,12 +520,20 @@ d1_out_tkctw <- subset(d1tkppt, year <= 2010) %>%
   arrange(date)
 
 
+# to follow Tim's methods, just change D1 and C1 and SDL to those when they are sources for another station in D1 and C1 datasets
+# > can stay belfort shielded in SDL because that's what it was
+d1_out_tkctw$source_station[grepl("C1", d1_out_tkctw$source_station)] <- "C1"
+d1_out_tkctw$source_station[grepl("SDL", d1_out_tkctw$source_station)] <- "SDL"
+
+c1_out_tkctw$source_station[grepl("D1", c1_out_tkctw$source_station)] <- "D1"
+c1_out_tkctw$source_station[grepl("SDL", c1_out_tkctw$source_station)] <- "SDL"
+
+
 # -- WRITE OUT ----
 # prelim dats out for jrad
 write.csv(c1_out_tkctw, paste0(datpath, "/infill/c1PPT_infilled_draft.csv"), row.names = F)
 write.csv(d1_out_tkctw, paste0(datpath, "/infill/d1PPT_infilled_draft.csv"), row.names = F)
 write.csv(sdl_out, paste0(datpath, "/infill/sdlPPT_infilled_draft.csv"), row.names = F)
-
 
 
 # write out as rds for me to inspect
@@ -498,3 +551,7 @@ saveRDS(d1_out, paste0(datpath, "/infill/d1PPT_infilled_ctw1980.rds"))
 
 # and the all stacked dat
 saveRDS(alldats_qdays, paste0(datpath, "/infill/allPPTdats_wNWTqdays.rds"))
+
+# write out special Saddle Sep 1987 onwards for Meagan
+write.csv(subset(sdl_out, date >= as.Date("1987-09-01")), paste0(datpath, "/infill/sdlPPT_infilled_draft_Sep1987.csv"), row.names = F)
+

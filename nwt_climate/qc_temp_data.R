@@ -101,17 +101,21 @@ charttemp_out <- charttemp %>%
   subset(!grepl("avg|DTR", metric))
   
 # look at values I adjusted to suss whether/how they should be removed from infilling (e.g., may be okay to keep in seasonal infill since drift would equally affect all predictor vals)
-ggplot(subset(charttemp_out2, yr > 2011), aes(date, measurement, group = local_site)) +
+ggplot(subset(charttemp_out, yr > 2011), aes(date, measurement, group = local_site)) +
   geom_line() +
-  geom_point(data = subset(charttemp_out2, yr > 2011 & ctw_adjusted), aes(date, measurement), col = "purple", alpha = 0.5) +
-  geom_point(data = subset(charttemp_out2, yr > 2011 & ctw_adjusted), aes(date, tk_measurement), col = "chocolate", alpha = 0.15) +
-  geom_point(data = subset(charttemp_out2, yr > 2011 & tk_predicted), aes(date, tk_measurement), col = "dodgerblue", alpha = 0.15) +
+  geom_point(data = subset(charttemp_out, yr > 2011 & ctw_adjusted), aes(date, measurement), col = "purple", alpha = 0.5) +
+  geom_point(data = subset(charttemp_out, yr > 2011 & ctw_adjusted), aes(date, tk_measurement), col = "chocolate", alpha = 0.15) +
+  geom_point(data = subset(charttemp_out, yr > 2011 & tk_predicted), aes(date, tk_measurement), col = "dodgerblue", alpha = 0.15) +
   facet_grid(metric~local_site)
 # leave points be for predictions -- if it was an infilled value, remove. if it was adjusted by ctw bc of drift, leave for both types of predictions
 
 # NA infilled vals
 charttemp_out <- mutate(charttemp_out, measurement = ifelse(tk_predicted, NA, measurement))
+# assign raw if 2019 onwards for d1 or c1, and for sdl [except NA previously infilled values]
+charttemp_out$measurement[is.na(charttemp_out$tk_predicted) & is.na(charttemp_out$flag)] <- with(charttemp_out, raw[is.na(tk_predicted) & is.na(flag)])
 charttemp_out$station_id <- paste0(charttemp_out$local_site, "_chart")
+# to be sure
+charttemp_out <- distinct(charttemp_out)
 
 
 # -- 2. NWT logger dats -----
@@ -206,6 +210,11 @@ ghcnd_out$local_site <- ghcnd_out$station_id
 ghcnd_out$local_site[grepl("116$", ghcnd_out$station_id) & ghcnd_out$date < switchdate] <- with(ghcnd_out, paste(unique(station_id[grepl("116$", ghcnd_out$station_id)]), "0700", sep = "_"))
 ghcnd_out$local_site[grepl("116$", ghcnd_out$station_id) & ghcnd_out$date >= switchdate] <- with(ghcnd_out, paste(unique(station_id[grepl("116$", ghcnd_out$station_id)]), "1600", sep = "_"))
 
+# be sure each station starts at it minimum start time
+for(s in unique(ghcnd_out$local_site)){
+  mindate <- min(ghcnd_out$date[ghcnd_out$local_site == s & !is.na(ghcnd_out$raw)])
+  ghcnd_out <- ghcnd_out[!(ghcnd_out$local_site == s & ghcnd_out$date < mindate),]
+}
 
 
 # -- 2. SNOTEL ------
@@ -218,7 +227,11 @@ ggplot(snotel, aes(date, measurement)) +
 snotel_out <- snotel
 snotel_out$local_site <- gsub(" ", "", snotel$station_name)
 
-
+# temp record for some of these stations began after precip (but still have those starting dates). start each station at when data consistently starts.
+for(s in unique(snotel_out$local_site)){
+  mindate <- with(snotel_out, min(date[local_site == s & !is.na(measurement)]))
+  snotel_out <- snotel_out[!(snotel_out$local_site == s & snotel_out$date < mindate),]
+}
 
 
 # -- 3. AmeriFlux -----
@@ -231,6 +244,17 @@ ameriflux_out <- ameriflux
 ameriflux_out$local_site <- with(ameriflux_out, ifelse(is.na(rep), station_id, paste0(station_id, rep)))
 unique(ameriflux_out$local_site)
 ameriflux_out$local_site <- gsub("-", "_", ameriflux_out$local_site)
+# assign qc value for measurement at forest, raw for measurement at tvan
+ameriflux_out$measurement <- with(ameriflux_out, ifelse(grepl("NR1", local_site), qc_measurement, raw_measurement))
+
+# start each site at its first nonNA date
+for(s in unique(ameriflux_out$local_site)){
+  mindate <- with(ameriflux_out, min(date[local_site == s & !is.na(measurement)]))
+  ameriflux_out <- ameriflux_out[!(ameriflux_out$local_site == s & ameriflux_out$date < mindate)]
+}
+
+ameriflux_out <- distinct(ameriflux_out)
+
 
 
 # -- GRAB SITE INFO (for site order) -----
@@ -338,6 +362,8 @@ charttemp_out$station_name <- charttemp_out$local_site
 nwtlog_out$local_site <- nwtlog_out$station_id
 nwtlog_out$station_id <- str_extract(nwtlog_out$station_id, "d1|c1|sdl|gl4")
 nwtlog_out$station_name <- paste(nwtlog_out$station_id, "logger")
+
+names(ameriflux_out) <- gsub("raw_measurement", "raw", names(ameriflux_out))
 
 
 # -- WRITE OUT -----
