@@ -51,7 +51,7 @@ siteinfo$CD <- with(siteinfo, ifelse(grepl("FRA|BER|GRAN|HIGH", station_name), "
 siteinfo$CD <- factor(siteinfo$CD, levels = c("West", "East"))
 # assign middle region too
 siteinfo$CD2 <- with(siteinfo, ifelse(longitude <= unique(longitude[local_site == "c1"]) & longitude >= unique(longitude[local_site == "d1"]),
-                                              "Middle", as.character(CD)))
+                                      "Middle", as.character(CD)))
 siteinfo$CD2 <- factor(siteinfo$CD2, levels = c("West", "Middle", "East"))
 # make simple site name for plotting
 siteinfo <- mutate(siteinfo, simple_name = ifelse(grepl("chart", station_id), casefold(station_name, upper = T), station_name))
@@ -79,6 +79,7 @@ siteinfo$simple_name[grepl("d1", siteinfo$station_id)] <- "D1 (NWT LTER, alpine)
 ghcnd_temp <- readRDS(qc_dats[grepl("ghcndT", qc_dats)])
 ameriflux_temp <- readRDS(qc_dats[grepl("fluxTEMP", qc_dats)])
 temp_sites <- readRDS(qc_dats[grepl("infoTEM", qc_dats)])
+snotel_temp <- readRDS(qc_dats[grepl("snotelTEMP", qc_dats)])
 
 # pull ghcnd and ameriflux sites to be sure all there (some extra ones used for temp)
 ghcnd_sites <- subset(ghcnd_temp, select = c(yr, station_id:elevation)) %>%
@@ -88,7 +89,7 @@ ghcnd_sites <- subset(ghcnd_temp, select = c(yr, station_id:elevation)) %>%
   mutate(yrgrp = ifelse(yr == min(yr), "Begin", "End")) %>%
   ungroup() %>%
   spread(yrgrp, yr)
-  
+
 # silver lake and others in TK's dat not there
 ghcnd_stations <- read_csv("/Users/scarlet/Documents/nwt_lter/nwt_climate/data/raw/GHCNd/otherfiles/stations.csv")
 
@@ -106,7 +107,7 @@ addstations$simple_name <- gsub("CARIBOU RANCH", "Caribou Ranch", addstations$si
 addstations$simple_name <- gsub("SILVER LAKE", "Silver Lake", addstations$simple_name)
 addstations$simple_name <- gsub("NEDERLAND", "Nederland", addstations$simple_name)
 addstations$CD2 <- with(addstations, ifelse(longitude <= unique(siteinfo$longitude[siteinfo$local_site == "c1"]) & longitude >= unique(siteinfo$longitude[siteinfo$local_site == "d1"]),
-                                      "Middle", as.character(CD)))
+                                            "Middle", as.character(CD)))
 addstations <- rename(addstations, station_name = station)
 
 boulderstation <- data.frame(station_id = "USC00050848",
@@ -129,7 +130,7 @@ other_nwt_sites$simple_name <- other_nwt_sites$station_name
 other_nwt_sites$simple_name[grepl("gl4", other_nwt_sites$station_name)] <- "Green Lake 4 (NWT LTER, alpine lake)"
 
 # ctw boulder climate dataset for monthly extremes
-ctw_bldr <- read_csv("/Volumes/GoogleDrive-114160697374447394169/Mi\ unidad/Boulder_OSMP/data/noaa/intermediate/boulder_daily_climate_metric_infilled.csv")
+ctw_bldr <- read_csv("../bosmp-grassland-analyses/dat/boulder_daily_climate_metric_infilled.csv")
 
 
 
@@ -149,9 +150,9 @@ allsites_kml_out <- SpatialPointsDataFrame(coords = allsites_kml[c("longitude", 
                                            proj4string = CRS("+proj=longlat +datum=WGS84"))
 
 plot(allsites_kml_out)
-writeOGR(allsites_kml_out, layer = 'allsites',
-        "/Users/scarlet/Documents/cu_boulder/Fall\ 2022/SciComm/allsites.kml", 
-         driver="KML")
+# writeOGR(allsites_kml_out, layer = 'allsites',
+#          "/Users/scarlet/Documents/cu_boulder/Fall\ 2022/SciComm/allsites.kml", 
+#          driver="KML")
 
 
 
@@ -183,8 +184,8 @@ month_convert <- data.frame(mon = casefold(month.abb, upper = T),
                             monnum = 1:12)
 bldrx <-"/Users/scarlet/Documents/cu_boulder/Fall\ 2022/SciComm/boulder_monthlies.xlsx"
 bldr_ppt <- read_excel(bldrx, sheet = "ppt") %>%
-# convert trace to 1/10 inch
- mutate_all(function(x) ifelse(grepl("^T",x), 1/10, x)) %>%
+  # convert trace to 1/10 inch
+  mutate_all(function(x) ifelse(grepl("^T",x), 1/10, x)) %>%
   mutate_if(is.character, function(x) parse_number(x)) %>%
   gather(mon, val, JAN:DEC) %>%
   rename(ann_ppt = 'YEAR TOTAL') %>%
@@ -193,7 +194,7 @@ bldr_ppt <- read_excel(bldrx, sheet = "ppt") %>%
          val = val * 25.4,
          ann_ppt = ann_ppt * 25.4) %>%
   left_join(month_convert)
-  
+
 bldr_tmax <- read_excel(bldrx, sheet = "tmax", na = c("X", "Miss", "MISS", NA)) %>%
   mutate(metric = "tmax")
 bldr_tmin <- read_excel(bldrx, sheet = "tmin", na = c("X", "Miss", "MISS", NA)) %>%
@@ -205,7 +206,7 @@ bldr_monT <- rbind(bldr_tmin, bldr_tmax, bldr_tmean) %>%
   left_join(month_convert) %>%
   # convert F to C
   mutate(val = parse_number(val),
-    val = (val-32)*(5/9))
+         val = (val-32)*(5/9))
 
 bldrmon_met <- subset(bldr_monT) %>%
   rbind(bldr_ppt[names(.)]) %>%
@@ -225,7 +226,7 @@ bldr_mon4nwt <- subset(bldrmon_met, select = -mon) %>%
   mutate(metric = ifelse(!metric %in%  c("tmean", "precip"), paste0("avg", metric), metric),
          plotdate = as.Date(paste(yr, mon, 1, sep = "-"))) %>%
   spread(metric, val) %>%
-   #make placeholder extremes
+  #make placeholder extremes
   mutate(tmax = NA,
          tmin = NA) %>%
   rename(mon_ppt = precip)
@@ -341,8 +342,8 @@ ggplot(regional_mon_ppt) +
         plot.caption = element_text(hjust = 0))
 
 # -- print this -----
-ggsave(paste0(figpath, "monthlycompare.pdf"), width = 8.5, height = 6, units = "in")
-ggsave(paste0(figpath, "monthlycompare.png"), width = 8.5, height = 6, units = "in")
+# ggsave(paste0(figpath, "monthlycompare.pdf"), width = 8.5, height = 6, units = "in")
+# ggsave(paste0(figpath, "monthlycompare.png"), width = 8.5, height = 6, units = "in")
 
 regional_wy_ppt <- regional_mon_ppt %>%
   mutate(wy = ifelse(mon %in% 10:12, yr+1, yr)) %>%
@@ -384,7 +385,7 @@ c1d1temp <- rbind(c1_temp, d1_temp) %>%
   rename(yr = year, dtr = DTR, avg_temp = mean_temp) %>%
   rename_all(function(x) gsub("_temp", "", x)) %>%
   mutate(mon = month(date), doy = yday(date))
-  
+
 # summarize NWT ppt
 nwt_temp <- subset(sdl_temp, select =c(local_site, date:dtr_homogenized)) %>%
   rename_all(function(x) gsub("airtemp_", "", x)) %>%
@@ -402,7 +403,7 @@ nwt_temp_mon <-group_by(nwt_temp, local_site, yr, mon) %>%
   left_join(siteinfo) %>%
   mutate(local_site_elev = factor(local_site, levels = c("d1", "sdl", "c1")))
 
-  
+
 ggplot(nwt_temp, aes(date, avg, col = local_site)) +
   geom_point(alpha = 0.5) +
   scale_color_manual(name = NULL, values = c("blue", "purple", "forestgreen"))
@@ -423,9 +424,9 @@ nwt_temp_mon %>%
   gather(metric, temp, tmin:tmean) %>%
   mutate(plotdate = as.Date(paste(yr, mon, 1, sep = "-"))) %>%
   group_by(local_site, metric) %>%
-  mutate(rollingtemp = zoo::rollmean(temp, 6, "right", fill = NA)) %>%
+  mutate(rollingtemp = zoo::rollmean(temp, 12, "center", fill = NA)) %>%
   ggplot(aes(plotdate, temp, col = local_site_elev)) +
-  geom_point(alpha = 0.25) +
+  #geom_point(alpha = 0.25) +
   geom_line(aes(plotdate, rollingtemp), lwd = 1, alpha = 0.5) +
   scale_color_manual(name = NULL, values = c("blue", "purple", "forestgreen")) +
   facet_wrap(~metric, nrow = 3, scales = "free_y")
@@ -467,15 +468,40 @@ nwt_temp %>%
   subset(nobs > 360, select = -nobs) %>%
   gather(metric, temp, tmax:tmean) %>%
   group_by(local_site, metric) %>%
-  mutate(rollingtemp = zoo::rollmean(temp, 3, "right", fill = NA)) %>%
+  mutate(rollingtemp = zoo::rollmean(temp, 5, "right", fill = NA)) %>%
   ggplot(aes(yr, temp, col = local_site)) +
   geom_point(alpha = 0.25) +
-  geom_line(aes(yr, rollingtemp), lwd = 1, alpha = 0.5) +
+  geom_line(alpha = 0.25) +
+  #geom_line(aes(yr, rollingtemp), lwd = 1, alpha = 0.5) +
   scale_color_manual(name = NULL, values = c("blue", "purple", "forestgreen")) +
   facet_wrap(~metric, nrow = 3, scales = "free_y")
 
 
-  
+# plot all mets by site to be sure at least that is logical
+
+nwt_temp %>%
+  group_by(local_site, yr) %>%
+  summarise(tmax = max(max), 
+            tmin = min(min),
+            avgtmax = mean(max),
+            avgtmin = mean(min),
+            tmean = mean(avg),
+            nobs = length((avg))) %>%
+  subset(nobs > 360, select = -nobs) %>%
+  subset(yr > 1985) %>%
+  gather(metric, temp, tmax:tmean) %>%
+  mutate(local_site = factor(local_site, levels = c("c1", "sdl", "d1"))) %>%
+  group_by(local_site, metric) %>%
+  mutate(rollingtemp = zoo::rollmean(temp, 5, "right", fill = NA)) %>%
+  ggplot(aes(yr, temp, col = metric)) +
+  geom_point(alpha = .95) +
+  geom_line(alpha = 0.95) +
+  #geom_line(aes(yr, rollingtemp), lwd = 1, alpha = 0.5) +
+  #scale_color_manual(name = NULL, values = c("blue", "purple", "forestgreen")) +
+  facet_wrap(~local_site, nrow = 3, scales = "free_y")
+
+
+
 # -- VISUALIZE MAIN SUMMARY FIGS -----
 figpath <- "/Users/scarlet/Documents/cu_boulder/Fall\ 2022/SciComm/figs/"
 # c1, d1, sdl, and boulder
@@ -483,23 +509,23 @@ bldr_mon4nwt_clean <- mutate(bldr_mon4nwt_clean, local_site = "Boulder", simple_
 
 mon_met_all <- left_join(nwt_temp_mon, regional_mon_ppt) %>%
   subset(select = c(local_site, simple_name, yr:tmean, mon_ppt, plotdate)) %>%
-  rbind(bldr_mon4nwt_clean[names(.)]) %>%
+  #rbind(bldr_mon4nwt_clean[names(.)]) %>%
   arrange(plotdate) %>%
   mutate(wy = ifelse(mon %in% 10:12, yr+1, yr),
          wymon = ifelse(mon %in% 10:12, mon-9, mon +1),
          local_site_elev = factor(simple_name, levels = c("D1 (NWT LTER, alpine)", "Saddle (NWT LTER, tundra)", "C1 (NWT LTER, forest)", "City of Boulder")))
 
 wymon_met_all <- mon_met_all %>%
-    left_join(allsites_kml[c("simple_name", "elevation")]) %>%
-    # convert elev to ft
-    mutate(elev_ft = round(elevation* 3.28084,0),
-           site_label = paste0(local_site,", ", elev_ft, " ft"),
-           site_label = paste0(casefold(substr(site_label, 1, 1), upper = T), substr(site_label,2, nchar(site_label))),
-           site_label = gsub("Sdl", "Saddle (NWT LTER, alpine tundra)", site_label),
-           site_label = gsub("D1", "D1 (NWT LTER, upper alpine)", site_label),
-           site_label = gsub("C1", "C1 (NWT LTER, subalpine forest)", site_label),
-           site_label = gsub("Boulder", "City of Boulder", site_label),
-           site_label = factor(site_label, levels = unique(site_label[order(local_site_elev)]), ordered = TRUE))
+  left_join(allsites_kml[c("simple_name", "elevation")]) %>%
+  # convert elev to ft
+  mutate(elev_ft = round(elevation* 3.28084,0),
+         site_label = paste0(local_site,", ", elev_ft, " ft"),
+         site_label = paste0(casefold(substr(site_label, 1, 1), upper = T), substr(site_label,2, nchar(site_label))),
+         site_label = gsub("Sdl", "Saddle (NWT LTER, alpine tundra)", site_label),
+         site_label = gsub("D1", "D1 (NWT LTER, upper alpine)", site_label),
+         site_label = gsub("C1", "C1 (NWT LTER, subalpine forest)", site_label),
+         site_label = gsub("Boulder", "City of Boulder", site_label),
+         site_label = factor(site_label, levels = unique(site_label[order(local_site_elev)]), ordered = TRUE))
 
 monthlydat <- wymon_met_all %>%
   gather(metric, value, tmin:mon_ppt) %>%
@@ -608,7 +634,7 @@ striplabels <- unique(wy_met_all$site_label)[unique(wy_met_all$local_site_elev)]
 anntemp <- subset(wy_met_all, select = -yr_ppt) %>%
   gather(metric, value, avgtmin:tmin) %>%
   # convert to F
-  mutate(value = (value*1.8) +32) %>%
+  #mutate(value = (value*1.8) +32) %>%
   group_by(local_site, metric) %>%
   mutate(rollingtemp = zoo::rollmean(value, k = 10, fill = NA, align = "right")) %>%
   ungroup() %>%
@@ -622,12 +648,14 @@ anntemp <- subset(wy_met_all, select = -yr_ppt) %>%
   scale_y_continuous(breaks = seq(-40, 100, 20)) +
   scale_color_brewer(name = NULL, palette = "PuOr") +
   scale_fill_brewer(name = NULL, palette = "PuOr") +
-  #labs(y = "Temperature (°C)", x = "Water year (Oct 1-Sep 30)") +
-  labs(y = "Temperature (°F)", x = "Water year (Oct 1-Sep 30)") +
+  labs(y = "Temperature (°C)", x = "Water year (Oct 1-Sep 30)") +
+  #labs(y = "Temperature (°F)", x = "Water year (Oct 1-Sep 30)") +
   facet_wrap(~site_label, nrow = 4) +
   theme_bw() +
-  theme(legend.position = c(0.2,1),
-        legend.justification = c(1,1),
+   theme(legend.position = c(0.1, 0.5),
+     #legend.position = c(0.2,1),
+        #legend.justification = c(1,1),
+     legend.justification = c("left", "bottom"),
         legend.background = element_rect(fill = "transparent"),
         legend.key = element_rect(fill = "transparent"),
         strip.background = element_rect(fill= "transparent"),
@@ -701,21 +729,21 @@ nwt_temp_plot <- nwt_temp %>%
 #sdl
 sdl_doy_ppt <- ggplot(subset(nwt_ppt_plot, local_site == "sdl"), aes(wydoy, runningppt, group = wy, color = wy)) +
   geom_line(alpha = 0.5, lwd = 2) +
-    labs(x = "Day of water year (Oct 1-Sep 30)", y = NULL,
-         caption = " ") +
+  labs(x = "Day of water year (Oct 1-Sep 30)", y = NULL,
+       caption = " ") +
   facet_wrap(~"Cumulative precipitation (mm)") +
   scale_x_continuous(expand = c(0,0), breaks = seq(0,350, 50)) +
   scale_y_continuous(expand = c(0,0), breaks = seq(0, 1500, 250)) +
   scale_color_viridis_c(name = NULL, breaks = c(1980, 1990, 2000, 2010, 2020), option = "B") +
-    theme(plot.caption = element_text(hjust = 0),
-          legend.position = c(0.99,-0.05),
-          legend.direction = "horizontal",
-          legend.justification = c(1,1),
-          legend.key.height = unit(5, "pt"),
-          legend.background = element_rect(fill = "transparent"),
-          legend.text = element_text(hjust = 1),
-          strip.background = element_rect(fill = "transparent"),
-          strip.text = element_text(face = "bold"))
+  theme(plot.caption = element_text(hjust = 0),
+        legend.position = c(0.99,-0.05),
+        legend.direction = "horizontal",
+        legend.justification = c(1,1),
+        legend.key.height = unit(5, "pt"),
+        legend.background = element_rect(fill = "transparent"),
+        legend.text = element_text(hjust = 1),
+        strip.background = element_rect(fill = "transparent"),
+        strip.text = element_text(face = "bold"))
 
 
 sdl_doy_temp <- ggplot(subset(nwt_temp_plot, local_site == "sdl"), ) +
@@ -958,7 +986,7 @@ sep2013 <- subset(all_ppt, mon == 9 & yr == 2013) %>%
   mutate(ppt = ifelse(local_site == "sdl", raw, measurement))
 
 ggplot(sep2013, aes(date, measurement, col = elevation)) +
-#ggplot(subset(sep2013, CD == "East"), aes(date, measurement, col = elevation)) +
+  #ggplot(subset(sep2013, CD == "East"), aes(date, measurement, col = elevation)) +
   geom_line(data = subset(sep2013, local_site == "sdl"), lwd = 2, col = "grey80", alpha = 0.75) +
   #geom_point(data = subset(novppt2020, doy == 317 & local_site == "sdl"), size = 3, col = "grey80", alpha = 0.75) +
   geom_line(aes(col = elevation, group = local_site), alpha = 0.75) +
@@ -998,7 +1026,7 @@ ggsave(paste0(figpath, "regional_ppt_sep2013.jpg"), width = 3, height = 3, units
 # -- june 1982 tmax outlier ----
 highdate <- with(sdl_chart_temp_qc, doy[grepl("high val", qa_flag)])
 sdl_june <- subset(sdl_chart_temp_qc, doy >= (highdate - 13) & doy <= (highdate + 13))
- 
+
 sdl_junelm <- lm(sdl_qatemp ~ cos(2*pi*doy/365) + sin(2*pi*doy/365), data = sdl_june)
 test <- data.frame((predict(sdl_junelm, newdata = sdl_june, se.fite = T, level = .99, interval = "prediction"))) %>%
   cbind(sdl_june)
@@ -1052,7 +1080,7 @@ ggplot(subset(sdl_temp, mon <4), aes(doy, airtemp_min_gapfilled)) +
 
 ggplot(sdl_2011, aes(airtemp_min_gapfilled)) +
   geom_density()
-    
+
 sdl_feblm <- lm(raw_airtemp_avg ~ cos(2*pi*doy/365) + sin(2*pi*doy/365), data = sdl_2011)
 test2011 <- data.frame((predict(sdl_feblm, newdata = sdl_2011, se.fite = T, level = .99, interval = "prediction"))) %>%
   cbind(sdl_2011)
@@ -1110,8 +1138,8 @@ sdl_goodchange <- gather(sdl_goodchange, met, val, raw_airtemp_max:raw_airtemp_m
   subset(yr > 1992) %>%
   # focus on 15 day window around 2/1 (day 32 of year)
   subset(doy >= 32-14 & doy <= 32+14) #%>%
-  # choose tmin only
-  subset(grepl("min", met))
+# choose tmin only
+subset(grepl("min", met))
 
 ggplot(sdl_goodchange, aes(scale(delta))) +
   geom_histogram() +
@@ -1147,22 +1175,22 @@ ggplot(sdl_goodchange, aes(doy, delta)) +
     legend.position = c(1.02,.98),
     legend.justification = c("right"),
     legend.direction = "horizontal",
-        #legend.justification = c(1,1),
-        legend.key.width = unit(0.4, "cm"),
-        legend.key.height = unit(3, "pt"),
-        
-        legend.background = element_blank(),
+    #legend.justification = c(1,1),
+    legend.key.width = unit(0.4, "cm"),
+    legend.key.height = unit(3, "pt"),
     
-        legend.text = element_text(size = 8, vjust = 3),
-        legend.title = element_text(size = 10, vjust = 1),
-        #legend.text.align = 0,
-        axis.line.y = element_line(arrow = grid::arrow(length = unit(0.2, "cm"), 
-                                                       ends = "both")),
-        axis.line.x = element_line(arrow = grid::arrow(length = unit(0.2, "cm"), 
-                                                       ends = "last")),
-        axis.text.y = element_text(size = 12),
-        axis.text.x = element_blank(),
-        axis.ticks = element_blank())
+    legend.background = element_blank(),
+    
+    legend.text = element_text(size = 8, vjust = 3),
+    legend.title = element_text(size = 10, vjust = 1),
+    #legend.text.align = 0,
+    axis.line.y = element_line(arrow = grid::arrow(length = unit(0.2, "cm"), 
+                                                   ends = "both")),
+    axis.line.x = element_line(arrow = grid::arrow(length = unit(0.2, "cm"), 
+                                                   ends = "last")),
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_blank(),
+    axis.ticks = element_blank())
 
 ggsave(paste0(figpath, "sdlT_goodchange_winter.pdf"), width = 3, height = 3, units = "in")
 ggsave(paste0(figpath, "sdlT_goodchange_winter.jpg"), width = 3, height = 3, units = "in")
@@ -1196,3 +1224,318 @@ ggplot(subset(sdl_flatline, doy >= (mindoy-7) & doy <= (maxdoy+7)), aes(date, sd
 
 ggsave(paste0(figpath, "sdlT_flatline.pdf"), width = 3, height = 3, units = "in")
 
+
+# -- plot D1 climate anomalies for ARose ----
+d1_anomT <- subset(d1_temp, select = c(year, mean_temp)) %>%
+  group_by(year) %>%
+  summarise(annT = mean(mean_temp)) %>%
+  ungroup() %>%
+  mutate(alldat_anom = annT - mean(annT),
+         rollmean = zoo::rollmean(annT, fill = NA, k = 30, align = "right"),
+         moving_anom = annT - rollmean,
+         baseline_mean = mean(annT[year < 1982]),
+         baseline_anom = annT - mean(annT[year < 1982]))
+
+cowplot::plot_grid(
+  ggplot(d1_anomT, aes(year, 1)) +
+    geom_col(aes(fill = annT)) + 
+    scale_fill_distiller(name = "Mean", palette = "RdBu"),
+  ggplot(d1_anomT, aes(year, 1)) +
+    geom_col(aes(fill = alldat_anom)) + 
+    scale_fill_distiller(name = "Anom", palette = "RdBu"),
+  ggplot(d1_anomT, aes(year, 1)) +
+    geom_col(aes(fill = baseline_anom)) + 
+    scale_fill_distiller(name = "Anom", palette = "RdBu"),
+  ggplot(d1_anomT, aes(year, 1)) +
+    geom_col(aes(fill = moving_anom)) + 
+    scale_fill_distiller(name = "Anom", palette = "RdBu"),
+  nrow = 4, align = "vh"
+)
+
+gather(d1_anomT, met, val, annT:ncol(d1_anomT)) %>%
+  subset(!met %in% c("annT", "rollmean")) %>%
+  ggplot(aes(year, 1)) +
+  geom_col(aes(fill = val)) + 
+  scale_fill_distiller(name = "Anom", palette = "RdBu") +
+  facet_wrap(~met, nrow = 3)
+
+
+# -- FIGS FOR NWT MEETING -----
+
+# to make:
+# 1. example raw fig w flagged data --> treated data
+
+# show d1 2013:2019
+d1_postTK <- subset(d1_temp, year > 2012) %>%
+# april 2017 has stuck pen
+  subset(month(date) %in% 3:4 & year ==2017, select = c(local_site:min_temp, source_station, t_mean_pvalue, Tmax_QAflag:ncol(.))) %>%
+  gather(met, val, max_temp, min_temp, raw_Tmax, raw_Tmin) %>%
+  mutate(gapfilled = ifelse(grepl("raw", met), "raw", "final"),
+         met = ifelse(grepl("max", met), "tmax", "tmin")) %>%
+  spread(gapfilled, val) %>%
+  mutate(qaflag = ifelse(met == "tmin", Tmin_QAflag, Tmax_QAflag))
+
+ggplot(d1_postTK, aes(date, raw, group = met)) +
+  geom_line(col = "grey30") +
+  geom_point(alpha = 0.9) +
+  geom_point(data = subset(d1_postTK, !is.na(qaflag)), aes(col = qaflag), alpha = 0.9) +
+  labs(y = "D1 raw max, min temp (°C)", x = NULL) +
+  scale_x_date(date_labels = "%m-%d-%y") +
+  scale_color_manual(values = c("firebrick2","goldenrod2")) +
+  scale_y_continuous(limits = c(-24, 9)) +
+  theme(legend.position = c(0.99, 0.99),
+        legend.justification = c("right", "top"),
+        legend.background = element_blank(),
+        legend.key = element_blank(),
+        legend.spacing.y = unit(2, "pt"),
+          legend.key.size =  unit(5, "pt"),
+        axis.text.x = element_text(hjust = 0.75))
+ggsave("nwt_climate/figs/d1_rawTemp_errorEx.jpg", height = 2.88, width = 3.56, units = "in")
+
+# corrected
+ggplot(d1_postTK, aes(date, final, group = met)) +
+  geom_line(col = "grey30") +
+  geom_point(alpha = 0.9) +
+  geom_point(data = subset(d1_postTK, !is.na(t_mean_pvalue)), aes(col = source_station), alpha = 0.9) +
+  scale_color_manual(values = c("cyan3", "mediumpurple1", "darkorchid3")) +
+  labs(y = "D1 gap-filled max, min temp (°C)", x = NULL) +
+  scale_y_continuous(limits = c(-24, 9)) +
+  scale_x_date(date_labels = "%m-%d-%y") +
+  theme(legend.position = c(0.01, 0.99),
+        legend.justification = c("left", "top"),
+        legend.background = element_blank(),
+        legend.key = element_blank(),
+        legend.key.size =  unit(5, "pt"),
+        legend.spacing.y = unit(2, "pt"),
+        #legend.title = element_text(size = 10),
+        axis.text.x = element_text(hjust = 0.75))
+
+ggsave("nwt_climate/figs/d1_finalTemp_errorEx.jpg", height = 2.88, width = 3.56, units = "in")
+
+# 2. another example or so of flagged data
+
+# find spike change and comparative deviance
+# choose c1 2014-11-25 tmax had comparative deviance and low value (met multiple flags, plot with other stations)
+
+# show 2 weeks before and after, all of nov
+c1_tmax_bad <- subset(c1_temp, year == 2014, select = c(local_site:date, max_temp,source_station, t_mean_pvalue, Tmin_QAflag, raw_Tmax)) %>%
+  subset(month(date) == 11) %>%
+  subset(date >= as.Date("2014-11-15"))
+c1_temp_sites <- subset(temp_sites, station_id == "c1_chart") %>%
+  arrange(final_rank) %>%
+  # choose top 6 sites
+  subset(final_rank < 18)
+c1_temp_order <- c1_temp_sites$paired_site[order(c1_temp_sites$final_rank)]
+
+# pull other data near c1
+snotel_c1 <- subset(snotel_temp, grepl("Niwo|Univ", local_site, fixed = F) & date %in% c1_tmax_bad$date & grepl("max", metric))
+nwtlogT <-subset(nwt_logger_temp_qc, grepl("max", metric) & date %in% c1_tmax_bad$date) 
+ghcnd_c1 <- subset(ghcnd_temp, local_site %in% c1_temp_sites$paired_site & date %in% c1_tmax_bad$date & grepl("max", metric))
+flux_c1 <- subset(ameriflux_temp, date %in% c1_tmax_bad$date & grepl("max", metric))
+stack_badT_c1 <- subset(nwtlogT, select = names(nwtlogT)[names(nwtlogT) %in% names(snotel_c1)]) %>%
+  rbind(snotel_c1[names(.)]) %>%
+  rbind(ghcnd_c1[names(.)]) %>%
+  rbind(flux_c1[names(.)]) %>%
+  mutate(local_site = factor(local_site, levels = c1_temp_order)) %>%
+  subset(!is.na(local_site))
+
+unique(stack_badT_c1$local_site[stack_badT_c1$local_site %in% c1_temp_order])
+
+ggplot(c1_tmax_bad, aes(date, raw_Tmax)) +
+  geom_line(data = stack_badT_c1, aes(date, measurement, col = local_site), alpha = 0.8) +
+  geom_line(col = "darkseagreen4", lwd = 1, alpha = 0.75) +
+  geom_point(col = "darkseagreen4", size = 2) +
+  geom_text(data = c1_tmax_bad[1,], col = "darkseagreen4", label = "C1 chart", hjust =0 , nudge_y = 2) +
+  geom_point(data = subset(c1_tmax_bad, !is.na(t_mean_pvalue)), pch = 1, size = 5, col = "chocolate2", lwd = 1) +
+  scale_color_grey(name = "comparative\nstation") +
+  guides(color = guide_legend(ncol = 2)) +
+  scale_x_date(date_breaks = "4 days", date_labels = "%m-%d-%y") +
+  labs(y = "raw daily max temp (°C)", x = NULL) +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 9),
+        legend.background = element_blank(),
+        legend.key = element_blank(),
+        legend.key.size =  unit(8, "pt"),
+        legend.spacing.y = unit(2, "pt"),
+        axis.text.x = element_text(hjust = 0.75))
+ggsave("nwt_climate/figs/c1_comparative_errorEx.jpg", height = 3, width = 3.4, units = "in")
+
+
+
+# 3. homogenized temp and gap-filled precip, panel
+nwt_temp_mon %>%
+  gather(metric, temp, tmin:tmean) %>%
+  subset(!grepl("avg", metric)) %>%
+  mutate(plotdate = as.Date(paste(yr, mon, 1, sep = "-"))) %>%
+  group_by(local_site, metric) %>%
+  mutate(rollingtemp = zoo::rollmean(temp, 12, "right", fill = NA)) %>%
+  ggplot(aes(plotdate, temp, col = local_site_elev)) +
+  geom_point(alpha = 0.25) +
+  geom_line(aes(plotdate, rollingtemp), lwd = 1, alpha = 0.9) +
+  scale_color_manual(name = NULL, values = c("blue", "purple", "forestgreen")) +
+  facet_wrap(~metric, nrow = 3, scales = "free_y")
+
+
+ggplot(subset(regional_wy_ppt, grepl("d1|c1|sdl", local_site) & !(local_site == "sdl" & wy < 1988)), aes(wy, wy_ppt, col = local_site_elev)) +
+  geom_line(alpha = 0.25) +
+  geom_line(aes(wy, zoo::rollmean(wy_ppt, 5, align = "right", fill = NA), group = local_site_elev), lwd = 1.5, alpha = 0.75) +
+  geom_point(alpha = 0.5) +
+  scale_color_manual(name = NULL, values = c("blue", "purple", "forestgreen")) +
+  labs(y = "Total precipitation (mm)", x = "Water year (Oct 1 - Sep 30)") +
+  scale_fill_viridis_d() +
+  theme(legend.position = c(0.05,0.9),
+        legend.justification = "left")
+
+
+
+
+
+# nwt_temp %>%
+#   group_by(local_site, yr) %>%
+#   summarise(tmax = max(max), 
+#             tmin = min(min),
+#             avgtmax = mean(max),
+#             avgtmin = mean(min),
+#             tmean = mean(avg),
+#             nobs = length((avg))) %>%
+#   subset(nobs > 360, select = -nobs) %>%
+#   #subset(yr > 1985) %>%
+#   gather(metric, temp, tmax:tmean) %>%
+#   mutate(local_site = factor(local_site, levels = c("c1", "sdl", "d1"))) %>%
+#   group_by(local_site, metric) %>%
+#   mutate(rollingtemp = zoo::rollmean(temp, 5, "right", fill = NA)) %>%
+#   ggplot(aes(yr, temp, col = local_site)) +
+#   geom_point(alpha = .95) +
+#   geom_line(alpha = 0.95) +
+#   #geom_line(aes(yr, rollingtemp), lwd = 1, alpha = 0.5) +
+#   scale_color_manual(name = NULL, values = c("blue", "purple", "forestgreen")) +
+#   facet_wrap(~metric, nrow = 3, scales = "free_y")
+
+
+wy_met_all <- group_by(mon_met_all, wy, local_site_elev, simple_name, local_site) %>%
+  summarise(avgtmin = mean(avgtmin),
+            avgtmax = mean(avgtmax),
+            tmean = mean(tmean),
+            tmax = max(tmax),
+            tmin = min(tmin),
+            yr_ppt = sum(mon_ppt),
+            ctmon = length(mon)) %>%
+  ungroup() %>%
+  subset(ctmon == 12) %>%
+  left_join(allsites_kml[c("simple_name", "elevation")]) %>%
+  # convert elev to ft
+  mutate(elev_ft = round(elevation* 3.28084,0),
+         site_label = paste0(local_site,", ", elev_ft, " ft"),
+         site_label = paste0(casefold(substr(site_label, 1, 1), upper = T), substr(site_label,2, nchar(site_label))),
+         site_label = gsub("Sdl", "Saddle (NWT LTER, alpine tundra)", site_label),
+         site_label = gsub("D1", "D1 (NWT LTER, upper alpine)", site_label),
+         site_label = gsub("C1", "C1 (NWT LTER, subalpine forest)", site_label),
+         site_label = gsub("Boulder", "City of Boulder", site_label),
+         site_label = factor(site_label, levels = unique(site_label[order(local_site_elev)]), ordered = TRUE))
+
+
+# time series annual temp
+yr_met_all %>%
+  gather(metric, value, avgtmin:yr_ppt) %>%
+  ggplot(aes(yr, value, col = local_site_elev)) +
+  geom_line(alpha = 0.5) +
+  geom_point(alpha = 0.7) +
+  facet_wrap(~metric, scales = "free_y")
+
+
+subset(wy_met_all, select = -yr_ppt) %>%
+  gather(metric, value, avgtmin:tmin) %>%
+  mutate(local_site_elev2 = factor(simple_name, rev(levels(local_site_elev))),
+         metric2 = factor(metric, levels = c("tmax", "avgtmax", "tmean", "avgtmin", "tmin"), labels = c("Max", "Avg. Max", "Avg.", "Avg. Min", "Min"))) %>%
+  ggplot(aes(wy, value, col = metric2)) +
+  geom_line(alpha = 0.5) +
+  geom_point(alpha = 0.7) +
+  facet_grid(~local_site_elev2, space = "free_x", scales = "free_x")
+
+striplabels <- unique(wy_met_all$site_label)[unique(wy_met_all$local_site_elev)]
+anntemp <- subset(wy_met_all, select = -yr_ppt) %>%
+  gather(metric, value, avgtmin:tmin) %>%
+  # convert to F
+  #mutate(value = (value*1.8) +32) %>%
+  group_by(local_site, metric) %>%
+  mutate(rollingtemp = zoo::rollmean(value, k = 5, fill = NA, align = "right")) %>%
+  ungroup() %>%
+  mutate(local_site_elev2 = factor(simple_name, rev(levels(local_site_elev))),
+         station = paste(casefold(local_site, upper = T), elevation, "m"),
+         station = factor(station, levels = c("D1 3734 m", "SDL 3528 m", "C1 3022 m")),
+         metric2 = factor(metric, levels = c("tmax", "avgtmax", "tmean", "avgtmin", "tmin"), labels = c("Max", "Avg. Max", "Avg.", "Avg. Min", "Min"))) %>%
+  ggplot(aes(wy, value, col = metric2)) +
+  geom_line(alpha = 0.5) +
+  geom_point(aes(fill = metric2), pch = 21, col = "grey50", alpha = 0.7) +
+  geom_line(aes(wy, rollingtemp), lwd = 1, alpha = 0.7) +
+  scale_x_continuous(breaks = seq(1880, 2020, 20)) +
+  scale_y_continuous(breaks = seq(-40, 100, 20)) +
+  scale_color_brewer(name = NULL, palette = "PuOr") +
+  scale_fill_brewer(name = NULL, palette = "PuOr") +
+  labs(y = "Temperature (°C)", x = "Water year (Oct 1-Sep 30)") +
+  #labs(y = "Temperature (°F)", x = "Water year (Oct 1-Sep 30)") +
+  facet_wrap(~station, nrow = 3) +
+  theme_bw() +
+  theme(legend.position = c(0.05, 0.45),
+        legend.justification = c("left", "bottom"),
+        legend.background = element_rect(fill = "transparent"),
+        legend.key.size = unit(4, "pt"),
+        legend.key = element_rect(fill = "transparent"),
+        axis.title = element_text(size = 10),
+        strip.background = element_rect(fill= "transparent"),
+        strip.text = element_text(face = "bold"))
+
+
+# time series annual ppt
+annppt <- subset(wy_met_all, select = c(wy:local_site, elevation, yr_ppt, site_label)) %>%
+  # put ppt in inches
+  #mutate(yr_ppt = yr_ppt/25.4) %>%
+  mutate(local_site_elev2 = factor(simple_name, rev(levels(local_site_elev))),
+         station = paste(casefold(local_site, upper = T), elevation, "m"),
+         station = factor(station, levels = c("D1 3734 m", "SDL 3528 m", "C1 3022 m"))) %>%
+  group_by(local_site) %>%
+  mutate(rollingppt = zoo::rollmean(yr_ppt, k = 5, fill = NA, align = "right")) %>%
+  ungroup() %>%
+  ggplot() +
+  geom_line(aes(wy, yr_ppt), alpha = 0.5, col = "dodgerblue") +
+  geom_point(aes(wy, yr_ppt), pch = 21, col ="blue", alpha = 0.7, fill = "dodgerblue") +
+  geom_line(aes(wy, rollingppt),lwd = 1, col = "blue", alpha = 0.7) +
+  #geom_smooth(method = "gam") +
+  labs(y = "Precipitation (mm)", x = "Water year (Oct 1-Sep 30)") +
+  scale_x_continuous(breaks = seq(1880, 2020, 20)) +
+  facet_wrap(~station, nrow = 4) +
+  theme_bw() +
+  theme(legend.position = c(0.1,1),
+        legend.justification = c(1,1),
+        legend.background = element_rect(fill = "transparent"),
+        legend.key = element_rect(fill = "transparent"),
+        axis.title = element_text(size = 10),
+        strip.background = element_rect(fill= "transparent"),
+        strip.text = element_text(face = "bold"))
+
+# what does log look like?
+subset(wy_met_all, select = c(wy:local_site, yr_ppt)) %>%
+  mutate(local_site_elev2 = factor(simple_name, rev(levels(local_site_elev))),
+         yr_ppt = log(yr_ppt)) %>%
+  group_by(local_site) %>%
+  mutate(rollingppt = zoo::rollmean(yr_ppt, k = 10, fill = NA, align = "right")) %>%
+  ungroup() %>%
+  ggplot() +
+  geom_line(aes(wy, yr_ppt), alpha = 0.5, col = "dodgerblue") +
+  geom_point(aes(wy, yr_ppt), pch = 21, col ="blue", alpha = 0.7, fill = "dodgerblue") +
+  geom_line(aes(wy, rollingppt), lwd = 1.5, col = "blue", alpha = 0.7) +
+  #geom_smooth(method = "gam") +
+  scale_x_continuous(breaks = seq(1880, 2020, 20)) +
+  facet_wrap(~local_site_elev, nrow = 4) +
+  theme_bw()
+
+
+ts_out <- plot_grid(annppt, anntemp, ncol = 2, 
+          align = "vh", rel_widths = c(0.8, 1))
+ggsave("nwt_climate/figs/annual_climate_timeseries.jpg", ts_out,
+       width = 3.85, height = 5.2, units = "in", scale = 1.3)
+
+ggsave(paste0(figpath, "annual_climate_timeseries.pdf"), width = 8, height = 5.5, units = "in", scale = 1.35)
+ggsave(paste0(figpath, "annual_climate_timeseries.png"), width = 8, height = 5.5, units = "in", scale = 1.35)
+
+# 
