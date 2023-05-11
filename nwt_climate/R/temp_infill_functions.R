@@ -585,7 +585,7 @@ calculate_minmax <- function(chosen_dat, target_dat, target_site){
                            # add selection method to make life easier for flagging
                            airtemp_avg_method = ifelse(!is.na(raw_airtemp_avg) & airtemp_avg == raw_airtemp_avg, "raw", "predicted"),
                            # post selection checks
-                           flagmax = airtemp_max <= airtemp_min | airtemp_avg >= airtemp_max_method,
+                           flagmax = airtemp_max <= airtemp_min | airtemp_avg >= airtemp_max,
                            flagmin = airtemp_avg <= airtemp_min)
   
   # if flagmax or flagmin, default to typical infill method (predicted tmean +- DTR*0.5)
