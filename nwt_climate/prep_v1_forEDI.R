@@ -368,4 +368,9 @@ View(subset(sdl_temp_pretty, source_station_hmp2 == "University Camp (838)")) # 
 
 
 # -- write out pretty temp -----
-write.csv(sdl_temp_pretty, paste0(datpath, "publish/sdl_daily_airtemp_gapfilled_ongoing.csv"), row.names = F)
+# for NWT long term datasets:
+# make NA NaN instead (tell sce NaN in this case = no value, not data are missing)
+# write out csv with utf-8 and \r\n eol (end of line)
+# (need to change this in code settings, check it looks good after write out)
+write.csv(sdl_temp_pretty, paste0(datpath, "publish/sdl_daily_airtemp_gapfilled_ongoing.csv"), row.names = F, na = "NaN", quote = T)
+
