@@ -1,0 +1,1093 @@
+---
+title: "Assess coverage for NWT temperature datasets"
+author: "CTW"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+The purpose of this script is to:
+
+1. Read in NWT temperature datasets of possible interest for the temperature synthesis project
+2. Review their coverage in time and space
+3. Visualize some of the raw data (to have a sense of quality, variation, range)
+
+
+```{r setup, include=FALSE, echo = F, warning=F, message=F}
+knitr::opts_chunk$set(echo = FALSE, message = F, warning = F, fig.width = 8, fig.height = 6)  # don't display code by default
+# load needed libraries
+library(tidyverse)
+library(lubridate)
+library(corrplot)
+library(sf) # for NWT plots
+library(neonUtilities) # to fetch neon data
+# ctw functions to fetch climate datasets from EDI
+source("~/github/nwt-data-munging/nwt_climate/R/fetch_data_functions.R")
+# ctw personal prefs for environemnt and display
+options(stringsAsFactors = F)
+theme_set(theme_minimal())
+
+```
+
+Most datasets used in this exploration are read in from the Environmental Data Initiative Data Portal (https://portal.edirepository.org), so this script can be run on any machine with R, RStudio, and the packages called.
+
+----- 
+
+NWT datasets mentioned in temperature synthesis proposal:
+
+**Niwot Ridge and Green Lakes Valleuy**
+
+* D1, SDL daily air temperature datasets
+* Tvan climate and temp flux gap-filled
+* Talus temperature datasets (pika demography, habitat occupancy)
+* GL4 temperature dataset (continuous buoy data, long-term water quality)
+* Ice-on/ice-off in GLV
+* Snow cover in Niwot Ridge and GLV
+* Saddle grid snow depth
+* SWE dataset for Niwot Ridge and GLV
+
+
+Datasets not mentioned in proposal that might be relevant:
+
+**NWT LTER datasets**
+
+* Sensor array air and soil tempertature datasets
+* Black sand experiment and control soil temp (Jane says be careful about interp absolute values)
+* SDL soil temperature dataset
+* GL4 air temperature (limited period)
+* C1 gap-filled
+* Robbie's soil temp and air temp permanent forest plots dataset
+
+**Other independent datasets collected at Niwot Ridge**
+
+* Ameriflux Tvan (west, east) and C1 Forest air and soil temp
+* SNOTEL C1 Niwot and University Camp
+* NEON tower air temperature and soil temperature datasets
+
+CTW knows not all of these data are gap-filled.. and gap-filled D1 and C1 are chart temp vs. mostly electronic logger at SDL. For now will focus on what's available without treating to determine what is worth treating for future analyses.
+
+
+-----
+
+```{r get NWT plot locations, eval = F}
+nwtplots <- sf::read_sf("/Users/scarlet/Documents/nwt_lter/temp_synth/lter_plots_2022_12_08/lter_plots.shp")
+
+# plots labeled "PTQUAD.." are the saddle grid. no snow pit locations here.
+# black sand locations present
+```
+
+
+## TEMPORAL OVERLAP SUMMARY ##
+
+The following plots display dates with coverage for all temperature datasets identified in the temperature synthesis proposal, and a few others from Ameriflux (CTW has these available from Saddle temperature infilling). Gapfilled Tvan is only available through 2014 and so if want to use that would need to add in Tvan east and Tvan west data from the Ameriflux website.
+
+```{r airtemp datasets, include = F}
+
+# gapfilled chart [use CTW prepped with sdl temp, provisional data]
+ctwfiles <- list.files("~/Documents/nwt_lter/nwt_climate/data/infill/")
+
+# d1 temp for nwt8-renewal [through 2020]
+d1temp <- read_csv("~/github/nwt-data-munging/nwt_climate/nwt8-renewal_homogenize_climdat/data/d1_temp_1952-2020_draft.csv")
+# for outstanding data
+rawchart_temp <- getNWTcharts(mets = c("temp"))
+d1temp_raw <- rawchart_temp$D1temp
+
+# c1 temp for nwt8-renewal [through 2020]
+c1temp <- read_csv("~/github/nwt-data-munging/nwt_climate/nwt8-renewal_homogenize_climdat/data/c1_temp_1952-2020_draft.csv")
+# for outstanding data
+c1temp_raw <- rawchart_temp$C1temp
+
+
+# sdl gap-filled on edi
+sdltemp <- getTabular(314)
+
+# grab gl4 logger temp prepped for sdl infilling
+qclog_airtemp <- readRDS("~/Documents/nwt_lter/nwt_climate/data/qc/nwtloggerTEMP_qc.rds")
+
+
+# -- extract d1, c1 gap-filled and raw dates -----
+d1temp_stacked <- rbind(rename(d1temp[,c(1,2,4:7)], 
+                               airtemp_max = max_temp,
+                               airtemp_min = min_temp,
+                               airtemp_avg = mean_temp),
+                        d1temp_raw[d1temp_raw$date > max(d1temp$date), !grepl("flag", names(d1temp_raw))]) 
+d1temp_dates <- d1temp_stacked
+d1temp_dates$missing <- apply(d1temp_dates[grepl("airtemp", names(d1temp_dates))], 1, function(x) any(is.na(x)))
+d1temp_dates$nobs <- apply(d1temp_dates[grepl("airtemp", names(d1temp_dates))], 1, function(x) sum(!is.na(x)))
+
+# c1
+c1temp_stacked <- rbind(rename(c1temp[,c(1,2,4:7)], 
+                               airtemp_max = max_temp,
+                               airtemp_min = min_temp,
+                               airtemp_avg = mean_temp),
+                        c1temp_raw[c1temp_raw$date > max(c1temp$date), !grepl("flag", names(c1temp_raw))]) 
+c1temp_dates <- c1temp_stacked
+c1temp_dates$missing <- apply(c1temp_dates[grepl("airtemp", names(c1temp_dates))], 1, function(x) any(is.na(x)))
+c1temp_dates$nobs <- apply(c1temp_dates[grepl("airtemp", names(c1temp_dates))], 1, function(x) sum(!is.na(x)))
+
+
+# -- extract sdl gap-filled temp dates ----
+sdltemp_dates <- subset(sdltemp, select = c(local_site, date))
+sdltemp_dates$missing <- FALSE
+sdltemp_dates$nobs <- 3 # three airtemps per date in gap-filled dataset
+
+# -- extract gl4 qc logger prep for sdl ----
+gl4_airtemp_dates <-  subset(qclog_airtemp, grepl("gl4", station_id)) %>%
+  group_by(date, local_site) %>%
+  summarise(missing = any(is.na(measurement)),
+            nobs = sum(!is.na(measurement))) %>%
+  ungroup()
+
+# -- stack d1, sdl datasets and dates ----
+nwtclim_dates <- rbind(
+  cbind(subset(d1temp_dates, select = c(local_site, date, missing, nobs)), dataset = "D1 airtemp"),
+  cbind(subset(c1temp_dates, select = c(local_site, date, missing, nobs)), dataset = "C1 airtemp"),
+  cbind(sdltemp_dates, dataset = "SDL airtemp"),
+  cbind(subset(gl4_airtemp_dates, select = c(local_site, date, missing, nobs)), dataset = "GL4 airtemp")
+) %>%
+  # there is only 1 site per station
+  mutate(sites = 1)
+
+# check that looks okay
+ggplot(nwtclim_dates, aes(date, dataset, group = missing, shape = missing, col = nobs)) +
+  geom_point(alpha = 0.6, position = position_dodge(width = 0.3))
+
+
+# -- ameriflux airtemp ---
+# gapfilled Tvan, 2008 - present (j knowles)
+tvan <- getTabular(2) # only through 2014.. need to read in raw tvan data for more recent years
+tvan_dates <- mutate(tvan, local_site = "Tvan",
+                     missing = is.na(air_temp_avg),
+                     dataset = "Tvan gapfilled airtemp") %>%
+  subset(select = c(local_site, date, missing, dataset)) %>%
+  mutate(nobs = 1, # there is only avg airtemp
+         sites = 1) # i'm not sure if these are average of 2 tvan sites or mostly just one (need to read metadata on EDI)
+
+# grabbed prepped data from sdl temp infilling
+ameriflux <- readRDS("~/Documents/nwt_lter/nwt_climate/data/qc/amerifluxTEMP_qc.rds")
+
+ameriflux_dates <- group_by(ameriflux, date, station_id, local_site) %>%
+  summarise(missing = any(is.na(measurement)),
+         nobs = sum(!is.na(measurement)),
+         # only 1 site per station (in my summarized dataset, there are multiple heights on flux towers)
+         sites = 1) %>%
+  ungroup() %>%
+  rename(dataset = station_id) %>%
+  # add daily airtemp to ameriflux data 
+  mutate(dataset = paste(dataset, "airtemp*")) %>%
+  subset(select = names(nwtclim_dates))
+
+# add to d1, sdl airtemp
+nwtclim_dates <- rbind(nwtclim_dates, 
+                         tvan_dates, ameriflux_dates) %>%
+  distinct() %>%
+  # reorder names
+  subset(select= c(date, missing, nobs, sites, dataset))
+
+# check that looks okay
+ggplot(nwtclim_dates, aes(date, dataset, group = missing, shape = missing, col = factor(nobs))) +
+  geom_point(alpha = 0.6, position = position_dodge(width = 0.3)) # for the most part when later-data missing, all three missing but sometimes one metric is present at d1/c1
+# note: this isn't checking for data quality in years post 2021 for d1 or c1
+
+
+```
+
+
+```{r prep glv lake and snow data, include = F}
+# gl4 buoy, 2018 - present (piet, sammy, steph, kelly)
+gl4b <- getTabular(188)
+gl4inlet <- getTabular(259)
+glvice <- getTabular(106)
+
+# nwt lakes water quality (PI = Diane)
+glv_lakeswq <- getTabular(157)
+
+# snow dat (lead = Jen)
+sdlsnod <- getTabular(31) # snow grid depth
+nwtswe <- getTabular(96) # nwt and glv4 swe
+nwtsnoc <- getTabular(98) # nwt and gl4 snow cover
+
+# see knb-nwt-lter.97 for snow pit location descriptions
+
+# gl4 buoy dates
+gl4b_dates <- mutate(gl4b, date = as.Date(timestamp)) %>%
+  group_by(local_site, date) %>%
+  summarise(missing = all_of(is.na(temperature)),
+            # number of depths per day
+            sites = length(unique(depth[!is.na(temperature)])),
+            # number timesteps per day
+            nobs = length(unique(timestamp[!is.na(temperature)]))) %>%
+  ungroup() %>%
+  mutate(dataset = "GL4 buoy contin.") %>%
+  distinct()
+
+# gl4 inlet-outlet dates
+gl4inlet_dates <- distinct(gl4inlet, local_site) %>%
+  subset(!is.na(local_site)) %>%
+  # be sure both sites have the same timestamps, and timestamps complete
+  cbind(timestamp = rep(unique(gl4inlet$timestamp),each = 2))
+# to be sure it worked correctly
+sapply(split(gl4inlet_dates$timestamp, gl4inlet_dates$local_site), length) # it worked
+
+# join temp data to complete timesteps for both sites and proceed with summarizing
+gl4inlet_dates <- left_join(gl4inlet_dates, gl4inlet) %>%
+  mutate(date = as.Date(timestamp)) %>%
+  group_by(local_site, date) %>%
+  summarise(missing = all_of(is.na(temperature)),
+            # at inlet and outlet, only 1 site/depth each
+            sites = 1,
+            # number timesteps per day
+            nobs = length(unique(timestamp[!is.na(temperature)]))) %>%
+  ungroup() %>%
+  # assign dataset names (separate inlet from outlet even tho in same dataset)
+  mutate(dataset = ifelse(grepl("inlet", local_site), "GL4 inlet contin.", "GL4 outlet contin.")) %>%
+  distinct()
+
+# plot to be sure all looks okay
+rbind(gl4b_dates, gl4inlet_dates) %>%
+ggplot(aes(date, dataset, group =missing, col = missing)) +
+  geom_point(position = position_dodge(width = 0.3))
+
+rbind(gl4b_dates, gl4inlet_dates) %>%
+ggplot(aes(date, dataset, group = sites, col = sites)) +
+  geom_point(position = position_dodge(width = 0.3))
+
+rbind(gl4b_dates, gl4inlet_dates) %>%
+ggplot(aes(date, dataset, group = nobs, col = nobs)) +
+  geom_point(position = position_dodge(width = 0.3), alpha = 0.6) +
+  scale_color_viridis_c() # okay
+
+# glv ice on-off dates
+glvice_dates <- subset(glvice, select = c(date, lake, ice_cover, breaking_ice, notes))
+glvice_dates$missing <- with(glvice_dates, is.na(ice_cover) & is.na(breaking_ice))  
+# two dates don't have ice_cover values, but they are present in the notes
+glvice_dates$ice_cover[glvice_dates$missing] <- with(glvice_dates[glvice_dates$missing, ], parse_number(notes))
+glvice_dates$missing <- with(glvice_dates, is.na(ice_cover) & is.na(breaking_ice)) # all dates have data now
+summary(glvice_dates$missing)
+
+glvice_dates <- group_by(glvice_dates, date) %>%
+  summarise(missing = unique(missing),
+            sites = length(unique(lake)),
+            nobs = 1) %>%
+  ungroup() %>%
+  mutate(dataset = "GLV ice on-off") %>%
+  distinct()
+
+# plot to check looks good
+rbind(gl4b_dates[names(glvice_dates)], gl4inlet_dates[names(glvice_dates)], glvice_dates) %>%
+ggplot(aes(date, dataset, group = nobs, col = nobs)) +
+  geom_point(position = position_dodge(width = 0.3), alpha = 0.6) +
+  scale_color_viridis_c()
+
+rbind(gl4b_dates[names(glvice_dates)], gl4inlet_dates[names(glvice_dates)], glvice_dates) %>%
+ggplot(aes(date, dataset, group = sites, col = sites)) +
+  geom_point(position = position_dodge(width = 0.5), alpha = 0.6) +
+  scale_color_viridis_c() # ok
+
+# sammy says lake temp pre-buoy is n the water quality dataset
+# extract dates from lakes water quality dataset
+glv_lakeswq_dates <- subset(glv_lakeswq, !grepl("AIR", location), select = c(local_site, date, location, depth, time, temp, flag)) %>%
+  #if all temp values in a day missing at a given lake, remove (they were sampling something else then)
+  group_by(date, local_site, location) %>%
+  mutate(nosample = all(is.na(temp)),
+         somesample = any(!is.na(temp))) %>% # filter worked
+  ungroup() %>%
+  subset(!nosample) %>%
+  # check if there is subdaily sampling per lake-depth
+  group_by(date, local_site, location,depth) %>%
+  mutate(timesteps = length(unique(time))) %>% # manual check: no
+  ungroup() %>%
+  mutate(site = paste(local_site, depth)) %>%
+  # count lake-depths sampled per day
+  group_by(date, location, timesteps) %>%
+  summarise(sites = length(unique(site[!is.na(temp)]))) %>%
+  ungroup() %>%
+  rename(nobs = timesteps, 
+         dataset = location) %>%
+  mutate(dataset = paste("GLV WQ:", casefold(dataset)), 
+         missing = FALSE) %>%
+  subset(select = names(glvice_dates)) %>%
+  distinct()
+
+
+# put all lake dates together
+glvaqua_dates <- rbind(gl4b_dates[names(glvice_dates)], gl4inlet_dates[names(glvice_dates)], glvice_dates, glv_lakeswq_dates)
+
+# plot to be sure looks okay
+ggplot(glvaqua_dates, aes(date, dataset, group = sites, col = sites)) +
+  geom_point(position = position_dodge(width = 0.5), alpha = 0.6) +
+  scale_color_viridis_c() # ok
+  
+ggplot(glvaqua_dates, aes(date, dataset, group = nobs, col = nobs)) +
+  geom_point(position = position_dodge(width = 0.5), alpha = 0.6) +
+  scale_color_viridis_c()
+  
+
+```
+
+
+
+```{r process snow dat, include = F}
+
+# -- nwt snow water equiv ----
+summary(nwtswe)
+swe_dates <- subset(nwtswe, !is.na(swe), select = c(local_site, samp_loc, loc_code, prof_depth, date, swe)) %>%
+  group_by(date) %>%
+  mutate(
+         sites = length(unique(paste(samp_loc, prof_depth)))) %>%
+  ungroup() %>%
+  group_by(date, loc_code) %>%
+  mutate(nobs = length(prof_depth)) %>%
+  ungroup() %>%
+  mutate(dataset = "NWT SWE", 
+         # create missing = FALSE to align with other dataset summaries
+         missing = FALSE) %>%
+  subset(select = names(gl4b_dates)) %>%
+  distinct()
+
+swe_dates %>%
+ggplot(aes(date, dataset, group = sites, col = sites)) +
+  geom_point(position = position_dodge(width = 0.5), alpha = 0.6) +
+  scale_color_viridis_c() # looks okay 
+
+# -- saddle snow depth ----
+summary(is.na(sdlsnod))
+# View(subset(sdlsnod, is.na(mean_depth) | is.na(depth_stake)))
+# for the most part, mean_depth has value when depth_stake does or when 4 survery points taken
+# there are two days where depth_stake has value and mean_depth doesn't. can assign those values
+sdlsnod <- mutate(sdlsnod, mean_depth = ifelse(is.na(mean_depth) & !is.na(depth_stake), depth_stake, mean_depth))
+snod_dates <- dplyr::select(sdlsnod, date, local_site, point_ID, mean_depth) %>%
+  group_by(date, point_ID) %>%
+  mutate(missing = is.na(mean_depth),
+         nobs = length(mean_depth)) %>%
+  ungroup() %>%
+  group_by(date) %>%
+  mutate(sites = sum(!is.na(mean_depth))) %>%
+  ungroup() %>%
+  mutate(dataset = "SDL snow depth") %>%
+  subset(select = names(gl4b_dates)) %>%
+  distinct()
+
+rbind(swe_dates[names(glvice_dates)], snod_dates[names(glvice_dates)]) %>%
+  rbind(gl4b_dates[names(glvice_dates)], gl4inlet_dates[names(glvice_dates)], glvice_dates, glv_lakeswq_dates) %>%
+  ggplot(aes(date, dataset, group = sites, col = sites)) +
+  geom_point(position = position_dodge(width = 0.5), alpha = 0.6) +
+  scale_color_viridis_c()
+
+# look at recent time
+rbind(swe_dates[names(glvice_dates)], snod_dates[names(glvice_dates)]) %>%
+  rbind(gl4b_dates[names(glvice_dates)], gl4inlet_dates[names(glvice_dates)], glvice_dates, glv_lakeswq_dates) %>%
+  subset(year(date) > 2010) %>%
+  ggplot(aes(date, dataset, group = sites, col = sites)) +
+  geom_point(position = position_dodge(width = 0.5), pch = 1, alpha = 0.6) +
+  scale_color_viridis_c()
+
+rbind(swe_dates[names(glvice_dates)], snod_dates[names(glvice_dates)]) %>%
+  rbind(gl4b_dates[names(glvice_dates)], gl4inlet_dates[names(glvice_dates)], glvice_dates, glv_lakeswq_dates) %>%
+  #subset(year(date) > 2010) %>%
+  mutate(datanum = as.numeric(factor(dataset))) %>%
+  ggplot(aes(date, as.numeric(factor(dataset)), group = sites, col = sites)) +
+  geom_errorbar(aes(ymin = datanum-0.25, ymax = datanum+0.25)) +
+  #geom_point(pch = "|") +
+  scale_y_continuous(breaks = 1:12) +
+  scale_color_viridis_c() +
+  theme_test()
+
+summary(nwtsnoc) # check nobs temp and nobs thickness
+# multiple measurements per sample pit sometimes
+snoc_dates <- distinct(nwtsnoc, local_site,samp_loc, loc_code, date, horiz_thick, meas_temp) %>%
+  group_by(date, local_site, loc_code) %>%
+  mutate(missing_thickness = any(is.na(horiz_thick)),
+         # if any temps are missing
+         missing = any(is.na(meas_temp)),
+         #nobs will be # measurements per snow pit (even tho that's a little different than how treated lake depth)
+         nobs = length(loc_code)) %>%
+  ungroup() %>%
+  distinct(date, local_site, samp_loc, loc_code, missing_thickness, missing, nobs) %>%
+  group_by(date) %>%
+  mutate(sites = length(loc_code)) %>%
+  ungroup() %>%
+  mutate(dataset = "NWT snow cover")
+
+# make simple dates that counts sites at pit x depths (similar to lakes), nobs will be one bc there is only one sample per site; ignore horizon thicknes
+snoc_simple_dates <- distinct(nwtsnoc, local_site,samp_loc, loc_code, date, ht_top_horiz, meas_temp) %>%
+  # paste pit x depth for # sites
+  mutate(pit_depth = paste(local_site, samp_loc, ht_top_horiz, sep = "_")) %>%
+  group_by(date) %>%
+  mutate(# if all temps are missing
+         missing = all(is.na(meas_temp)),
+         sites = length(unique(pit_depth))) %>%
+  # nobs will be counts of measurements per pit-depth
+  group_by(date, pit_depth) %>%
+  mutate(
+         #nobs will be # measurements per snow pit (even tho that's a little different than how treated lake depth)
+         nobs = length(loc_code)) %>%
+  ungroup() %>%
+  mutate(dataset = "NWT snow cover") %>%
+  subset(select = names(glvice_dates)) %>%
+  distinct() # note: some pits have multiple measurements per date (e.g., subnivean feb 5 2001 multiple measurements @ surface, but only 1 per sub-surface depth)
+  
+
+# put all snow dates together
+nwtsnow_dates <- rbind(swe_dates[names(glvice_dates)], snod_dates[names(glvice_dates)], snoc_simple_dates[names(glvice_dates)]) %>%
+  distinct()
+
+# plot to be sure all looks okay
+rbind(swe_dates[names(glvice_dates)], snod_dates[names(glvice_dates)], snoc_simple_dates[names(glvice_dates)]) %>%
+  rbind(gl4b_dates[names(glvice_dates)], gl4inlet_dates[names(glvice_dates)], glvice_dates, glv_lakeswq_dates) %>%
+  ggplot(aes(date, dataset, group = sites, col = log(sites))) +
+  geom_point(position = position_dodge(width = 0.5), alpha = 0.6) +
+  scale_color_viridis_c() # there are only a few second inlet locations.. should probably collapse that
+
+rbind(swe_dates[names(glvice_dates)], snod_dates[names(glvice_dates)], snoc_dates[names(glvice_dates)]) %>%
+  rbind(gl4b_dates[names(glvice_dates)], gl4inlet_dates[names(glvice_dates)], glvice_dates, glv_lakeswq_dates) %>%
+  ggplot(aes(date, dataset, group = nobs, col = nobs)) +
+  geom_point(position = position_dodge(width = 0.5), alpha = 0.6) +
+  scale_color_viridis_c() # okay
+# note: nobs for buoy = unique timestamps per date across all depths 
+
+```
+
+
+```{r read pika datasets, include = F}
+
+# pika hab occupancy
+pikahab <- getTabular(17) # these are plot conditions
+# there are multiple data tables with dataset, so generic read in function doesn't work. use URL to temp
+pikaT <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.17.2&entityid=277e15977751ea77c595c5bb45fb275e")
+# pika locations
+pikasites <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.17.2&entityid=313b4ae5a8cf0ce9434e24a6ceccbb73")
+
+pika_demoT <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.8.5&entityid=fc3de3c583f5d9207841734ead55b709")
+pika_demoT_lut <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.8.5&entityid=c1a7d0d58f5658cffccd829cf6bb6c18")
+
+# note from chris on temps:
+# You asked about the different depths of sensors in the talus, and I said all the data archived with EDI are from the same depth, but I think I recall now that 3 depths are represented somewhat, even in that subset of the data. What I did was provide depth metadata for each placement, coded as deep, shallow and tree (above the surface). So, we'll be able to ignore data from deep and tree placements for now, and just focus on the shallow sensors, which are the most abundant
+
+# ^this comment was about the demography dataset
+
+# -- extract pika demography dates ---
+pikadem_simple_dates <- left_join(pika_demoT, pika_demoT_lut[c("deployment_id", "years_insitu", "site", "easting", "northing", "depth")]) %>%
+  mutate(uniqueID = paste(site, deployment_id, depth, sep = "_"),
+         easting = as.numeric(easting),
+         northing = as.numeric(northing),
+         date = date(date_time)) %>%
+  group_by(date) %>%
+  mutate(sites = length(unique(uniqueID))) %>%
+  #distinct(site, uniqueID, sites, date, temperature) %>%
+  group_by(site, uniqueID, sites, date) %>%
+  summarise(nobs = length(temperature),
+            missing = any(is.na(temperature))) %>%
+  ungroup() %>%
+  mutate(dataset = "Pika demography") %>%
+  rename(local_site = site)
+
+
+# -- extract pika occupancy dates and # sites ----
+unique(pikaT$plot) # this one has a winter plot 82 obs 
+unique(pikasites$plot)
+# need to separate number from NWT for consistency in joining tables
+pikaT$plotnum <- as.numeric(gsub("[A-Z]+|-", "", pikaT$plot))
+pikasites$plotnum <- as.numeric(gsub("[A-Z]+|-", "", pikasites$plot))
+pikaocc_dates <- left_join(pikaT, pikasites[c("plotnum", "easting_final", "northing_final")])
+  
+
+pikaocc_simple_dates <- pikaocc_dates %>%
+  mutate(date = date(date_time)) %>%
+  group_by(date) %>%
+  mutate(sites = length(unique(plot))) %>%
+  #distinct(site, uniqueID, sites, date, temperature) %>%
+  group_by(plot, date, sites) %>%
+  summarise(nobs = length(temperature),
+            missing = any(is.na(temperature))) %>%
+  ungroup() %>%
+  mutate(dataset = "Pika occupancy hab",
+         local_site = "NWT")
+
+# plot to be sure looks okay
+rbind(pikadem_simple_dates[names(gl4b_dates)], pikaocc_simple_dates[names(gl4b_dates)]) %>%
+  distinct() %>%
+  ggplot(aes(date, dataset, group = nobs, col = nobs)) +
+  geom_point(position = position_dodge(width = 0.5), alpha = 0.6) +
+  scale_color_viridis_c()
+
+rbind(pikadem_simple_dates[names(gl4b_dates)], pikaocc_simple_dates[names(gl4b_dates)]) %>%
+  distinct() %>%
+  ggplot(aes(date, dataset, group = sites, col = sites)) +
+  geom_point(position = position_dodge(width = 0.5), alpha = 0.6) +
+  scale_color_viridis_c()
+
+```
+
+
+```{r viz time coverage}
+# put it all together
+
+alltog <- rbind(pikadem_simple_dates[names(glvice_dates)], pikaocc_simple_dates[names(glvice_dates)]) %>%
+  rbind(glvaqua_dates, nwtsnow_dates, nwtclim_dates) %>%
+  distinct() %>%
+  mutate(datanum = as.numeric(factor(dataset,
+                                     # organize factor levels by theme (ok if alpha order for that)
+                                     levels = c(unique(nwtclim_dates$dataset),
+                                                unique(glvaqua_dates$dataset),
+                                                unique(nwtsnow_dates$dataset),
+                                                unique(pikadem_simple_dates$dataset),
+                                                unique(pikaocc_simple_dates$dataset))
+                                     ))
+         )
+
+dataset_labs <- unique(alltog$dataset[order(alltog$datanum)])
+ggplot(subset(alltog, !missing), aes(date, datanum, group = nobs, col = nobs)) +
+  geom_errorbar(aes(ymax = datanum + 0.4, ymin = datanum-0.4), position = position_dodge(width = 0.5), alpha = 0.6) +
+  scale_y_continuous(breaks = 1:length(dataset_labs), minor_breaks = NULL, labels = dataset_labs, expand = c(0,0)) +
+  scale_x_date(expand= c(0,0)) +
+  labs(y = NULL, x = NULL,
+       title = "Day-resolution overlap of NWT (and Ameriflux) temperature datasets",
+       subtitle = "*available at sub-daily (CTW aggregated to daily for climate infilling work)") +
+  scale_color_viridis_c(name = "Daily\ntimesteps")
+
+
+
+```
+
+The above figure shows all datasets for their full time period available. Each date is colored by the number of time points temperature was measured: data collected at sub-daily scale (e.g., every 10 min, 30min, 2 hrs, etc.) will be a non-purple hue, anything collected daily is purple (most of the data are collected once-per-day). Pika temperature and GL4 loggers are primarily the sub-daily datasets, although Ameriflux, electronic loggers at NWT climate stations, and the NWT sensor array (not shown) also collect sub-daily data.
+
+The NWT climate station data (D1, C1, and SDL) are gapfilled through 2020 (D1, C1) or 2021 (SDL), and doing a quick gap-fill (i.e., not performing QC check beforehand) to have data through 2022 is quick to do with existing scripts for NWT. US-NR1 (near C1) should also have more current complete data coverage (CTW downloaded Ameriflux data last in summer 2022).
+
+These next two figures zoom in to the time period where pika habitat temperature data start, so it's easier to see what all overlaps. The first figure colors in the dates by the number of sites and/or depths (e.g., for snow cover, multiple pits were visited in a day, and multiple profile depths measured; similarly, lakes are measured at multiple depths).
+
+```{r zoom in to pika years}
+
+# focus on just the pika data period, show # sites
+ggplot(subset(alltog, date >= min(pikaocc_simple_dates$date) & !missing), aes(date, datanum, group = sites, col = sites)) +
+  geom_errorbar(aes(ymax = datanum + 0.4, ymin = datanum-0.4), position = position_dodge(width = 0.5), alpha = 0.6) +
+  scale_y_continuous(breaks = 1:length(dataset_labs), minor_breaks = NULL, labels = dataset_labs, expand = c(0,0)) +
+  scale_x_date(expand= c(0,0)) +
+  labs(y = NULL, x = NULL,
+       title = "Daily overlap of temperature datasets, pika temp onset to present",
+       subtitle = "*available at sub-daily (CTW aggregated to daily for climate infilling work)") +
+  scale_color_viridis_c(name = "# sites, depths")
+
+
+
+```
+
+This figure is the same as above except dates are colored by logged sampling frequency per day to help think about variation in sampling frequency and how to aggregate data for comparison. I also counted different air temperature measurements in this (e.g., a climate station with max, mean, and min temperature present has 3 measurements that day). The electronic loggers at the NWT climate stations capture instantaneous min and max temp, otherwise sub-daily data from loggers reflect the average temp in the interval.
+
+```{r timestep coverage zoomed in}
+
+ggplot(subset(alltog, date >= min(pikaocc_simple_dates$date) & !missing), aes(date, datanum, group = log(nobs), col = log(nobs))) +
+  geom_errorbar(aes(ymax = datanum + 0.4, ymin = datanum-0.4), position = position_dodge(width = 0.5), alpha = 0.6) +
+  #geom_jitter(width = 0, height = 0.25, alpha = 0.6) +
+  scale_y_continuous(breaks = 1:length(dataset_labs), minor_breaks = NULL, labels = dataset_labs, expand = c(0,0)) +
+  scale_x_date(expand= c(0,0)) +
+  labs(y = NULL, x = NULL,
+       title = "Daily overlap of temperature datasets, pika temp onset to present",
+       subtitle = "Daily timesteps sampled (or temp types) log-transformed to better see range across datasets") +
+  scale_color_viridis_c(name = "ln(timesteps,\ntemp types)")
+
+```
+
+When zoomed in to more recent years, it's easier to see where the missing data are for air temperature. I haven't looked at all sensor array nodes, but many start in fall 2017 so there would be some overlap if using those data. 
+
+---
+
+## EXAMPLES OF TIME SERIES DATA (AS IS) ##
+
+Not all datasets plotted, but just some to see. These are just quick plots to see what the data look like, so not the prettiest...
+
+### AIR TEMPERATURE TIME SERIES ###
+
+These are typically very well correlated (they also inform each other for gap-filling so correlated for that reason as well). I'm showing data downloaded from the Ameriflux website to supplement Tmax, Tmin, and years after 2014 at Tvan (not available in John Knowles' gapfilled Tvan dataset). US-NR1 is the gapfilled airtemp dataset from the Ameriflux site near C1 (gapfilled by Peter Blanken & Co). Since most of the other datasets in consideration are available 2000 onwards (esp. the pika datasets), I'm only showing daily airtemp data 2000 onwards.
+
+```{r plot ameriflux coverage, eval = F}
+
+# -- ameriflux -----
+corrplot(cor(tvan[3:ncol(tvan)], use = "pairwise.complete.obs"), method = "square", diag = F, insig = "label_sig") # strongest correlation is soil temp at 10cm and air temp avg.. mb just keep those for now
+tvan_dates <- subset(tvan, select = c(date, air_temp_avg, soil_temp_10cm)) %>% 
+  gather(met, val, 2:ncol(.))
+
+
+# show tvan data
+ggplot() +
+  geom_line(data = subset(ameriflux, grepl("T-V", station_name)), 
+            aes(date, measurement, col = station_id), alpha = 0.75) +
+geom_line(data = mutate(tvan, metric = "airtemp_avg"), aes(date, air_temp_avg), alpha = 0.5, col = "purple") +
+  scale_x_date(date_breaks = "2 month", date_labels = "%m-%y", expand= c(0,0)) +
+  facet_grid(metric~.) +
+  theme(axis.text.x = element_text(angle = 90))
+
+# just in a manual check for jan 1-3 2008, the mean of US-NR3 and US-NR4 is not the airtemp_avg in the gap-filled tvan dataset (but it probably within a 0.5C.. can do comparative check later)
+
+```
+
+```{r plot time series and corrgram for airtemp}
+
+# stack airtemp datasets
+nwtT <- subset(sdltemp, select = c(date, local_site, airtemp_max_homogenized:airtemp_avg_homogenized)) %>%
+  rename_all(function(x) gsub("_homogenized", "", x)) %>%
+  rbind(d1temp_stacked[names(.)], c1temp_stacked[names(.)]) %>%
+  mutate(local_site = casefold(local_site, upper = T)) %>%
+  gather(metric, measurement, airtemp_max:ncol(.)) %>%
+  rbind(subset(qclog_airtemp, grepl("gl4", local_site, ignore.case  = T), select = names(.))) %>%
+  mutate(local_site = ifelse(grepl("gl4", local_site), "GL4", local_site)) %>%
+  rbind(subset(ameriflux, select = c(date, local_site, metric, measurement))) %>%
+  mutate(local_site = ifelse(grepl("US", local_site), substr(local_site,1,6), local_site),
+         local_site = gsub("_", "-", local_site))
+
+# stack ameriflux
+tvangapT <- tvan[c("date", "air_temp_avg")] %>%
+  rename(measurement = air_temp_avg) %>%
+  mutate(metric = "airtemp_avg",
+         local_site = "Tvan (gapfilled)")
+
+rbind(nwtT, tvangapT[names(nwtT)]) %>%
+subset(year(date) >= 2000) %>%
+  mutate(metric = factor(metric, levels = c("airtemp_max", "airtemp_avg", "airtemp_min")),
+         local_site2 = ifelse(grepl("Tvan|NR3|NR4", local_site), "Tvan", local_site),
+         dataset = ifelse(local_site2 == "Tvan", local_site, "best available"),
+         local_site2 = factor(local_site2, levels = c("D1", "SDL", 
+                                                    "Tvan", "GL4", "US-NR1", "C1"))) %>%
+ggplot(aes(date, measurement, col = local_site2)) +
+  geom_line(aes(linetype = dataset), alpha = 0.5) +
+  scale_color_brewer(name = "Site", palette = "Paired", direction = 1) +
+  labs(title = "NWT + Ameriflux daily airtemp datasets (2000 to 2022)",
+       y = "Temperature (°C)", x = NULL) +
+  facet_grid(local_site2~metric, scales = "free_y")
+```
+
+
+### GLV LAKES + STREAM DATA TIME SERIES ###
+
+```{r prelim plot glv, include = F}
+## -- glv lake temp ----
+# look at water quality data itself (how are values looking?)
+ggplot(glv_lakeswq, aes(date, temp, group = depth, col = depth)) +
+  geom_point() +
+  facet_wrap(~local_site)
+
+# change below ice to between surface (0) and 1 m, then convert depth to numeric
+# also what depth is NA?
+# View(subset(glv_lakeswq, is.na(depth))) # location is AIR, no temp data present
+glv_lakeswq <- mutate(glv_lakeswq, depth = ifelse(grepl("below", depth), 0.25, as.numeric(depth))) %>%
+  subset(!grepl("^AIR$", location, fixed = F))
+
+```
+
+
+```{r datavis for glv}
+
+ggplot(mutate(glv_lakeswq, depth = depth * -1), aes(date, temp, group = depth, col = depth)) +
+  geom_point(alpha = 0.6) +
+  scale_x_date(expand = c(0,0)) +
+  labs(title = paste("GLV lake water quality dataset:", min(glv_lakeswq$date), "to", max(glv_lakeswq$date)), 
+       y = "Temperature (°C)",
+       x = NULL) +
+  theme(legend.position = c(0.85,0.4),
+        legend.justification = c("left", "top")) +
+  facet_wrap(~local_site, nrow = 2)
+```
+
+A closer look at select lake water temperature by depth over time...
+
+```{r glv water qual zoomed, fig.height=10, fig.width = 8}
+
+ggplot(subset(glv_lakeswq, !is.na(temp) & !grepl("ROCK|2|3", local_site)), aes(yday(date), depth * -1)) +
+  #geom_line(aes(group = year*depth), col = "grey50") +
+  geom_jitter(aes(col = temp), alpha = 0.9, width = 0.25, height = 0.25) +
+  scale_color_distiller(palette = "OrRd", direction = 1) +
+  facet_grid(year~local_site, scale = "free") +
+  labs(x = "Day of year", y = "Depth from surface (m)") +
+  theme_test()
+
+
+```
+
+
+Focusing on just GL4, checking relationship between temp and PAR (was curious), then looking at more recent continuous GL4 buoy and logger data:
+
+```{r focus on gl4}
+# look at just gl4
+ggplot(subset(mutate(glv_lakeswq, depth = depth*-1), grepl("4", local_site) & !is.na(temp)), aes(yday(date), temp, col = depth)) +
+  geom_line(aes(group = paste(location, depth), lty = location)) +
+  geom_point() +
+  #scale_x_continuous(limits = c(160, 265)) +
+  scale_linetype_manual(values = c(2,1,4)) +
+  labs(x = "Day of year", y = "Temperature (C)",
+       title = "GL4 temperature seasonlity (by day of year), all GL4 WQ locations") +
+  facet_wrap(~year) # pretty warm temps at the surface and inlet in 21 and 22 (inlet could be due to shallow flow.. check PAR for lake)
+# check temporal coverage by lake
+
+# ggplot(subset(mutate(glv_lakeswq, depth = depth*-1), grepl("4", local_site) & !is.na(PAR)), aes(yday(date), PAR, col = depth)) +
+#   geom_line(aes(group = paste(location, depth), lty = location)) +
+#   geom_point() +
+#   #scale_x_continuous(limits = c(160, 265)) +
+#   scale_linetype_manual(values = c(2,1,4)) +
+#   facet_wrap(~year)
+
+# line up PAR and temp together for 2018:2022
+
+subset(mutate(glv_lakeswq, depth = depth*-1), grepl("4", local_site), select = c(local_site, location, depth, year, date, temp, PAR)) %>%
+  gather(met, val, temp, PAR) %>%
+  subset(!is.na(val) & year > 2017) %>%
+  ggplot(aes(yday(date), val, col = depth)) +
+  geom_line(aes(group = paste(location, depth), lty = location)) +
+  geom_point() +
+  #scale_x_continuous(limits = c(160, 265)) +
+  labs(x = "Day of year", y = "PAR or temp (C)",
+       title = "GL4 recent years photosynthetic active radiation and temperature, by depth") +
+  scale_linetype_manual(values = c(2,1,4)) +
+  facet_grid(met~year, scales = "free")
+
+# what is the correlation?
+subset(mutate(glv_lakeswq, depth = depth*-1), grepl("4", local_site), select = c(local_site, location, depth, year, date, temp, PAR)) %>%
+  subset(year > 2017 & (!is.na(PAR) | !is.na(temp)) & depth > -11) %>%
+  ggplot(aes(PAR, temp, col = depth)) +
+  #geom_line(aes(group = paste(location, depth), lty = location)) +
+  geom_point() +
+  geom_smooth(aes(group = paste(depth), fill = depth), method = "lm") +
+  #scale_x_continuous(limits = c(160, 265)) +
+  labs(title = "GL4: PAR and temperature relationship by depth, all years") +
+  scale_linetype_manual(values = c(2,1,4)) +
+  facet_wrap(~depth, scales = "free")
+
+
+# -- gl4 buoy -----
+ggplot(gl4b, aes(timestamp, depth*-1, col = temperature)) +
+  geom_jitter(width = 0, height = 0.25, alpha = 0.5) +
+  labs(title = "GL4 buoy: lake depth profiles over time (points colored by temp)",
+       y = "Depth from surface (m)",
+       x = NULL) +
+  scale_color_viridis_c()
+
+ggplot(gl4b, aes(yday(timestamp), depth*-1, col = temperature)) +
+  geom_jitter(width = 0, height = 0.25, alpha = 0.5) +
+  labs(title = "GL4 buoy: seasonality of temperature (faceted by year)",
+       subtitle = "*buoy data time intervals change through time (e.g., hourly, 30min)",
+       y = "Depth from surface (m)",
+       x = "Day of year") +
+  scale_color_viridis_c() +
+  facet_grid(year(timestamp)~.)
+
+# ggplot(gl4b, aes(depth , temperature)) +
+#   geom_bin2d() +
+#   #geom_jitter(width = 0, height = 0.25, alpha = 0.5) +
+#   scale_fill_viridis_c()
+#   facet_grid(year(timestamp)~.)
+
+
+```
+
+GLV lake ice on/off data through time:
+
+```{r lake ice clearance}
+
+# -- ice on/off dates ----
+#summary(glvice)
+# only started quantifying ice cover between 0 and 100 2018 onwards
+# just plot dates that have (any) info
+# mutate(glvice, status = ifelse(grepl("^0$", ice_cover) | !is.na(complete_ice_clearance), "3 ice free",
+#                                ifelse(grepl("^100$", ice_cover) | !is.na(complete_ice_formation), "1 ice covered", "2 ice breaking"))) %>%
+# ggplot(aes(date, 1))+
+#   geom_errorbar(aes(ymax = 1, ymin = 0, col = status)) +
+#   #scale_color_brewer(palette = "Purples", direction = -1) +
+#   scale_color_manual(values = c("#756BB1", "#BCBDDC", "skyblue")) +
+#   facet_wrap(~lake) +
+#   theme_test()
+
+# plot as doy tiles
+mutate(glvice, status = ifelse(grepl("^0$", ice_cover) | !is.na(complete_ice_clearance), "3 ice free",
+                               ifelse(grepl("^100$", ice_cover) | !is.na(complete_ice_formation), "1 ice covered", "2 ice breaking"))) %>%
+ggplot(aes(yday, year))+
+  geom_line(aes(group = year), col = "grey70", alpha = 0.5, linewidth = 1) +
+  #geom_hex(aes(fill = status), alpha = 0.75) +
+  geom_point(aes(fill = status), alpha = 0.75, size = 3, pch = 21) +
+  #scale_color_brewer(palette = "Purples", direction = -1) +
+  scale_fill_manual(values = c("#756BB1", "#BCBDDC", "skyblue")) +
+  labs(x = "Day of year",
+       title = paste("GLV ice on, ice breaking, and ice off:", min(glvice$date), "to", max(glvice$date))) +
+  facet_wrap(~lake)+
+  coord_flip() +
+  theme_test() +
+  theme(legend.position = c(0.75, 0.01),
+        legend.justification = c("left", "bottom"))
+
+```
+
+
+### NWT SNOW DATA TIME SERIES ###
+
+
+```{r plot snowdat, eval = F}
+
+swe_dates <- subset(nwtswe, !is.na(swe), select = c(local_site, samp_loc, loc_code, prof_depth, date, swe)) %>%
+  group_by(local_site, date) %>%
+  mutate(
+         sites = length(unique(paste(samp_loc, prof_depth)))) %>%
+  ungroup() %>%
+  group_by(date, loc_code) %>%
+  mutate(nobs = length(prof_depth)) %>%
+  ungroup() %>%
+  mutate(dataset = "NWT SWE")
+
+
+# -- saddle snow depth ----
+summary(is.na(sdlsnod))
+# View(subset(sdlsnod, is.na(mean_depth) | is.na(depth_stake)))
+# for the most part, mean_depth has value when depth_stake does or when 4 survery points taken
+# there are two days where depth_stake has value and mean_depth doesn't. can assign those values
+sdlsnod <- mutate(sdlsnod, mean_depth = ifelse(is.na(mean_depth) & !is.na(depth_stake), depth_stake, mean_depth))
+snod_dates <- dplyr::select(sdlsnod, date, local_site, point_ID, mean_depth) %>%
+  group_by(date, point_ID) %>%
+  mutate(missing = is.na(mean_depth)) %>%
+  ungroup() %>%
+  group_by(date) %>%
+  mutate(snonobs = sum(!is.na(mean_depth)))
+
+
+summary(nwtsnoc) # check nobs temp and nobs thickness
+# multiple measurements per sample pit sometimes
+snoc_dates <- distinct(nwtsnoc, local_site,samp_loc, loc_code, date, horiz_thick, meas_temp) %>%
+  group_by(date, local_site, loc_code) %>%
+  mutate(present_thick = any(!is.na(horiz_thick)),
+         present_temp = any(!is.na(meas_temp))) %>%
+  ungroup() %>%
+  distinct(date, local_site, samp_loc, loc_code, present_thick, present_temp) %>%
+  group_by(date) %>%
+  mutate(nobs = length(loc_code)) %>%
+  ungroup()
+
+# plot swe availability
+ggplot(swe_dates, aes(date, 1)) +
+  geom_errorbar(aes(ymax = 1, ymin = 0, col = sites, linewidth = sites), alpha = 0.4) +
+  scale_linewidth_continuous(range = c(0.5,2)) +
+  labs(subtitle = "SWE") +
+  facet_wrap(~local_site)
+
+
+ggplot(distinct(snod_dates, date, snonobs), aes(date, 1)) +
+  geom_errorbar(aes(ymax = 1, ymin = 0, col = snonobs, linewidth = snonobs), alpha = 0.6) +
+  scale_color_viridis_c() +
+  #scale_color_distiller(palette = "PRGn") +
+  scale_linewidth_continuous(range = rev(c(0.5,2.5))) +
+  scale_x_date(date_breaks = "2 year", date_labels = "%Y") +
+  labs(subtitle = "snow depth")
+
+
+
+snoc_dates %>%
+  gather(met,val, present_thick:present_temp) %>%
+  subset(val) %>%
+  ggplot(aes(date,1)) +
+  geom_errorbar(aes(ymax = 1, ymin = 0, linewidth = nobs, col = nobs), alpha = 0.4) +
+  scale_linewidth_continuous(range = c(0.5,2.5)) +
+  facet_wrap(~local_site+met) +
+  labs(subtitle = "snow percent cover")
+
+```
+
+Additional to point-location snow data, various doctoral students from Noah Molotch's lab have published spatial distribution models of snowpack in GLV from mid 1990s to end of 2010s (not shown, but for consideration if potentially relevant). 
+
+```{r show snow and swe time series}
+swe_dates <- subset(nwtswe, !is.na(swe), select = c(local_site, samp_loc, loc_code, prof_depth, date, swe)) %>%
+  group_by(local_site, date) %>%
+  mutate(
+         sites = length(unique(paste(samp_loc, prof_depth)))) %>%
+  ungroup() %>%
+  group_by(date, loc_code) %>%
+  mutate(nobs = length(prof_depth)) %>%
+  ungroup() %>%
+  mutate(dataset = "NWT SWE")
+
+# plot swe availability
+ggplot(swe_dates, aes(date, 1)) +
+  geom_errorbar(aes(ymax = 1, ymin = 0, col = sites, linewidth = sites), alpha = 0.4) +
+  scale_linewidth_continuous(range = c(0.5,2)) +
+  labs(subtitle = "NWT SWE data availability by general area (sites = sample point locations)",
+       y = NULL, x = NULL) +
+  scale_y_continuous(breaks = NULL) +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()) +
+  facet_wrap(~local_site)
+
+# show temps
+subset(nwtswe, grepl("GL4|GL5|SADD|SUBNI|C1", local_site), select = c(local_site:prof_depth, wted_temp, swe)) %>%
+  mutate(prof_depth = prof_depth*-1) %>%
+  gather(met, val, wted_temp, swe) %>%
+ggplot(aes(date, val, fill = prof_depth)) +
+  geom_point(alpha = 0.5, pch = 21) +
+  scale_x_date(expand = c(0,0)) +
+  labs(title = "NWT SWE and temperature by snow pit profile depth",
+       y = c("SWE (m) or temperature (°C)"),
+       x = NULL) +
+  facet_grid(met~local_site, scales = "free_y")
+
+# snow cover data
+ggplot(nwtsnoc, aes(date, meas_temp, col = ht_top_horiz*-1)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "NWT snow cover: measured temperature of snow pit profiles",
+       x = NULL, y = "Temperature (°C)") +
+  scale_color_continuous("Depth from surface") +
+  # theme(legend.direction = "horizontal",
+  #       legend.position = c(0.3, 0.1),
+  #       legend.justification = c("left", "bottom")) +
+  facet_wrap(~local_site)
+
+# snow depth at saddle
+mutate(sdlsnod, depth_stake = parse_number(depth_stake),
+       # create water year and day of water year
+       mon = month(date),
+       wy = ifelse(mon > 9, year(date)+1, year(date)),
+       wy_mon = ifelse(mon > 9, mon-9, mon +3),
+       day = day(date),
+       wy_date = as.Date(paste(wy, wy_mon, day, sep = "-")),
+       dowy = yday(wy_date),
+       decade = ifelse(wy < 2000, "1990s",
+                       paste0("20", substr(wy, 3,3), "0s")))%>%
+  ggplot(aes(dowy, depth_stake, col = wy)) +
+  geom_jitter(alpha = 0.5, height = 0, width= 0.1) +
+  labs(x = "Day of water year (Oct 1-Sep 30)",
+       y = "Snow depth at stake (cm)",
+       title = paste("Saddle grid snow depth (all plots):", min(sdlsnod$date), "to", max(sdlsnod$date))
+       ) +
+  geom_smooth(aes(group = wy),method = "loess", se = F) +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_viridis_c("Water\nyear")+
+  facet_grid(decade~.)
+
+```
+
+
+### PIKA TEMPERATURE COVERAGE ###
+
+```{r process pikadat, include = F}
+
+pikadem_dates <- left_join(pika_demoT, pika_demoT_lut[c("deployment_id", "years_insitu", "site", "easting", "northing", "depth")]) %>%
+  mutate(uniqueID = paste(site, deployment_id, sep = "_"),
+         easting = as.numeric(easting),
+         northing = as.numeric(northing)) %>%
+  group_by(uniqueID) %>%
+  mutate(nobs = length(temperature)) %>%
+  ungroup %>%
+  mutate(date = date(date_time)) %>%
+  group_by(date, site) %>%
+  mutate(site_nobs = length(unique(uniqueID))) %>%
+  ungroup()
+
+unique(pikaT$plot) # this one has a winter plot 82 obs 
+unique(pikasites$plot)
+# need to separate number from NWT for consistency in joining tables
+pikaT$plotnum <- as.numeric(gsub("[A-Z]+|-", "", pikaT$plot))
+pikasites$plotnum <- as.numeric(gsub("[A-Z]+|-", "", pikasites$plot))
+pikaocc_dates <- left_join(pikaT, pikasites[c("plotnum", "easting_final", "northing_final")])
+
+
+```
+
+
+```{r pika plots, fig.height=7, fig.width=7}
+
+ggplot(subset(pika_demoT, grepl("2008", deployment_id)), aes(date_time, temperature)) +
+  geom_line(aes(group = deployment_id), alpha = 0.5) +
+  labs(title = "Example pika demography temperature time series (deployed 2008-2009)")
+
+distinct(pikadem_dates, uniqueID, site, easting, northing, years_insitu, nobs) %>%
+  subset(!grepl("TBD", site)) %>%
+ggplot(aes(easting, northing, col = years_insitu, size = nobs)) +
+  geom_point(alpha = 0.7) +
+  scale_color_viridis_d() +
+  labs(title = "Spatial and temporal coverage of pika demography data",
+       subtitle = "nobs = all recordings for a given location (deployment id)") +
+  facet_wrap(~site, scales = "free")
+
+ggplot(distinct(pikadem_dates, date, site, site_nobs), aes(date, site, col = site_nobs, size = site_nobs)) +
+  geom_jitter(width = 0, height = 0.4,alpha = 0.5) +
+  labs(title= "Focus on pika demography: temporal coverage and measurements per day (nobs)",
+       subtitle = paste0(min(date(pikadem_dates$date_time)), 
+                     " to ", max(date(pikadem_dates$date_time)),
+                     ", points sized and colored by # observations per day and jittered vertically to help see data")
+       ) +
+  scale_color_viridis_c()
+
+ggplot(pikaocc_dates, aes(date_time, factor(plotnum), group = plotnum)) +
+  geom_point(aes(col = temperature), size = 2, alpha = 0.7) +
+  labs(title = "Focus on pika occupancy dataset: temperature by plot over time",
+       subtitle = paste(min(date(pikaocc_dates$date_time)), 
+                     "to", max(date(pikaocc_dates$date_time))),
+       y = "Plot", x = NULL) +
+  scale_color_viridis_c(option = "B")
+
+```
+
+
+---
+
+## OTHER NWT TEMPERATURE DATA OPTIONS ##
+
+These datasets were not mentioned in the proposal, but have more years of data so could be used.
+
+The sensor node array data have a 10min sampling frequency. Because of the size of each node's dataset, I am only displaying example data for one node.
+
+```{r read in other NWT datasets}
+# sensor array, 2017 - present
+#sensornode01 <- getTabular(210)
+sensornode06 <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.210.5&entityid=e08b00b23222a52539118a2b0b0cd1e2")
+sensornode06[grepl("date|^airtemp|^soiltemp", names(sensornode06))] %>%
+  gather(met,value, airtemp_max:ncol(.)) %>%
+  ggplot(aes(date, value)) +
+  geom_line() +
+  labs(title = "Example node (06) temperature data available in NWT sensor array",
+       y = "Temperature (°C)", x = NULL,
+       subtitle = "10 min interval resolution") +
+  facet_wrap(~met, scales = "free_y")
+
+
+# sensor node supplemental air and soil temp, 2019-2021 (will reed)
+#supplementnode <- getTabular(262)
+
+
+```
+
+The black sand experiment is another option, and has a 1hr sampling frequency for soil tempature (air temp not collected). Sites are: Arikaree, East Knoll, Lefty, Soddie and Trough. I removed soil temp values < -50C (to screen out -7999 values) and > 40C, but more a bit more data QC would be needed to use these data. 
+
+```{r black sand, message = F}
+# black sand experiment (has controls)
+blacksand <- getTabular(238)
+
+blacksand[grepl("local|date|^soiltemp", names(blacksand))] %>%
+  gather(met, temp, 3:ncol(.)) %>%
+  # remove missing val nobs
+  mutate(temp = ifelse(temp < -50 | temp >40, NA, temp)) %>%
+  ggplot(aes(date, temp, group = met, col = met)) +
+  geom_line(alpha = 0.6) +
+  labs(x = NULL, y = "Soil temperature (°C)",
+       title = "Black sand experiment soil temperature",
+       subtitle = "Faceted by site and treatment (bs = treated, con = control)") +
+  scale_color_brewer(name = NULL, palette = "Set2") +
+  facet_wrap(~local_site, nrow = 2, scales = "free_y") +
+  theme(legend.position = "bottom")
+```
+
+Time range for sensor node data available is: `r min(blacksand$date)` to `r max(blacksand$date)`. The black sand data range temporally from `r min(blacksand$date)` to `r max(blacksand$date)`.
+
+```{r outside temp, echo=FALSE, include=FALSE, eval=FALSE}
+nwt_neon_soilT <- neonUtilities::loadByProduct("DP1.00041.001", site = "NIWO", startdate = "2022-01", enddate = "2022-12", tabl = "ST_30_minute")
+
+ggplot(nwt_neon_soilT$ST_30_minute, aes(startDateTime, soilTempMean)) +
+  geom_line(aes(col = verticalPosition))+
+  facet_wrap(~horizontalPosition)
+nwt_neon_weather <- neonUtilities::loadByProduct("DP4.00001.001", site = "NIWO", startdate = "2022-01", enddate = "2022-03")
+
+nwt_neon_temp <- neonUtilities::loadByProduct("DP4.00001.001", site = "NIWO", startdate = "2019-01", enddate = "2022-12", tabl = "wss_daily_temp")
+
+ggplot(nwt_neon_temp$wss_daily_temp) +
+  geom_line(aes(date, wssTempTripleMean), col = "purple") +
+  geom_smooth(aes(date, wssTempTripleMean),col = "purple", fill = "purple") +
+  geom_line(aes(date, wssTempTripleMaximum), col = "red") +
+  geom_smooth(aes(date, wssTempTripleMaximum), col = "red", fill = "red") +
+  geom_line(aes(date, wssTempTripleMinimum), col = "blue") +
+  geom_smooth(aes(date, wssTempTripleMinimum), col = "blue", fill = "blue")
+# i like the daily weather dat.. missing soil T but otherwise fine to use for initial comparisons
+```
+
