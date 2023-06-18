@@ -1,7 +1,12 @@
 # format infill temp and ppt dats for EDI
 
+# notes:
+# for ppt, include june-sep infilled (i think i did that?). winter months pre-1989 will probably never be usable unless NWT finds something to explain winter precip discrep (esp why saddle drier than c1 in winter when d1 is not)
+
+
 # -- SETUP ----
 library(tidyverse)
+library(lubridate)
 options(stringsAsFactors = F)
 
 source("~/github/nwt-data-munging/nwt_climate/R/fetch_data_functions.R")
@@ -374,3 +379,203 @@ View(subset(sdl_temp_pretty, source_station_hmp2 == "University Camp (838)")) # 
 # (need to change this in code settings, check it looks good after write out)
 write.csv(sdl_temp_pretty, paste0(datpath, "publish/sdl_daily_airtemp_gapfilled_ongoing.csv"), row.names = F, na = "NaN", quote = T)
 
+
+# -- 2. PRETTY SDL PPT -----
+# pretty all dates, but only write out summer months pre-oct 1988 (show in fig to meagan and sarah that sdl ppt )
+
+# check flags/notes:
+sapply(sdl_ppt[grepl("note|flag", names(sdl_ppt))], unique)
+
+# regression flags already fine, just standardize qc notes
+
+# notes I have:
+# 1) qdays flag/note, 2) infill qc note/flag, 3) qc and post-infill qc note
+# keep all three cols rather than condense (in case any data user interested), just clean up notes
+
+# -- clean up QC notes -----
+sdl_ppt_pretty<- sdl_ppt %>%
+  # capitalize sdl, d1, nwt site names
+  mutate_at(.vars = names(.)[grepl("_qc", names(.))], function(x) gsub("sdl", "SDL", x)) %>%
+  mutate_at(.vars = names(.)[grepl("_qc", names(.))], function(x) gsub("d1", "D1", x)) %>%
+  mutate_at(.vars = names(.)[grepl("_qc", names(.))], function(x) gsub("nwt", "NWT", x)) %>%
+  # change ppt to precip
+  mutate_at(.vars = names(.)[grepl("_qc", names(.))], function(x) gsub("ppt", "precip", x)) %>%
+  # capitalize first letter of note
+  mutate_at(.vars = names(.)[grepl("_qc", names(.))], 
+            function(x) ifelse(!is.na(x), 
+                               # if not present, paste capitalized first letter, then the rest of string
+                               paste0(casefold(substr(x, 1,1), upper = T), substr(x, 2, nchar(x))),
+                               # else leave as is
+                               x)
+            )
+
+# check notes again
+sapply(sdl_ppt_pretty[grepl("note|flag", names(sdl_ppt_pretty))], unique)
+
+# clarify notes:
+# gapfilling notes
+sdl_ppt_pretty$infill_qcnote[grepl("^Infilled by outdated",sdl_ppt_pretty$infill_qcnote)] <- "'Raw' value infilled by outdated method; remove and redo gapfill with current methods"
+sdl_ppt_pretty$infill_qcnote[grepl("^JM flag",sdl_ppt_pretty$infill_qcnote)] <- "J. Morse flagged raw value as questionable, remove raw and gapfill"
+# move snow even where overcatch applied to infill col
+sdl_ppt_pretty$infill_qcnote[grepl("post-infilling", sdl_ppt_pretty$compare_qcflag)] <- unique(sdl_ppt_pretty$compare_qcflag[grepl("post-infilling", sdl_ppt_pretty$compare_qcflag)])
+# clarify winter overcatch and it's a shoulder event (these are in june)
+sdl_ppt_pretty$infill_qcnote <- gsub("overcatch", "winter overcatch", sdl_ppt_pretty$infill_qcnote)
+sdl_ppt_pretty$infill_qcnote <- gsub("Snow event,", "Large shoulder snow event,", sdl_ppt_pretty$infill_qcnote)
+# remove from comparative qc col once moved
+sdl_ppt_pretty$compare_qcflag[grepl("post-infilling", sdl_ppt_pretty$infill_qcnote)] <- NA
+
+# comparative qc notes:
+sdl_ppt_pretty$compare_qcflag[grepl("^SDL 0,",sdl_ppt_pretty$compare_qcflag)] <- "SDL recorded 0 precip; all other NWT sites have positive precip, at least one > 2 z-score and D1 > 10mm or NA"
+sdl_ppt_pretty$compare_qcflag[grepl("^SDL >= 10mm precip,",sdl_ppt_pretty$compare_qcflag)] <- "SDL >= 10mm precip; all other NWT sites no precip or NA, only 1 to 3 regional sites with precip (<15% regional sites have positive precip)"
+sdl_ppt_pretty$compare_qcflag[grepl("^SDL >= 25in precip,",sdl_ppt_pretty$compare_qcflag)] <- "SDL >= 0.25in precip, only site at NWT with positive precip, only 1 of 1 to 3 sites in region with positive precip"
+sdl_ppt_pretty$compare_qcflag[grepl("^Only site",sdl_ppt_pretty$compare_qcflag)] <- "SDL only site in region with positive precip, value exceeds 2.5 z-score (likely blowing snow event)"      
+
+# average diff with all other sites exceeded 5 in scale(diff)
+sdl_ppt_pretty$compare_qcflag[grepl("^Shoulder snow",sdl_ppt_pretty$compare_qcflag)] <- "Shoulder snow event or blowing snow; SDL precip exceeds all NWT sites, average pairwise difference with all regional sites exceeds 5 z-score"
+sdl_ppt_pretty$compare_qcflag[grepl("^SDL precip exceeds",sdl_ppt_pretty$compare_qcflag)] <- "SDL precip exceeds all NWT sites, average pairwise difference with all regional sites exceeds 5 z-score"
+
+# check notes now
+sapply(sdl_ppt_pretty[grepl("note|flag", names(sdl_ppt_pretty))], unique) #ok
+
+
+# -- clean up station names -----
+unique(sdl_ppt_pretty$source_station) # this matches tim's station name convention.. don't need to change, esp if SCE is going to recycle this for C1, D1
+# but.. I prefer clarity. treat ghcnd and snotel stations the same as did for temp
+
+# iterate through to partial match value (should work) and assign pretty name from temp_LUT
+ppt_sites_LUT <- distinct(sdl_ppt_pretty,source_station) %>%
+  mutate(source = ifelse(grepl("Belfort", source_station), "nwt lter", 
+                         ifelse(grepl("US-NR", source_station), "ameriflux",
+                                ifelse(grepl("[0-9]{5}", source_station), "ghcnd", "snotel")))) %>%
+  mutate(pretty_name = ifelse(grepl("nwt lt|ameri", source), source_station, ""))
+ppt_sites_LUT <- subset(temp_station_LUT, grepl("snot|ghc", source), select = -local_site) %>%
+  distinct() %>%
+  mutate(keycol = ifelse(source == "snotel", station_name,
+                         # drop beginning of ghcnd name otherwise to get last 5 chars
+                         gsub("US.000", "", station_id)))
+
+# join pretty source names to sdl to replace ghcnd and snotel
+sdl_ppt_pretty <- left_join(sdl_ppt_pretty, ppt_sites_LUT[c("keycol", "pretty_name")], by = c("source_station" = "keycol"))
+# review before replace
+View(subset(sdl_ppt_pretty, !is.na(pretty_name))) # looks fine
+sdl_ppt_pretty <- mutate(sdl_ppt_pretty, source_station = ifelse(!is.na(pretty_name), pretty_name, source_station))
+
+
+# -- finalize dataset -----
+# final review
+summary(sdl_ppt_pretty)
+# are all dates accounted for?
+summary(sdl_ppt_pretty$date %in% seq.Date(min(sdl_ppt_pretty$date), max(sdl_ppt_pretty$date), 1))
+summary(seq.Date(min(sdl_ppt_pretty$date), max(sdl_ppt_pretty$date), 1) %in% sdl_ppt_pretty$date) # good
+# check non-winter v winter ppt to be sure
+with(sdl_ppt_pretty, sapply(split(precip, lubridate::month(date) %in% 6:9), summary))
+with(sdl_ppt_pretty, sapply(split(precip_winteradj, lubridate::month(date) %in% 6:9), summary)) # okay
+
+# check unique vals for all but regression eqs
+sapply(sdl_ppt_pretty[grepl("LTER|local|flag|source|qc", names(sdl_ppt_pretty))], function(x) unique(sort(x))) # ok
+
+# reorganize cols, and slight tweak to colnames
+names(sdl_ppt_pretty)
+names(tkd1_ppt) # put winteradj before precip
+# be sure to NA winter months ppt 1981 until Sep 1987 (all okay to leave after that)
+sdl_ppt_pretty$remove <- with(sdl_ppt_pretty, month(date) %in% c(1:5, 10:12) & date < as.Date("1987-09-01"))
+
+sdl_ppt_pretty %>%
+  mutate(mon = month(date)) %>%
+  group_by(mon, year) %>%
+  summarize(ppt = sum(precip_winteradj)) %>%
+  ungroup() %>%
+  mutate(plot_date = as.Date(paste(year, mon, 1, sep = "-")),
+         decade = paste0(substr(year,1,3), "0")) %>%
+  ggplot(aes(plot_date, ppt)) +
+  geom_line() +
+  facet_wrap(~decade, scales = "free_x", nrow = 5)
+
+sdl_ppt_pretty %>%
+  mutate(mon = month(date)) %>%
+  group_by(mon, year) %>%
+  summarize(ppt = sum(precip_winteradj)) %>%
+  ungroup() %>%
+  mutate(plot_date = as.Date(paste(year, mon, 1, sep = "-")),
+         decade = paste0(substr(year,1,3), "0")) %>%
+  ggplot(aes(mon, ppt)) +
+  geom_boxplot(aes(group = mon)) +
+  geom_point(aes(col = substr(year,4,4), group = year), position = position_dodge(width = 0.3)) +
+  geom_smooth(aes(col = substr(year,4,4), group = year), position = position_dodge(width = 0.3), se = F) +
+  scale_x_continuous(breaks = 1:12) +
+  scale_color_viridis_d(name = "Month") +
+  facet_wrap(~decade, scales = "free_x", nrow = 5)
+
+sdl_check <- sdl_ppt_pretty %>%
+  mutate(mon = month(date)) %>%
+  group_by(local_site, mon, year) %>%
+  summarize(ppt = sum(precip_winteradj)) %>%
+  ungroup() %>%
+  mutate(plot_date = as.Date(paste(year, mon, 1, sep = "-")),
+         decade = paste0(substr(year,1,3), "0"))
+
+tkd1_ppt %>%
+  mutate(mon = month(date)) %>%
+  group_by(local_site, mon, year) %>%
+  summarize(ppt = sum(precip)) %>%
+  ungroup() %>%
+  mutate(plot_date = as.Date(paste(year, mon, 1, sep = "-")),
+         decade = paste0(substr(year,1,3), "0")) %>%
+  rbind(sdl_check) %>%
+  subset(year %in% 1981:2000) %>%
+  ggplot(aes(mon, ppt, col = local_site)) +
+  #geom_boxplot(aes(group = mon)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~year)
+
+tkd1_ppt %>%
+  mutate(mon = month(date)) %>%
+  group_by(local_site, mon, year) %>%
+  summarize(ppt = sum(precip)) %>%
+  ungroup() %>%
+  mutate(plot_date = as.Date(paste(year, mon, 1, sep = "-")),
+         decade = paste0(substr(year,1,3), "0")) %>%
+  rbind(sdl_check) %>%
+  subset(year %in% 1982:1992) %>%
+  ggplot(aes(mon, ppt)) +
+  #geom_boxplot(aes(group = mon)) +
+  geom_point(aes(group = year), position = position_dodge(width = 0.3)) +
+  geom_line() +
+  scale_x_continuous(breaks = 1:12) +
+  scale_color_viridis_d(name = "Month") +
+  facet_grid(year~local_site, scales = "free_x") # start sdl all days at sep 1987, before that jun-sep only. sort of looks like winter correction got applied earlier, but idk
+
+sdl_ppt_pretty <- sdl_ppt_pretty %>%
+  # remove winter months. people can get the raw data if they want it
+  # reorder cols and put raw after qc notes
+  subset(!remove, select = c(LTER_site:date, precip_winteradj, precip,flag_1:regression_equation, 
+                             infill_qcnote, compare_qcflag, qdays_qcnote, raw_ppt_tot, raw_qdays)) %>%
+  rename(compare_qcnote = compare_qcflag)
+
+glimpse(sdl_ppt_pretty)
+
+ggplot(sdl_ppt_pretty, aes(day(date), precip_winteradj, col = year)) +
+  geom_point(alpha = 0.5) +
+  scale_color_viridis_c() +
+  facet_wrap(~month(date), nrow = 2)
+
+mutate(sdl_ppt_pretty,decade = paste0(substr(year,1,3), 0),) %>%
+ggplot(aes(month(date), precip, group = month(date))) +
+  geom_boxplot() +
+  geom_jitter(aes(col = substr(year,4,4)), alpha = 0.5) +
+  scale_color_viridis_d() +
+  facet_wrap(~decade, nrow = 2) # okay.. just make a note in methods we're unsure about early record winter precip (but late 80s looks like early 2020s .. so maybe)
+
+
+
+# -- write out pretty ppt -----
+# make NA NaN instead (tell sce NaN in this case = no value, not data are missing)
+# write out csv with utf-8 and \r\n eol (end of line)
+# (need to change this in code settings, check it looks good after write out)
+write.csv(sdl_ppt_pretty, paste0(datpath, "publish/sdl_daily_precip_gapfilled_ongoing.csv"), 
+          row.names = F, na = "NaN", quote = T)
+
+# make sure it reads back in okay
+testread_base <- read.csv(paste0(datpath, "publish/sdl_daily_precip_gapfilled_ongoing.csv"))
+testread_tidy <- read_csv(paste0(datpath, "publish/sdl_daily_precip_gapfilled_ongoing.csv")) # looks good!
