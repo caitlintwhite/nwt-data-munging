@@ -11,7 +11,8 @@ datpath <- "/Users/scarlet/Documents/nwt_lter/nwt_climate/data/"
 
 sdl_temp <- readRDS(paste0(datpath, "homogenize/nwt_sdl_homogenized_temperature_draft.rds"))
 sdl_ppt <- readRDS(paste0(datpath, "infill/sdlPPT_infilled_draft_Sep1987.rds"))
-
+sdl_ppt_pretty <- read_csv(paste0(datpath, "publish/sdl_daily_precip_gapfilled_ongoing.csv"))
+  
 # list all rds files in prepped data folder (full path directory)
 rdsfiles <- list.files(paste0(datpath, "prep"), pattern = "rds", full.names = T)
 # read in prepared temp data
@@ -128,24 +129,28 @@ summary(unique(infill_temp_dates$date) %in% unique(missing_dates$date))
 
 # -- run with gapfill precip ----
 #sdl_ppt_studyperiod <- subset(sdl_ppt, date %in% study_dates) 
-sdl_ppt_studyperiod <- subset(sdl_ppt, date >= as.Date("1987-10-01")) # publishing starting WY 1988 (Oct 01, 1987)
+sdl_ppt_studyperiod <- subset(sdl_ppt, date >= as.Date("1987-10-01")) %>% rename(compare_qcnote = compare_qcflag) # publishing starting WY 1988 (Oct 01, 1987)
+sdl_ppt_studyperiod <- sdl_ppt_pretty # if including summer months JJAS 1981-1987
 
 # how many were missing?
 # summing: cells that have no ppt_tot record, cells that are accumulated precip greater than 0, and cells that were infilled by an outdated method
 with(sdl_ppt_studyperiod, sum((is.na(raw_ppt_tot) | grepl("outdated", infill_qcnote) | !raw_qdays %in% c(1, NA) ) & flag_2 != "G")/length(raw_ppt_tot))
+# using 1981 summer + 1988 wy dataset: 0.08568207; using wy 1988 onwards only: 0.08928143
+# > either way, both about 9% rounding
 
 # how many not AA -- some of these are missing and some were flagged
-nrow(subset(sdl_ppt_studyperiod, !grepl("SDL", source_station)))/nrow(sdl_ppt_studyperiod) # 0.0908 (9%) adjusted by another station
-nrow(subset(sdl_ppt_studyperiod, flag_1 == "A" & flag_2 %in% c("G", "H")))/nrow(sdl_ppt_studyperiod) # 0.0025 had 0 accum or accum divided equally
+nrow(subset(sdl_ppt_studyperiod, !grepl("SDL", source_station)))/nrow(sdl_ppt_studyperiod) # 0.0908 (9%) adjusted by another station wy 1988; 0.09417512 with early summer
+nrow(subset(sdl_ppt_studyperiod, flag_1 == "A" & flag_2 %in% c("G", "H")))/nrow(sdl_ppt_studyperiod) # 0.0025 had 0 accum or accum divided equally; 0.002856069 using pretty
 
 # how many additional cells flagged by QC?
 # anything that has a comparative qc note that isn't about post-infilling overcatch only, and that had qdays == 1 (would have been used as is)
 # multiply by 100 for percentage
-with(sdl_ppt_studyperiod, sum(!is.na(compare_qcflag) & !grepl("post.infilling", compare_qcflag) & raw_qdays == 1)/nrow(sdl_ppt_studyperiod)) * 100
+with(sdl_ppt_studyperiod, sum(!is.na(compare_qcnote) & !grepl("post.infilling", compare_qcnote) & raw_qdays == 1)/nrow(sdl_ppt_studyperiod)) * 100 #0.796693, so about 0.8%, 106 days of 13305
+
 
 # methods
-nrow(subset(sdl_ppt_studyperiod, flag_1 %in% c("B", "C")))/nrow(sdl_ppt_studyperiod) # 4.4% infilled via method 1 (short window)
-nrow(subset(sdl_ppt_studyperiod, flag_1 %in% c("D", "E")))/nrow(sdl_ppt_studyperiod) # 4.8% infilled via method 2 (historic)
+nrow(subset(sdl_ppt_studyperiod, flag_1 %in% c("B", "C")))/nrow(sdl_ppt_studyperiod) # 4.4% infilled via method 1 (short window) [pretty: 0.04163848]
+nrow(subset(sdl_ppt_studyperiod, flag_1 %in% c("D", "E")))/nrow(sdl_ppt_studyperiod) # 4.8% infilled via method 2 (historic) [pretty: 0.05253664]
 
 # check D1 -- what I recently infilled vs. what's there
 nrow(subset(d1_out_tkctw, !grepl("D1", source_station)))/nrow(d1_out_tkctw) # 0.274 (27%) adjusted by another station
@@ -193,7 +198,7 @@ sdl_missing_breakdown <- sdl_ppt_studyperiod %>%
                                                 ifelse(flag_1 != "A" & flag_2 %in% c("B", "H", "I"), "accumulated",
                                                        ifelse(flag_1 != "A" & flag_2 == "A", "true missing", NA))),
                                        # update status so if it was flagged by JM or by me in QC but otherwise present, mark as present
-                                       status = ifelse((grepl("JM flagged", infill_qcnote) & raw_qdays == 1) | (!is.na(compare_qcflag) & grepl("^1$", raw_qdays)), "qcremoved", status),
+                                       status = ifelse((grepl("JM flagged", infill_qcnote) & raw_qdays == 1) | (!is.na(compare_qcnote) & grepl("^1$", raw_qdays)), "qcremoved", status),
                                 totnobs = length(precip)) %>%
   group_by(totnobs, status) %>%
   summarise(statnobs = length(precip)) %>%
@@ -207,7 +212,7 @@ sdl_missing_breakdown_month <- sdl_ppt_studyperiod %>%
                          ifelse(flag_1 != "A" & flag_2 %in% c("B", "H", "I"), "accumulated",
                                 ifelse(flag_1 != "A" & flag_2 == "A", "true missing", NA))),
          # update status so if it was flagged by JM or by me in QC but otherwise present, mark as present
-         status = ifelse((grepl("JM flagged", infill_qcnote) & raw_qdays == 1) | (!is.na(compare_qcflag) & grepl("^1$", raw_qdays)), "qcremoved", status),
+         status = ifelse((grepl("JM flagged", infill_qcnote) & raw_qdays == 1) | (!is.na(compare_qcnote) & grepl("^1$", raw_qdays)), "qcremoved", status),
          totnobs = length(precip),
          mon = month(date)) %>%
   group_by(totnobs, mon) %>%
@@ -229,7 +234,7 @@ sdl_missing_breakdown_winter <- sdl_ppt_studyperiod %>%
                          ifelse(flag_1 != "A" & flag_2 %in% c("B", "H", "I"), "accumulated",
                                 ifelse(flag_1 != "A" & flag_2 == "A", "true missing", NA))),
          # update status so if it was flagged by JM or by me in QC but otherwise present, mark as present
-         status = ifelse((grepl("JM flagged", infill_qcnote) & raw_qdays == 1) | (!is.na(compare_qcflag) & grepl("^1$", raw_qdays)), "qcremoved", status),
+         status = ifelse((grepl("JM flagged", infill_qcnote) & raw_qdays == 1) | (!is.na(compare_qcnote) & grepl("^1$", raw_qdays)), "qcremoved", status),
          totnobs = length(precip),
          period = ifelse(month(date) %in% 6:9, "JJAS", "winter")) %>%
   group_by(totnobs, period) %>%
@@ -254,6 +259,21 @@ nrow(subset(sdl_ppt_studyperiod, flag_1 != "A")) # to be sure, sumcheck
 # what about anything but divide accumulated and 0 accumulated?
 with(subset(sdl_ppt_studyperiod, flag_1 != "A" & !flag_2 %in% c("G", "H")), round(sort(summary(factor(source_station))/length(date))*100, 5))
 
+# how much was gap-filled by year or decade?
+decade_stats <- mutate(sdl_ppt_studyperiod, decade = paste0(substr(year,1,3),0),
+                       summer = month(date) %in% 6:9,
+                       infilled = (!grepl("SDL", source_station)), removed = !is.na(compare_qcnote)) %>%
+  group_by(decade, year, summer, infilled, removed) %>%
+  summarise(nobs = sum(!is.na(pvalue)),
+            nobs_check = length(date))
+
+ggplot(subset(decade_stats, infilled), aes(year, nobs, fill = paste(summer, removed))) +
+  geom_col(col = "grey30") +
+  scale_fill_brewer(palette = "Paired") +
+  #facet_wrap(summer~., nrow = 2, scales = "free_y") +
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_continuous(expand = c(0.05,0)) +
+  theme_classic()
 
 #d1
 round(sort(summary(factor(d1_out_tkctw$source_station))/nrow(sdl_ppt))*100, 5)
@@ -436,16 +456,16 @@ ggplot(subset(season_yr_ppt, location == "NWT LTER"), aes(ecoyr, ecoyr_ppt, col 
 
 
 # how many data values removed for questionable blowing snow, and how different were estimates from raw?
-unique(sdl_ppt_studyperiod$compare_qcflag)
-with(subset(sdl_ppt_studyperiod, !is.na(compare_qcflag)), (summary(factor(compare_qcflag)) / nrow(sdl_ppt_studyperiod))*100)
-(table(is.na(sdl_ppt_studyperiod$compare_qcflag[!grepl("^snow event", sdl_ppt_studyperiod$compare_qcflag)]))/(nrow(sdl_ppt_studyperiod)))*100 # 0.77% of observations pulled
+unique(sdl_ppt_studyperiod$compare_qcnote)
+with(subset(sdl_ppt_studyperiod, !is.na(compare_qcnote)), (summary(factor(compare_qcnote)) / nrow(sdl_ppt_studyperiod))*100)
+(table(is.na(sdl_ppt_studyperiod$compare_qcnote[!grepl("^snow event", sdl_ppt_studyperiod$compare_qcnote)]))/(nrow(sdl_ppt_studyperiod)))*100 # 0.77% of observations pulled
 
-ggplot(subset(sdl_ppt_studyperiod, !is.na(compare_qcflag)), aes(date, precip_winteradj - raw_ppt_tot, col = compare_qcflag)) +
+ggplot(subset(sdl_ppt_studyperiod, !is.na(compare_qcnote)), aes(date, precip_winteradj - raw_ppt_tot, col = compare_qcnote)) +
   geom_hline(aes(yintercept =0), lty = 2, col = "grey50") +
   geom_point() +
   facet_wrap(~month(date), scales = "free_x")
 
-ggplot(subset(sdl_ppt_studyperiod, !is.na(compare_qcflag)), aes(raw_ppt_tot, precip_winteradj, col = compare_qcflag)) +
+ggplot(subset(sdl_ppt_studyperiod, !is.na(compare_qcnote)), aes(raw_ppt_tot, precip_winteradj, col = compare_qcnote)) +
   geom_hline(aes(yintercept =0), lty = 2, col = "grey50") +
   geom_point() +
   facet_wrap(~month(date), scales = "free")
