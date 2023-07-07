@@ -1,0 +1,703 @@
+---
+title: "NWT temperature correlations"
+author: "CTW"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = F, warning = F, fig.width = 8, fig.height = 6)  # don't display code by default
+# load needed libraries
+library(tidyverse)
+library(lubridate)
+library(corrplot)
+#library(sf) # for NWT plots
+#library(neonUtilities) # to fetch neon data
+# ctw functions to fetch climate datasets from EDI
+source("~/github/nwt-data-munging/nwt_climate/R/fetch_data_functions.R")
+# ctw personal prefs for environemnt and display
+options(stringsAsFactors = F)
+theme_set(theme_bw())
+```
+
+
+
+```{r fetch datasets, echo = F, warning=F, message=F, include = F}
+
+# NWT climate station daily temp
+# gapfilled chart [use CTW prepped with sdl temp, provisional data]
+ctwfiles <- list.files("~/Documents/nwt_lter/nwt_climate/data/infill/")
+
+# d1 temp for nwt8-renewal [through 2020]
+d1temp <- read_csv("~/github/nwt-data-munging/nwt_climate/nwt8-renewal_homogenize_climdat/data/d1_temp_1952-2020_draft.csv")
+# for outstanding data
+rawchart_temp <- getNWTcharts(mets = c("temp"))
+d1temp_raw <- rawchart_temp$D1temp
+
+# c1 temp for nwt8-renewal [through 2020]
+c1temp <- read_csv("~/github/nwt-data-munging/nwt_climate/nwt8-renewal_homogenize_climdat/data/c1_temp_1952-2020_draft.csv")
+# for outstanding data
+c1temp_raw <- rawchart_temp$C1temp
+
+# sdl gap-filled on edi
+sdltemp <- getTabular(314)
+
+# Tvan gap-filled temp
+# 2008 - present (j knowles)
+tvan <- getTabular(2) # only through 2014.. need to read in raw tvan data for more recent years
+
+# also read in ctw prepped 
+
+
+# ---- aquatic and lake ice datasets ----
+# GL4 temp (buoy only?)
+gl4b <- getTabular(188) # 2018-present
+# nwt lakes water quality (PI = Diane)
+glv_lakeswq <- getTabular(157) # just in case, but sampling is only weekly
+
+# GL4 outlet/inlet temp
+gl4inlet <- getTabular(259)
+
+# ice-on, ice-off data in green lakes valley
+glvice <- getTabular(106)
+# gl4 ice thickness data
+icethick <- getTabular(199)
+
+# -- snow datasets -----
+# snow dat (lead = Jen)
+sdlsnod <- getTabular(31) # snow grid depth
+nwtswe <- getTabular(96) # nwt and glv4 swe
+nwtsnoc <- getTabular(98) # nwt and gl4 snow cover
+
+# -- read in saddle grid community table for spatially aggregating snow depth ---
+# > used for extended summer analysis, lives on long-term-trends github rep
+
+sdlcom <- read_csv("/Users/scarlet/github/long-term-trends/extended_summer/analysis/raw_data/sdlprodsnowclass.csv")
+
+```
+
+
+## Summarize temperature datasets
+
+Some messy plots and summary outputs from reviewing data to aggregate ...
+
+```{r aggregate pika temp, include = F}
+# dates chosen should depend on dates available for pika temp, so treat these datasets first
+
+# Pika temp
+# pika hab occupancy
+pikahab <- getTabular(17) # these are plot conditions
+# there are multiple data tables with dataset, so generic read in function doesn't work. use URL to temp
+pikaT <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.17.2&entityid=277e15977751ea77c595c5bb45fb275e")
+# pika locations
+pikasites <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.17.2&entityid=313b4ae5a8cf0ce9434e24a6ceccbb73")
+
+# pika demography
+pika_demoT <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.8.5&entityid=fc3de3c583f5d9207841734ead55b709")
+pika_demoT_lut <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.8.5&entityid=c1a7d0d58f5658cffccd829cf6bb6c18")
+
+# note from chris on temps:
+# You asked about the different depths of sensors in the talus, and I said all the data archived with EDI are from the same depth, but I think I recall now that 3 depths are represented somewhat, even in that subset of the data. What I did was provide depth metadata for each placement, coded as deep, shallow and tree (above the surface). So, we'll be able to ignore data from deep and tree placements for now, and just focus on the shallow sensors, which are the most abundant
+
+# ^this comment was about the demography dataset
+
+
+# note: Chris says pika HOBO temps are instantaneous at time taken
+
+# demography is easier to work with so start there, also has longer record
+# > join lut first so can aggregate by local_site
+# > there aren't that many TBD depths, so drop those for now
+# first screen temp for anonomalous temps
+hist(pika_demoT$temperature)
+
+ggplot(pika_demoT) +
+  geom_boxplot(aes(deployment_id,temperature)) +
+  theme(axis.text.x = element_blank())
+
+group_by(pika_demoT, deployment_id) %>%
+  filter(any(temperature > 30)) %>%
+  ggplot(aes(deployment_id,temperature)) +
+  geom_violin() +
+  geom_jitter(height = 0, width = 0.25, alpha = 0.25) +
+  coord_flip()
+
+head(sort(pika_demoT$temperature), n = 20); tail(sort(pika_demoT$temperature), n = 20) # for now NA temp > 40
+
+group_by(pika_demoT, deployment_id) %>%
+  filter(any(temperature > 30)) %>%
+  filter(temperature < 50) %>%
+  ungroup() %>%
+  ggplot(aes(month(date_time),temperature, group = month(date_time))) +
+  geom_jitter(height = 0, width = 0.25, alpha = 0.25) +
+  geom_violin(fill = "transparent", col = "red") +
+  scale_x_continuous(breaks = 1:12) +
+  facet_wrap(~deployment_id) # high temps that occur make sense
+
+
+pika_demoT_dailies <- left_join(pika_demoT, pika_demoT_lut) %>%
+  # NA temps > 40C
+  mutate(temperature = ifelse(temperature > 40, NA, temperature)) %>%
+  mutate(fecha = as.Date(date_time)) %>%
+  subset(!grepl("TBD|Mea", depth)) %>%
+  # id first and last date of recording
+  group_by(deployment_id, site, easting) %>%
+  arrange(date_time) %>%
+  mutate(first_date = min(fecha),
+         last_date = max(fecha),
+         #check length between time
+         deltatime = difftime(date_time, lag(date_time), units = "hours"),
+         unidiff = length(unique(deltatime[!is.na(deltatime)])),
+         meddiff = median(deltatime, na.rm = T),
+         nobsperday = 24/as.numeric(meddiff)) %>%
+  group_by(deployment_id, site, easting, northing, depth, first_date, last_date, meddiff, nobsperday, fecha) %>%
+  summarise(tmean = mean(temperature, na.rm = T),
+            nobs = length(temperature[!is.na(temperature)])) %>%
+  # screen for hobo dates where fewer than 3 nobs) %>%
+  ungroup() %>%
+  mutate(flag_nobs = nobs != nobsperday)
+# check if date is equal to first or last day in situ
+pika_demoT_dailies$fecha_flag <- with(pika_demoT_dailies, fecha == first_date | fecha == last_date)
+# there are some strange rounding errors, time intervals not perfectly distrib over days (e.g., 5-7-5-7 instead of 6-6-6-6)
+# can drop anything that is flag_nobs & fecha_flag (last or first day launched and fewer than typical obs)
+
+pika_demoT_dailies <- pika_demoT_dailies %>% 
+  subset(!(fecha_flag & flag_nobs)) 
+
+#plots temps over time to investigate variation collapsed when average
+ggplot(subset(pika_demoT_dailies, grepl("Std", depth, fixed = F)), aes(fecha, tmean)) +
+  geom_line(aes(group = deployment_id), alpha =0.5) +
+  stat_summary(geom = "line", fun = median, color = "orchid") +
+  #geom_jitter(height = 0, alpha =0.5) +
+  facet_wrap(~site)
+
+ggplot(pika_demoT_dailies, aes(fecha, tmean)) +
+  geom_line(aes(group = deployment_id), alpha =0.5) +
+  stat_summary(geom = "line", fun = median, color = "orchid") +
+  #geom_jitter(height = 0, alpha =0.5) +
+  facet_grid(depth~site)
+
+# to see, choose std in 2010 and see how correlated sites are
+subset(pika_demoT_dailies, grepl("Std", depth) & year(fecha) == 2010, select = c(deployment_id, fecha, tmean)) %>%
+  spread(deployment_id, tmean) %>%
+  select(-fecha) %>%
+  cor(use = "pairwise.complete.obs") %>%
+  corrplot() # it's pretty related.. but some more than others
+
+
+pika_demoT_sitelevel_dailies <- group_by(pika_demoT_dailies, fecha, site, depth) %>%
+  summarise(mean_temp = mean(tmean, na.rm = T),
+            se_temp = sd(tmean, na.rm = T)/sqrt(length(tmean[!is.na(tmean)])),
+            nobs = length(tmean[!is.na(tmean)]))
+
+ggplot(pika_demoT_sitelevel_dailies, aes(fecha, mean_temp)) +
+  #geom_ribbon(aes(ymax = mean_temp + se_temp, ymin = mean_temp - se_temp)) +
+  geom_line() +
+  facet_wrap(~site +depth, scales = "free", nrow = 4) # okay
+
+```
+
+
+
+```{r prep daily airtemp, include = F}
+
+pika_mindate <-min(pika_demoT_sitelevel_dailies$fecha) 
+pika_maxdate <- max(pika_demoT_sitelevel_dailies$fecha)
+
+# since other datasets have more recent dates, use all dates available from nwt climate stations. chris can continue anlyses w more recent pika temps if what's showing for what exists looks promising
+
+d1temp_sub <- subset(d1temp, year >= year(pika_mindate), select = c(local_site, date, mean_temp))
+c1temp_sub <- subset(c1temp, year >= year(pika_mindate), select = c(local_site, date, mean_temp))
+sdltemp_sub <- subset(sdltemp, year >= year(pika_mindate), select = c(local_site, date, airtemp_avg_homogenized)) %>%
+  rename(mean_temp = airtemp_avg_homogenized)
+
+# based on WQ variables (below), also pull heat flux and solrad, just to see whether/how they are correlated
+tvan_sub <- subset(tvan, year >= year(pika_mindate), select = grepl("date|temp|flux", names(tvan)))
+
+```
+
+
+```{r prep daily glv, include = F}
+# screen for odd temps first
+summary(gl4b)
+tail(sort(gl4b$temperature)) # looks okay, esp if warmer temp is near surface
+sapply(split(gl4b$temperature, gl4b$depth), function(x) tail(sort(x))) # 14 and 20 at 10m depth seem odd.. see if warm temps on same day?
+# in manual check, the 20C recording is an outlier (spike). for now NA anything coded with "o" in flag col
+
+unique(sort(gl4b$depth))
+# take daily means at each depth, then can average/collapse as needed depths
+gl4b_dailies <- mutate(gl4b, fecha = date(timestamp),
+                       temperature = ifelse(flag_temperature == "o", NA, temperature)) %>%
+  group_by(depth) %>%
+  # record max/min timestamp
+  mutate(mintime = min(timestamp, na.rm = T),
+         maxtime = max(timestamp, na.rm = T)) %>%
+  group_by(depth, mintime, maxtime, fecha) %>%
+  summarise(mean_temp = mean(temperature, na.rm = T),
+            nobs = sum(!is.na(temperature)))
+
+# plot to examine nobs
+ggplot(gl4b_dailies, aes(fecha, mean_temp)) +
+  geom_point(aes(col = nobs), alpha = 0.5) +
+  scale_color_viridis_c() +
+  facet_wrap(~depth) # try 0-2, 2.1-5.1, 6-9, 10, 11-13
+
+gl4b_dailies %>%
+  mutate(bins = ifelse(depth <= 2, 2, 
+                       ifelse(depth > 2 & depth < 5.2 , 4, 
+                              ifelse(depth >= 6 & depth < 10, 7,
+                                     ifelse(depth >=11, 12, depth))))) %>%
+  ggplot(aes(fecha, mean_temp)) +
+  geom_point(aes(col = depth), alpha = 0.5) +
+  scale_color_viridis_c() +
+  facet_wrap(~bins) # good enough
+
+gl4b_dailies_bindepths <- gl4b_dailies %>%
+  mutate(bin_depth = ifelse(depth <= 2, 2, 
+                            ifelse(depth > 2 & depth < 5.2 , 4, 
+                                   ifelse(depth >= 6 & depth < 10, 7,
+                                          ifelse(depth >=11, 12, depth))))) %>%
+  group_by(bin_depth, fecha) %>%
+  summarise(avg_temp = mean(mean_temp, na.rm = T),
+            depth_nobs = sum(!is.na(mean_temp)))
+
+ggplot(gl4b_dailies_bindepths, aes(fecha, avg_temp, col = -1*bin_depth, group = bin_depth)) +
+  geom_line(alpha = 0.5) +
+  scale_color_viridis_c() # 10, bottom, and suface might be most reliable depths to use?
+
+
+# -- prep inlet/outlet ----
+unique(gl4inlet$flag_temperature) # remove anything flagged as questionable for now (e.g., they are flatlines)
+with(gl4inlet, sapply(split(timestamp, local_site), function(x) unique(difftime(x, lag(x), units = "hours"))))
+unique(gl4inlet$local_site)
+#[1] "gl4_inlet"  "gl4_outlet" NA
+head(subset(gl4inlet, is.na(local_site))); tail(subset(gl4inlet, is.na(local_site)))
+# > forgot timestamps added in for dates where data missing, but local_site not assigned: from 2019-08-20 to 2020-10-01
+with(subset(gl4inlet, local_site == "gl4_inlet"), sapply(split(timestamp, local_site), function(x) unique(difftime(x, lag(x), units = "hours"))))
+# track time diff when calculating hourly
+gl4inout_dailies <- subset(gl4inlet, !is.na(local_site)) %>%
+  # NA questionable temps
+  mutate(temperature = ifelse(flag_temperature == "q", NA, temperature),
+         fecha = as.Date(timestamp)) %>%
+  arrange(local_site, timestamp) %>%
+  group_by(local_site, fecha) %>%
+  mutate(deltatime = difftime(timestamp, lag(timestamp), units = "hours"),
+         nobspresent = sum(!is.na(temperature)))
+
+unique(gl4inout_dailies$deltatime) # since it's every 30min typically, maybe okay to allow up to 4 missing obs (lack 2 hours of data)
+with(gl4inout_dailies, sapply(split(nobspresent, deltatime), function(x) sort(unique(x))))
+# manually reviewed nobs 0-46; allow 46 or more nobs per day. otherwise funky (e.g., flatline) obs present when fewer + missing on those days
+gl4inout_dailies <- gl4inout_dailies %>%
+  # first NA anything with nobs < 46
+  mutate(temperature = ifelse(nobspresent < 46, NA, temperature)) %>%
+  summarise(tmean = mean(temperature, na.rm = T),
+            nobs = sum(!is.na(temperature))) %>% # to be sure
+  ungroup()
+
+summary(gl4inout_dailies) # good
+ggplot(gl4inout_dailies, aes(fecha, tmean)) +
+  geom_point(aes(col = factor(nobs), size = nobs %in% c(46,47)), alpha = 0.5) +
+  facet_wrap(~local_site) # ok
+
+ggplot(gl4inout_dailies, aes(month(fecha), tmean, group = month(fecha))) +
+  geom_boxplot() +
+  geom_jitter(aes(col = factor(nobs), size = nobs %in% c(46,47)), alpha = 0.5) +
+  scale_x_continuous(breaks = 1:12) +
+  facet_grid(year(fecha)~local_site) # water must be frozen at the inlet in winter when there are no data?
+# try proceeding without infilling 0s for winter months, then can come back to it if needed
+
+# -- prep glv wq temp -----
+# looking at wq, might be interesting to look at correlations for conductivity and PAR with temps, and then maybe some bio-related like NO3 and DO or TDS, just to see how those flux with substrate temps .. would be good to grab solrad if there is a good dataset (relatively complete) available
+
+glvwq_dailies <- subset(glv_lakeswq, year >= year(pika_mindate), select = c(local_site:date, temp, pH, std_conduct, PAR)) %>%
+  # drop air measurements (mostly for PAR as QA check to be sure greater than surface PAR I'm guessing)
+  subset(!location == "AIR") %>%
+  # unite lake and location (inlet, outlet, lake)
+  unite(local_site, local_site, location, sep = "_")
+
+
+```
+
+```{r aggregate snow data} 
+
+
+# aggregate nwt swe
+# first one location in a season to see how it changes
+subset(nwtswe, year(date) < 1998) %>%
+  ggplot(aes(yday(date), swe)) +
+  #geom_point(aes(col = wted_temp, size = prof_depth), alpha = 0.5) +
+  stat_summary() +
+  facet_grid(year(date)~local_site)
+
+subset(nwtswe, year(date) > 2010) %>%
+  ggplot(aes(yday(date), wted_temp, col = swe)) +
+  #geom_point(aes(col = wted_temp, size = prof_depth), alpha = 0.5) +
+  stat_summary() +
+  facet_grid(year(date)~local_site) # i'm not sure how to use swe so will hold off on that for now
+
+# plot ice thickness
+ggplot(icethick, aes(jday, thickness, col = year)) +
+  geom_point() +
+  geom_line(aes(group = year)) +
+  scale_color_viridis_c() # hold off on this as well, would need to convert to yday to day of water year for it to make sense
+
+# aggregate snow cover depths.. maybe create surface, 10-20, 30-90, 90-1.5m, and then anything deeper than 1.5?
+# or could sum horizon and take the average of snow temp?.. substrate seems important
+#0-10, 20-1, 1-2, 2+
+snoc_layered <- mutate(nwtsnoc, layer = ifelse(ht_top_horiz <= 0.1, "depth1_0-10cm",
+                                               ifelse(ht_top_horiz <= 1, "depth2_20cm-1m",
+                                                      ifelse(ht_top_horiz <= 2, "depth3_1m-2m", "depth4_2m_deeper")))) %>%
+  group_by(local_site, samp_loc, loc_code, date, layer) %>%
+  summarise(tmean = mean(meas_temp, na.rm = T),
+            wgt = sum(meas_wt, na.rm= T)) %>%
+  ungroup() %>%
+  subset(year(date) >= 2008)
+
+ggplot(snoc_layered, aes(layer, tmean)) +
+  geom_line(aes(group = paste(loc_code, date))) +
+  stat_summary(col = "red") +
+  facet_grid(local_site~year(date), scale = "free") +
+  theme(axis.text.x = element_text(angle = 90))
+
+nwtsnoc %>%
+  group_by(local_site, samp_loc, loc_code, date) %>%
+  summarise(tmean = mean(meas_temp, na.rm = T),
+            prof_depth = sum(horiz_thick, na.rm = T),
+            wgt = sum(meas_wt, na.rm= T)) %>%
+  ungroup() %>%
+  subset(year(date) >= 2008) %>%
+  ggplot(aes(date, tmean)) +
+  geom_point(aes(col = prof_depth, size = wgt), alpha = 0.75) +
+  stat_summary(col = "red") +
+  scale_color_viridis_c() +
+  facet_wrap(~local_site)
+  #theme(axis.text.x = element_text(angle = 90))
+  
+# choose the mean of snow cover layered (mean by day)
+# > but also have mean profile depth.. and maybe mean temp just in case layered doesn't show anything useful
+snoc_layered_dailymeans <- snoc_layered <- mutate(nwtsnoc, layer = ifelse(ht_top_horiz <= 0.1, "depth1_0-10cm",
+                                               ifelse(ht_top_horiz <= 1, "depth2_20cm-1m",
+                                                      ifelse(ht_top_horiz <= 2, "depth3_1m-2m", "depth4_2m_deeper")))) %>%
+  group_by(local_site, date, layer) %>%
+  summarise(tmean = mean(meas_temp, na.rm = T),
+            tot_horiz_thick = sum(horiz_thick, na.rm = T),
+            tot_wgt = sum(meas_wt, na.rm= T)) %>%
+  ungroup() %>%
+  subset(year(date) >= 2008)
+
+snoc_dailymeans <- nwtsnoc %>%
+  group_by(local_site, date) %>%
+  summarise(prof_mean = mean(meas_temp, na.rm = T),
+            prof_depth = sum(horiz_thick, na.rm = T),
+            prof_tot_wgt = sum(meas_wt, na.rm= T)) %>%
+  ungroup() %>%
+  subset(year(date) >= 2008)
+
+
+  
+```
+
+
+#### Hierarchicial clustering for Saddle grid snow depth data 
+
+For now, using hierarchical clustering to determine how to aggregate saddle grid snow depth spatially. I compared cluster results with plant community designations and those do not overlap cleanly with snow-pattern clustering  (e.g., only Snowbed planmt communities are in cluster 7). There are 88 plots in the Saddle grid. Wind redistribution of snow is a consideration for correlating values temporally.. I think as the time resolution becomes coarser (e.g., daily to monthly) wind redistribution would be less influential on correlations, but haven't thought it through completely. 
+
+```{r saddle grid snow depth}
+# summarize saddle grid depth by veg comm (?)
+# > sdl prod com doesn't have extra 8 east labeled the same way it shows in the snow depth dataset
+# see how grid points corr with one another based on depth alone
+
+snowd_pts_wide <- dplyr::select(sdlsnod, local_site, point_ID, date, depth_stake, mean_depth) %>%
+  mutate(final_depth = ifelse(is.na(depth_stake), parse_number(mean_depth), parse_number(depth_stake)),
+         point_ID = ifelse(nchar(point_ID)==1, paste0("00", point_ID),
+                           ifelse(nchar(point_ID)==2, paste0("0", point_ID), point_ID))) %>%
+  unite(local_site, local_site, point_ID, sep = "_") %>%
+  dplyr::select(local_site, date, final_depth) %>%
+  spread(local_site, final_depth)
+
+corhclust <- corrplot(cor(snowd_pts_wide[,-1], use = "pairwise.complete.obs"), na.label = NA, order = "hclust", addrect = 8, diag = F)
+corrplot(1-(cor(snowd_pts_wide[,-1], use = "pairwise.complete.obs")), na.label = NA, order = "hclust", addrect = 8, diag = F)
+
+gplots::heatmap.2(cor(snowd_pts_wide[,-1], use = "pairwise.complete.obs"), revC = T)
+snowd_pts_wide2 <- hclust(as.dist(1-(cor(snowd_pts_wide[,-1], use = "pairwise.complete.obs"))))
+snowgroups <- cutree(snowd_pts_wide2, k = 7)
+snowgroups_df <- data.frame(grp = cutree(snowd_pts_wide2, k = 7)) %>%
+  mutate(plot_ID = rownames(.),
+         sort_num = parse_number(plot_ID)) %>%
+  left_join(sdlcom) # to see how plant groups map on .. which, after manual review they don't really. would rather group by snow trends tho
+
+plot(hclust(dist(cor(snowd_pts_wide[,-1], use = "pairwise.complete.obs"))))
+
+snowd_grps_dailies <- left_join(sdlsnod, snowgroups_df[c(c("grp", "plot_ID", "sort_num"))], by = c("point_ID" = "sort_num")) %>%
+  mutate(final_depth = ifelse(is.na(depth_stake), parse_number(mean_depth), parse_number(depth_stake)))
+
+ggplot(subset(snowd_grps_dailies, year(date)==2000), aes(date, final_depth, group = date)) +
+  geom_point(alpha = 0.5) + 
+  stat_summary(aes(group = date), col = "red") +
+  facet_wrap(~grp, scales = "free_y")
+snowd_grps_dailies <- group_by(snowd_grps_dailies, date, grp) %>%
+  summarise(mean_depth = mean(final_depth, na.rm = T),
+            max_depth = max(final_depth, na.rm = T),
+            se_depth = sd(final_depth, na.rm = T)/sqrt(length(final_depth[!is.na(final_depth)])),
+            nobs = sum(!is.na(final_depth))) %>%
+  # if mean and max are nan, then depth is 0
+  ungroup() %>%
+  mutate(mean_depth = ifelse(is.nan(mean_depth), 0, mean_depth),
+         max_depth = ifelse(is.infinite(max_depth), 0, max_depth)) %>%
+  subset(year(date) >= 2008)
+
+```
+
+```{r correlate daily temps, include = F}
+
+# need wide format data table
+
+# start with pika dat
+pika_demoT_wide <- unite(pika_demoT_sitelevel_dailies, site, site, depth, sep = "_") %>%
+  select(fecha, site, mean_temp) %>%
+  spread(site, mean_temp)
+
+nwtclim_wide <- rbind(d1temp_sub, c1temp_sub, sdltemp_sub) %>%
+  spread(local_site, mean_temp)
+
+rbind(d1temp_sub, c1temp_sub, sdltemp_sub) %>%
+  ggplot(aes(date, mean_temp, col = local_site)) +
+  geom_line() +
+  facet_wrap(~local_site)
+
+tvan_wide <- rename_at(tvan_sub, .vars = names(tvan_sub)[!grepl("date", names(tvan_sub))], function(x) paste0("tvan_", x))
+
+gl4b_wide <- dplyr::select(gl4b_dailies_bindepths, -depth_nobs) %>%
+  mutate(bin_depth = paste0("gl4buoy_depth_", bin_depth, "m")) %>%
+  spread(bin_depth, avg_temp)
+
+gl4inout_wide <- mutate(gl4inout_dailies, tmean = ifelse(is.nan(tmean), NA, tmean),
+                        local_site = gsub("gl4", "gl4hobolog", local_site)) %>%
+  dplyr::select(-nobs) %>%
+  spread(local_site, tmean)
+
+# preseve all depths for now, can average later if needed
+# > choose albion, gl1 and gl4 based on temporal coverage (all available after 2008 through present)
+glvwq_wide <- subset(glvwq_dailies, grepl("ALB|GL1|GL4", local_site), select = -year) %>%
+  #subset(grepl("GL4", local_site)) %>%
+  dplyr::select(local_site, depth, date, temp) %>%
+  unite(local_site, local_site, depth, sep = "_") %>%
+  gather(met, val, temp:ncol(.)) %>%
+  unite(local_site, local_site, met) %>%
+  #group_by(local_site, date) %>%
+  #mutate(dup = duplicated(date))
+  spread(local_site, val)
+
+# check how many obs per column
+colcheck <- sapply(glvwq_wide, function(x) sum(!is.na(x))) 
+table(colcheck) # out of 165 rows (date col has 165 unique vals)
+#View(glvwq_wide[, colcheck <= 10]) # I'm okay w dropping these
+glvwq_wide <- glvwq_wide[, colcheck > 10]
+# maybe choose 
+corrplot(cor(glvwq_wide[,-1], use = "pairwise.complete.obs"))
+
+# prep snow
+# snow depth 
+snowd_grps_daily_wide <- dplyr::select(snowd_grps_dailies, date, grp, mean_depth) %>%
+  mutate(grp = paste0("sdlsnow_grp_", grp)) %>%
+  spread(grp, mean_depth)
+
+dplyr::select(snowd_grps_dailies, date, grp, max_depth) %>%
+  mutate(grp = paste0("sdlsnow_grp_", grp)) %>% 
+  ggplot(aes(date, max_depth, col = grp)) +
+  geom_line(aes(group = year(date))) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "gam") +
+  facet_wrap(~grp, nrow = 7)
+
+snoc_layered_dailywide <- snoc_layered_dailymeans %>%
+  unite(local_site, local_site, layer, sep = "_") %>%
+  gather(met, val, tmean:ncol(.)) %>%
+  unite(local_site, local_site, met) %>%
+  spread(local_site, val)
+
+# do sumcheck on cols, remove anything rare
+snoc_sumcheck <- sapply(snoc_layered_dailywide, function(x) sum(!is.na(x)))
+View(snoc_layered_dailywide[,snoc_sumcheck<10])
+
+# the non-layered snow depth means
+snoc_dailymeans_wide <- subset(snoc_dailymeans, select = c(local_site, date, prof_mean, prof_depth)) %>%
+  # only keep saddle, subniv, c1
+  subset(grepl("C1|SADD|SUBNIV", local_site)) %>%
+ gather(met, val, prof_mean, prof_depth) %>%
+  unite(local_site, local_site, met, sep = "_") %>%
+  spread(local_site, val)
+
+
+# first create key for week index from start time to most recent time
+cormindate <- min(nwtclim_wide$date)
+cormaxdate <- max(nwtclim_wide$date)
+
+cordates <- data.frame(date = seq.Date(cormindate, cormaxdate, 1))
+#create 7-day week from start
+cordates$weekdays <- weekdays(cordates$date)
+cordates$yr_week <- week(cordates$date)
+cordates$week_index <- c(rep(c(1:floor(nrow(cordates)/7)),each = 7),rep(floor(nrow(cordates)/7),4))
+cordates$mon <- month(cordates$date)
+# create main month for each week index
+cordates <- group_by(cordates, week_index, mon) %>%
+  mutate(countmon = length(date)) %>%
+  ungroup() %>%
+  group_by(week_index) %>%
+  mutate(mainmon = unique(mon[which.max(countmon)])) %>%
+  ungroup() %>%
+  rename(fecha = date)
+
+dailies_wide <- cordates[c("fecha")] %>%
+  left_join(pika_demoT_wide) %>%
+  left_join(nwtclim_wide, by = c("fecha" = "date")) %>%
+  left_join(tvan_wide, by = c("fecha" = "date")) %>%
+  left_join(gl4b_wide) %>%
+  left_join(gl4inout_wide) %>%
+  left_join(glvwq_wide, by = c("fecha" = "date")) %>%
+  left_join(snowd_grps_daily_wide, by = c("fecha" = "date")) %>%
+  #left_join(snoc_layered_dailywide[,snoc_sumcheck > 10], by = c("fecha" = "date")) %>%
+  left_join(snoc_dailymeans_wide, by = c("fecha" = "date")) %>%
+  ungroup() %>%
+  data.frame()
+# check NA count
+daily_sumcheck <- sapply(dailies_wide, function(x) sum(!is.na(x))) 
+
+#gplots::heatmap.2(cor(tempdat, use = "pairwise.complete.obs"), na.rm = T, revC = T, trace = "none")  
+
+
+```
+
+
+## Correlations of daily mean values
+
+The first plot shows correlations for all data. The 12 after that show correlations by month. The variables being correlated by month depends on data availability: I chose a minimum of 10 observations present in the time series to be included in the correlations. Any variables that don't overlap in time or don't vary enough in their temporal overlap will have a blank space in the correlation plot.
+
+**Note: These plots show just trends, not significant correlations. Because of patchy overlap between variables, the data would need to be subsetted further to derive correlation significance (the `corrplot` package functions I'm using throw an error on attempts to run significance testing for the full matrix). I can write a workaround through either subsetting data, or iterating through each pair and using base R functions to run `cor.test`(I think the `corrplot` function accounts for multiple hypothesis testing though, so it's better to use).**  
+
+```{r corplot dailies}
+
+corrplot(cor(dailies_wide[,-1], use = "pairwise.complete.obs"), na.label = NA, diag = F, tl.cex = 0.5,type = "lower",
+         title = "Correlation matrix: all data (summarized so far), daily means")
+
+dailycorlist <- list()
+for(m in 1:12){
+  tempdat <- subset(dailies_wide, month(fecha) == m, select = -fecha)
+  temp_sumcheck <- sapply(tempdat, function(x) sum(!is.na(x)))
+  # if there are fewer than 10 observations remove
+  tempdat <- tempdat[, temp_sumcheck >= 10]
+  #corres <- cor.mtest(subset(dailies_wide, month(fecha) == m, select = -fecha)) not enough finite observations
+  dailycorlist[[m]] <- corrplot(cor(tempdat, use = "pairwise.complete.obs"),
+                                na.label = NA, 
+                                type = "lower",
+                                tl.cex = 0.5, tl.srt = 45,xaxs="i", yaxs= "i",
+                                omi = c(0,0,0,0),
+                                title = as.character(month(m,abbr = F, label = T)), 
+                                mar = c(0, 0, 2, 0),
+                                diag = F)
+  names(dailycorlist)[m] <- as.character(month(m,abbr = F, label = T))
+}
+
+```
+
+## Correlations on weekly summarized data
+
+Plots here show correlations by month only (there are 80 variables otherwise in the all-data matrix). Data are aggregated (values averaged) on a weekly time resolution.
+
+```{r summarize weekly}
+
+
+
+# join to dailies and summarize then plot
+weeklies_wide <- dailies_wide %>%
+  gather(met, val, 2:ncol(.)) %>%
+  full_join(cordates) %>%
+  group_by(week_index, mainmon, met) %>%
+  summarise(meanval = mean(val, na.rm = T)) %>%
+  ungroup() %>%
+  subset(!is.na(met)) %>%
+  mutate(meanval = ifelse(is.nan(meanval), NA, meanval)) %>%
+  spread(met, meanval)
+  
+# iterate through months to look for patterns
+for(m in 1:12){
+  tempdat <- subset(weeklies_wide, month(mainmon) == m, select = -c(week_index, mainmon))
+  temp_sumcheck <- sapply(tempdat, function(x) sum(!is.na(x)))
+  # if there are fewer than 10 observations remove
+  tempdat <- tempdat[,temp_sumcheck >= 10]
+  #corres <- cor.mtest(subset(dailies_wide, month(fecha) == m, select = -fecha)) not enough finite observations
+  #dailycorlist[[m]] <- 
+  
+  corrplot(cor(tempdat, use = "pairwise.complete.obs"),
+                                na.label = NA, 
+                                type = "lower",
+                                tl.cex = 0.5, tl.srt = 45,xaxs="i", yaxs= "i",
+                                omi = c(0,0,0,0),
+                                title = as.character(month(m,abbr = F, label = T)), 
+                                mar = c(0, 0, 2, 0),
+                                diag = F)
+  #names(dailycorlist)[m] <- as.character(month(m,abbr = F, label = T))
+}
+
+```
+
+
+## Correlations on monthly summarized data
+
+First plot is shows correlations of all data, mean-aggregated by month; subsequent plots are correlations for aggregated data, subsetted by month.
+
+Monthly correlations include ice thickness at GL4. Thickness is measured about once per month in winter months.
+
+```{r summarize monthly}
+
+# add in ice thickness?
+
+monthlies <- dailies_wide %>% 
+  gather(met, temp, 2:ncol(.)) %>%
+  mutate(mon = month(fecha),
+         yr = year(fecha))
+
+# ggplot(monthlies, aes(fecha, temp)) +
+#   geom_line() +
+#   facet_wrap(~met)
+
+monthlies <- group_by(monthlies, yr, mon, met) %>%
+  summarise(totdays = length(fecha),
+            meanT = mean(temp, na.rm = T),
+            nobs = sum(!is.na(temp))) %>%
+  subset(nobs> 0, select = -c(totdays, nobs))
+  # remove anything 0 nobs or if nobs != totdays
+  #subset(nobs == totdays, select = -c(totdays, nobs))
+
+# add in ice thickness
+monthly_ice <- mutate(icethick, mon = month(date), yr = year(date), met = "gl4_ice_thickness") %>%
+  distinct() %>%
+  group_by(met, yr, mon) %>%
+  summarise(meanT = mean(thickness, na.rm = T)) %>%
+  ungroup() %>%
+  subset(yr > 2007)
+
+monthlies2 <- rbind(monthlies, monthly_ice[names(monthlies)]) %>%
+  mutate(fecha = paste(yr, mon, 1, sep = "-"),
+         fecha = as.Date(fecha)) %>%
+  subset(select = -c(yr, mon)) %>%
+  spread(met, meanT)
+
+corrplot(cor(monthlies2[,-1], use = "pairwise.complete.obs"), tl.cex = 0.5, na.label = NA)
+
+for(m in 1:12){
+  tempdat <- subset(monthlies2, month(fecha) == m, select = -fecha)
+  temp_sumcheck <- sapply(tempdat, function(x) sum(!is.na(x)))
+  tempdat <- tempdat[,temp_sumcheck>=5]
+  #corres <- cor.mtest(subset(dailies_wide, month(fecha) == m, select = -fecha)) not enough finite observations
+  corrplot(cor(tempdat, use = "pairwise.complete.obs"),
+           title = as.character(month(m,abbr = F, label = T)), 
+           na.label = NA,
+           tl.cex = 0.75,
+           tl.srt = 45,
+           type = "lower",
+           mar = c(0,0,1,0),
+           diag = F)
+  #names(dailycorlist)[m] <- as.character(month(m,abbr = F, label = T))
+}
+```
+
