@@ -5,6 +5,15 @@
 # script purpose:
 # had most of this code in .Rmds, but putting it in its own so compilation doesn't have to be done every time
 
+# notes:
+# from Chris re: PIKA-088:
+# The two loggers at site PIKA-088 were placed in different years. 
+# U was recording good data from 2016-08-16 through 2018-11-07, when it failed, and NWT-06 was recording good data from 2018-08-09 to 2020-08-12. 
+# The reason they overlap from 2018-08-09 to 2018-11-07 is the techs could not find U to pull it when they placed NWT-06. 
+# Both should have been deployed in similar (standard) placements, at std depth, but they certainly weren't in exactly the same position, or the crew would have found U when placing NWT-06.
+
+
+
 # -- SETUP ----
 # load needed libraries
 library(tidyverse)
@@ -312,6 +321,9 @@ summary(pikaocc_2019[c("diff_east", "diff_north")]) # looks fine. only off by 7-
 
 
 # unpubdat 2 (2018)
+# > this has PIKA-088, which has two loggers that overlap aug - nov 2018. 
+# > pika-088 sensor U ran 2016-08-16 12:30 to 2018-11-07 03:00; sensor NWT-06 ran 2018-08-09 12:00 to 2020-08-12 09:00
+# > number rows to distinguish the two sensors
 pikaocc_2018 <- left_join(mutate(unpub_pikasurvey_temp, plot = trimws(plot)), 
                           distinct(unpub_pikasurvey_meta, plot, easting.sensor, northing.sensor)) %>%
   mutate(plotnum = as.numeric(gsub("[A-Z]+|-", "", plot))) %>%
@@ -353,11 +365,13 @@ pikaocc_all_out <- subset(edi_pikaocc, select = c(dat_plot, lut_plot, plotnum, e
   distinct() %>%
   # check for any duplicates in data
   group_by(plotnum) %>%
-  mutate(duptime = duplicated(date_time))
+  mutate(duptime = duplicated(date_time),
+         dupdate = date_time %in% date_time[duptime])
 summary(pikaocc_all_out) # true :(
 # NWT-082 and NWT-082-WN conflict (from EDI)
 # plot 88 has duplicate dates from unpublished data.. metadata shows two different sensors with overlapping dates
 # I don't know which one is correct..spans Aug thru Nov 2018
+
 
 ggplot(subset(pikaocc_all_out, plotnum == 88 & year(date_time) == 2018 & month(date_time) %in% 7:12)) +
   geom_point(aes(date_time, temperature), alpha = 0.5) +
@@ -370,12 +384,25 @@ ggplot(subset(pikaocc_all_out, plotnum == 88 & year(date_time) == 2018 & month(d
 # that seems fine
 
 # what about 082 and 082-WN (overlap also aug thru nov 2018)
-ggplot(subset(edi_pikaocc, plotnum == 82 & year(date_time) == 2018 & month(date_time) %in% 6:12)) +
-  geom_line(aes(date_time, temperature, col = dat_plot), alpha = 0.5) +
-  #stat_summary(geom = "point", aes(date_time, temperature, group = date_time), fun = "mean", col = "red", alpha = 0.7) +
-  facet_wrap(~month(date_time), scales = "free_x") # averaging is not going to work. they are different
+ggplot(subset(edi_pikaocc, plotnum == 82 & year(date_time) == 2018 & month(date_time) %in% 8:11)) +
+  geom_line(aes(date_time, temperature, col = dat_plot), alpha = 0.75, linewidth = 1) +
+  scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "1 month") +
+  theme_bw() +
+  theme(legend.position = c(0.95, 0.95),
+        legend.title = element_blank(),
+        legend.justification = c("right", "top"))
 
-# maybe keep as is and not there are duplicate date_times for the same site, not sure of differences
+# update: Chris says at both of these sites crew couldn't find old sensor so placed new ones. then found sensors later, hence overlap.
+# maybe for purposes of analysis, average values at duplicate timestamps? or keep both separate but need to note sensors in unpublished pika data
+
+# specifically:
+#The two loggers at site PIKA-088 were placed in different years. U was recording good data from 2016-08-16 through 2018-11-07, when it failed, and NWT-06 was recording good data from 2018-08-09 to 2020-08-12. The reason they overlap from 2018-08-09 to 2018-11-07 is the techs could not find U to pull it when they placed NWT-06. Both should have been deployed in similar (standard) placements, at std depth, but they certainly weren't in exactly the same position, or the crew would have found U when placing NWT-06.
+
+# pull out 82 and 88 to average each by date_time
+
+nwt8288 <- subset(pikaocc_all_out, plotnum %in% c(82, 88)) %>%
+  group_by(plotnum) %>%
+  mutate(dupdate = date_time %in% date_time[duptime])
 
 
 # -- 5. COMPILE WEST KNOLL AND GLV DATA -----
@@ -387,6 +414,15 @@ glvpika_temp_master <- mutate(glvpika_temp_master,
   group_by(Datalogger) %>%
   mutate(dat_index = 1:length(temp_c)) %>%
   ungroup()
+
+# join coords to glvpika, NA any alarms
+glvpika_temp_clean <- left_join(glvpika_temp_master, subset(glvpika_meta, select = c(Datalogger:Northing))) %>%
+  # drop 1 row with no data
+  subset(!is.na(date)) %>%
+  rename_all(casefold) %>%
+  rename(years_insitu = year) %>%
+  subset(select = c(datalogger, site:northing, date, clean_time, clean_date_time, dat_index, temp_c, temp_alarm)) %>%
+  mutate(site = "Green Lakes Valley")
 
 # some west knoll sites don't have a time so create index to at least aggregate by day
 sort(unique(wkpika_temp_master$time_char)) # need to remove trailing .0, times are at least between 0 and 24 when present
@@ -430,3 +466,25 @@ unique(with(wkpika_temp_clean, datalogger[is.na(site)]))
 wkpika_meta$datalogger[!wkpika_meta$datalogger %in% wkpika_temp_clean$datalogger] # that's all accounted for
 # i don't know what the two mystery sites are. will need to ask chris
 wkpika_temp_clean$site <- "West Knoll"
+# chris says PM sites are from Montana. Should not be in West Knoll, subset out
+wkpika_temp_clean <- subset(wkpika_temp_clean, !is.na(years_insitu))
+
+
+# -- WRITE OUT -----
+# write to output data folder on local drive
+datpath <- "/Users/scarlet/Documents/nwt_lter/temp_synth/output/dat/"
+
+# write out data as they are so can work on sub-daily plots for meeting with chris 7/31/23. come back to spruce up later
+
+# prepped demography data
+saveRDS(pika_demoT_all, paste0(datpath, "pika_demog_edicg.rdata"))
+write_csv()
+
+# demography data: glv and west knoll
+saveRDS(glvpika_temp_clean, paste0(datpath, "glvpika_demog.rdata"))
+saveRDS(glvpika_temp_clean, paste0(datpath, "wkpika_demog.rdata"))
+
+# prepped occupancy data
+saveRDS(pikaocc_all_out, paste0(datpath, "pika_habocc_all.rdata"))
+write_csv()
+
