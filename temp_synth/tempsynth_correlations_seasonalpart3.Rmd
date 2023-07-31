@@ -1,0 +1,1651 @@
+---
+title: "NWT temperature correlations (part 3)"
+author: "CTW"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = F, include = F, warning = F, fig.width = 8, fig.height = 8)  # don't display code by default
+# load needed libraries
+library(tidyverse)
+library(lubridate)
+library(readxl)
+library(corrplot)
+library(gplots)
+library(sf)
+library(terra)
+#library(sf) # for NWT plots
+#library(neonUtilities) # to fetch neon data
+# ctw functions to fetch climate datasets from EDI
+source("~/github/nwt-data-munging/nwt_climate/R/fetch_data_functions.R")
+# ctw personal prefs for environemnt and display
+options(stringsAsFactors = F)
+theme_set(theme_bw())
+
+```
+
+
+```{r read in nwt plot locations, include = F}
+nwtplots <- sf::read_sf("/Users/scarlet/Documents/nwt_lter/temp_synth/lter_plots_2022_12_08/lter_plots.shp")
+# utms present but epsg is 6269 (lat lon)
+crs(nwtplots)
+
+```
+
+
+```{r fetch datasets, echo = F, warning=F, message=F, include = F}
+
+# NWT climate station daily temp
+# gapfilled chart [use CTW prepped with sdl temp, provisional data]
+ctwfiles <- list.files("~/Documents/nwt_lter/nwt_climate/data/infill/")
+
+# d1 temp for nwt8-renewal [through 2020]
+d1temp <- read_csv("~/github/nwt-data-munging/nwt_climate/nwt8-renewal_homogenize_climdat/data/d1_temp_1952-2020_draft.csv")
+# for outstanding data
+rawchart_temp <- getNWTcharts(mets = c("temp"))
+d1temp_raw <- rawchart_temp$D1temp
+
+# c1 temp for nwt8-renewal [through 2020]
+c1temp <- read_csv("~/github/nwt-data-munging/nwt_climate/nwt8-renewal_homogenize_climdat/data/c1_temp_1952-2020_draft.csv")
+# for outstanding data
+c1temp_raw <- rawchart_temp$C1temp
+
+# sdl gap-filled on edi
+sdltemp <- getTabular(314)
+
+# Tvan gap-filled temp
+# 2008 - present (j knowles)
+tvan <- getTabular(2) # only through 2014.. need to read in raw tvan data for more recent years
+
+# also read in ctw prepped tvan
+# prepped data from sdl temp infilling
+ameriflux <- readRDS("~/Documents/nwt_lter/nwt_climate/data/qc/amerifluxTEMP_qc.rds")
+
+
+# ---- aquatic and lake ice datasets ----
+# GL4 temp (buoy only?)
+gl4b <- getTabular(188) # 2018-present
+# nwt lakes water quality (PI = Diane)
+glv_lakeswq <- getTabular(157) # just in case, but sampling is only weekly
+
+# GL4 outlet/inlet temp
+gl4inlet <- getTabular(259)
+
+# ice-on, ice-off data in green lakes valley
+glvice <- getTabular(106)
+# gl4 ice thickness data
+icethick <- getTabular(199)
+
+# -- snow datasets -----
+# snow dat (lead = Jen)
+sdlsnod <- getTabular(31) # snow grid depth
+nwtswe <- getTabular(96) # nwt and glv4 swe
+nwtsnoc <- getTabular(98) # nwt and gl4 snow cover
+
+# -- read in saddle grid community table for spatially aggregating snow depth ---
+# > used for extended summer analysis, lives on long-term-trends github rep
+
+sdlcom <- read_csv("/Users/scarlet/github/long-term-trends/extended_summer/analysis/raw_data/sdlprodsnowclass.csv")
+
+```
+
+```{r read in unpublished pika data, include = F}
+# set path to pika data
+pikadat <- list.dirs("/Users/scarlet/Documents/nwt_lter/temp_synth/unpublished_data")
+# make name of subfolder name of element
+names(pikadat) <- gsub("^.*temp_synth[/]","",pikadat)
+# clean up names for nested folders
+names(pikadat) <- gsub("^.*[/]", "", names(pikadat))
+# read contents of each folder to list
+pikadat_list <- sapply(as.list(pikadat), function(x) list.files(x, full.names = T))
+
+
+# read in temp data and metadata
+# -- cable gate (pika demography dataset) ----
+cgpika_temp <- read.delim(pikadat_list$`Cable Gate talus temperatures`[grep(".txt$", pikadat_list$`Cable Gate talus temperatures`)], skip = 2,strip.white = T, blank.lines.skip = T, header = T)
+cgpika_meta <- read.csv(pikadat_list$`Cable Gate talus temperatures`[grep(".csv$", pikadat_list$`Cable Gate talus temperatures`)], strip.white = T, blank.lines.skip = T)
+
+summary(cgpika_temp) # need to convert date_time to posix, temps look okay in range
+
+
+# -- excel workbook temps -----
+# get tab names in excel workbook
+glvpika_temp_sheets <- readxl::excel_sheets(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)])
+# read metadata
+glvpika_meta <- read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], sheet = "metadata")
+# separate glv sites from west knoll sites
+glvpika_sites <- glvpika_temp_sheets[glvpika_temp_sheets %in% glvpika_meta$Datalogger[grepl("Green", glvpika_meta$Site)]]
+# read in glv logger data
+glvpika_list <- lapply(glvpika_sites, function(x) read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], sheet = x, col_names = F, col_types = "text")) 
+# ^ has boilerplate info with actual data variable lines below, and a section noting high values
+# dates and timestamps don't read in correctly, even specifying text values
+names(glvpika_list) <- glvpika_sites
+# iterate through each tab and note:
+# 1. alarm value section (will have "HIGH/LOW" in col 2)
+# 2. temp data section (will have "Log" in column 1)
+# or could note the format sections
+glvpika_temp_master <- data.frame()
+for(i in glvpika_sites){
+  tempdat <- glvpika_list[[i]]
+  tempdat <- data.frame(tempdat)
+  tempdat$rowid <- rownames(tempdat)
+  # get eat section
+  formatlines <- tempdat[grep("Format", tempdat[,1]),]
+  names(formatlines)[names(formatlines) != "rowid"] <- letters[1:(ncol(formatlines)-1)]
+  # alarm info will be between where alarm starts and histogram starts
+  alarmstart <-  as.numeric(with(formatlines, rowid[grepl("HIGH/LOW", b)]))
+  alarmend <- as.numeric(with(formatlines, rowid[grepl("Range", c)]))
+  
+  alarmdat <- read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], 
+                                    sheet = i, 
+                                    skip = alarmstart-1,
+                         n_max = (alarmend-alarmstart-3))
+  names(alarmdat)[sapply(alarmdat, function(x) all(grepl("[A-Z]+", x)|is.na(x)))] <- "temp_alarm"
+  names(alarmdat)[sapply(alarmdat[2,], function(x) is.POSIXct(x) & !grepl(":",x))] <- c("date")
+  names(alarmdat)[sapply(alarmdat[2,], function(x) is.POSIXct(x) & grepl(":",x))] <- c("time")
+  alarmdat <- alarmdat[c("date", "time", "temp_alarm")]
+  datastart <- as.numeric(with(formatlines, rowid[grepl("^Temp.+Cel", d)]))
+  logdat <-  read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], 
+                                    sheet = i, 
+                                    skip = datastart-1,trim_ws = T)
+  # first column should be NAs (remove any col that is all NAs)
+  logdat <- logdat[,sapply(logdat, function(x) !all(is.na(x)))]
+  # standardize temp name
+  names(logdat)[grepl("^Temp.+Cel", names(logdat))]<- "temp_c"
+  names(logdat)[sapply(logdat[2,], function(x) is.POSIXct(x) & !grepl(":",x))] <- c("date")
+  names(logdat)[sapply(logdat[2,], function(x) is.POSIXct(x) & grepl(":",x))] <- c("time")
+  # standardize loggerdat names as lowcase
+  names(logdat) <- casefold(names(logdat))
+  logdat <- logdat[c("date", "time", "temp_c")]
+  # join alarmdat to loggerdat
+  logdat <- left_join(logdat, alarmdat)
+  logdat <- cbind(Datalogger = i, logdat)
+  glvpika_temp_master <- rbind(glvpika_temp_master, logdat)
+}
+
+# read in and treat the west knoll pika temps
+# separate glv sites from west knoll sites
+wkpika_sites <- glvpika_temp_sheets[!glvpika_temp_sheets %in% glvpika_meta$Datalogger[grepl("Green", glvpika_meta$Site)]]
+wkpika_sites <- wkpika_sites[wkpika_sites!= "metadata"] # remove metadata 
+
+# read in wk logger data
+wkpika_list <- lapply(wkpika_sites, function(x) read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], sheet = x, col_names = F, col_types = "text")) 
+# ^ has boilerplate info with actual data variable lines below, and a section noting high values
+# dates and timestamps don't read in correctly, even specifying text values
+names(wkpika_list) <- wkpika_sites
+# iterate through each tab and note:
+# 1. alarm value section (will have "HIGH/LOW" in col 2)
+# 2. temp data section (will have "Log" in column 1)
+# or could note the format sections
+wkpika_temp_master <- data.frame()
+for(i in wkpika_sites){
+  tempdat <- wkpika_list[[i]]
+  tempdat <- data.frame(tempdat)
+  
+  # find col and row that has a cell value that == "Date"
+  datecol <- sapply(tempdat, function(x) any(grepl("^date$|^date ", x, ignore.case = T)))
+  daterow <- grep("^date$|^date ", tempdat[,datecol], ignore.case = T)
+  
+  # read in dat starting at data header
+  logdat <-  read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], 
+                                    sheet = i, 
+                                    skip = daterow-1,)
+   
+  # print for troubleshooting
+  #print(i)
+  #print(str(logdat))
+  
+  # pull temp units
+  temp_units <- names(logdat)[grepl("°|C)|F)|Cels|Far", names(logdat), ignore.case = T)]
+  # pull time info
+  time_gmt <- names(logdat)[grepl("GMT|hour|hrs", names(logdat), ignore.case = T)]
+  
+  # > standardize colnames
+  # logdat should start date:temp
+  datecol <- which(sapply(logdat[3,], function(x) is.POSIXct(x) & !grepl(":", x)))
+  names(logdat)[datecol] <- "date"
+  # tempcol
+  tempcol <- which(sapply(logdat, function(x) any(is.numeric(x) & grepl("[.]", x))))
+  names(logdat)[tempcol] <- "temp"
+  
+  # write check to see if a time col exists
+  timecol <- which(sapply(logdat[3,], function(x) grepl("[0-9]:[0-9]", x))) # it may not necessarily be read as a posix, sometimes reads as character 
+  if(length(timecol) ==0){
+    # if no timecol, create one
+    logdat$time <- ""
+  }else{
+    # rename
+    names(logdat)[timecol] <- "time" 
+  }
+  logdat <- logdat[c("date", "time", "temp")]
+  
+  logdat$date <- as.Date(logdat$date)
+  logdat$time_char <- as.character(logdat$time)
+  logdat$time_char <- gsub("[0-9]{4}-[0-9]{2}-[0-9]{2} ", "", logdat$time_char)
+  logdat$time <- as.POSIXct(logdat$time, format = "%H:%M:%S")
+  logdat$time_info <- ifelse(length(time_gmt) == 0, "none", time_gmt)
+  logdat$temp_unit <- ifelse(length(temp_units) == 0 , "none", temp_units)
+  
+  # row-bind
+  wkpika_temp_master <- rbind(wkpika_temp_master, cbind(Datalogger = i, logdat))
+}
+
+summary(wkpika_temp_master) # max temp is 193..
+summary(is.na(wkpika_temp_master))
+lapply(wkpika_temp_master[c("Datalogger", "time_char", "time_info", "temp_unit")], unique)
+# which data loggers have blank times
+unique(wkpika_temp_master$Datalogger[wkpika_temp_master$time_char == ""]) # compared against .xlsx and looks okay
+# all loggers have temp unit info..
+# which data loggers don't have time info (this doesn't matter quite as much because can count nobs per day and compare)
+unique(wkpika_temp_master$Datalogger[wkpika_temp_master$time_info == "none"])
+# review temps
+ggplot(wkpika_temp_master) +
+  geom_histogram(aes(x = temp, fill = grepl("C", temp_unit))) +
+  facet_wrap(~Datalogger, scales = "free") # P8_2013_edited has high F range, otherwise other scales look plausible
+
+ggplot(subset(wkpika_temp_master, temp < 100)) +
+  geom_boxplot(aes(x = month(date), y = temp, group = month(date), fill = grepl("C", temp_unit))) +
+  facet_wrap(~Datalogger, scales = "free") #pm_2013 and p8_2013 are still looking unusual when drop high outliers.. unless winter months have stable temps
+
+# check winter only
+ggplot(subset(wkpika_temp_master, temp < 100 & !month(date) %in% 6:9)) +
+  geom_boxplot(aes(x = month(date), y = temp, group = month(date), fill = grepl("C", temp_unit))) +
+  facet_wrap(~Datalogger, scales = "free")
+# split F from C
+ggplot(subset(wkpika_temp_master, temp < 100 & !month(date) %in% 6:9)) +
+  geom_boxplot(aes(x = Datalogger, y = temp, group = Datalogger, fill = grepl("C", temp_unit))) +
+  facet_grid(month(date)~grepl("C", temp_unit), scales = "free") +
+  theme(axis.text.x = element_text(angle = 90))
+# check summer
+ggplot(subset(wkpika_temp_master, temp < 100 & month(date) %in% 6:9)) +
+  geom_violin(aes(x = Datalogger, y = temp, group = Datalogger, fill = grepl("C", temp_unit))) +
+  facet_grid(month(date)~grepl("C", temp_unit), scales = "free") +
+  theme(axis.text.x = element_text(angle = 90))
+
+# check global highs and lows
+with(wkpika_temp_master, sapply(split(temp, Datalogger), function(x) tail(sort(x)))) # 137 and 193 in P8_2013 are the warmest
+with(wkpika_temp_master, sapply(split(temp, Datalogger), function(x) head(sort(x)))) # global lows okay
+# check glv
+with(glvpika_temp_master, sapply(split(temp_c, Datalogger), function(x) tail(sort(x))))
+with(glvpika_temp_master, sapply(split(temp_c, Datalogger), function(x) head(sort(x)))) # okay
+
+# convert pika temps to celsius, give same name as glv pika
+wkpika_temp_master <- wkpika_temp_master %>%
+  mutate(
+    # subtract F by 32, then divide by 1.8; round to 2 deci places to match precision
+    temp_c = ifelse(grepl("F", temp_unit), round((temp-32)/1.8, 2), temp),
+    # add index (assume data read in in order, but can double check)
+    index = 1:nrow(.)
+  )
+
+
+# -- read in more recent pika occupancy data -----
+# pika occupancy temps
+unpub_pikaocc_temp <- read.csv(pikadat_list$`temperature-pika-occ-survey-2021-in-situ`[grep(".txt$", pikadat_list$`temperature-pika-occ-survey-2021-in-situ`)], strip.white = T, blank.lines.skip = T, header = T)
+unpub_pikaobb_meta <- read.csv(pikadat_list$`temperature-pika-occ-survey-2021-in-situ`[grep(".csv$", pikadat_list$`temperature-pika-occ-survey-2021-in-situ`)], strip.white = T, blank.lines.skip = T, header = T)
+
+# pika survey
+unpub_pikasurvey_temp <- read.csv(pikadat_list$`NWT-pika-survey-temperature-metadata-2020-v2`[1])
+unpub_pikasurvey_meta <- read.csv(pikadat_list$`NWT-pika-survey-temperature-metadata-2020-v2`[[2]])
+  
+```
+
+
+## Dataset aggregation for correlation plots
+
+Messy plots to show how I aggregated pika habitat occcupancy sites:
+
+```{r aggregate pika temp, include = F}
+
+# write function to check for flatlines in pika temps within same data logger, if flatline found, note how long
+
+# test <- group_by(pika_demoT, deployment_id) %>%
+#   arrange(date_time) %>%
+#   mutate(difftemp = temperature - lag(temperature),
+#          nochange = difftemp == 0)
+# 
+# tracktemp <- list2DF(rle(test$difftemp))
+# 
+# # function to identify flatline in sensors
+# check_flatline <- function(dat, val = "difftemp", ctdays = 12*7){
+#   # calcalute runs of 0-temp change
+#   count0 <- rle(diff(dat[[val]]) == 0)
+#   flatdf <- data.frame(cbind(run = count0$lengths, rle0 = count0$values))
+#   # look for 4+ consecutive days of 0 change
+#   flatdf$flag <- (flatdf$run > ctdays & flatdf$rle0 ==1)
+#   flag0 <- which(flatdf$flag)
+#   flatdf$rowid <- NA
+#   
+#   # create status markers
+#   ten <- flag0[round(length(flag0)*.1)]
+#   qtr <- flag0[round(length(flag0)*.25)]
+#   half <- flag0[round(length(flag0)*.5)]
+#   qtr3 <- flag0[round(length(flag0)*.75)]
+#   
+#   # start message to set wait expectation
+#   print(paste(length(flag0), "flags to process.."))
+#   
+#   # id rows in main dataset that have 4 or more days of 0 change
+#   for(i in flag0){
+#     #print status message every x rows so know where process is
+#     if(i %in% c(ten, qtr, half, qtr3)){
+#       print(paste("Percent processed:", 100*round(which(flag0 == i)/ length(flag0),4)
+#       ))
+#     }
+#     temp_rowid <- sum(flatdf$run[1:i-1])+1
+#     flatdf$rowid[i] <- temp_rowid
+#   }
+#   
+#   # add column with flatline count
+#   dat$flatline <- NA
+#   for(i in sort(flatdf$rowid)){
+#     dat$flatline[i] <- flatdf$run[flatdf$rowid == i & !is.na(flatdf$rowid)]
+#   }
+#   # return subset of data with flatlines
+#   return(dat)
+# }
+
+# dates chosen should depend on dates available for pika temp, so treat these datasets first
+
+# coordinates are UTM Zone 13N, datum NAD 83, units = meter
+
+# Pika temp
+# pika hab occupancy
+pikahab <- getTabular(17) # these are plot conditions
+# there are multiple data tables with dataset, so generic read in function doesn't work. use URL to temp
+pika_haboccT <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.17.2&entityid=277e15977751ea77c595c5bb45fb275e")
+# pika habitat occupancy locations
+pika_habocc_sites <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.17.2&entityid=313b4ae5a8cf0ce9434e24a6ceccbb73")
+
+# pika demography
+pika_demoT <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.8.5&entityid=fc3de3c583f5d9207841734ead55b709")
+pika_demoT_lut <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.8.5&entityid=c1a7d0d58f5658cffccd829cf6bb6c18")
+
+# note from chris on temps:
+# You asked about the different depths of sensors in the talus, and I said all the data archived with EDI are from the same depth, but I think I recall now that 3 depths are represented somewhat, even in that subset of the data. What I did was provide depth metadata for each placement, coded as deep, shallow and tree (above the surface). So, we'll be able to ignore data from deep and tree placements for now, and just focus on the shallow sensors, which are the most abundant
+
+# ^this comment was about the demography dataset
+
+
+# note: Chris says pika HOBO temps are instantaneous at time taken
+
+# -- aggregate demography ----
+# demography is easier to work with so start there, also has longer record
+# > join lut first so can aggregate by local_site
+# > there aren't that many TBD depths, so drop those for now
+
+# format cable gate so can rbind to pika demography
+str(pika_demoT)
+str(cgpika_temp)
+cgpika_demoT <- cgpika_temp %>%
+  mutate(date = substr(Date.Time, 1, 8),
+         date = as.Date(date, format = "%m/%d/%y"),
+         time = trimws(substr(Date.Time, 9, nchar(Date.Time))),
+         time = gsub("[.]0$", "", time),
+         date_time = as.POSIXct(paste(date, time)),
+         deployment_id = cgpika_meta$Sensor.ID[1]) %>%
+  rename_at(grep("Temp", names(.)), function(x) x <- "temperature") %>%
+  dplyr::select(names(pika_demoT))
+
+
+# check if metadata format same as pika dem
+str(cgpika_meta)
+str(pika_demoT_lut) # no..
+
+cgpika_demoT_lut <- cgpika_meta %>%
+  rename_all(casefold) %>%
+  rename(deployment_id = sensor.id) %>%
+  mutate(date_placed = as.POSIXct(paste(date.placed, time.placed), format = "%m/%d/%Y %H:%M"),
+         date_pulled = as.POSIXct(paste(date.retrieved, time.retrieved), format = "%m/%d/%Y %H:%M"),
+         years_insitu = paste(year(date_placed), year(date_pulled), sep = "-"),
+         true_file_name = "",
+         notes = "") %>%
+dplyr::select(names(pika_demoT_lut))
+
+# add cable gate to pika demography
+pika_demoT <- rbind(pika_demoT, cgpika_demoT)
+pika_demoT_lut <- rbind(pika_demoT_lut, cgpika_demoT_lut)
+
+# ---- review data ----
+# first screen temp for anomalous temps
+hist(pika_demoT$temperature)
+
+ggplot(pika_demoT) +
+  geom_boxplot(aes(deployment_id,temperature)) +
+  theme(axis.text.x = element_blank())
+
+group_by(pika_demoT, deployment_id) %>%
+  filter(any(temperature > 30)) %>%
+  ggplot(aes(deployment_id,temperature)) +
+  geom_violin() +
+  geom_jitter(height = 0, width = 0.25, alpha = 0.25) +
+  coord_flip()
+
+head(sort(pika_demoT$temperature), n = 20); tail(sort(pika_demoT$temperature), n = 20) # for now NA temp > 40
+
+group_by(pika_demoT, deployment_id) %>%
+  filter(any(temperature > 30)) %>%
+  filter(temperature < 50) %>%
+  ungroup() %>%
+  ggplot(aes(month(date_time),temperature, group = month(date_time))) +
+  geom_jitter(height = 0, width = 0.25, alpha = 0.25) +
+  geom_violin(fill = "transparent", col = "red") +
+  scale_x_continuous(breaks = 1:12) +
+  facet_wrap(~deployment_id) # high temps that occur make sense
+
+# -- aggregate dailies ----
+pika_demoT_dailies <- left_join(pika_demoT, pika_demoT_lut) %>%
+  # make depth in cable gate similar letter casing as other pika demography
+  mutate(depth = gsub("std", "Std", depth)) %>%
+  # NA temps > 40C
+  mutate(temperature = ifelse(temperature > 40, NA, temperature)) %>%
+  mutate(fecha = as.Date(date_time)) %>%
+  subset(!grepl("TBD|Mea", depth)) %>%
+  # id first and last date of recording
+  group_by(deployment_id, site, easting) %>%
+  arrange(date_time) %>%
+  mutate(first_date = min(fecha),
+         last_date = max(fecha),
+         #check length between time
+         deltatime = difftime(date_time, lag(date_time), units = "hours"),
+         unidiff = length(unique(deltatime[!is.na(deltatime)])),
+         meddiff = median(deltatime, na.rm = T),
+         nobsperday = 24/as.numeric(meddiff)) %>%
+  group_by(deployment_id, site, easting, northing, depth, first_date, last_date, meddiff, nobsperday, fecha) %>%
+  summarise(tmean = mean(temperature, na.rm = T),
+            nobs = length(temperature[!is.na(temperature)])) %>%
+  # screen for hobo dates where fewer than 3 nobs) %>%
+  ungroup() %>%
+  mutate(flag_nobs = nobs != nobsperday)
+# check if date is equal to first or last day in situ
+pika_demoT_dailies$fecha_flag <- with(pika_demoT_dailies, fecha == first_date | fecha == last_date)
+# there are some strange rounding errors, time intervals not perfectly distrib over days (e.g., 5-7-5-7 instead of 6-6-6-6)
+# can drop anything that is flag_nobs & fecha_flag (last or first day launched and fewer than typical obs)
+
+pika_demoT_dailies <- pika_demoT_dailies %>% 
+  subset(!(fecha_flag & flag_nobs)) 
+
+#plots temps over time to investigate variation collapsed when average
+ggplot(subset(pika_demoT_dailies, grepl("Std", depth, ignore.case = T)), aes(fecha, tmean)) +
+  geom_line(aes(group = deployment_id), alpha =0.5) +
+  stat_summary(geom = "line", fun = median, color = "orchid") +
+  #geom_jitter(height = 0, alpha =0.5) +
+  facet_wrap(~site)
+
+ggplot(pika_demoT_dailies, aes(fecha, tmean)) +
+  geom_line(aes(group = deployment_id), alpha =0.5) +
+  stat_summary(geom = "line", fun = median, color = "orchid") +
+  #geom_jitter(height = 0, alpha =0.5) +
+  facet_grid(depth~site)
+
+# to see, choose std in 2010 and see how correlated sites are
+subset(pika_demoT_dailies, grepl("Std", depth) & year(fecha) == 2010, select = c(deployment_id, fecha, tmean)) %>%
+  spread(deployment_id, tmean) %>%
+  select(-fecha) %>%
+  cor(use = "pairwise.complete.obs") %>%
+  corrplot() # it's pretty related.. but some more than others
+
+
+pika_demoT_sitelevel_dailies <- group_by(pika_demoT_dailies, fecha, site, depth) %>%
+  summarise(mean_temp = mean(tmean, na.rm = T),
+            se_temp = sd(tmean, na.rm = T)/sqrt(length(tmean[!is.na(tmean)])),
+            nobs = length(tmean[!is.na(tmean)]))
+
+ggplot(pika_demoT_sitelevel_dailies, aes(fecha, mean_temp)) +
+  #geom_ribbon(aes(ymax = mean_temp + se_temp, ymin = mean_temp - se_temp)) +
+  geom_line() +
+  facet_wrap(~site +depth, scales = "free", nrow = 4) # okay
+
+# note: ML Deep only has dates early record (2010-2011 and after 2020), which makes patchy correlation with other datasets; ML Tree as well)
+
+```
+
+
+
+```{r extra pika occupancy sites close to locations of interest, include = F}
+
+# make a pika plots sf .. but also: pika occupancy locations are in nwt plots shapefile already!
+pika_plots <- subset(nwtplots, PI == "Chris Ray" & !grepl("Acoustic", PROJECT, fixed = F))
+
+# pull sites of interest:
+# climate stations, tvan, Green Lakes + Arikaree, saddle grid, sensor array? (SN_)
+sensor_sites <- subset(nwtplots, grepl("sensor network", PROJECT))
+climate_stations <- subset(nwtplots, (grepl("(D1|SAD)-SSCREEN", SITECOD) & grepl("Losleben", PI, fixed = F)) | # add C1 if needed
+                             grepl("Blanken", PI, fixed = F))
+sdl_grid <- subset(nwtplots, grepl("PTQUAD", SITECOD))
+glv_sites <- subset(nwtplots, (PI == "Jen Morse" & grepl("GL4", SITECOD)) | # gl4 stream gauge
+                      grepl("GL4_A", SITECOD) | # Hannah's point in lake (closer to some of pika occupancy sites)
+                      PI == "Kelly Loria" |  # GL5, 3 and 2 sites
+                      SITECOD == "GL1" |
+                      grepl("RockGlacier", SITECOD)) # GL1 stream gauge for Nel (close enough to lake)
+# rbind all together
+pairtemp_sites <- rbind(sensor_sites, 
+                        climate_stations, 
+                        #sdl_grid, 
+                        glv_sites)
+
+# plot with pika plots to see
+ggplot(pairtemp_sites) +
+  geom_sf_text(aes(label = SITECOD)) +
+  labs(x = NULL, y = NULL, title = "Locations of target NWT sites for pairing with pika habitat occupancy temperature")
+
+# overlay with pika habitat occupancy plots
+ggplot()+
+  geom_sf(data = st_buffer(pairtemp_sites, dist = 300), aes(fill = SITECOD), alpha = 0.3) +
+  geom_sf_text(data = subset(pika_plots, grepl("occup", PROJECT, fixed = F)), aes(label = gsub("NWT-", "", SITECOD)), color = "orchid") +
+  geom_sf(data = subset(pika_plots, grepl("demog", PROJECT, fixed = F) & !grepl("Mitch", SITECOD)), color = "blue") +
+  geom_sf_text(data = pairtemp_sites, aes(label = SITECOD)) +
+  labs(x = NULL, y = NULL, subtitle = "Habitat occupancy in pink labels, playing with buffer sizes for target sites")
+
+  
+# look at points near sensor nodes
+ggplot()+
+  geom_sf(data = st_buffer(subset(pairtemp_sites, grepl("SN_", SITECOD)), dist = 300), aes(fill = SITECOD), alpha = 0.3) +
+  geom_sf_text(data = subset(pika_plots, grepl("occup", PROJECT, fixed = F)), aes(label = gsub("NWT-", "", SITECOD)), color = "orchid") +
+  geom_sf(data = subset(pika_plots, grepl("demog", PROJECT, fixed = F) & !grepl("Mitch", SITECOD)), color = "blue") +
+  geom_sf_text(data = subset(pairtemp_sites, grepl("SN_", SITECOD)), aes(label = SITECOD)) +
+  labs(x = NULL, y = NULL, subtitle = "Habitat occupancy in pink labels, playing with buffer sizes for target sites")
+
+  
+# manually assign sites based on how things are plotting
+pika_habsite_grps <- list(arik_pika = c(102, 038, 22),
+                          gl5in_pika = c(033, 097, 049),
+                          gl5out_pika = c(086, 069, 005, 053, 082),
+                          gl4_pika = c(117, 002, 009, 073),
+                          d1_pika = c(058, 030, 003),
+                          gl3_pika = c(043, 059), # 085 is high elevation (up in the talus) compared to 43 and 59 (closer to lake)
+                          gl3hi_pika = c(085),
+                          gl2_pika = c(027, 055),
+                          gl1_pika = c(031, 095, 023),
+                          downslope_gl1_pika = c(075, 011, 087, 151),
+                          sdl_pika = c(056, 060),
+                          glv_overlook_pika = c(091, 014, 186, 062, 079, 015),
+                          martinelli_pika = c(024, 195),
+                          sensornode_pika = c(035, 083, 016, 019),
+                          isabelle_pika = c(017, 001, 109, 065),
+                          above_isabelle_pika = c(050, 034, 006),
+                          isabelle_glacier_pika = c(121, 057, 029),
+                          longlake_pika = c(032, 068, 004, 116, 100, 036),
+                          cg_pika = c(071, 007, 144),
+                          wklong_slope_pika = c(084,140),
+                          d1isa_loslope_pika = c(010, 074, 094),
+                          d1isa_hislope_pika = c(042, 040, 088),
+                          d1wk_loslope_pika = c(026,072,008)
+)
+# fix format
+pika_habsite_grps <- lapply(pika_habsite_grps, function(x) gsub(" ", "0", formatC(x, digits = 3)))
+pika_habsite_grps <- lapply(pika_habsite_grps, function(x) gsub("^0", "NWT-", x))
+pika_habsite_lut <- data.frame()
+for(i in 1:length(pika_habsite_grps)){
+  pika_habsite_lut <- rbind(pika_habsite_lut,
+                            cbind(pikahab_grp = names(pika_habsite_grps)[i],
+                                  pikahab_plot = pika_habsite_grps[[i]])
+  )
+}
+# check for duplicates
+#with(pika_habsite_lut, pikahab_plot[duplicated(pikahab_plot)]) # 0 = no plots assigned to multiple groups
+
+# overlay with interest sites to be sure groupings look good
+left_join(pika_plots, pika_habsite_lut, by = c("SITECOD" = "pikahab_plot")) %>%
+  ggplot()+
+  geom_sf(data = st_buffer(pairtemp_sites, dist = 300), alpha = 0.3) +
+  geom_sf_text(aes(label = gsub("NWT-", "", SITECOD), color = pikahab_grp)) +
+  #geom_sf(data = subset(pika_plots, grepl("demog", PROJECT, fixed = F)), color = "blue")
+  geom_sf_text(data = pairtemp_sites, aes(label = SITECOD)) + # okay for now
+  labs(x = NULL, y = NULL, subtitle = "colored text shows which pika habitat sites were paired, grey text = not paired (not used)")
+
+
+# check cross over with elevation-SWE-probability assignment
+left_join(pika_habsite_lut, pika_habocc_sites, by = c("pikahab_plot" = "plot")) %>%
+  ggplot(aes(easting_original, northing_original, col = mdcaty)) +
+  #geom_point(aes(shape = grepl("^HighElev", mdcaty)), size = 2, alpha = .75) +
+  geom_text(aes(label = gsub("NWT-", "", pikahab_plot)), size = 3) +
+  facet_wrap(~pikahab_grp) + # scales  = "free"
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(title = "Checking distribution of elevation-swe-probability with spatial groupings")
+
+# compare gl3 sites temp (if 85 v different, exclude from that group)
+subset(pika_haboccT, plot %in% gsub("-0|-00", "-", pika_habsite_lut$pikahab_plot[grepl("gl3", pika_habsite_lut$pikahab_grp)])) %>%
+  ggplot() +
+  geom_line(aes(date_time, temperature, col = plot, group = plot), alpha = 0.5) # think should drop 85 since its temp profile is different (and flattens during summer)
+#facet_wrap(~plot)
+
+#pika_habsite_lut <- subset(pika_habsite_lut, pikahab_plot != "NWT-085")
+
+
+# -- plot with new hab and occupancy data to amend groupings -----
+left_join(pika_habocc_sites, pika_habsite_lut, by = c("plot" = "pikahab_plot")) %>%
+ggplot(aes(easting_final, northing_final)) +
+  geom_point(aes(col = pikahab_grp), size = 3) +
+  #geom_point(data = unpub_pikaobb_meta, aes(easting.plot, northing.plot), col = "orchid") +
+  #geom_point(data = unpub_pikasurvey_meta, aes(easting.sensor, northing.sensor), col = "green") #+ # mostly the same
+  #geom_text(aes(label = plot), size = 3) +
+  #geom_text(data = unpub_pikaobb_meta, aes(easting.plot, northing.plot, label = plot.ID), col = "orchid", size = 3) +
+  geom_text(data = unpub_pikasurvey_meta, aes(easting.sensor, northing.sensor, label = plot), col = "dodgerblue3", size = 3)
+
+# proceed with pairing and summarizing
+pika_habocc_dailies <- rbind (pika_haboccT, unpub_pikasurvey_temp, unpub_pikaocc_temp) %>%
+  mutate(pikanum = parse_number(gsub("NWT-|PIKA-", "", plot))) %>%
+  left_join(mutate(pika_habsite_lut, pikanum = parse_number(gsub("NWT-", "", pikahab_plot))))
+
+summary(is.na(pika_habocc_dailies))
+#make copy if mess up (rbind takes a while)
+pika_habocc_dailies_copy <- pika_habocc_dailies
+
+# review temps to screen outliers
+# ggplot(pika_habocc_dailies, aes(pikahab_plot, temperature, col = pikahab_grp)) +
+#   geom_boxplot(aes(group = pikahab_plot), alpha = 0.5) +
+#   facet_wrap(~pikahab_grp, scales = "free_y") +
+#   coord_flip() # no values look immediately odd
+# # actual temps through time
+# ggplot(pika_habocc_dailies, aes(date_time, temperature, col = pikanum)) +
+#   geom_line(aes(group = pikahab_plot), alpha = 0.5) +
+#   facet_wrap(~pikahab_grp, scales = "free_y") # look at above isabelle, arikaree, and gl5 inlet
+# # examine groupings that may need revision
+# ggplot(subset(pika_habocc_dailies, grepl("gl5in|above_isa|arik", pikahab_grp)),
+#        aes(date_time, temperature, col = pikahab_plot)) +
+#   geom_line(aes(group = pikahab_plot), alpha = 0.5) +
+#   facet_wrap(~pikahab_grp, scales = "free_y") # not sure, see how correlations go then chat with chris
+
+# first need to summarize each sensor's daily temp (on condition enough observations present)
+pika_habocc_dailies <- mutate(pika_habocc_dailies, fecha = as.Date(date_time)) %>%
+  #data.frame() %>%
+  # id first and last date of recording
+  group_by(pikahab_plot, pikahab_grp) %>%
+  arrange(date_time) %>%
+  mutate(first_date = min(fecha),
+         last_date = max(fecha),
+         #check length between time
+         deltatime = difftime(date_time, lag(date_time), units = "hours"),
+         unidiff = length(unique(deltatime[!is.na(deltatime)])),
+         meddiff = median(deltatime[deltatime > 0], na.rm = T),
+         nobsperday = 24/as.numeric(meddiff)) %>%
+  group_by(pikahab_plot, pikahab_grp, first_date, last_date, meddiff, nobsperday, fecha) %>%
+  summarise(tmean = mean(temperature, na.rm = T),
+            nobs = length(temperature[!is.na(temperature)])) %>%
+  # screen for hobo dates where fewer than 3 nobs) %>%
+  ungroup() %>%
+  mutate(flag_nobs = nobs != nobsperday)
+
+# check if date is equal to first or last day in situ
+pika_habocc_dailies$fecha_flag <- with(pika_habocc_dailies, fecha == first_date | fecha == last_date)
+# diff nobs from expected nobs. If within 1-2, allow
+pika_habocc_dailies$abs_nobdiff <- with(pika_habocc_dailies, abs(nobsperday - nobs))
+# rounding errors again
+
+pika_habocc_dailies <- subset(pika_habocc_dailies, !(fecha_flag & flag_nobs)) #%>% # for now allow all values until have time to review new pika date_times with 24 hr lags
+  #subset(!(flag_nobs & abs_nobdiff > 2.1))
+
+# plot to see how it looks
+ggplot(pika_habocc_dailies, aes(fecha, tmean)) +
+  geom_line(aes(group = pikahab_plot, col = pikahab_plot)) +
+  stat_summary(geom = "line", fun = mean) +
+  facet_wrap(~pikahab_grp) + # looks okay!
+  labs(x = NULL, title = "Spatial group mean daily temp (black) with individual pika site daily means")
+
+pika_habocc_grp_dailies <- group_by(pika_habocc_dailies, fecha, pikahab_grp) %>%
+  summarise(mean_temp = mean(tmean, na.rm = T),
+            se_temp = sd(tmean, na.rm = T)/sqrt(length(tmean[!is.na(tmean)])),
+            nobs = length(tmean[!is.na(tmean)])) %>%
+  ungroup()
+
+```
+
+
+
+```{r prep daily airtemp, include = F}
+
+pika_mindate <- min(pika_demoT_sitelevel_dailies$fecha) 
+pika_maxdate <- max(pika_demoT_sitelevel_dailies$fecha)
+
+# since other datasets have more recent dates, use all dates available from nwt climate stations. chris can continue anlyses w more recent pika temps if what's showing for what exists looks promising
+
+d1temp_sub <- subset(d1temp, year >= year(pika_mindate), select = c(local_site, date, mean_temp))
+c1temp_sub <- subset(c1temp, year >= year(pika_mindate), select = c(local_site, date, mean_temp))
+sdltemp_sub <- subset(sdltemp, year >= year(pika_mindate), select = c(local_site, date, airtemp_avg_homogenized)) %>%
+  rename(mean_temp = airtemp_avg_homogenized)
+
+# based on WQ variables (below), also pull heat flux and solrad, just to see whether/how they are correlated
+tvan_sub <- subset(tvan, year >= year(pika_mindate), select = grepl("date|temp|flux", names(tvan)))
+
+# aggregate ameriflux data
+# > it's already made (nobs accounted for). just subset station, date, and measurement
+ameriflux_dailies <- subset(ameriflux, metric == "airtemp_avg", select = c(date, station_id, measurement)) %>%
+  mutate(station_id = gsub("-", "_", station_id))
+
+```
+
+
+```{r prep daily glv, include = F}
+# screen for odd temps first
+summary(gl4b)
+tail(sort(gl4b$temperature)) # looks okay, esp if warmer temp is near surface
+sapply(split(gl4b$temperature, gl4b$depth), function(x) tail(sort(x))) # 14 and 20 at 10m depth seem odd.. see if warm temps on same day?
+# in manual check, the 20C recording is an outlier (spike). for now NA anything coded with "o" in flag col
+
+unique(sort(gl4b$depth))
+# take daily means at each depth, then can average/collapse as needed depths
+gl4b_dailies <- mutate(gl4b, fecha = date(timestamp),
+                       temperature = ifelse(flag_temperature == "o", NA, temperature)) %>%
+  group_by(depth) %>%
+  # record max/min timestamp
+  mutate(mintime = min(timestamp, na.rm = T),
+         maxtime = max(timestamp, na.rm = T)) %>%
+  group_by(depth, mintime, maxtime, fecha) %>%
+  summarise(mean_temp = mean(temperature, na.rm = T),
+            nobs = sum(!is.na(temperature)))
+
+# plot to examine nobs
+ggplot(gl4b_dailies, aes(fecha, mean_temp)) +
+  geom_point(aes(col = nobs), alpha = 0.5) +
+  scale_color_viridis_c() +
+  facet_wrap(~depth) # try 0-2, 2.1-5.1, 6-9, 10, 11-13
+
+gl4b_dailies %>%
+  mutate(bins = ifelse(depth <= 2, 2, 
+                       ifelse(depth > 2 & depth < 5.2 , 4, 
+                              ifelse(depth >= 6 & depth < 10, 7,
+                                     ifelse(depth >=11, 12, depth))))) %>%
+  ggplot(aes(fecha, mean_temp)) +
+  geom_point(aes(col = depth), alpha = 0.5) +
+  scale_color_viridis_c() +
+  facet_wrap(~bins) # good enough
+
+gl4b_dailies_bindepths <- gl4b_dailies %>%
+  mutate(bin_depth = ifelse(depth <= 2, 2, 
+                            ifelse(depth > 2 & depth < 5.2 , 4, 
+                                   ifelse(depth >= 6 & depth < 10, 7,
+                                          ifelse(depth >=11, 12, depth))))) %>%
+  group_by(bin_depth, fecha) %>%
+  summarise(avg_temp = mean(mean_temp, na.rm = T),
+            depth_nobs = sum(!is.na(mean_temp)))
+
+ggplot(gl4b_dailies_bindepths, aes(fecha, avg_temp, col = -1*bin_depth, group = bin_depth)) +
+  geom_line(alpha = 0.5) +
+  scale_color_viridis_c() # 10, bottom, and suface might be most reliable depths to use?
+
+
+# -- prep inlet/outlet ----
+unique(gl4inlet$flag_temperature) # remove anything flagged as questionable for now (e.g., they are flatlines)
+with(gl4inlet, sapply(split(timestamp, local_site), function(x) unique(difftime(x, lag(x), units = "hours"))))
+unique(gl4inlet$local_site)
+#[1] "gl4_inlet"  "gl4_outlet" NA
+head(subset(gl4inlet, is.na(local_site))); tail(subset(gl4inlet, is.na(local_site)))
+# > forgot timestamps added in for dates where data missing, but local_site not assigned: from 2019-08-20 to 2020-10-01
+with(subset(gl4inlet, local_site == "gl4_inlet"), sapply(split(timestamp, local_site), function(x) unique(difftime(x, lag(x), units = "hours"))))
+# track time diff when calculating hourly
+gl4inout_dailies <- subset(gl4inlet, !is.na(local_site)) %>%
+  # NA questionable temps
+  mutate(temperature = ifelse(flag_temperature == "q", NA, temperature),
+         fecha = as.Date(timestamp)) %>%
+  arrange(local_site, timestamp) %>%
+  group_by(local_site, fecha) %>%
+  mutate(deltatime = difftime(timestamp, lag(timestamp), units = "hours"),
+         nobspresent = sum(!is.na(temperature)))
+
+unique(gl4inout_dailies$deltatime) # since it's every 30min typically, maybe okay to allow up to 4 missing obs (lack 2 hours of data)
+with(gl4inout_dailies, sapply(split(nobspresent, deltatime), function(x) sort(unique(x))))
+# manually reviewed nobs 0-46; allow 46 or more nobs per day. otherwise funky (e.g., flatline) obs present when fewer + missing on those days
+gl4inout_dailies <- gl4inout_dailies %>%
+  # first NA anything with nobs < 46
+  mutate(temperature = ifelse(nobspresent < 46, NA, temperature)) %>%
+  summarise(tmean = mean(temperature, na.rm = T),
+            nobs = sum(!is.na(temperature))) %>% # to be sure
+  ungroup()
+
+summary(gl4inout_dailies) # good
+ggplot(gl4inout_dailies, aes(fecha, tmean)) +
+  geom_point(aes(col = factor(nobs), size = nobs %in% c(46,47)), alpha = 0.5) +
+  facet_wrap(~local_site) # ok
+
+ggplot(gl4inout_dailies, aes(month(fecha), tmean, group = month(fecha))) +
+  geom_boxplot() +
+  geom_jitter(aes(col = factor(nobs), size = nobs %in% c(46,47)), alpha = 0.5) +
+  scale_x_continuous(breaks = 1:12) +
+  facet_grid(year(fecha)~local_site) # water must be frozen at the inlet in winter when there are no data?
+# try proceeding without infilling 0s for winter months, then can come back to it if needed
+
+# -- prep glv wq temp -----
+# looking at wq, might be interesting to look at correlations for conductivity and PAR with temps, and then maybe some bio-related like NO3 and DO or TDS, just to see how those flux with substrate temps .. would be good to grab solrad if there is a good dataset (relatively complete) available
+
+glvwq_dailies <- subset(glv_lakeswq, year >= year(pika_mindate), select = c(local_site:date, temp, pH, std_conduct, PAR)) %>%
+  # drop air measurements (mostly for PAR as QA check to be sure greater than surface PAR I'm guessing)
+  subset(!location == "AIR") %>%
+  # unite lake and location (inlet, outlet, lake)
+  unite(local_site, local_site, location, sep = "_")
+
+
+```
+
+```{r aggregate snow data, include = F} 
+
+
+# aggregate nwt swe
+# first one location in a season to see how it changes
+subset(nwtswe, year(date) < 1998) %>%
+  ggplot(aes(yday(date), swe)) +
+  #geom_point(aes(col = wted_temp, size = prof_depth), alpha = 0.5) +
+  stat_summary() +
+  facet_grid(year(date)~local_site)
+
+subset(nwtswe, year(date) > 2010) %>%
+  ggplot(aes(yday(date), wted_temp, col = swe)) +
+  #geom_point(aes(col = wted_temp, size = prof_depth), alpha = 0.5) +
+  stat_summary() +
+  facet_grid(year(date)~local_site) # i'm not sure how to use swe so will hold off on that for now
+
+# try taking mean and max swe by local_site
+nwtswe_dailies <- group_by(nwtswe, date, local_site) %>%
+  summarise(mean_depth = mean(prof_depth, na.rm = T), # prof_depth = sum of all horizons measured in a pit
+            mean_swe = mean(swe, na.rm = T), # swe is mass/1000
+            mean_temp = mean(wted_temp, na.rm =T), # depth-weighted mean temp: sum of(horiz thickness*thickness snow temp))/prof_depth
+            n_pits = length(loc_code[!is.na(prof_depth)]),
+            n_swe = length(loc_code[!is.na(swe)])) %>% # 22 dates where prof depth present but swe not
+  ungroup()
+
+nwtswe_dailies %>%
+  gather(met, val, mean_depth:ncol(.)) %>%
+  ggplot(aes(date, val, col = local_site)) +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~met, scale = "free_y")
+
+# plot ice thickness
+ggplot(icethick, aes(jday, thickness, col = year)) +
+  geom_point() +
+  geom_line(aes(group = year)) +
+  scale_color_viridis_c() # hold off on this as well, would need to convert to yday to day of water year for it to make sense
+
+# aggregate snow cover depths.. maybe create surface, 10-20, 30-90, 90-1.5m, and then anything deeper than 1.5?
+# or could sum horizon and take the average of snow temp?.. substrate seems important
+#0-10, 20-1, 1-2, 2+
+snoc_layered <- mutate(nwtsnoc, layer = ifelse(ht_top_horiz <= 0.1, "depth1_0-10cm",
+                                               ifelse(ht_top_horiz <= 1, "depth2_20cm-1m",
+                                                      ifelse(ht_top_horiz <= 2, "depth3_1m-2m", "depth4_2m_deeper")))) %>%
+  group_by(local_site, samp_loc, loc_code, date, layer) %>%
+  summarise(tmean = mean(meas_temp, na.rm = T),
+            wgt = sum(meas_wt, na.rm= T)) %>%
+  ungroup() %>%
+  subset(year(date) >= 2008)
+
+ggplot(snoc_layered, aes(layer, tmean)) +
+  geom_line(aes(group = paste(loc_code, date))) +
+  stat_summary(col = "red") +
+  facet_grid(local_site~year(date), scale = "free") +
+  theme(axis.text.x = element_text(angle = 90))
+
+nwtsnoc %>%
+  group_by(local_site, samp_loc, loc_code, date) %>%
+  summarise(tmean = mean(meas_temp, na.rm = T),
+            prof_depth = sum(horiz_thick, na.rm = T),
+            wgt = sum(meas_wt, na.rm= T)) %>%
+  ungroup() %>%
+  subset(year(date) >= 2008) %>%
+  ggplot(aes(date, tmean)) +
+  geom_point(aes(col = prof_depth, size = wgt), alpha = 0.75) +
+  stat_summary(col = "red") +
+  scale_color_viridis_c() +
+  facet_wrap(~local_site)
+#theme(axis.text.x = element_text(angle = 90))
+
+# choose the mean of snow cover layered (mean by day)
+# > but also have mean profile depth.. and maybe mean temp just in case layered doesn't show anything useful
+snoc_layered_dailymeans <- snoc_layered <- mutate(nwtsnoc, layer = ifelse(ht_top_horiz <= 0.1, "depth1_0-10cm",
+                                                                          ifelse(ht_top_horiz <= 1, "depth2_20cm-1m",
+                                                                                 ifelse(ht_top_horiz <= 2, "depth3_1m-2m", "depth4_2m_deeper")))) %>%
+  group_by(local_site, date, layer) %>%
+  summarise(tmean = mean(meas_temp, na.rm = T),
+            tot_horiz_thick = sum(horiz_thick, na.rm = T),
+            tot_wgt = sum(meas_wt, na.rm= T)) %>%
+  ungroup() %>%
+  subset(year(date) >= 2008)
+
+snoc_dailymeans <- nwtsnoc %>%
+  group_by(local_site, date) %>%
+  summarise(prof_mean = mean(meas_temp, na.rm = T),
+            prof_depth = sum(horiz_thick, na.rm = T),
+            prof_tot_wgt = sum(meas_wt, na.rm= T)) %>%
+  ungroup() %>%
+  subset(year(date) >= 2008)
+
+
+
+```
+
+
+#### Hierarchicial clustering for Saddle grid snow depth data 
+
+For now, using hierarchical clustering to determine how to aggregate saddle grid snow depth spatially. I compared cluster results with plant community designations and those do not overlap cleanly with snow-pattern clustering  (e.g., only Snowbed planmt communities are in cluster 7). There are 88 plots in the Saddle grid. Wind redistribution of snow is a consideration for correlating values temporally.. I think as the time resolution becomes coarser (e.g., daily to monthly) wind redistribution would be less influential on correlations, but haven't thought it through completely. 
+
+```{r saddle grid snow depth, include = T, fig.height = 10, fig.width=10}
+# summarize saddle grid depth by veg comm (?)
+# > sdl prod com doesn't have extra 8 east labeled the same way it shows in the snow depth dataset
+# see how grid points corr with one another based on depth alone
+
+snowd_pts_wide <- dplyr::select(sdlsnod, local_site, point_ID, date, depth_stake, mean_depth) %>%
+  mutate(final_depth = ifelse(is.na(depth_stake), parse_number(mean_depth), parse_number(depth_stake)),
+         point_ID = ifelse(nchar(point_ID)==1, paste0("00", point_ID),
+                           ifelse(nchar(point_ID)==2, paste0("0", point_ID), point_ID))) %>%
+  unite(local_site, local_site, point_ID, sep = "_") %>%
+  dplyr::select(local_site, date, final_depth) %>%
+  spread(local_site, final_depth)
+
+corhclust <- corrplot(cor(snowd_pts_wide[,-1], use = "pairwise.complete.obs"), 
+                      na.label = NA, order = "hclust", 
+                      addrect = 3,
+                      diag = F, tl.cex = 0.5)
+
+gplots::heatmap.2(cor(snowd_pts_wide[,-1], use = "pairwise.complete.obs"), revC = T, trace = "none")
+snowd_pts_wide2 <- hclust(as.dist(1-(cor(snowd_pts_wide[,-1], use = "pairwise.complete.obs"))))
+snowgroups <- cutree(snowd_pts_wide2, k = 3)
+snowgroups_df <- data.frame(grp = cutree(snowd_pts_wide2, k = 3)) %>%
+  mutate(plot_ID = rownames(.),
+         sort_num = parse_number(plot_ID)) %>%
+  left_join(sdlcom) # to see how plant groups map on .. which, after manual review they don't really. would rather group by snow trends tho
+
+
+snowd_grps_dailies <- left_join(sdlsnod, snowgroups_df[c(c("grp", "plot_ID", "sort_num"))], by = c("point_ID" = "sort_num")) %>%
+  mutate(final_depth = ifelse(is.na(depth_stake), parse_number(mean_depth), parse_number(depth_stake)))
+
+ggplot(subset(snowd_grps_dailies, year(date)==2014), aes(date, final_depth, group = date)) +
+  geom_point(alpha = 0.5) + 
+  stat_summary(aes(group = date), col = "red") +
+  facet_wrap(~grp, nrow = max(snowd_grps_dailies$grp))
+snowd_grps_dailies <- group_by(snowd_grps_dailies, date, grp) %>%
+  summarise(mean_depth = mean(final_depth, na.rm = T),
+            max_depth = max(final_depth, na.rm = T),
+            se_depth = sd(final_depth, na.rm = T)/sqrt(length(final_depth[!is.na(final_depth)])),
+            nobs = sum(!is.na(final_depth))) %>%
+  # if mean and max are nan, then depth is 0
+  ungroup() %>%
+  mutate(mean_depth = ifelse(is.nan(mean_depth), 0, mean_depth),
+         max_depth = ifelse(is.infinite(max_depth), 0, max_depth)) %>%
+  subset(year(date) >= 2008)
+
+```
+
+```{r correlate daily temps, include = F}
+
+# need wide format data table
+
+# start with pika dat
+pika_demoT_wide <- unite(pika_demoT_sitelevel_dailies, site, site, depth, sep = "_") %>%
+  select(fecha, site, mean_temp) %>%
+  spread(site, mean_temp)
+
+pika_haboccT_wide <- dplyr::select(pika_habocc_grp_dailies, fecha, pikahab_grp, mean_temp) %>%
+  spread(pikahab_grp, mean_temp)
+
+nwtclim_wide <- rbind(d1temp_sub, c1temp_sub, sdltemp_sub) %>%
+  spread(local_site, mean_temp)
+
+rbind(d1temp_sub, c1temp_sub, sdltemp_sub) %>%
+  ggplot(aes(date, mean_temp, col = local_site)) +
+  geom_line() +
+  facet_wrap(~local_site)
+
+tvan_wide <- rename_at(tvan_sub, .vars = names(tvan_sub)[!grepl("date", names(tvan_sub))], function(x) paste0("tvan_", x))
+
+ameriflux_wide <- spread(ameriflux_dailies, station_id, measurement)
+
+gl4b_wide <- dplyr::select(gl4b_dailies_bindepths, -depth_nobs) %>%
+  mutate(bin_depth = paste0("gl4buoy_depth_", bin_depth, "m")) %>%
+  spread(bin_depth, avg_temp)
+
+gl4inout_wide <- mutate(gl4inout_dailies, tmean = ifelse(is.nan(tmean), NA, tmean),
+                        local_site = gsub("gl4", "gl4hobolog", local_site)) %>%
+  dplyr::select(-nobs) %>%
+  spread(local_site, tmean)
+
+# preseve all depths for now, can average later if needed
+# > choose albion, gl1 and gl4 based on temporal coverage (all available after 2008 through present)
+glvwq_wide <- subset(glvwq_dailies, grepl("ALB|GL1|GL4", local_site), select = -year) %>%
+  #subset(grepl("GL4", local_site)) %>%
+  dplyr::select(local_site, depth, date, temp) %>%
+  unite(local_site, local_site, depth, sep = "_") %>%
+  gather(met, val, temp:ncol(.)) %>%
+  unite(local_site, local_site, met) %>%
+  #group_by(local_site, date) %>%
+  #mutate(dup = duplicated(date))
+  spread(local_site, val)
+
+# check how many obs per column
+colcheck <- sapply(glvwq_wide, function(x) sum(!is.na(x))) 
+table(colcheck) # out of 165 rows (date col has 165 unique vals)
+#View(glvwq_wide[, colcheck <= 10]) # I'm okay w dropping these
+glvwq_wide <- glvwq_wide[, colcheck > 10]
+# maybe choose 
+corrplot(cor(glvwq_wide[,-1], use = "pairwise.complete.obs"))
+
+# prep snow
+# snow depth 
+snowd_grps_daily_wide <- dplyr::select(snowd_grps_dailies, date, grp, mean_depth) %>%
+  mutate(grp = paste0("sdlsnow_grp_", grp)) %>%
+  spread(grp, mean_depth)
+
+dplyr::select(snowd_grps_dailies, date, grp, max_depth) %>%
+  mutate(grp = paste0("sdlsnow_grp_", grp)) %>% 
+  ggplot(aes(date, max_depth, col = grp)) +
+  geom_line(aes(group = year(date))) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "gam") +
+  facet_wrap(~grp, nrow = 7)
+
+snoc_layered_dailywide <- snoc_layered_dailymeans %>%
+  unite(local_site, local_site, layer, sep = "_") %>%
+  gather(met, val, tmean:ncol(.)) %>%
+  unite(local_site, local_site, met) %>%
+  spread(local_site, val)
+
+# do sumcheck on cols, remove anything rare
+snoc_sumcheck <- sapply(snoc_layered_dailywide, function(x) sum(!is.na(x)))
+#View(snoc_layered_dailywide[,snoc_sumcheck<10])
+
+# the non-layered snow depth means
+snoc_dailymeans_wide <- subset(snoc_dailymeans, select = c(local_site, date, prof_mean, prof_depth)) %>%
+  # only keep saddle, subniv, c1
+  subset(grepl("C1|SADD|SUBNIV", local_site)) %>%
+  gather(met, val, prof_mean, prof_depth) %>%
+  unite(local_site, local_site, met, sep = "_") %>%
+  spread(local_site, val)
+
+# prep swe wide
+swe_dailymeans_wide <- subset(nwtswe_dailies, select = -c(n_pits, n_swe)) %>%
+  gather(met, val, mean_depth:ncol(.)) %>%
+  unite(met, local_site, met, sep = "_") %>%
+  spread(met, val)
+
+# first create key for week index from start time to most recent time
+cormindate <- min(nwtclim_wide$date)
+cormaxdate <- max(nwtclim_wide$date)
+
+cordates <- data.frame(date = seq.Date(cormindate, cormaxdate, 1))
+#create 7-day week from start
+cordates$weekdays <- weekdays(cordates$date)
+cordates$yr_week <- week(cordates$date)
+cordates$week_index <- c(rep(c(1:floor(nrow(cordates)/7)),each = 7),rep(floor(nrow(cordates)/7),4))
+cordates$mon <- month(cordates$date)
+# create main month for each week index
+cordates <- group_by(cordates, week_index, mon) %>%
+  mutate(countmon = length(date)) %>%
+  ungroup() %>%
+  group_by(week_index) %>%
+  mutate(mainmon = unique(mon[which.max(countmon)])) %>%
+  ungroup() %>%
+  rename(fecha = date)
+
+dailies_wide <- cordates[c("fecha")] %>%
+  left_join(pika_demoT_wide) %>%
+  left_join(pika_haboccT_wide) %>%
+  left_join(nwtclim_wide, by = c("fecha" = "date")) %>%
+  left_join(ameriflux_wide, by = c("fecha" = "date")) %>%
+  left_join(tvan_wide, by = c("fecha" = "date")) %>%
+  left_join(gl4b_wide) %>%
+  left_join(gl4inout_wide) %>%
+  left_join(glvwq_wide, by = c("fecha" = "date")) %>%
+  left_join(snowd_grps_daily_wide, by = c("fecha" = "date")) %>%
+  left_join(swe_dailymeans_wide, by = c("fecha" = "date")) %>%
+  #left_join(snoc_layered_dailywide[,snoc_sumcheck > 10], by = c("fecha" = "date")) %>%
+  #left_join(snoc_dailymeans_wide, by = c("fecha" = "date")) %>% # if use swe, drop snow cover df (same vars)
+  ungroup() %>%
+  data.frame()
+# check NA count
+daily_sumcheck <- sapply(dailies_wide, function(x) sum(!is.na(x))) 
+# drop anything with 0 obs for time period selected
+dailies_wide <- dailies_wide[,daily_sumcheck != 0]
+#gplots::heatmap.2(cor(tempdat, use = "pairwise.complete.obs"), na.rm = T, revC = T, trace = "none")  
+
+# # check for flatlines in pika temps on dailies
+# pika <- dailies_wide[names(dailies_wide)[grepl("fecha|_Deep|Std|pika", names(dailies_wide))]]
+# gl1_check <- check_flatline(pika, val = "gl1_pika", ctdays = 3)
+# 
+# # example of "flatline" (insulated from snow, two different sites near each other exhibit same pattern so its real)
+# ggplot(subset(pika_habocc_dailies, fecha > as.Date("2016-08-01") & fecha < as.Date("2017-08-01") & grepl("gl1_pika", pikahab_grp))) + geom_line(aes(fecha, tmean, group = pikahab_plot))
+```
+
+
+
+
+```{r corplot dailies, eval = F}
+
+
+## Correlations of daily mean values
+
+The first plot shows correlations for all data. The 12 after that show correlations by month. The variables being correlated by month depends on data availability: I chose a minimum of 10 observations present in the time series to be included in the correlations. Any variables that don't overlap in time or don't vary enough in their temporal overlap will have a blank space in the correlation plot.
+
+**Note: These plots show just trends, not significant correlations. Because of patchy overlap between variables, the data would need to be subsetted further to derive correlation significance (the `corrplot` package functions I'm using throw an error on attempts to run significance testing for the full matrix). I can write a workaround through either subsetting data, or iterating through each pair and using base R functions to run `cor.test`(I think the `corrplot` function accounts for multiple hypothesis testing though, so it's better to use).**  
+  
+  corrplot(cor(dailies_wide[,-1], use = "pairwise.complete.obs"), na.label = NA, diag = F, tl.cex = 0.5,
+           #type = "lower",
+           title = "Correlation matrix: all data (summarized so far), daily means")
+
+dailycorlist <- list()
+for(m in 1:12){
+  tempdat <- subset(dailies_wide, month(fecha) == m, select = -fecha) #select = -fecha
+  tempdat <- tempdat[,!grepl("ML_D|_2m|LL_De|_pika|gl4buoy|LL_Tr|gl4ho|_10cm", names(tempdat))]
+  temp_sumcheck <- sapply(tempdat, function(x) sum(!is.na(x)))
+  # if there are fewer than 10 observations remove
+  tempdat <- tempdat[, temp_sumcheck >= 30]
+  #corres <- cor.mtest(subset(dailies_wide, month(fecha) == m, select = -fecha)) not enough finite observations
+  cortest <- cor.mtest(tempdat, use = "pairwise.complete.obs")
+  corrplot(cor(tempdat, use = "pairwise.complete.obs"),
+           na.label = NA, 
+           #order = "hclust",
+           #p.mat = cortest$p,
+           type = "lower", 
+           sig.level = .03,
+           
+           insig = "label_sig",
+           tl.cex = 0.75, tl.srt = 45,xaxs="i", yaxs= "i",
+           omi = c(0,0,0,0),
+           title = as.character(month(m,abbr = F, label = T)), 
+           mar = c(0, 0, 2, 0),
+           diag = F)
+  
+}
+
+
+ggplot(subset(tempdat, LL_Deep < 13), aes(LL_Deep, gl4buoy_depth_10m)) +
+  geom_point(aes(col = SDL))+
+  scale_color_viridis_c(option = "B") +
+  geom_smooth(method = "lm")
+
+
+ggplot(tempdat, aes(gl1_pika,C1)) +
+  geom_point()+
+  scale_color_viridis_c(option = "B") +
+  geom_smooth(method = "lm")
+
+summary(lm(gl4buoy_depth_10m ~ WK_Deep, data = tempdat))
+
+summary(lm(gl4buoy_depth_10m ~ LL_Deep, data = subset(tempdat, LL_Deep < 13)))
+
+heatmap.2(cor(tempdat, use = "pairwise.complete.obs"), revC = T)
+```
+
+## Correlations on weekly summarized data
+
+Correlation plots on weekly-aggregated values are summarized, by month, the following way:
+
+1. Correlation plot (significance not possible for meeting today, 2023-07-20, because of patchy overlap)
+
+2. Heatmap with dendrogram
+
+To deal with patchy temporal overlap of datasets (to allow for testing for significance on correlation matrix), I've subsetted the compiled data into two periods:
+
+1. "Early" (all data up to when gapfilled Tvan ends: 2008-2014)
+
+2. "Latter" (all data 2015 to as late as possible, e.g., after Tvan)
+
+
+#### Important/helpful definitions for select variables #####
+
+For gap-filled tvan variables (defs from: https://hogback.atmos.colostate.edu/cmmap/learn/climate/energy4.html)
+
+A *positive latent heat flux* means water is condensing onto the surface.
+A *negative latent heat flux* means water is evaporating from the surface.
+
+A *positive sensible heat flux* means heat is flowing from the atmosphere to the surface.
+A *negative sensible heat flux* means heat is flowing from the surface to the atmosphere.
+
+*Soil heat flux*: "The soil heat flux is the energy receive by the soil to heat it per unit of surface and time. The Soil heat flux is *positive when the soil receives energy (warms) and negative when the soil loses energy (cools)*." (definition from [first Google result]: https://confluence.ecmwf.int/display/UER/Soil+heat+flux)
+
+
+For SWE dataset (and any NWT snow pit-derived dataset) [taken from methods in metadata on EDI]:
+
+The value total *snow profile depth* of the data section is the sum of horizon thickness values for a given snow pit and date. 
+
+Total *snow mass* is the sum of horizon mass values for a given snow pit and date. 
+
+*Depth-weighted mean temperature* was calculated as (sum of (horizon thickness * snow temperature)) / (total snow profile depth). 
+
+*Mean density* is total snow mass/total snow profile depth. 
+
+*Snow water equivalent* is equal to total snow mass/1000. 
+
+The snow-soil interface was defined as 0 cm. 
+
+
+```{r summarize weekly, include = F, fig.height=8, fig.width=8}
+
+#Correlation plots on weekly-aggregated values are summarized, by month, the following way:
+# 
+# 1. Correlation plot with significance level (asterisk = pval< 0.5).
+# 
+# 2. Heatmap with dendrogram for Early and Middle time series periods only. 
+
+
+# 2. "Middle" (time period captured by pika habitat occupancy dataset: 2016-2019)
+# 
+# 3. "Late" (all data present from when GL4 buoy and stream continuous data loggers start to latest data available: 2018 - 2022)
+
+
+# join to dailies and summarize then plot
+weeklies_wide <- dailies_wide %>%
+  gather(met, val, 2:ncol(.)) %>%
+  full_join(cordates) %>%
+  # id the datasets that should have a daily value each day (climate, buoy, and continuous data)
+  mutate(dailydata = grepl("_Deep|_Tree|_Std|pika|^SDL$|^C1$|^D1$|^US_NR|buoy|^tvan", met)) %>%
+  group_by(week_index, mainmon, met, dailydata) %>%
+  summarise(days_pres = length(mon),
+            nobs_pres = sum(!is.na(val)),
+            meanval = mean(val, na.rm = T)) %>%
+  ungroup()  %>%
+  # if it's a daily dataset and it doesn't have at least [days-pres]-1 nobs NA, otherwise can use the mean
+  mutate(meanval = ifelse(is.nan(meanval), NA, meanval),
+         meanval = ifelse(dailydata & (nobs_pres/days_pres) < 0.8, NA, meanval)) %>%
+  subset(select = -c(dailydata, days_pres, nobs_pres)) %>%
+  spread(met, meanval)
+
+
+# iterate through months to look for patterns
+for(m in 1:12){
+  
+  # subset month
+  tempdat <- subset(weeklies_wide, month(mainmon) == m, select = -c(mainmon)) # keep week index to look for change through time
+  
+  
+  # split data by temporal availability (tvan period vs habitat occupancy period)
+  ## early (start - end tvan gap-filled) about 2008-2014
+  tvan_weeks <- tempdat$week_index[!is.na(tempdat$tvan_air_temp_avg)]
+  tempdat_early <- subset(tempdat, week_index <= max(tvan_weeks))
+  
+  ## mid-range (habitat occupancy range)
+  habocc_weeks <- tempdat$week_index[apply(tempdat[grepl("_pika", names(tempdat))], 1, function(x) any(!is.na(x)))]
+  tempdat_middle <- subset(tempdat, week_index >= min(habocc_weeks) & week_index <= max(habocc_weeks))
+  
+  ## latest range (gl4 buoy range)
+  gl4b_weeks <- tempdat$week_index[apply(tempdat[grepl("gl4b|gl4h", names(tempdat))], 1, function(x) any(!is.na(x)))]
+  tempdat_late <- subset(tempdat, week_index >= min(gl4b_weeks))
+  
+  # try 2015 - end for later
+  tempdat_latter <-  subset(tempdat, week_index >= min(cordates$week_index[year(cordates$fecha) == 2015]))
+  
+  # iterate through plots
+  for(i in c("early", "middle", "late", "latter")){
+    d <- get(paste0("tempdat_", i))
+    d <- d[, colSums(!is.na(d)) >= 10]
+    
+    # need to assign sdlsnow_grp 0 if month == 7
+    if(m == 7 & any(grepl("sdlsnow_grp", names(d)))){
+      d <- mutate_at(d, names(d)[grepl("sdlsnow_grp", names(d))], function(x) ifelse(is.na(x), 0, x))
+    }
+    # remove any columns that only have 1 unique value (may increase this to 2..)
+    uniquevals <- sapply(d, function(x)length(unique(x[!is.na(x)])))
+    d <- d[uniquevals > 2]  
+    
+    # check for columns that create an issue for clustering (too many NAs in cormatrix)
+    NAcheck_d <- cor(d,  use = "pairwise.complete")
+    corcheckNA <- colSums(is.na(NAcheck_d))
+    if(any(corcheckNA >= 2)){
+      repeat{
+        remove <- names(corcheckNA[which.max(corcheckNA)])
+        d <- d[,!grepl(remove, names(d))]
+        # recrunch and test if should break
+        NAcheck_d <- cor(d,  use = "pairwise.complete")
+        corcheckNA <- colSums(is.na(NAcheck_d))
+        if(all(corcheckNA < 2)){
+          break
+        }
+        
+      }
+    }
+    # # check for finite pairs
+    # finite <- is.finite(cor(d, use = "pairwise.complete"))
+    # finitesums <- apply(finite, 2, sum)
+    # # determine which vars have insufficient pairs ()
+    # names(finitesums)[finitesums/ncol(finite) > .8]
+    # tempdat <- tempdat[names(finitesums)[finitesums==max(finitesums)]]
+    # #tempdat <- subset(tempdat, select = -sdlsnow_grp_1)
+    # 
+    
+    # calculate significance
+    #corsig <- cor.mtest(d) #not enough finite observations
+    # make correlation plot showing significance
+    corrplot(cor(d,  use = "pairwise.complete"),
+             order = "hclust",
+             #p.mat = corsig$p, sig.level = 0.05, insig = "label_sig", # for plotting signif terms
+             col = heat.colors(200),
+             na.label = NA, 
+             type = "lower",
+             outline = T,
+             tl.cex = 0.75, tl.srt = 45,xaxs="i", yaxs= "i",
+             tl.col = "black",
+             omi = c(0,0,0,0),
+             title = paste0(as.character(month(m,abbr = F, label = T)), ": ", i, " time period"), 
+             mar = c(0, 0, 2, 0),
+             diag = F)
+    
+    # show dendrogram if early or mid
+    # if(i != "late"){
+    #   heatmap.2(cor(d,  use = "pairwise.complete"), revC = T, margins = c(10,10), trace = "none", 
+    #             #col = colorRampPalette(RColorBrewer::brewer.pal(9, "RdBu")[c(1,5,9)])(20),
+    #             main = paste0(as.character(month(m,abbr = F, label = T)), ": ", i, " time period"))
+    # }
+    # if(i == "late"){
+    #   next
+    # }
+    # # refresh plotting frame
+    #plot.new()
+  }
+}
+
+
+
+
+```
+
+Here I show weekly correlations by season:
+
+* winter = Dec, Jan, Feb
+
+* spring = Mar, Apr, May
+
+* summer = Jun, Jul, Aug
+
+* fall = Sep, Oct, Nov
+
+```{r weekly correlations by season, include = T, fig.height= 10, fig.width=10}
+winter <- c(12,1,2)
+fall <- c(9,10,11)
+spring <- c(3,4,5)
+summer <- c(6,7,8)
+
+
+# iterate through months to look for patterns
+for(m in c("winter", "spring", "summer", "fall")){
+  
+  #print(m)
+  # subset month
+  tempdat <- subset(weeklies_wide, month(mainmon) %in% get(m), select = -c(mainmon)) # keep week index to look for change through time
+  
+  
+  # split data by temporal availability (tvan period vs habitat occupancy period)
+  ## early (start - end tvan gap-filled)
+  tvan_weeks <- tempdat$week_index[!is.na(tempdat$tvan_air_temp_avg)]
+  tempdat_early <- subset(tempdat, week_index <= max(tvan_weeks))
+  
+  ## mid-range (habitat occupancy range)
+  habocc_weeks <- tempdat$week_index[apply(tempdat[grepl("_pika", names(tempdat))], 1, function(x) any(!is.na(x)))]
+  tempdat_middle <- subset(tempdat, week_index >= min(habocc_weeks) & week_index <= max(habocc_weeks))
+  
+  ## latest range (gl4 buoy range)
+  gl4b_weeks <- tempdat$week_index[apply(tempdat[grepl("gl4b|gl4h", names(tempdat))], 1, function(x) any(!is.na(x)))]
+  tempdat_late <- subset(tempdat, week_index >= min(gl4b_weeks))
+  
+  # try 2015 - end for later
+  tempdat_latter <-  subset(tempdat, week_index >= min(cordates$week_index[year(cordates$fecha) == 2015]))
+  
+  # iterate through plots
+  # "middle", "late",
+  for(i in c("early", "latter")){
+    #print (i)
+    d <- get(paste0("tempdat_", i))
+    d <- d[, colSums(!is.na(d)) >= 15]
+    
+    # need to assign sdlsnow_grp 0 if month == 7
+    # if(m == 7 & any(grepl("sdlsnow_grp", names(d)))){
+    #   d <- mutate_at(d, names(d)[grepl("sdlsnow_grp", names(d))], function(x) ifelse(is.na(x), 0, x))
+    # }
+    # remove any columns that only have 1 unique value (may increase this to 2..)
+    uniquevals <- sapply(d, function(x)length(unique(x[!is.na(x)])))
+    d <- d[uniquevals > 2]  
+    
+    # check for columns that create an issue for clustering (too many NAs in cormatrix)
+    NAcheck_d <- cor(d,  use = "pairwise.complete.obs")
+    corcheckNA <- colSums(is.na(NAcheck_d))
+    nobspres <- colSums(!is.na(d))
+    if(any(corcheckNA >= 2)){
+      repeat{
+        remove <- names(corcheckNA[corcheckNA == max(corcheckNA)])
+        nobspres <- sort(nobspres[names(nobspres) %in% remove])
+        # choose variable with fewest observations (chris may want to prioritize pika variables over nobs)
+        fewestnobs <- names(nobspres)[nobspres %in% min(nobspres)]
+        d <- d[, !names(d) %in% fewestnobs]
+        # recrunch and test if should break
+        NAcheck_d <- cor(d,  use = "pairwise.complete")
+        corcheckNA <- colSums(is.na(NAcheck_d))
+        nobspres <- colSums(!is.na(d))
+        if(all(corcheckNA < 2)){
+          break
+        }
+        
+      }
+    }
+    
+    # remove any week index where majority of variables are absent
+    rowcheck <- apply(d, 1, function(x) sum(!is.na(x)))
+    nvars = ncol(d)-1 # subtract week index
+    # at least 15% of vars should have data present
+    d <- d[rowcheck> nvars*.2,]
+    # make sure each pair has at least 10 obs together
+    
+    ## CTW COME BACK TO MAKE BETTER CODE, LAZY QUICK WAY FOR MTG 7/13/23 ### =====
+    # being lazy if i can get away with it [remove swe dat from late period because patchy time between swe and pikhab causing error i don't want to deal with rn -- have lack of pairwise complete observations for a correlation test]
+    if(i == "late"){
+    # check overlap with pika
+      swedates <- d[grepl("_swe|_mean_depth|_mean_temp|_mean_swe", names(d))]
+      swerows <- rownames(swedates)[apply(swedates, 1, function(x) any(!is.na(x)))]
+      pikadates <- d[grepl("_pika", names(d))]
+      pikarows <- rownames(pikadates)[apply(pikadates, 1, function(x) any(!is.na(x)))]
+      if(sum(swerows %in% pikarows) < 10){
+        if(length(swerows) < length(pikarows)){
+          d <- d[!names(d) %in% names(swedates)]
+        }else{
+          d <- d[!names(d) %in% names(pikadates)]
+        }
+      }
+    }
+    
+    if(i == "late" & m == "fall"){
+      d <- d[!grepl("gl4hobo", names(d))]
+    }
+    if(m == "summer"){
+      # remove sdl snow depth
+      d <- d[!grepl("sdlsnow_|GL[1-4]_(LAKE|INLET)|gl4hobo", names(d))]
+    }
+    
+    
+    ## END LAZY CODE TO FIX ## ======
+    
+    # calculate significance
+    #corsig <- cor.mtest(d) #not enough finite observations
+    # make correlation plot showing significance
+    corrplot(cor(d[!names(d) %in% c("week_index")],  use = "pairwise.complete"),
+             order = "hclust",
+             #p.mat = corsig$p, sig.level = 0.05, insig = "label_sig", # for plotting signif terms
+             #col = heat.colors(200),
+             na.label = NA, 
+             type = "lower",
+             outline = T,
+             tl.cex = 0.75, tl.srt = 45,xaxs="i", yaxs= "i",
+             tl.col = "black",
+             omi = c(0,0,0,0),
+             title = paste0(m, ": ", i, " time period"), 
+             mar = c(0, 0, 2, 0),
+             diag = F)
+    
+    # show dendrogram if early or mid
+      heatmap.2(cor(d[!names(d) %in% c("week_index")],  use = "pairwise.complete"), revC = T, margins = c(10,10), trace = "none", 
+                col = colorRampPalette(RColorBrewer::brewer.pal(9, "RdBu")[c(1,5,9)])(20),
+                main = paste0(m, ": ", i, " time period"))
+  
+   
+    # refresh plotting frame
+    #plot.new()
+  }
+}
+
+
+
+
+```
+
+
+```{r code for looking at plots, eval = F}
+# try iterating through to show significant correlations only. make multiple corrgrams as needed..
+# try with january first:
+tempdat <- subset(weeklies_wide, month(mainmon) == m)
+#tempdat <- tempdat[, !grepl("SUBNIV|SADDLE_|C1_prof|tvan_|_NR3", names(tempdat))]
+tempdat <- tempdat[, !grepl("GL1|tvan_|grp_2", names(tempdat))]
+temp_sumcheck <- sapply(tempdat, function(x) sum(!is.na(x)))
+# if there are fewer than 10 observations remove
+tempdat <- tempdat[,temp_sumcheck >= 10]
+corrplot(cor(tempdat[,names(tempdat) != "mainmon"],  use = "pairwise.complete"),
+         na.label = NA, 
+         type = "lower",
+         tl.cex = 0.75, tl.srt = 45,xaxs="i", yaxs= "i",
+         omi = c(0,0,0,0),
+         title = as.character(month(m,abbr = F, label = T)), 
+         mar = c(0, 0, 2, 0),
+         diag = F)
+testcor <- cor.mtest(tempdat[,names(tempdat) != "mainmon"])
+corrplot(cor(tempdat[,names(tempdat) != "mainmon"],  use = "pairwise.complete"), #order = "hclust",
+         p.mat = testcor$p, sig.level = 0.05, insig = "label_sig",
+         na.label = NA, 
+         type = "lower",
+         tl.cex = 0.75, tl.srt = 45,xaxs="i", yaxs= "i",
+         omi = c(0,0,0,0),
+         title = as.character(month(m,abbr = F, label = T)), 
+         mar = c(0, 0, 2, 0),
+         diag = F)
+
+heatmap.2(cor(tempdat,  use = "pairwise.complete"), revC = T, margins = c(10,10), main = as.character(month(m,abbr = F, label = T)))
+
+tempdat <- subset(weeklies_wide, month(mainmon) == m)
+
+# these are for january weekly
+ggplot(tempdat, aes(week_index, tvan_heat_flux_sens)) +
+  geom_point()+ 
+  geom_smooth(method = "lm")
+
+ggplot(weeklies_wide, aes(week_index, tvan_heat_flux_sens)) +
+  geom_point()+ 
+  geom_smooth(method = "lm") +
+  facet_wrap(~mainmon)
+
+ggplot(tempdat, aes(WK_Std, tvan_heat_flux_sens)) +
+  geom_point()+ 
+  geom_smooth(method = "lm")
+
+ggplot(subset(tempdat, week_index < 375), aes(week_index, tvan_heat_flux_sens)) +
+  geom_point() +
+  geom_smooth() +
+  geom_point(aes(week_index, WK_Std), col = "orchid") +
+  geom_smooth(aes(week_index, WK_Std), col = "orchid3", fill = "orchid1")
+
+ggplot(tempdat, aes(LL_Deep, SUBNIVEAN_prof_depth)) +
+  geom_point()+ 
+  geom_smooth(method = "lm")
+
+ggplot(tempdat, aes(SADDLE_prof_depth, SADDLE_prof_mean)) +
+  geom_point()+ 
+  geom_smooth(method = "lm")
+
+#test <- left_join(tempdat, distinct(cordates, week_index) #%>%
+ggplot(tempdat, aes(sdlsnow_grp_3, US_NR1)) +
+  geom_text(aes(label = week_index))+ 
+  geom_smooth(method = "lm")
+
+
+cor.test(~LL_Deep + tvan_heat_flux_sens, data = tempdat, method = "spearman")
+summary(lm(tvan_heat_flux_sens ~LL_Deep, data = tempdat))
+
+# for July
+ggplot(tempdat, aes(sdlsnow_grp_3, GL4_LAKE_2_temp)) +
+  geom_point()+ 
+  geom_smooth(method = "lm")
+
+ggplot(tempdat, aes(WK_Deep, GL4_LAKE_10_temp)) +
+  geom_point()+ 
+  geom_smooth(method = "lm")
+
+ggplot(tempdat, aes(week_index, GL4_LAKE_10_temp)) +
+  geom_point()+ 
+  geom_smooth(method = "lm")
+
+ggplot(tempdat, aes(week_index, D1)) +
+  geom_point()+ 
+  geom_smooth(method = "gam")
+
+ggplot(subset(weeklies_wide, mainmon %in% c(12,1,2)), aes(tvan_heat_flux_sens, D1)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+subset(weeklies_wide, mainmon %in% c(12,1,2, 6,7,8)) %>%
+  mutate(season = ifelse(mainmon %in% c(12,1,2), "winter", "summer")) %>%
+ggplot(aes(tvan_heat_flux_sens, D1)) +
+  geom_vline(aes(xintercept = 0), lty = 2) +
+  geom_hline(aes(yintercept = 0), lty = 2, col = "grey50") +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(x = "Sensible heat flux (+ = heat flows from atmosphere to surface; neg = surface to atmosphere)",
+       y = "D1 air temp (degrees C)",
+       subtitle = "Tvan heat flux vs. D1 mean air temp in winter and summer") +
+  facet_wrap(~season, scales = "free_x")
+
+```
+
+
+
+```{r summarize monthly, eval = F}
+
+
+## Correlations on monthly summarized data
+
+# First plot is shows correlations of all data, mean-aggregated by month; subsequent plots are correlations for aggregated data, subsetted by month.
+# 
+# Monthly correlations include ice thickness at GL4. Thickness is measured about once per month in winter months.
+
+# add in ice thickness?
+
+monthlies <- dailies_wide %>% 
+  gather(met, temp, 2:ncol(.)) %>%
+  mutate(mon = month(fecha),
+         yr = year(fecha))
+
+# ggplot(monthlies, aes(fecha, temp)) +
+#   geom_line() +
+#   facet_wrap(~met)
+
+monthlies <- group_by(monthlies, yr, mon, met) %>%
+  summarise(totdays = length(fecha),
+            meanT = mean(temp, na.rm = T),
+            nobs = sum(!is.na(temp))) %>%
+  subset(nobs> 0, select = -c(totdays, nobs))
+# remove anything 0 nobs or if nobs != totdays
+#subset(nobs == totdays, select = -c(totdays, nobs))
+
+# add in ice thickness
+monthly_ice <- mutate(icethick, mon = month(date), yr = year(date), met = "gl4_ice_thickness") %>%
+  distinct() %>%
+  group_by(met, yr, mon) %>%
+  summarise(meanT = mean(thickness, na.rm = T)) %>%
+  ungroup() %>%
+  subset(yr > 2007)
+
+monthlies2 <- rbind(monthlies, monthly_ice[names(monthlies)]) %>%
+  mutate(fecha = paste(yr, mon, 1, sep = "-"),
+         fecha = as.Date(fecha)) %>%
+  subset(select = -c(yr, mon)) %>%
+  spread(met, meanT)
+
+corrplot(cor(monthlies2[,-1], use = "pairwise.complete.obs"), tl.cex = 0.5, na.label = NA)
+
+for(m in 1:12){
+  tempdat <- subset(monthlies2, month(fecha) == m, select = -fecha)
+  temp_sumcheck <- sapply(tempdat, function(x) sum(!is.na(x)))
+  tempdat <- tempdat[,temp_sumcheck>=5]
+  #corres <- cor.mtest(subset(dailies_wide, month(fecha) == m, select = -fecha)) not enough finite observations
+  corrplot(cor(tempdat, use = "pairwise.complete.obs"),
+           title = as.character(month(m,abbr = F, label = T)), 
+           na.label = NA,
+           tl.cex = 0.75,
+           tl.srt = 45,
+           type = "lower",
+           mar = c(0,0,1,0),
+           diag = F)
+  #names(dailycorlist)[m] <- as.character(month(m,abbr = F, label = T))
+}
+```
+

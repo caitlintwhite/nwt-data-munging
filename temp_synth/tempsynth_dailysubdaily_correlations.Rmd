@@ -1,0 +1,477 @@
+---
+title: "Daily and subdaily correlations"
+author: "CTW"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning = F, echo = F}
+knitr::opts_chunk$set(echo = FALSE, message = F, include = F, warning = F, fig.width = 8, fig.height = 8)  # don't display code by default
+# load needed libraries
+library(tidyverse)
+library(lubridate)
+library(readxl)
+library(corrplot)
+library(gplots)
+library(sf)
+library(terra)
+library(elevatr)
+#library(sf) # for NWT plots
+#library(neonUtilities) # to fetch neon data
+# ctw functions to fetch climate datasets from EDI
+source("~/github/nwt-data-munging/nwt_climate/R/fetch_data_functions.R")
+# ctw personal prefs for environemnt and display
+options(stringsAsFactors = F)
+theme_set(theme_bw())
+
+```
+
+```{r get ppt dats}
+
+# to check if snowfall reason for temp diffs in winterish months
+d1ppt <- getTabular()
+```
+
+
+```{r nwtplots}
+nwtplots <- sf::read_sf("/Users/scarlet/Documents/nwt_lter/temp_synth/lter_plots_2022_12_08/lter_plots.shp")
+# utms present but epsg is 6269 (lat lon)
+crs(nwtplots)
+
+
+
+# subset datasets of interest for sub-daily comparison to pull their locations
+llocs_sf <- subset(nwtplots, 
+                # stevenson screen locations for c1, sdl, d1
+                grepl("SAD-SSC|D1-SSC|C1-SSC", SITECOD) |
+                  # sensor nodes
+                  grepl("SN_", SITECOD) |
+                  # pika plots
+                  (PI == "Chris Ray" & !grepl("ARU", SITECOD))|
+                  # closest locations to gl4 inlet, outlet and lake
+                  grepl("GL4 UPHILL NA|^GL4_A$|GL4 GAUG", SITECOD)
+                  )
+
+
+
+
+# pull lat long for data frame
+llocs_latlong <- st_coordinates(llocs_sf)
+
+# pull elevation data from USGS
+llocs_elev <- get_elev_point(llocs_sf, prj = "EPSG:6269", src = "epqs")
+
+
+llocs_df <- data.frame(llocs_sf) %>%
+  subset(select = c(SITECOD:GPS_ELE)) %>%
+  cbind(llocs_latlong) %>%
+  cbind(elev_m = llocs_elev$elevation) %>%
+  mutate(dups = duplicated(SITECOD)) %>%  #NWT-121 is duplicated (has different coords, relocated?). remove 2nd instance for now
+  subset(!dups, select = -c(dups)) %>%
+  mutate_at(names(.)[names(.) != "SITECOD"], as.numeric)
+
+needsmatch <- subset(llocs_df, is.na(elev_m))
+
+# try again for missed elev
+llocs_missing_elev <- get_elev_point(subset(llocs_sf, SITECOD %in% needsmatch$SITECOD), prj = "EPSG:6269", src = "epqs")
+llocs_sf_missingelev <- st_join(subset(llocs_sf, SITECOD %in% needsmatch$SITECOD), llocs_missing_elev) 
+llocs_sf_allelev <- st_join(llocs_sf, llocs_elev) %>%
+  subset(!is.na(elevation)) %>%
+  rbind(llocs_sf_missingelev)
+
+llocs_df <- data.frame(llocs_sf_allelev) %>%
+  subset(select = c(SITECOD:UTM_N, elevation)) %>%
+mutate(dups = duplicated(SITECOD)) %>%  #NWT-121 is duplicated (has different coords, relocated?). remove 2nd instance for now
+  subset(!dups, select = -c(dups)) %>%
+  mutate_at(names(.)[names(.) != "SITECOD"], as.numeric) %>%
+  gather(met, val, 2:ncol(.)) %>%
+  spread(SITECOD, val)
+
+rownames(llocs_df) <- llocs_df$met
+llocs_df <- llocs_df[names(llocs_df) != "met"]
+
+# see what site associate based on x,y coords
+heatmap.2(cor(llocs_df, use = "pairwise.complete.obs"), revC = T)
+
+llocs_hclust <- hclust(as.dist(1-(cor(llocs_df))))
+llocs_dendro <- as.dendrogram(llocs_hclust)
+plot(llocs_hclust, cex = 0.75)
+plot(llocs_dendro, type = "rectangle", ylim = c(0,0.000000005))
+
+llocs_cut <- data.frame(cluster = cutree(llocs_hclust, h = 0.000000005))
+llocs_cut$SITECOD <- rownames(llocs_cut)
+llocs_sf_clusters <- left_join(llocs_sf_allelev[!names(llocs_sf_allelev) == "cluster"], llocs_cut)
+
+ggplot(llocs_sf_clusters) +
+  geom_sf(aes(color = factor(cluster)), alpha = 0.5)
+
+ggplot(llocs_sf_clusters) +
+  geom_sf(aes(color = elevation, shape = PI), alpha = 0.75) +
+  scale_color_viridis_c() +
+  facet_wrap(~cluster)
+
+ggplot(subset(llocs_sf_clusters, cluster %in% cluster[grepl("SAD|GL4|D1", SITECOD)])) +
+  geom_sf(aes(color = PI)) +
+  geom_sf_text(aes(label = SITECOD, col = PI)) +
+  facet_wrap(~cluster)
+
+ggplot(llocs_sf_clusters) +
+  geom_point(aes(UTM_E, UTM_N, color = factor(cluster))) +
+  ggrepel::geom_text_repel(aes(UTM_E, UTM_N,label = SITECOD, color = factor(cluster)), max.overlaps = 15)
+  
+ggplot(subset(llocs_sf_clusters, cluster %in% cluster[grepl("SAD|GL4|D1", SITECOD)])) +
+  geom_point(aes(UTM_E, UTM_N, color = factor(PI))) +
+  ggrepel::geom_text_repel(aes(UTM_E, UTM_N,label = SITECOD, color = factor(PI)), max.overlaps = 15) +
+  facet_wrap(~cluster)
+
+ggplot(subset(llocs_sf_clusters, cluster %in% cluster[grepl("SN_|D1", SITECOD)])) +
+  geom_point(aes(UTM_E, UTM_N, size = elevation, color = factor(PI)), alpha = 0.6) +
+  ggrepel::geom_text_repel(aes(UTM_E, UTM_N,label = SITECOD), max.overlaps = 15) +
+  facet_wrap(~cluster)
+
+# 
+```
+
+
+
+```{r read in subdaily temps}
+
+# need climate logger dat.. use the jennings data because it's infilled (only thru 2019) and semi-quality controlled
+
+jennings <- getTabular(168)
+
+sdl_hrly <- getTabular(57)
+
+```
+
+
+```{r get pika data}
+# Pika temp
+# pika hab occupancy
+pikahab <- getTabular(17) # these are plot conditions
+# there are multiple data tables with dataset, so generic read in function doesn't work. use URL to temp
+pika_haboccT <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.17.2&entityid=277e15977751ea77c595c5bb45fb275e")
+# pika habitat occupancy locations
+pika_habocc_sites <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.17.2&entityid=313b4ae5a8cf0ce9434e24a6ceccbb73")
+
+# pika demography
+pika_demoT <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.8.5&entityid=fc3de3c583f5d9207841734ead55b709")
+pika_demoT_lut <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.8.5&entityid=c1a7d0d58f5658cffccd829cf6bb6c18")
+
+```
+
+
+```{r read in unpublished pika data, include = F}
+# set path to pika data
+pikadat <- list.dirs("/Users/scarlet/Documents/nwt_lter/temp_synth/unpublished_data")
+# make name of subfolder name of element
+names(pikadat) <- gsub("^.*temp_synth[/]","",pikadat)
+# clean up names for nested folders
+names(pikadat) <- gsub("^.*[/]", "", names(pikadat))
+# read contents of each folder to list
+pikadat_list <- sapply(as.list(pikadat), function(x) list.files(x, full.names = T))
+
+
+# read in temp data and metadata
+# -- cable gate (pika demography dataset) ----
+cgpika_temp <- read.delim(pikadat_list$`Cable Gate talus temperatures`[grep(".txt$", pikadat_list$`Cable Gate talus temperatures`)], skip = 2,strip.white = T, blank.lines.skip = T, header = T)
+cgpika_meta <- read.csv(pikadat_list$`Cable Gate talus temperatures`[grep(".csv$", pikadat_list$`Cable Gate talus temperatures`)], strip.white = T, blank.lines.skip = T)
+
+summary(cgpika_temp) # need to convert date_time to posix, temps look okay in range
+
+
+# -- excel workbook temps -----
+# get tab names in excel workbook
+glvpika_temp_sheets <- readxl::excel_sheets(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)])
+# read metadata
+glvpika_meta <- read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], sheet = "metadata")
+# separate glv sites from west knoll sites
+glvpika_sites <- glvpika_temp_sheets[glvpika_temp_sheets %in% glvpika_meta$Datalogger[grepl("Green", glvpika_meta$Site)]]
+# read in glv logger data
+glvpika_list <- lapply(glvpika_sites, function(x) read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], sheet = x, col_names = F, col_types = "text")) 
+# ^ has boilerplate info with actual data variable lines below, and a section noting high values
+# dates and timestamps don't read in correctly, even specifying text values
+names(glvpika_list) <- glvpika_sites
+# iterate through each tab and note:
+# 1. alarm value section (will have "HIGH/LOW" in col 2)
+# 2. temp data section (will have "Log" in column 1)
+# or could note the format sections
+glvpika_temp_master <- data.frame()
+for(i in glvpika_sites){
+  tempdat <- glvpika_list[[i]]
+  tempdat <- data.frame(tempdat)
+  tempdat$rowid <- rownames(tempdat)
+  # get eat section
+  formatlines <- tempdat[grep("Format", tempdat[,1]),]
+  names(formatlines)[names(formatlines) != "rowid"] <- letters[1:(ncol(formatlines)-1)]
+  # alarm info will be between where alarm starts and histogram starts
+  alarmstart <-  as.numeric(with(formatlines, rowid[grepl("HIGH/LOW", b)]))
+  alarmend <- as.numeric(with(formatlines, rowid[grepl("Range", c)]))
+  
+  alarmdat <- read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], 
+                                    sheet = i, 
+                                    skip = alarmstart-1,
+                         n_max = (alarmend-alarmstart-3))
+  names(alarmdat)[sapply(alarmdat, function(x) all(grepl("[A-Z]+", x)|is.na(x)))] <- "temp_alarm"
+  names(alarmdat)[sapply(alarmdat[2,], function(x) is.POSIXct(x) & !grepl(":",x))] <- c("date")
+  names(alarmdat)[sapply(alarmdat[2,], function(x) is.POSIXct(x) & grepl(":",x))] <- c("time")
+  alarmdat <- alarmdat[c("date", "time", "temp_alarm")]
+  datastart <- as.numeric(with(formatlines, rowid[grepl("^Temp.+Cel", d)]))
+  logdat <-  read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], 
+                                    sheet = i, 
+                                    skip = datastart-1,trim_ws = T)
+  # first column should be NAs (remove any col that is all NAs)
+  logdat <- logdat[,sapply(logdat, function(x) !all(is.na(x)))]
+  # standardize temp name
+  names(logdat)[grepl("^Temp.+Cel", names(logdat))]<- "temp_c"
+  names(logdat)[sapply(logdat[2,], function(x) is.POSIXct(x) & !grepl(":",x))] <- c("date")
+  names(logdat)[sapply(logdat[2,], function(x) is.POSIXct(x) & grepl(":",x))] <- c("time")
+  # standardize loggerdat names as lowcase
+  names(logdat) <- casefold(names(logdat))
+  logdat <- logdat[c("date", "time", "temp_c")]
+  # join alarmdat to loggerdat
+  logdat <- left_join(logdat, alarmdat)
+  logdat <- cbind(Datalogger = i, logdat)
+  glvpika_temp_master <- rbind(glvpika_temp_master, logdat)
+}
+
+# read in and treat the west knoll pika temps
+# separate glv sites from west knoll sites
+wkpika_sites <- glvpika_temp_sheets[!glvpika_temp_sheets %in% glvpika_meta$Datalogger[grepl("Green", glvpika_meta$Site)]]
+wkpika_sites <- wkpika_sites[wkpika_sites!= "metadata"] # remove metadata 
+
+# read in wk logger data
+wkpika_list <- lapply(wkpika_sites, function(x) read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], sheet = x, col_names = F, col_types = "text")) 
+# ^ has boilerplate info with actual data variable lines below, and a section noting high values
+# dates and timestamps don't read in correctly, even specifying text values
+names(wkpika_list) <- wkpika_sites
+# iterate through each tab and note:
+# 1. alarm value section (will have "HIGH/LOW" in col 2)
+# 2. temp data section (will have "Log" in column 1)
+# or could note the format sections
+wkpika_temp_master <- data.frame()
+for(i in wkpika_sites){
+  tempdat <- wkpika_list[[i]]
+  tempdat <- data.frame(tempdat)
+  
+  # find col and row that has a cell value that == "Date"
+  datecol <- sapply(tempdat, function(x) any(grepl("^date$|^date ", x, ignore.case = T)))
+  daterow <- grep("^date$|^date ", tempdat[,datecol], ignore.case = T)
+  
+  # read in dat starting at data header
+  logdat <-  read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], 
+                                    sheet = i, 
+                                    skip = daterow-1,)
+   
+  # print for troubleshooting
+  #print(i)
+  #print(str(logdat))
+  
+  # pull temp units
+  temp_units <- names(logdat)[grepl("°|C)|F)|Cels|Far", names(logdat), ignore.case = T)]
+  # pull time info
+  time_gmt <- names(logdat)[grepl("GMT|hour|hrs", names(logdat), ignore.case = T)]
+  
+  # > standardize colnames
+  # logdat should start date:temp
+  datecol <- which(sapply(logdat[3,], function(x) is.POSIXct(x) & !grepl(":", x)))
+  names(logdat)[datecol] <- "date"
+  # tempcol
+  tempcol <- which(sapply(logdat, function(x) any(is.numeric(x) & grepl("[.]", x))))
+  names(logdat)[tempcol] <- "temp"
+  
+  # write check to see if a time col exists
+  timecol <- which(sapply(logdat[3,], function(x) grepl("[0-9]:[0-9]", x))) # it may not necessarily be read as a posix, sometimes reads as character 
+  if(length(timecol) ==0){
+    # if no timecol, create one
+    logdat$time <- ""
+  }else{
+    # rename
+    names(logdat)[timecol] <- "time" 
+  }
+  logdat <- logdat[c("date", "time", "temp")]
+  
+  logdat$date <- as.Date(logdat$date)
+  logdat$time_char <- as.character(logdat$time)
+  logdat$time_char <- gsub("[0-9]{4}-[0-9]{2}-[0-9]{2} ", "", logdat$time_char)
+  logdat$time <- as.POSIXct(logdat$time, format = "%H:%M:%S")
+  logdat$time_info <- ifelse(length(time_gmt) == 0, "none", time_gmt)
+  logdat$temp_unit <- ifelse(length(temp_units) == 0 , "none", temp_units)
+  
+  # row-bind
+  wkpika_temp_master <- rbind(wkpika_temp_master, cbind(Datalogger = i, logdat))
+}
+
+summary(wkpika_temp_master) # max temp is 193..
+summary(is.na(wkpika_temp_master))
+lapply(wkpika_temp_master[c("Datalogger", "time_char", "time_info", "temp_unit")], unique)
+# which data loggers have blank times
+unique(wkpika_temp_master$Datalogger[wkpika_temp_master$time_char == ""]) # compared against .xlsx and looks okay
+# all loggers have temp unit info..
+# which data loggers don't have time info (this doesn't matter quite as much because can count nobs per day and compare)
+unique(wkpika_temp_master$Datalogger[wkpika_temp_master$time_info == "none"])
+# review temps
+ggplot(wkpika_temp_master) +
+  geom_histogram(aes(x = temp, fill = grepl("C", temp_unit))) +
+  facet_wrap(~Datalogger, scales = "free") # P8_2013_edited has high F range, otherwise other scales look plausible
+
+ggplot(subset(wkpika_temp_master, temp < 100)) +
+  geom_boxplot(aes(x = month(date), y = temp, group = month(date), fill = grepl("C", temp_unit))) +
+  facet_wrap(~Datalogger, scales = "free") #pm_2013 and p8_2013 are still looking unusual when drop high outliers.. unless winter months have stable temps
+
+# check winter only
+ggplot(subset(wkpika_temp_master, temp < 100 & !month(date) %in% 6:9)) +
+  geom_boxplot(aes(x = month(date), y = temp, group = month(date), fill = grepl("C", temp_unit))) +
+  facet_wrap(~Datalogger, scales = "free")
+# split F from C
+ggplot(subset(wkpika_temp_master, temp < 100 & !month(date) %in% 6:9)) +
+  geom_boxplot(aes(x = Datalogger, y = temp, group = Datalogger, fill = grepl("C", temp_unit))) +
+  facet_grid(month(date)~grepl("C", temp_unit), scales = "free") +
+  theme(axis.text.x = element_text(angle = 90))
+# check summer
+ggplot(subset(wkpika_temp_master, temp < 100 & month(date) %in% 6:9)) +
+  geom_violin(aes(x = Datalogger, y = temp, group = Datalogger, fill = grepl("C", temp_unit))) +
+  facet_grid(month(date)~grepl("C", temp_unit), scales = "free") +
+  theme(axis.text.x = element_text(angle = 90))
+
+# check global highs and lows
+with(wkpika_temp_master, sapply(split(temp, Datalogger), function(x) tail(sort(x)))) # 137 and 193 in P8_2013 are the warmest
+with(wkpika_temp_master, sapply(split(temp, Datalogger), function(x) head(sort(x)))) # global lows okay
+# check glv
+with(glvpika_temp_master, sapply(split(temp_c, Datalogger), function(x) tail(sort(x))))
+with(glvpika_temp_master, sapply(split(temp_c, Datalogger), function(x) head(sort(x)))) # okay
+
+# convert pika temps to celsius, give same name as glv pika
+wkpika_temp_master <- wkpika_temp_master %>%
+  mutate(
+    # subtract F by 32, then divide by 1.8; round to 2 deci places to match precision
+    temp_c = ifelse(grepl("F", temp_unit), round((temp-32)/1.8, 2), temp),
+    # add index (assume data read in in order, but can double check)
+    index = 1:nrow(.)
+  )
+
+
+# -- read in more recent pika occupancy data -----
+# pika occupancy temps
+unpub_pikaocc_temp <- read.csv(pikadat_list$`temperature-pika-occ-survey-2021-in-situ`[grep(".txt$", pikadat_list$`temperature-pika-occ-survey-2021-in-situ`)], strip.white = T, blank.lines.skip = T, header = T)
+unpub_pikaobb_meta <- read.csv(pikadat_list$`temperature-pika-occ-survey-2021-in-situ`[grep(".csv$", pikadat_list$`temperature-pika-occ-survey-2021-in-situ`)], strip.white = T, blank.lines.skip = T, header = T)
+
+# pika survey
+unpub_pikasurvey_temp <- read.csv(pikadat_list$`NWT-pika-survey-temperature-metadata-2020-v2`[1])
+unpub_pikasurvey_meta <- read.csv(pikadat_list$`NWT-pika-survey-temperature-metadata-2020-v2`[[2]])
+  
+```
+
+
+```{r aquatic data, echo=FALSE}
+
+# basically just buoy data
+gl4_inout <- getTabular(259)
+```
+
+```{r sensor node}
+# package is knb-lter-nwt.210, each node has its own link
+sn01 <- getTabular(210)
+
+sn11 <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.210.6&entityid=169a6714085ee69b8ecae9d7bfd2399a")
+
+# check ranges and structure
+summary(sn11)
+glimpse(sn11)
+# see how correlated variables are just for one month
+
+test <- sn11 %>%
+  mutate(mon = month(date),
+       yr = year(date),
+       dy = day(date)) %>%
+  subset(yr == 2017, select = -c(grep("flag|site|sensorno|date|yr|dy$|mon$|batt|snow|dts", names(.)))) #%>%
+sn11cor <- cor.mtest(test)
+corrplot(cor(test, use = "pairwise.complete.obs"),
+         sig.level = 0.01,
+         p.mat = sn11cor$p)
+```
+
+
+```{r test pairing}
+
+# plot NWT-058 with D1
+nwt058 <- subset(pika_haboccT, grepl("58|73", plot)) %>%
+  mutate(yr = year(date_time),
+         mon = month(date_time),
+         dt = date(date_time))
+# plot sep 2017 (complete month)
+ggplot(subset(nwt058, mon == 9 & yr == 2017), aes(date_time, temperature, col = plot)) +
+  geom_line(data = subset(jennings, year == 2017 & local_site == "d1" & month(date) == 9), aes(`date-time`, airtemp_avg), col = "grey") +
+  geom_line()
+  
+```
+
+```{r sn 1 with nwt 056}
+
+unpub056 <- subset(unpub_pikaocc_temp, grepl("56|140", plot)) %>%
+  mutate(date_time = as.POSIXct(date_time, format = "%Y-%m-%d %H:%M"))
+nwt056 <- subset(pika_haboccT, grepl("56|140", plot)) %>%
+  rbind(unpub056) %>%
+  arrange(plot, date_time) %>%
+  mutate(yr = year(date_time),
+         mon = month(date_time),
+         dt = date(date_time),
+         plot = parse_number(plot),
+         plot = gsub("-", "", plot))
+
+
+sn01pair <- subset(sn01) %>%
+  # na anything sub -40
+  mutate(airtemp_avg = ifelse(airtemp_avg < -40, NA, airtemp_avg)) %>%
+  mutate(yr = year(date),
+         mon = month(date),
+         dt = date(date)) %>%
+  # subset to dates in nw056
+  subset(dt <= max(nwt056$dt, na.rm = T))
+
+ggplot(subset(nwt056, dt >= min(sn01pair$dt) & yr == 2019), aes(date_time, temperature, col = plot)) +
+  # plot with sdl since close
+  geom_line(data = mutate(subset(jennings, local_site == "sdl" & date %in% sn01pair$dt), dt = date), aes(`date-time`, airtemp_avg), col = "blue", alpha = 0.5) +
+  geom_line(data = subset(sn01pair, yr == 2019), aes(date, airtemp_avg), col = "purple", alpha = 0.5) +
+  geom_line(data = subset(sn01pair, yr == 2019), aes(date, soiltemp_5cm_avg), col = "grey60", alpha = 0.7) +
+  geom_line(data = subset(sn01pair, yr == 2019), aes(date, soiltemp_30cm_avg), col = "black", alpha = 0.7) +
+  geom_line() +
+  scale_x_datetime(date_breaks = "1 week", date_labels = "%m-%d") +
+  facet_wrap(~month(dt), scales = "free") +
+  theme(axis.text.x = element_text(angle = 90))
+
+ggplot(subset(nwt056, dt >= min(sn01pair$dt) & yr == 2020), aes(date_time, temperature, col = plot)) +
+  # with sensor node 1
+  geom_line(data = subset(sn01pair, yr == 2020), aes(date, airtemp_avg), col = "purple", alpha = 0.5) +
+  geom_line(data = subset(sn01pair, yr == 2020), aes(date, soiltemp_5cm_avg), col = "grey60", alpha = 0.7) +
+  geom_line(data = subset(sn01pair, yr == 2020), aes(date, soiltemp_30cm_avg), col = "black", alpha = 0.7) +
+  geom_line() +
+  scale_x_datetime(date_breaks = "1 week", date_labels = "%m-%d") +
+  facet_wrap(~month(dt), scales = "free") +
+  theme(axis.text.x = element_text(angle = 90))
+
+# zoom in on jul and aug
+ggplot(subset(nwt056, mon %in% c(7,8) & yr == 2020), aes(date_time, temperature)) +
+  # with sensor node 1
+  geom_line(data = subset(sn01pair, mon %in% c(7,8) & yr == 2020), aes(date, airtemp_avg), col = "purple", linewidth = 1, alpha = 0.5) +
+  geom_line(data = subset(sn01pair, mon %in% c(7,8) & yr == 2020), aes(date, soiltemp_5cm_avg), col = "grey40", alpha = 0.7) +
+  geom_line(data = subset(sn01pair, mon %in% c(7,8) & yr == 2020), aes(date, soiltemp_30cm_avg), col = "blue", alpha = 0.7) +
+  geom_line() +
+  #scale_x_datetime(date_breaks = "1 week", date_labels = "%m-%d") +
+  theme_test() +
+  facet_wrap(~plot + month(dt), nrow = 2, scales = "free") +
+  theme(axis.text.x = element_text(angle = 90))
+
+# just july
+ggplot(subset(nwt056, mon ==7 & yr == 2020), aes(date_time, temperature)) +
+  # with sensor node 1
+  geom_line(data = subset(sn01pair, mon ==7  & yr == 2020), aes(date, airtemp_avg), col = "purple", linewidth = 1, alpha = 0.5) +
+  geom_line(data = subset(sn01pair, mon ==7  & yr == 2020), aes(date, soiltemp_5cm_avg), col = "red", alpha = 0.7) +
+  geom_line(data = subset(sn01pair, mon ==7  & yr == 2020), aes(date, soiltemp_30cm_avg), col = "blue", alpha = 0.7) +
+  geom_line() +
+  #scale_x_datetime(date_breaks = "1 week", date_labels = "%m-%d") +
+  theme_test() +
+  facet_wrap(~plot + month(dt), nrow = 2, scales = "free") +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
