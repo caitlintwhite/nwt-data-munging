@@ -267,6 +267,10 @@ allsites_out <- subset(allsites_out, !grepl("Jen M|Hannah|Kurt", PI) & SITECOD !
 
 # -- WRITE OUT -----
 datpath <- "/Users/scarlet/Documents/nwt_lter/temp_synth/output/dat/"
-saveRDS(allsites_out, paste0(datpath, "tempsynth_allsites_sf"))
-
+saveRDS(allsites_out, paste0(datpath, "tempsynth_allsites_sf.rdata"))
+# also write out csv so someone doesn't need to load sf if don't want to
+allsites_df <- data.frame(allsites_out) %>% subset(select = -geometry)
+# check it is data frame only
+str(allsites_df) # yes
+write.csv(allsites_df, paste0(datpath, "tempsynth_allsites_df.csv"), row.names = F)
 
