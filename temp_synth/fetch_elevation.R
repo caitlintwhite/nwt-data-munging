@@ -1,4 +1,6 @@
 # script to grab elevation data for all nwt lter dataset points of interest
+# author: caitlin.t.white@colorado.edu
+# project: NWT LTER temperature synthesis (project PI = Chris Ray)
 
 # script purpose: 
 # not all plots have elevation, helpful for grouping sites for comparison in cluster analysis
