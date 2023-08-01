@@ -482,7 +482,7 @@ write_csv()
 
 # demography data: glv and west knoll
 saveRDS(glvpika_temp_clean, paste0(datpath, "glvpika_demog.rdata"))
-saveRDS(glvpika_temp_clean, paste0(datpath, "wkpika_demog.rdata"))
+saveRDS(wkpika_temp_clean, paste0(datpath, "wkpika_demog.rdata"))
 
 # prepped occupancy data
 saveRDS(pikaocc_all_out, paste0(datpath, "pika_habocc_all.rdata"))
