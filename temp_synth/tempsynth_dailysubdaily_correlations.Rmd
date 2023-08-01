@@ -14,359 +14,368 @@ library(readxl)
 library(corrplot)
 library(gplots)
 library(sf)
-library(terra)
-library(elevatr)
-#library(sf) # for NWT plots
-#library(neonUtilities) # to fetch neon data
+
 # ctw functions to fetch climate datasets from EDI
 source("~/github/nwt-data-munging/nwt_climate/R/fetch_data_functions.R")
+
 # ctw personal prefs for environemnt and display
 options(stringsAsFactors = F)
 theme_set(theme_bw())
 
+# specify datpath to temp synth folder on local drive
+# > has unpublished pika data and simple features of all sites for temp synth with coords and elevation
+datpath <- "/Users/scarlet/Documents/nwt_lter/temp_synth/"
+# list of preppred data
+datfiles <- list.files(paste0(datpath, "output/dat"), full.names = T)
 ```
 
-```{r get ppt dats}
+```{r get ppt dats, eval = F}
 
 # to check if snowfall reason for temp diffs in winterish months
-d1ppt <- getTabular()
+#d1ppt <- getTabular()
 ```
 
-
-```{r nwtplots}
-nwtplots <- sf::read_sf("/Users/scarlet/Documents/nwt_lter/temp_synth/lter_plots_2022_12_08/lter_plots.shp")
-# utms present but epsg is 6269 (lat lon)
-crs(nwtplots)
-
-
-
-# subset datasets of interest for sub-daily comparison to pull their locations
-llocs_sf <- subset(nwtplots, 
-                # stevenson screen locations for c1, sdl, d1
-                grepl("SAD-SSC|D1-SSC|C1-SSC", SITECOD) |
-                  # sensor nodes
-                  grepl("SN_", SITECOD) |
-                  # pika plots
-                  (PI == "Chris Ray" & !grepl("ARU", SITECOD))|
-                  # closest locations to gl4 inlet, outlet and lake
-                  grepl("GL4 UPHILL NA|^GL4_A$|GL4 GAUG", SITECOD)
-                  )
-
-
-
-
-# pull lat long for data frame
-llocs_latlong <- st_coordinates(llocs_sf)
-
-# pull elevation data from USGS
-llocs_elev <- get_elev_point(llocs_sf, prj = "EPSG:6269", src = "epqs")
-
-
-llocs_df <- data.frame(llocs_sf) %>%
-  subset(select = c(SITECOD:GPS_ELE)) %>%
-  cbind(llocs_latlong) %>%
-  cbind(elev_m = llocs_elev$elevation) %>%
-  mutate(dups = duplicated(SITECOD)) %>%  #NWT-121 is duplicated (has different coords, relocated?). remove 2nd instance for now
-  subset(!dups, select = -c(dups)) %>%
-  mutate_at(names(.)[names(.) != "SITECOD"], as.numeric)
-
-needsmatch <- subset(llocs_df, is.na(elev_m))
-
-# try again for missed elev
-llocs_missing_elev <- get_elev_point(subset(llocs_sf, SITECOD %in% needsmatch$SITECOD), prj = "EPSG:6269", src = "epqs")
-llocs_sf_missingelev <- st_join(subset(llocs_sf, SITECOD %in% needsmatch$SITECOD), llocs_missing_elev) 
-llocs_sf_allelev <- st_join(llocs_sf, llocs_elev) %>%
-  subset(!is.na(elevation)) %>%
-  rbind(llocs_sf_missingelev)
-
-llocs_df <- data.frame(llocs_sf_allelev) %>%
-  subset(select = c(SITECOD:UTM_N, elevation)) %>%
-mutate(dups = duplicated(SITECOD)) %>%  #NWT-121 is duplicated (has different coords, relocated?). remove 2nd instance for now
-  subset(!dups, select = -c(dups)) %>%
-  mutate_at(names(.)[names(.) != "SITECOD"], as.numeric) %>%
-  gather(met, val, 2:ncol(.)) %>%
-  spread(SITECOD, val)
-
-rownames(llocs_df) <- llocs_df$met
-llocs_df <- llocs_df[names(llocs_df) != "met"]
-
-# see what site associate based on x,y coords
-heatmap.2(cor(llocs_df, use = "pairwise.complete.obs"), revC = T)
-
-llocs_hclust <- hclust(as.dist(1-(cor(llocs_df))))
-llocs_dendro <- as.dendrogram(llocs_hclust)
-plot(llocs_hclust, cex = 0.75)
-plot(llocs_dendro, type = "rectangle", ylim = c(0,0.000000005))
-
-llocs_cut <- data.frame(cluster = cutree(llocs_hclust, h = 0.000000005))
-llocs_cut$SITECOD <- rownames(llocs_cut)
-llocs_sf_clusters <- left_join(llocs_sf_allelev[!names(llocs_sf_allelev) == "cluster"], llocs_cut)
-
-ggplot(llocs_sf_clusters) +
-  geom_sf(aes(color = factor(cluster)), alpha = 0.5)
-
-ggplot(llocs_sf_clusters) +
-  geom_sf(aes(color = elevation, shape = PI), alpha = 0.75) +
-  scale_color_viridis_c() +
-  facet_wrap(~cluster)
-
-ggplot(subset(llocs_sf_clusters, cluster %in% cluster[grepl("SAD|GL4|D1", SITECOD)])) +
-  geom_sf(aes(color = PI)) +
-  geom_sf_text(aes(label = SITECOD, col = PI)) +
-  facet_wrap(~cluster)
-
-ggplot(llocs_sf_clusters) +
-  geom_point(aes(UTM_E, UTM_N, color = factor(cluster))) +
-  ggrepel::geom_text_repel(aes(UTM_E, UTM_N,label = SITECOD, color = factor(cluster)), max.overlaps = 15)
-  
-ggplot(subset(llocs_sf_clusters, cluster %in% cluster[grepl("SAD|GL4|D1", SITECOD)])) +
-  geom_point(aes(UTM_E, UTM_N, color = factor(PI))) +
-  ggrepel::geom_text_repel(aes(UTM_E, UTM_N,label = SITECOD, color = factor(PI)), max.overlaps = 15) +
-  facet_wrap(~cluster)
-
-ggplot(subset(llocs_sf_clusters, cluster %in% cluster[grepl("SN_|D1", SITECOD)])) +
-  geom_point(aes(UTM_E, UTM_N, size = elevation, color = factor(PI)), alpha = 0.6) +
-  ggrepel::geom_text_repel(aes(UTM_E, UTM_N,label = SITECOD), max.overlaps = 15) +
-  facet_wrap(~cluster)
-
-# 
-```
 
 
 
 ```{r read in subdaily temps}
 
-# need climate logger dat.. use the jennings data because it's infilled (only thru 2019) and semi-quality controlled
-
+# need climate logger dat.. use the jennings data because it's infilled (only thru 2019) and semi-quality controlled (not QAQC after 2013, but done 1990-2013)
 jennings <- getTabular(168)
-
 sdl_hrly <- getTabular(57)
 
 ```
 
 
 ```{r get pika data}
-# Pika temp
-# pika hab occupancy
-pikahab <- getTabular(17) # these are plot conditions
-# there are multiple data tables with dataset, so generic read in function doesn't work. use URL to temp
-pika_haboccT <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.17.2&entityid=277e15977751ea77c595c5bb45fb275e")
-# pika habitat occupancy locations
-pika_habocc_sites <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.17.2&entityid=313b4ae5a8cf0ce9434e24a6ceccbb73")
 
-# pika demography
-pika_demoT <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.8.5&entityid=fc3de3c583f5d9207841734ead55b709")
-pika_demoT_lut <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.8.5&entityid=c1a7d0d58f5658cffccd829cf6bb6c18")
+pika_demo_edicg <- readRDS(datfiles[grepl("edi", datfiles)])
+pika_demo_glv <- readRDS(datfiles[grepl("glv", datfiles)])
+pika_demo_wk <- readRDS(datfiles[grepl("wkpika", datfiles)])
+pika_habocc <- readRDS(datfiles[grepl("habocc", datfiles)])
 
 ```
 
 
-```{r read in unpublished pika data, include = F}
-# set path to pika data
-pikadat <- list.dirs("/Users/scarlet/Documents/nwt_lter/temp_synth/unpublished_data")
-# make name of subfolder name of element
-names(pikadat) <- gsub("^.*temp_synth[/]","",pikadat)
-# clean up names for nested folders
-names(pikadat) <- gsub("^.*[/]", "", names(pikadat))
-# read contents of each folder to list
-pikadat_list <- sapply(as.list(pikadat), function(x) list.files(x, full.names = T))
+```{r newest demography sites}
+newdemoT <- read_excel(paste0(datpath, "unpublished_data/TalusTemperatureMetadataNWT2023-4Caitlin.xlsx"),trim_ws = T, skip = 3)
 
-
-# read in temp data and metadata
-# -- cable gate (pika demography dataset) ----
-cgpika_temp <- read.delim(pikadat_list$`Cable Gate talus temperatures`[grep(".txt$", pikadat_list$`Cable Gate talus temperatures`)], skip = 2,strip.white = T, blank.lines.skip = T, header = T)
-cgpika_meta <- read.csv(pikadat_list$`Cable Gate talus temperatures`[grep(".csv$", pikadat_list$`Cable Gate talus temperatures`)], strip.white = T, blank.lines.skip = T)
-
-summary(cgpika_temp) # need to convert date_time to posix, temps look okay in range
-
-
-# -- excel workbook temps -----
-# get tab names in excel workbook
-glvpika_temp_sheets <- readxl::excel_sheets(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)])
-# read metadata
-glvpika_meta <- read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], sheet = "metadata")
-# separate glv sites from west knoll sites
-glvpika_sites <- glvpika_temp_sheets[glvpika_temp_sheets %in% glvpika_meta$Datalogger[grepl("Green", glvpika_meta$Site)]]
-# read in glv logger data
-glvpika_list <- lapply(glvpika_sites, function(x) read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], sheet = x, col_names = F, col_types = "text")) 
-# ^ has boilerplate info with actual data variable lines below, and a section noting high values
-# dates and timestamps don't read in correctly, even specifying text values
-names(glvpika_list) <- glvpika_sites
-# iterate through each tab and note:
-# 1. alarm value section (will have "HIGH/LOW" in col 2)
-# 2. temp data section (will have "Log" in column 1)
-# or could note the format sections
-glvpika_temp_master <- data.frame()
-for(i in glvpika_sites){
-  tempdat <- glvpika_list[[i]]
-  tempdat <- data.frame(tempdat)
-  tempdat$rowid <- rownames(tempdat)
-  # get eat section
-  formatlines <- tempdat[grep("Format", tempdat[,1]),]
-  names(formatlines)[names(formatlines) != "rowid"] <- letters[1:(ncol(formatlines)-1)]
-  # alarm info will be between where alarm starts and histogram starts
-  alarmstart <-  as.numeric(with(formatlines, rowid[grepl("HIGH/LOW", b)]))
-  alarmend <- as.numeric(with(formatlines, rowid[grepl("Range", c)]))
-  
-  alarmdat <- read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], 
-                                    sheet = i, 
-                                    skip = alarmstart-1,
-                         n_max = (alarmend-alarmstart-3))
-  names(alarmdat)[sapply(alarmdat, function(x) all(grepl("[A-Z]+", x)|is.na(x)))] <- "temp_alarm"
-  names(alarmdat)[sapply(alarmdat[2,], function(x) is.POSIXct(x) & !grepl(":",x))] <- c("date")
-  names(alarmdat)[sapply(alarmdat[2,], function(x) is.POSIXct(x) & grepl(":",x))] <- c("time")
-  alarmdat <- alarmdat[c("date", "time", "temp_alarm")]
-  datastart <- as.numeric(with(formatlines, rowid[grepl("^Temp.+Cel", d)]))
-  logdat <-  read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], 
-                                    sheet = i, 
-                                    skip = datastart-1,trim_ws = T)
-  # first column should be NAs (remove any col that is all NAs)
-  logdat <- logdat[,sapply(logdat, function(x) !all(is.na(x)))]
-  # standardize temp name
-  names(logdat)[grepl("^Temp.+Cel", names(logdat))]<- "temp_c"
-  names(logdat)[sapply(logdat[2,], function(x) is.POSIXct(x) & !grepl(":",x))] <- c("date")
-  names(logdat)[sapply(logdat[2,], function(x) is.POSIXct(x) & grepl(":",x))] <- c("time")
-  # standardize loggerdat names as lowcase
-  names(logdat) <- casefold(names(logdat))
-  logdat <- logdat[c("date", "time", "temp_c")]
-  # join alarmdat to loggerdat
-  logdat <- left_join(logdat, alarmdat)
-  logdat <- cbind(Datalogger = i, logdat)
-  glvpika_temp_master <- rbind(glvpika_temp_master, logdat)
-}
-
-# read in and treat the west knoll pika temps
-# separate glv sites from west knoll sites
-wkpika_sites <- glvpika_temp_sheets[!glvpika_temp_sheets %in% glvpika_meta$Datalogger[grepl("Green", glvpika_meta$Site)]]
-wkpika_sites <- wkpika_sites[wkpika_sites!= "metadata"] # remove metadata 
-
-# read in wk logger data
-wkpika_list <- lapply(wkpika_sites, function(x) read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], sheet = x, col_names = F, col_types = "text")) 
-# ^ has boilerplate info with actual data variable lines below, and a section noting high values
-# dates and timestamps don't read in correctly, even specifying text values
-names(wkpika_list) <- wkpika_sites
-# iterate through each tab and note:
-# 1. alarm value section (will have "HIGH/LOW" in col 2)
-# 2. temp data section (will have "Log" in column 1)
-# or could note the format sections
-wkpika_temp_master <- data.frame()
-for(i in wkpika_sites){
-  tempdat <- wkpika_list[[i]]
-  tempdat <- data.frame(tempdat)
-  
-  # find col and row that has a cell value that == "Date"
-  datecol <- sapply(tempdat, function(x) any(grepl("^date$|^date ", x, ignore.case = T)))
-  daterow <- grep("^date$|^date ", tempdat[,datecol], ignore.case = T)
-  
-  # read in dat starting at data header
-  logdat <-  read_excel(pikadat_list$unpublished_data[grep("GLV", pikadat_list$unpublished_data)], 
-                                    sheet = i, 
-                                    skip = daterow-1,)
-   
-  # print for troubleshooting
-  #print(i)
-  #print(str(logdat))
-  
-  # pull temp units
-  temp_units <- names(logdat)[grepl("°|C)|F)|Cels|Far", names(logdat), ignore.case = T)]
-  # pull time info
-  time_gmt <- names(logdat)[grepl("GMT|hour|hrs", names(logdat), ignore.case = T)]
-  
-  # > standardize colnames
-  # logdat should start date:temp
-  datecol <- which(sapply(logdat[3,], function(x) is.POSIXct(x) & !grepl(":", x)))
-  names(logdat)[datecol] <- "date"
-  # tempcol
-  tempcol <- which(sapply(logdat, function(x) any(is.numeric(x) & grepl("[.]", x))))
-  names(logdat)[tempcol] <- "temp"
-  
-  # write check to see if a time col exists
-  timecol <- which(sapply(logdat[3,], function(x) grepl("[0-9]:[0-9]", x))) # it may not necessarily be read as a posix, sometimes reads as character 
-  if(length(timecol) ==0){
-    # if no timecol, create one
-    logdat$time <- ""
-  }else{
-    # rename
-    names(logdat)[timecol] <- "time" 
-  }
-  logdat <- logdat[c("date", "time", "temp")]
-  
-  logdat$date <- as.Date(logdat$date)
-  logdat$time_char <- as.character(logdat$time)
-  logdat$time_char <- gsub("[0-9]{4}-[0-9]{2}-[0-9]{2} ", "", logdat$time_char)
-  logdat$time <- as.POSIXct(logdat$time, format = "%H:%M:%S")
-  logdat$time_info <- ifelse(length(time_gmt) == 0, "none", time_gmt)
-  logdat$temp_unit <- ifelse(length(temp_units) == 0 , "none", temp_units)
-  
-  # row-bind
-  wkpika_temp_master <- rbind(wkpika_temp_master, cbind(Datalogger = i, logdat))
-}
-
-summary(wkpika_temp_master) # max temp is 193..
-summary(is.na(wkpika_temp_master))
-lapply(wkpika_temp_master[c("Datalogger", "time_char", "time_info", "temp_unit")], unique)
-# which data loggers have blank times
-unique(wkpika_temp_master$Datalogger[wkpika_temp_master$time_char == ""]) # compared against .xlsx and looks okay
-# all loggers have temp unit info..
-# which data loggers don't have time info (this doesn't matter quite as much because can count nobs per day and compare)
-unique(wkpika_temp_master$Datalogger[wkpika_temp_master$time_info == "none"])
-# review temps
-ggplot(wkpika_temp_master) +
-  geom_histogram(aes(x = temp, fill = grepl("C", temp_unit))) +
-  facet_wrap(~Datalogger, scales = "free") # P8_2013_edited has high F range, otherwise other scales look plausible
-
-ggplot(subset(wkpika_temp_master, temp < 100)) +
-  geom_boxplot(aes(x = month(date), y = temp, group = month(date), fill = grepl("C", temp_unit))) +
-  facet_wrap(~Datalogger, scales = "free") #pm_2013 and p8_2013 are still looking unusual when drop high outliers.. unless winter months have stable temps
-
-# check winter only
-ggplot(subset(wkpika_temp_master, temp < 100 & !month(date) %in% 6:9)) +
-  geom_boxplot(aes(x = month(date), y = temp, group = month(date), fill = grepl("C", temp_unit))) +
-  facet_wrap(~Datalogger, scales = "free")
-# split F from C
-ggplot(subset(wkpika_temp_master, temp < 100 & !month(date) %in% 6:9)) +
-  geom_boxplot(aes(x = Datalogger, y = temp, group = Datalogger, fill = grepl("C", temp_unit))) +
-  facet_grid(month(date)~grepl("C", temp_unit), scales = "free") +
-  theme(axis.text.x = element_text(angle = 90))
-# check summer
-ggplot(subset(wkpika_temp_master, temp < 100 & month(date) %in% 6:9)) +
-  geom_violin(aes(x = Datalogger, y = temp, group = Datalogger, fill = grepl("C", temp_unit))) +
-  facet_grid(month(date)~grepl("C", temp_unit), scales = "free") +
-  theme(axis.text.x = element_text(angle = 90))
-
-# check global highs and lows
-with(wkpika_temp_master, sapply(split(temp, Datalogger), function(x) tail(sort(x)))) # 137 and 193 in P8_2013 are the warmest
-with(wkpika_temp_master, sapply(split(temp, Datalogger), function(x) head(sort(x)))) # global lows okay
-# check glv
-with(glvpika_temp_master, sapply(split(temp_c, Datalogger), function(x) tail(sort(x))))
-with(glvpika_temp_master, sapply(split(temp_c, Datalogger), function(x) head(sort(x)))) # okay
-
-# convert pika temps to celsius, give same name as glv pika
-wkpika_temp_master <- wkpika_temp_master %>%
-  mutate(
-    # subtract F by 32, then divide by 1.8; round to 2 deci places to match precision
-    temp_c = ifelse(grepl("F", temp_unit), round((temp-32)/1.8, 2), temp),
-    # add index (assume data read in in order, but can double check)
-    index = 1:nrow(.)
-  )
-
-
-# -- read in more recent pika occupancy data -----
-# pika occupancy temps
-unpub_pikaocc_temp <- read.csv(pikadat_list$`temperature-pika-occ-survey-2021-in-situ`[grep(".txt$", pikadat_list$`temperature-pika-occ-survey-2021-in-situ`)], strip.white = T, blank.lines.skip = T, header = T)
-unpub_pikaobb_meta <- read.csv(pikadat_list$`temperature-pika-occ-survey-2021-in-situ`[grep(".csv$", pikadat_list$`temperature-pika-occ-survey-2021-in-situ`)], strip.white = T, blank.lines.skip = T, header = T)
-
-# pika survey
-unpub_pikasurvey_temp <- read.csv(pikadat_list$`NWT-pika-survey-temperature-metadata-2020-v2`[1])
-unpub_pikasurvey_meta <- read.csv(pikadat_list$`NWT-pika-survey-temperature-metadata-2020-v2`[[2]])
-  
+newdemoT_sites <- subset(newdemoT, select = c(DeploymentID, UTM_E, UTM_N, DateInSitu,DateEnd)) %>%
+  data.frame()
 ```
+
+
+```{r}
+blacksand <- getTabular(238)
+bs_llocs <- read_csv("https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-nwt.238.4&entityid=024605e81d0308609981d83268388934")
+
+# subset to just control plots
+bs_control <- subset(blacksand, grepl("con", local_site))
+```
+
 
 
 ```{r aquatic data, echo=FALSE}
 
-# basically just buoy data
+# I think just GL4 buoy and hobo loggers at inlet and outlet have continuous temp data
 gl4_inout <- getTabular(259)
+gl4b <- getTabular(188) # 2018-present
+
+```
+
+```{r create temporal coverage lut, include = F}
+# track start-end dates for each sensor or dataset to use in clustering
+# > i.e., 
+
+# climate data
+jennings_dates <- mutate(jennings, met = "airtemp_avg") %>%
+  group_by(local_site, met) %>%
+  summarise(start = min(date[!is.na(airtemp_avg)]),
+            stop = max(date[!is.na(airtemp_avg)])) %>%
+  ungroup()
+sdl_hrly_dates <- sdl_hrly %>%
+  subset(select = !grepl("flag", names(.))) %>%
+  subset(select = grepl("local|airtemp.*_avg|soiltemp.*avg|date_time", names(.))) %>%
+  gather(met, val, grep("temp", names(.))) %>%
+  group_by(local_site, met) %>%
+  summarise(start = as.Date(min(date_time_start[!is.na(val)])),
+            stop = as.Date(max(date_time_start[!is.na(val)]))) %>%
+  ungroup()
+
+# gl4 aq data
+gl4_inout_dates <- group_by(gl4_inout, local_site) %>%
+  subset(!is.na(local_site)) %>%
+  summarise(start = as.Date(min(timestamp[!is.na(temperature)])),
+            stop = as.Date(max(timestamp[!is.na(temperature)]))) %>%
+  ungroup() %>%
+  mutate(met = paste(local_site, "temp"))
+
+gl4b_dates <- group_by(gl4b, depth) %>%
+  summarise(start = as.Date(min(timestamp[!is.na(temperature)])),
+            stop = as.Date(max(timestamp[!is.na(temperature)]))) %>%
+  ungroup() %>%
+  mutate(local_site = "GL4 buoy",
+         met = paste("temp", depth))
+
+# pika sensors/placements
+pika_demo_edicg_dates <- group_by(pika_demo_edicg, site, deployment_id, depth) %>%
+  summarise(start = as.Date(min(date_time[!is.na(temperature)])),
+            stop = as.Date(max(date_time[!is.na(temperature)]))) %>%
+  ungroup()
+
+pika_demo_glv_dates <- group_by(pika_demo_glv, site, datalogger) %>%
+  summarise(start = as.Date(min(clean_date_time[!is.na(temp_c)])),
+            stop = as.Date(max(clean_date_time[!is.na(temp_c)]))) %>%
+  ungroup()
+
+# not all wk sites have timestamps (hour of day)
+pika_demo_wk_dates <- group_by(pika_demo_wk, site, datalogger) %>%
+  summarise(start = as.Date(min(date[!is.na(temp_c)])),
+            stop = as.Date(max(date[!is.na(temp_c)]))) %>%
+  ungroup()
+
+# pika occupancy
+pika_habocc_dates <- group_by(pika_habocc, lut_plot) %>%
+  summarise(start = as.Date(min(date_time[!is.na(temperature)])),
+            stop = as.Date(max(date_time[!is.na(temperature)]))) %>%
+  ungroup() %>%
+  rename(site = lut_plot)
+
+# stack pika dates
+pika_alldates <- subset(pika_demo_edicg_dates, select = -depth) %>%
+  rename(datalogger = deployment_id) %>%
+  rbind(pika_demo_glv_dates) %>%
+  rbind(pika_demo_wk_dates) %>%
+  rbind(mutate(pika_habocc_dates, datalogger = site)[names(.)]) %>%
+  rename(SITECOD = datalogger)
+
+# black sand
+bs_control_dates <- bs_control %>%
+  subset(select = !grepl("flag", names(.))) %>%
+  subset(select = grepl("local|date|soiltemp", names(.))) %>%
+  gather(met, temp_c, grep("temp", names(.))) %>%
+  group_by(local_site, met) %>%
+  summarise(start = as.Date(min(date[!is.na(temp_c)])),
+            stop = as.Date(max(date[!is.na(temp_c)]))) %>%
+  ungroup()
+
+# stack all times
+timestable <- rbind(jennings_dates, sdl_hrly_dates) %>%
+  rbind(
+    rbind(gl4_inout_dates[names(.)], gl4b_dates[names(.)], bs_control_dates[names(.)])
+    )
+    
+```
+
+
+```{r fetch site info}
+# sf prepped by ctw with all sites from nwt lter shapefile (on NWT website) and other sites (unpublished data or not included in nwt lter)
+tempsynth_sites <- readRDS(paste0(datpath, "output/dat/tempsynth_allsites_sf.rdata"))
+# keep only sites of interest for sub-daily comparison
+tempsynth_sites <- subset(tempsynth_sites, !grepl("ARU|PTQ", SITECOD) & !grepl("Kelly|Nel", PI)) %>%
+  # drop experimental sand plot
+  subset(!grepl("_Sand_", SITECOD)) %>%
+  # remove GL4 met sites
+  subset(!(grepl("Mark", PI) & site == "GL4")) %>%
+  mutate(site = gsub("WestKnoll", "West Knoll", site),
+         site = gsub("GreenLakesValley", "Green Lakes Valley", site))
+
+# join start-stop to each
+pika_tempsynth <- left_join(pika_alldates, data.frame(tempsynth_sites))
+# assign cable gate
+pika_tempsynth_missing <- subset(pika_tempsynth, is.na(easting), select = c(site:stop)) %>%
+  mutate(site2 = site,
+         site2 = recode(site2, WK = "West Knoll", LL = "Long Lake", ML = "Mitchell Lake")) %>%
+  left_join(subset(tempsynth_sites, select = -site), by = c("site2" = "SITECOD")) %>%
+  subset(!site == "TBD", select = names(pika_tempsynth))
+pika_tempsynth <- subset(pika_tempsynth, !is.na(easting)) %>%
+  rbind(pika_tempsynth_missing)
+
+# environmental sites not black sand
+env_tempsynth <- subset(timestable, !grepl("_con", local_site)) %>%
+  mutate(site = ifelse(grepl("d1|c1", local_site), casefold(local_site, upper = T),
+                                      ifelse(grepl("gl4", local_site, ignore.case = T), "GL4",
+                                             ifelse(local_site == "sdl", "SAD", NA)))) %>%
+  mutate(SITECOD = ifelse(grepl("d1|c1|sdl", local_site, ignore.case = T), paste0(site, "-SSCREEN"),
+                          ifelse(grepl("inle", local_site), "GL4 hobo inlet",
+                                 ifelse(grepl("outl", local_site), "GL4 hobo outlet", "GL4 buoy"
+                          )))) %>%
+  left_join(data.frame(tempsynth_sites)) %>%
+  mutate(SITECOD = ifelse(SITECOD == "GL4 buoy", paste(SITECOD, met), SITECOD)) %>%
+  # drop hmp2 and 3 bc 1 reps both, and drop sdl avg airtemp with more recent start date since keith's covers that period
+  subset(!(site == "SAD" & grepl("hmp[2-3]", met)) &!(site == "SAD" & year(start) == 2009)) %>%
+  mutate(SITECOD = ifelse(grepl("hmp", met), paste(SITECOD, "hmp_airtemp"), SITECOD))
+
+
+bs_tempsynth <- subset(timestable, grepl("_con", local_site))
+bs_tempsynth$site <- "Audubon"
+bs_tempsynth$site[grepl("l_", bs_tempsynth$local_site)] <- "Lefty"
+bs_tempsynth$site[grepl("ek_", bs_tempsynth$local_site)] <- "EastKnoll"
+bs_tempsynth$site[grepl("s_", bs_tempsynth$local_site)] <- "Soddie"
+bs_tempsynth$site[grepl("t_", bs_tempsynth$local_site)] <- "Trough"
+bs_tempsynth$sensor <- str_extract(bs_tempsynth$met, "(?<=soiltemp)[:digit:]")
+bs_tempsynth$sensor <- with(bs_tempsynth, paste0(site, "-con-sen", sensor))
+
+# create utms for sensors in black sand exp
+bs_llocs_utms <- sf::st_as_sf(bs_llocs, coords = c("longitude", "latitude"))
+st_crs(bs_llocs_utms) <- st_crs(tempsynth_sites)
+bs_llocs_utms <- st_transform(bs_llocs_utms, crs = "EPSG:26913")
+bs_llocs <- cbind(subset(bs_llocs, select = c(sensor:elevation)), st_coordinates(bs_llocs_utms))
+names(bs_llocs)[names(bs_llocs) %in% c("X", "Y")] <- c("easting", "northing")
+
+# join utms to bs_tempsynth
+bs_tempsynth <- left_join(bs_tempsynth, bs_llocs)
+bs_tempsynth <- rename(bs_tempsynth, lat = latitude, lon = longitude, elev_m = elevation, SITECOD = sensor)
+
+# stack all and try clustering by lat, elevation, and start-stop
+stack_timestable <- subset(bs_tempsynth, select = c(names(tempsynth_sites)[!grepl("proj|site|geom|PI|insitu", names(tempsynth_sites))], "start", "stop")) %>%
+  rbind(env_tempsynth[names(.)]) %>%
+  rbind(pika_tempsynth[names(.)]) %>%
+  mutate(dups = duplicated(SITECOD)) %>%  #NWT-121 is duplicated (has different coords, relocated?). remove 2nd instance for now
+  subset(!dups, select = -c(dups)) %>%
+  # add next line after try with all dates
+  subset(year(stop) >= 2018) %>%
+  # add sensor nodes
+  rbind(data.frame(mutate(tempsynth_sites[grepl("SN_",tempsynth_sites$SITECOD),],
+                          start = as.Date("2018-08-01"),
+                          stop = as.Date("2022-08-01")
+                          ))[names(.)]
+        )
+
+# make wide format for correlations
+stack_timestable_wide <- data.frame(stack_timestable) %>%   
+  gather(met, val, 2:ncol(.)) %>%
+  spread(SITECOD, val)
+rownames(stack_timestable_wide) <- stack_timestable_wide$met
+stack_timestable_wide <- stack_timestable_wide[names(stack_timestable_wide) != "met"]
+
+heatmap.2(cor(stack_timestable_wide[rownames(stack_timestable_wide) %in% c("northing", "elev_m"),]), trace = "none", revC = T) #"start", "stop"
+
+sites_hclust_time <- hclust(as.dist(1-(cor(stack_timestable_wide[rownames(stack_timestable_wide) %in% c("northing", "easting", "elev_m", "stop"),]))))
+sites_dendro_time <- as.dendrogram(sites_hclust_time)
+plot(sites_hclust_time, cex = 0.5)
+plot(sites_dendro_time, type = "rectangle", cex = 0.25, ylim = c(0,0.000000005))
+
+sites_cut_time <- data.frame(cluster = cutree(sites_hclust_time, k = 15))
+sites_cut_time$SITECOD <- rownames(sites_cut_time) # i don't think that worked out very well.. need to have all years accounted for for better pairing (e.g., year binary var for whether data present or not that year)
+
+# join site info back to plot
+stack_timestable_clusters <- left_join(stack_timestable, sites_cut_time) %>%
+  mutate(project = ifelse(grepl("SN_", SITECOD), "Sensor network",
+                          ifelse(grepl("NWT-", SITECOD), "Pika occupancy study",
+                                 ifelse(grepl("-con", SITECOD), "Black sand",
+                                        ifelse(grepl("GL4", SITECOD), "GL4 monitoring",
+                                               ifelse(grepl("d1|sdl|SAD|c1", SITECOD, ignore.case = T), "Climate monitoring", "Pika demography study"))
+                          )))
+         )
+
+ggplot(stack_timestable_clusters, aes(easting, northing, col = factor(cluster))) +
+  geom_text(aes(label = cluster), alpha = 0.5) +
+  facet_wrap(~project)
+# look for things that paired with climate stations, black sand, gl4, or sensors
+ggplot(subset(stack_timestable_clusters, cluster %in% cluster[grepl("climate|black|sensor|gl4", project, ignore.case = T)]), aes(easting, northing, col = factor(cluster))) +
+ geom_text(aes(label = cluster), alpha = 0.75) +
+  facet_wrap(~project)
+
+ggplot(stack_timestable_clusters, aes(easting, northing, col = project)) +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~cluster)
+
+ggplot(subset(stack_timestable_clusters, cluster %in% cluster[grepl("climate|black|sensor|gl4", project, ignore.case = T)]), aes(easting, northing, col = project)) +
+  geom_point(alpha = 0.5) +
+  geom_point(data = newdemoT_sites, aes(UTM_E, UTM_N), col = "black") +
+ #geom_text(aes(label = cluster), alpha = 0.75) +
+  facet_wrap(~cluster)
+
+ggplot(subset(stack_timestable_clusters, cluster %in% c(3,4,7)), aes(easting, northing, col = project)) +
+  geom_point(alpha = 0.5) +
+  geom_text(data = newdemoT, aes(UTM_E, UTM_N, label = SensorID), size = 2, col = "black") +
+ #geom_text(aes(label = cluster), alpha = 0.75) +
+  facet_wrap(~cluster)
+
+ggplot(subset(stack_timestable_clusters, cluster %in% c(7)), aes(easting, northing, col = project)) +
+  geom_point(alpha = 0.5) +
+  geom_point(data = newdemoT, aes(UTM_E, UTM_N, label = SensorID), alpha = 0.5, col = "black") +
+  ggrepel::geom_text_repel(data = newdemoT, aes(UTM_E, UTM_N, label = SensorID), size = 3, col = "black") +
+  ggrepel::geom_text_repel(aes(label = SITECOD), alpha = 0.5) +
+ #geom_text(aes(label = cluster), alpha = 0.75) +
+  facet_wrap(~cluster)
+
+# try it subsetting sites to when buoy active
+activebuoy <- stack_timestable %>%
+  subset(year(stop) >= 2018)
+
+
+# create wide matrix for spatial clustering
+sites_wide <- data.frame(tempsynth_sites) %>%
+  subset(select = c(SITECOD, easting, northing, elev_m)) %>%
+  mutate(dups = duplicated(SITECOD)) %>%  #NWT-121 is duplicated (has different coords, relocated?). remove 2nd instance for now
+  subset(!dups, select = -c(dups)) %>%
+  mutate_at(names(.)[names(.) != "SITECOD"], as.numeric) %>%
+  gather(met, val, 2:ncol(.)) %>%
+  spread(SITECOD, val)
+
+rownames(sites_wide) <- sites_wide$met
+sites_wide <- sites_wide[names(sites_wide) != "met"]
+
+# see what site associate based on x,y coords
+heatmap.2(cor(sites_wide, use = "pairwise.complete.obs"), revC = T, trace = "none")
+
+sites_hclust <- hclust(as.dist(1-(cor(sites_wide))))
+sites_dendro <- as.dendrogram(sites_hclust)
+plot(sites_hclust, cex = 0.5)
+plot(sites_dendro, type = "rectangle", cex = 0.25, ylim = c(0,0.000000005))
+
+sites_cut <- data.frame(cluster = cutree(sites_hclust, h = 0.000000005))
+sites_cut$SITECOD <- rownames(sites_cut)
+sites_sf_clusters <- left_join(data.frame(tempsynth_sites), sites_cut, by = "SITECOD") %>%
+  subset(!is.na(cluster)) %>%
+  sf::st_as_sf()
+
+ggplot(sites_sf_clusters) +
+  geom_sf(aes(color = factor(cluster), shape = PI), alpha = 0.75, size = 2) +
+  labs(title = "Site clusters based on geocoords, elevation")
+
+ggplot(sites_sf_clusters) +
+  geom_sf(aes(color = elev_m, shape = PI), alpha = 0.75) +
+  scale_color_viridis_c() +
+  facet_wrap(~cluster)
+
+ggplot(subset(sites_sf_clusters, cluster %in% cluster[grepl("SAD|GL4|D1", SITECOD)])) +
+  geom_sf(aes(color = PI)) +
+  geom_sf_text(aes(label = SITECOD, col = PI)) +
+  facet_wrap(~cluster)
+
+ggplot(sites_sf_clusters) +
+  geom_point(aes(easting, northing, color = factor(cluster))) +
+  ggrepel::geom_text_repel(aes(easting, northing,label = SITECOD, color = factor(cluster)), max.overlaps = 15)
+  
+ggplot(subset(sites_sf_clusters, cluster %in% cluster[grepl("SAD|GL4|D1", SITECOD)])) +
+  geom_point(aes(easting, northing, color = factor(PI))) +
+  ggrepel::geom_text_repel(aes(easting, northing,label = SITECOD, color = factor(PI)), max.overlaps = 15) +
+  facet_wrap(~cluster)
+
+ggplot(subset(sites_sf_clusters, cluster %in% cluster[grepl("SN_|D1", SITECOD)])) +
+  geom_point(aes(easting, northing, size = elev_m, color = factor(PI)), alpha = 0.6) +
+  ggrepel::geom_text_repel(aes(easting, northing,label = SITECOD), max.overlaps = 15) +
+  facet_wrap(~cluster)
+
+subset(sites_sf_clusters, cluster %in% cluster[grepl("West|Tvan", site)]) %>%
+  mutate(project = gsub("Demography", "demography study", project),
+         project = ifelse(grepl("Wireless", project), "Sensor node array", project)) %>%
+ggplot() +
+  geom_point(aes(easting, northing, size = elev_m, color = project), alpha = 0.6) +
+  ggrepel::geom_text_repel(aes(easting, northing,label = SITECOD), max.overlaps = 20) +
+  facet_wrap(~cluster)
+
+subset(sites_sf_clusters, cluster %in% cluster[grepl("Green", site)]) %>%
+  mutate(project = gsub("Demography", "demography study", project),
+         project = ifelse(grepl("Wireless", project), "Sensor node array", project)) %>%
+ggplot() +
+  geom_point(aes(easting, northing, size = elev_m, color = project), alpha = 0.6) +
+  ggrepel::geom_text_repel(aes(easting, northing,label = SITECOD), max.overlaps = 20) +
+  facet_wrap(~cluster)
+# 
 ```
 
 ```{r sensor node}
@@ -395,14 +404,16 @@ corrplot(cor(test, use = "pairwise.complete.obs"),
 ```{r test pairing}
 
 # plot NWT-058 with D1
-nwt058 <- subset(pika_haboccT, grepl("58|73", plot)) %>%
+nwt058 <- subset(pika_habocc, grepl("58|73", plotnum)) %>%
   mutate(yr = year(date_time),
          mon = month(date_time),
          dt = date(date_time))
 # plot sep 2017 (complete month)
 ggplot(subset(nwt058, mon == 9 & yr == 2017), aes(date_time, temperature, col = plot)) +
-  geom_line(data = subset(jennings, year == 2017 & local_site == "d1" & month(date) == 9), aes(`date-time`, airtemp_avg), col = "grey") +
-  geom_line()
+  geom_line(data = subset(jennings, year == 2017 & local_site == "d1" & month(date) == 9), aes(`date-time`, airtemp_avg), col = "grey20") +
+  geom_line() +
+  scale_x_datetime(date_labels = "%b %d %Y") +
+  labs(title = "Subdaily example: D1 hourly (black) infilled temp with NWT-053 and NWT-073")
   
 ```
 
@@ -410,8 +421,8 @@ ggplot(subset(nwt058, mon == 9 & yr == 2017), aes(date_time, temperature, col = 
 
 unpub056 <- subset(unpub_pikaocc_temp, grepl("56|140", plot)) %>%
   mutate(date_time = as.POSIXct(date_time, format = "%Y-%m-%d %H:%M"))
-nwt056 <- subset(pika_haboccT, grepl("56|140", plot)) %>%
-  rbind(unpub056) %>%
+nwt056 <- subset(pika_habocc, grepl("56|140", plotnum)) %>%
+  #rbind(unpub056) %>%
   arrange(plot, date_time) %>%
   mutate(yr = year(date_time),
          mon = month(date_time),
