@@ -21,6 +21,9 @@ library(lubridate)
 library(readxl)
 options(stringsAsFactors = F)
 
+# source scripts
+# pathways to static data (data that can't be fetched online and lives in a personal/individual folder, e.g., your local machine or cloud storage location)
+source("tempsynth_localpointers.R")
 # ctw functions to fetch climate datasets from EDI
 source("~/github/nwt-data-munging/nwt_climate/R/fetch_data_functions.R")
 
